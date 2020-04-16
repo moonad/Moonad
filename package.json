@@ -1,0 +1,31 @@
+{
+  "name": "moonad.org",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maiavictor/inferno-hello-world.git"
+  },
+  "author": "Victor Maia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maiavictor/inferno-hello-world/issues"
+  },
+  "homepage": "https://github.com/maiavictor/inferno-hello-world#readme",
+  "devDependencies": {
+    "html-webpack-plugin": "^3.2.0",
+    "inferno": "^7.3.3",
+    "inferno-hyperscript": "^7.3.3",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.1",
+    "file-loader": "^6.0.0"
+  },
+  "dependencies": {
+  }
+}
