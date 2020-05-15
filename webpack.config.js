@@ -5,12 +5,12 @@ const fs = require("fs");
 
 module.exports = {
   mode: 'production',
-  optimization: {minimize: true},
+  optimization: {minimize: false},
   devtool: "source-map",
-  entry: './src/index.js',
+  entry: './src/front/index.js',
   module: {rules: [
     {
-      test: /\.(woff|woff2|eot|ttf|otf)$/,
+      test: /\.(woff|woff2|eot|ttf|otf|ico|png)$/,
       use: ['file-loader'],
     }
   ]},
@@ -25,7 +25,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/index.html', 
+      template: 'src/front/index.html', 
     }),
   ]
 };
