@@ -74,6 +74,7 @@ class Writer extends Component {
         "width": "100%",
         "height": "50%",
         "padding": "0px 4px",
+        "overflow-y": "scroll",
         //"border-bottom": "1px solid black",
       },
       onClick: () => {
@@ -106,7 +107,11 @@ class Writer extends Component {
         var head = text.slice(2, text.indexOf("\n"));
         var body = text.slice(text.indexOf("\n") + 1);
         while (body[0] === "\n") body = body.slice(1);
-        alert(await moonad.post({pkey, cite, head, body}));
+        try {
+          alert(await moonad.post({pkey, cite, head, body}));
+        } catch (e) {
+          alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
+        }
         this.props.done();
       },
     }, ["Post!"]);
