@@ -1,9 +1,9 @@
 // Database paths:
-// - PostTitle.fm   = a post
-// - PostTitle.cite = list of files that reply to it
-// - DefName.orig   = post where Namespace.Term is defined
-// - EthAddr.name   = name of an address
-// - name.addr      = address of a name 
+// - PostNumber.post = a post
+// - PostNumber.cite = list of files that reply to it
+// - DefName.orig    = post where Namespace.Term is defined
+// - EthAddr.name    = name of an address
+// - name.addr       = address of a name 
 
 var express = require("express");
 var app = express();
@@ -13,37 +13,56 @@ var cors = require("cors");
 var db = require("./db.js");
 var sig = require("nano-ethereum-signer");
 var fm = require("formality-core");
+var common = require("./../common.js");
 
 // Globals
 // =======
 
 var Defs = {};
+var Post = [{
+  post: "0x0000000000000000",
+  cite: "0x0000000000000000",
+  head: "ROOT",
+  body: ""
+}];
 
 // Startup
 // =======
 
+function path_of(file = "") {
+  return path.join(__dirname, "..", "..", "db", file);
+};
+
 async function startup() {
   // Makes sure db directory exists
-  await fs.ensureFile(path.join(__dirname,"..","..","db","root.cite"));
+  await fs.ensureFile(path_of("0x0000000000000000.cite"));
 
-  // Loads `.fm` definitions
-  var dir = fs.readdirSync("db").filter(name => name.slice(-3) === ".fm");
-  for (var fm_file of dir) {
-    var fm_text = fs.readFileSync(path.join(__dirname,"..","..","db",fm_file), "utf8");
+  // Loads posts
+  var post_files = fs.readdirSync(path_of());
+  var post_files = post_files.filter(name => name.slice(-5) === ".post");
+  var post_files = post_files.sort((a,b) => a > b ? 1 : -1);
+  for (var post_file of post_files) {
+    var post = JSON.parse(fs.readFileSync(path_of(post_file), "utf8"));
+    console.log(post.post);
+    var code = common.get_post_code(post);
+    //console.log(code);
     try {
-      var fm_defs = fm.lang.parse(fm_text);
+      var defs = fm.lang.parse(code);
     } catch (e) {
       console.log("Error loading fm files on db directory. Aborting.");
+      console.log(e);
       process.exit();
     }
-    for (var fm_def in fm_defs) {
-      if (Defs[fm_def]) {
-        console.log("Redefinition of '"+fm_def+"' in '"+fm_file+"' on db directory. Aborting.");
+    //console.log(defs);
+    for (var def in defs) {
+      if (Defs[def]) {
+        console.log("Redefinition of '"+def+"' in '"+post_file+"' on db directory. Aborting.");
         process.exit();
       }
-      Defs[fm_def] = fm_defs[fm_def];
-      console.log("- Defined: "+fm_def);
+      Defs[def] = defs[def];
+      console.log("- "+def);
     }
+    Post.push(post);
   }
 
   // Starts API
@@ -89,100 +108,64 @@ var has = async (key) => {
   }
 };
 
-// Validation
-// ==========
-
-function hex(bits, hex) {
-  if (typeof hex !== "string" || !/^0x[a-fA-F0-9]*$/.test(hex)) {
-    return null;
-  };
-  while ((hex.length - 2) * 4 < bits) {
-    hex = "0x0" + hex.slice(2);
-  };
-  if ((hex.length - 2) * 4 > bits) {
-    hex = hex.slice(0, Math.floor(bits / 4) + 2);
-  }
-  return hex;
-};
-
-function nam(name) {
-  if (typeof name !== "string" || !/^[a-zA-Z0-9.]*$/.test(name)) {
-    return null;
-  } else {
-    return name;
-  }
-};
-
-function num(val) {
-  try {
-    var num = parseInt(val, 10);
-    if (isNaN(num)) {
-      return null;
-    } else {
-      return num;
-    }
-  } catch (e) {
-    return null;
-  }
-};
-
 // API
 // ===
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("docs"));
+app.use(express.static(path.join(__dirname, "..", "..", "docs")));
 
 // Makes a post
 app.post("/post", async (req, res) => {
   try {
-    var post = req.query.post;
-    var code = req.query.code;
+    console.log("New post:", req.query);
+
     var cite = req.query.cite;
+    var head = req.query.head;
+    var body = req.query.body;
     var auth = req.query.auth;
     var sign = req.query.sign;
-    var date = hex(64, "0x"+Date.now().toString(16));
-    console.log(req.query);
+    var date = common.hex(64, "0x"+Date.now().toString(16));
+    var post = common.hex(64, "0x"+Post.length.toString(16));
+    var post = {post, cite, date, auth, sign, head, body};
 
-    // Validates post name
-    if (typeof post !== "string" || nam(post) === null) {
-      console.log("...", post, nam(post));
+    // Validates if cited file exists
+    if (!await has(post.cite+".cite")) {
+      throw "Cited post '"+post.cite+"' doesn't exist.";
+    }
+
+    // Validates post head
+    if (typeof post.head !== "string"
+      || post.head.length > 64
+      || post.head.indexOf("\n") !== -1) {
       throw "Invalid post title.";
     }
 
-    // Validates post code
+    // Validates post body
     try {
+      if (typeof post.body !== "string") {
+        throw "Invalid body.";
+      }
+      var code = common.get_post_code(post);
       var defs = fm.lang.parse(code);
     } catch(e) {
       throw e.toString();
     }
 
-    // Validates if posted file doesn't exist
-    if (await has(post+".cite")) {
-      throw "Post '"+post+"' already exists.";
-    }
-
-    // Validates if cited file exists
-    if (!await has(cite+".cite")) {
-      throw "Cited post '"+cite+"' doesn't exist.";
-    }
-
     // Validates signature
-    
-    var full = post+";"+cite+";"+code;
-    var msge = sig.keccak(full);
-    if (hex(520,sign) === null || auth !== sig.signerAddress(msge,sign)) {
-      console.log("...full", JSON.stringify(full));
-      console.log("...msge", msge);
-      console.log("...sign", sign);
-      console.log("...sign", hex(520,sign));
-      console.log("...addr", sig.signerAddress(msge,sign));
+    var msge = sig.keccak(post.cite+"\n"+post.head+"\n"+post.body);
+    if ( common.hex(520,post.sign) === null
+      || post.auth !== sig.signerAddress(msge,post.sign)) {
+      //console.log("...full", JSON.stringify(full));
+      //console.log("...msge", msge);
+      //console.log("...sign", common.hex(520,sign));
+      //console.log("...addr", sig.signerAddress(msge,sign));
       throw "Invalid signature.";
     }
 
     // Validates no redefinitions
     for (var def in defs) {
-      console.log("Exists " + def + "? ", Defs[def]);
+      //console.log("Exists " + def + "? ", Defs[def]);
       if (Defs[def]) {
         throw "Redefinition of '" + def + "'.";
       }
@@ -204,31 +187,26 @@ app.post("/post", async (req, res) => {
       }
     };
 
-    // Builds full post
-    var full = "";
-    full += "#cite:"+cite+"#\n";
-    full += "#auth:"+auth+"#\n";
-    full += "#sign:"+sign+"#\n";
-    full += "#date:"+date+"#\n";
-    full += code;
-
     // Saves it
     try {
-      await set(post+".fm", full);
-      await set(post+".cite", "");
-      for (var def in all_defs) {
-        await set(def+".orig", post);
+      await set(post.post+".post", JSON.stringify(post, null, 2));
+      await set(post.post+".cite", "");
+      for (var def in defs) {
+        await set(def+".orig", post.post);
       }
-      await push(cite+".cite", post+";");
+      await push(cite+".cite", post.post+";");
+      Post.push(post);
       for (var def in defs) {
         Defs[def] = defs[def];
       }
+      console.log("Saved post: " + post.post);
     } catch (e) {
       throw "Internal error storing data.";
     }
 
-    res.send("DONE.");
+    res.send("DONE.\n"+post.post);
   } catch (e) {
+    console.log(e);
     res.send("FAIL.\n"+e.toString());
   }
 });
@@ -236,18 +214,34 @@ app.post("/post", async (req, res) => {
 // Gets the contents of a post
 app.post("/get_post", async (req, res) => {
   try {
-    var post = req.query.post;
-    var text = await get(post+".fm");
-    res.send("DONE.\n"+text);
+    var post = common.hex(64, req.query.post);
+    console.log("....", req.query);
+    if (!post) {
+      throw "Invalid post id: '" + post + "'.";
+    }
+    var post = Post[common.hex_to_num(post)];
+    res.send("DONE.\n"+JSON.stringify(post, null, 2));
   } catch (e) {
     res.send("FAIL.\n"+e.toString());
   }
 });
 
-// Gets the file that cite this post
+// Gets the amount of posts
+app.post("/get_posts_size", async (req, res) => {
+  try {
+    res.send("DONE.\n"+Post.length);
+  } catch (e) {
+    res.send("FAIL.\n"+e.toString());
+  }
+});
+
+// Gets all posts that cite this post
 app.post("/get_cite", async (req, res) => {
   try {
-    var post = req.query.post;
+    var post = common.hex(64, req.query.post);
+    if (!post) {
+      throw "Invalid post id.";
+    }
     var cite = await get(post+".cite");
     res.send("DONE.\n"+cite);
   } catch (e) {
@@ -261,10 +255,10 @@ app.post("/register", async (req, res) => {
   try {
     var name = req.query.name;
     var addr = req.query.addr;
-    if (nam(name) === null) {
+    if (common.nam(name) === null) {
       throw "Invalid name.";
     }
-    if (hex(40, addr) === null) {
+    if (common.hex(40, addr) === null) {
       throw "Invalid address.";
     }
     if (await has(addr+".name") || await has(name+".addr")) {
@@ -282,7 +276,7 @@ app.post("/register", async (req, res) => {
 app.post("/get_name", async (req, res) => {
   try {
     var addr = req.query.addr;
-    if (hex(40, addr) === null) {
+    if (common.hex(40, addr) === null) {
       throw "Invalid address.";
     }
     res.send("DONE.\n" + await get(addr+".name"));
@@ -295,7 +289,7 @@ app.post("/get_name", async (req, res) => {
 app.post("/get_addr", async (req, res) => {
   try {
     var name = req.query.name;
-    if (nam(name) === null) {
+    if (common.nam(name) === null) {
       throw "Invalid name.";
     }
     res.send("DONE.\n" + await get(name+".addr"));
