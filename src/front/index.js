@@ -1,4 +1,4 @@
-// Favicon
+require("./IBMPlexMono-Light.ttf");
 const logo = require("./moonad_logo.png").default;
 
 const {Component, render} = require("inferno");
