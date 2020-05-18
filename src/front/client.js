@@ -1,9 +1,9 @@
 var req = require("xhr-request-promise");
 var sig = require("nano-ethereum-signer");
 
-module.exports = (url = "http://localhost") => {
+module.exports = (url = "") => {
   async function query(method, query) {
-    var response = await req(url+"/"+method, {method: "POST", query});
+    var response = await req(url+method, {method: "POST", query});
     if (response.slice(0,5) === "DONE.") {
       return response.slice(6);
     } else {
