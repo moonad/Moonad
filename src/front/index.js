@@ -35,11 +35,10 @@ class Write extends Component {
 
     try {
       alert(await moonad.post({pkey, cite, head, body}));
+      window.history.back();
     } catch (e) {
       alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
     }
-
-    window.history.back();
   }
 
   click(key, elem) {
