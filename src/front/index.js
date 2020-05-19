@@ -68,6 +68,7 @@ class Write extends Component {
         "height": "20px",
         "padding": "2px 4px",
         "border-bottom": "1px solid rgb(240,240,240)",
+        "background": "white",
       },
       onClick: (e) => this.click("head", e.target),
       onInput: (e) => this.refresh("head", e.target),
@@ -85,6 +86,7 @@ class Write extends Component {
         "padding": "2px 4px",
         "overflow-y": "scroll",
         "border-bottom": "1px solid rgb(240,240,240)",
+        "background": "white",
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
@@ -118,11 +120,11 @@ class Write extends Component {
 
     const repl = h("pre", { 
       style: {
-        "height": "calc(100% - 20px - 20px - 20px - 360px)",
+        "height": "calc(100% - 20px - 20px - 360px)",
         "color": "rgb(101,102,105)",
-        "background": "rgb(241,242,246)",
-        "border-top": "1px solid rgb(221,222,224)",
-        "padding": "0px 4px",
+        "background": "rgb(221,222,224)",
+        "border-top": "1px solid rgb(201,202,204)",
+        "padding": "4px 4px",
       },
     }, ["*type-checker console and REPL here*"]);
 
