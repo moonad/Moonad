@@ -29,20 +29,20 @@ var Post = [{
 // Startup
 // =======
 
-function path_of(file = "") {
-  return path.join(__dirname, "..", "..", "db", file);
+function path_of(base, file = "") {
+  return path.join(__dirname, "..", "..", base, file);
 };
 
 async function startup() {
   // Makes sure db directory exists
-  await fs.ensureFile(path_of("0x0000000000000000.cite"));
+  await fs.ensureFile(path_of("db", "0x0000000000000000.cite"));
 
   // Loads posts
-  var post_files = fs.readdirSync(path_of());
+  var post_files = fs.readdirSync(path_of("db"));
   var post_files = post_files.filter(name => name.slice(-5) === ".post");
   var post_files = post_files.sort((a,b) => a > b ? 1 : -1);
   for (var post_file of post_files) {
-    var post = JSON.parse(fs.readFileSync(path_of(post_file), "utf8"));
+    var post = JSON.parse(fs.readFileSync(path_of("db", post_file), "utf8"));
     console.log(post.post);
     var code = common.get_post_code(post);
     //console.log(code);
@@ -295,5 +295,14 @@ app.post("/get_addr", async (req, res) => {
     res.send("DONE.\n" + await get(name+".addr"));
   } catch (e) {
     res.send("FAIL.\n"+e.toString());
+  }
+});
+
+app.get("*", async (req, res) => {
+  var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
+  if (fs.existsSync(path_of("docs", file))) {
+    res.sendFile(path_of("docs", file));
+  } else {
+    res.sendFile(path_of("docs", "index.html"));
   }
 });
