@@ -233,8 +233,8 @@ class Posts extends Component {
           onClick: () => this.props.on_click_reply(),
         }, "write reply"),
       ]));
-      for (var i = post.ciby.length - 1; i >= 0; --i) {
-        var ciby_post = posts[common.hex_to_num(post.ciby[i])];
+      for (let i = post.ciby.length - 1; i >= 0; --i) {
+        let ciby_post = posts[common.hex_to_num(post.ciby[i])];
         body.push(Post({
           post: ciby_post,
           expand: false,
