@@ -12,7 +12,7 @@ var path = require("path");
 var cors = require("cors");
 var db = require("./db.js");
 var sig = require("nano-ethereum-signer");
-var fm = require("formality-core");
+var fm = require("formality-lang");
 var common = require("./../common.js");
 
 // Globals
@@ -43,11 +43,11 @@ async function startup() {
   var post_files = post_files.sort((a,b) => a > b ? 1 : -1);
   for (var post_file of post_files) {
     var post = JSON.parse(fs.readFileSync(path_of("db", post_file), "utf8"));
-    console.log(post.post);
+    console.log("Loaded post:", post.post);
     var code = common.get_post_code(post);
     //console.log(code);
     try {
-      var defs = fm.lang.parse(code);
+      var defs = fm.lang.parse(code).defs;
     } catch (e) {
       console.log("Error loading fm files on db directory. Aborting.");
       console.log(e);
@@ -60,7 +60,7 @@ async function startup() {
         process.exit();
       }
       Defs[def] = defs[def];
-      console.log("- "+def);
+      console.log("- Defined: "+def);
     }
     Post.push(post);
   }
@@ -147,7 +147,7 @@ app.post("/post", async (req, res) => {
         throw "Invalid body.";
       }
       var code = common.get_post_code(post);
-      var defs = fm.lang.parse(code);
+      var defs = fm.lang.parse(code).defs;
     } catch(e) {
       throw e.toString();
     }
@@ -215,7 +215,6 @@ app.post("/post", async (req, res) => {
 app.post("/get_post", async (req, res) => {
   try {
     var post = common.hex(64, req.query.post);
-    console.log("....", req.query);
     if (!post) {
       throw "Invalid post id: '" + post + "'.";
     }

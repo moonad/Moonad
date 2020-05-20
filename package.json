@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "formality-core": "^0.2.105",
+    "formality-lang": "^0.4.4",
     "fs-extra": "^9.0.0",
     "nano-ethereum-signer": "^0.1.2",
     "xhr-request-promise": "^0.1.3"

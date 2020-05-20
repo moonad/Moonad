@@ -3,11 +3,10 @@ const logo = require("./moonad_logo.png").default;
 
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
-const fmc = require("formality-core");
 const moonad = require("./client.js")(window.location.origin+"/");
 const utils = require("./utils.js");
 const common = require("./../common.js");
-const fm = require("formality-core");
+const fm = require("formality-lang");
 
 function formatHexDate(hex_date) {
   var date = new Date(common.hex_to_num(hex_date));
@@ -140,7 +139,60 @@ class Write extends Component {
   }
 };
 
-const Post = ({post, expand, on_click_title}) => {
+const Code = ({code, defs, on_click_post}) => {
+  var tags = fm.lang.parse(code).tags;
+  var elems = [];
+  var txt_col = "rgb(102,172,182)";
+  var nam_col = "rgb(160,162,166)";
+  var nul_col = "rgb(112,146,188)";
+  var str_col = "rgb(204,69,49)";
+  var ref_col = "rgb(157, 147, 171)";
+  var typ_col = "rgb(172,111,52)";
+  for (let tag of tags) {
+    let color = null;
+    let click = null;
+    let decor = null;
+    let cursr = null;
+    switch (tag.ctor) {
+      case "nam":
+        color = nam_col;
+        break;
+      case "var":
+        color = nam_col;
+        break;
+      case "txt":
+        if (tag.text === "Type") {
+          color = typ_col;
+        } else {
+          color = txt_col;
+        }
+        break;
+      case "nul": // ok 
+        color = nul_col;
+        break;
+      case "str":
+        color = str_col;
+        break;
+      case "ref":
+        color = ref_col;
+        click = () => defs[tag.text] && on_click_post(defs[tag.text].orig);
+        decor = "underline";
+        cursr = "pointer";
+        break;
+    }
+    elems.push(h("span", {
+      onClick: click,
+      style: {
+        "color": color,
+        "text-decoration": decor,
+        "cursor": cursr,
+      }
+    }, tag.text));
+  };
+  return elems;
+};
+
+const Post = ({defs, post, expand, on_click_post}) => {
   const title = h("div", {
       style: {
         "font-family": "IBMPlexMono-Light",
@@ -150,8 +202,21 @@ const Post = ({post, expand, on_click_title}) => {
         "color": "rgb(41, 42, 44)",
         "cursor": "pointer",
       },
-      onClick: () => on_click_title(post.post),
+      onClick: () => on_click_post(post.post),
     }, post.head);
+
+  var blocks = common.get_post_blocks(post);
+  var post_body = [];
+  for (var block of blocks) {
+    switch (block.ctor) {
+      case "code":
+        post_body.push(Code({code: block.code, defs, on_click_post}));
+        break;
+      case "text":
+        post_body.push(block.text);
+        break;
+    }
+  };
 
   const body = !expand ? null : h("pre", {
       style: {
@@ -160,7 +225,7 @@ const Post = ({post, expand, on_click_title}) => {
         "padding": "2px 0px",
         "color": "rgb(101,102,105)",
       }
-    }, post.body);
+    }, post_body);
 
   const author = h("div", {
       style: {
@@ -173,8 +238,8 @@ const Post = ({post, expand, on_click_title}) => {
     }, ""
       + post.ciby.length + " replies"
       + " | 0 points"
-      + " | by " + post.auth
       + " | at " + formatHexDate(post.date)
+      + " | by " + post.auth
       );
 
   return h("div", {
@@ -190,7 +255,7 @@ class Posts extends Component {
   }
   render() {
     var posts = this.props.posts;
-    console.log("....", this.props.focus, posts);
+    //console.log("....", this.props.focus, posts);
     if (!posts) {
       return null;
     } else if (this.props.focus) {
@@ -204,9 +269,10 @@ class Posts extends Component {
         //},
       //}, "Back to " + post.cite + "..."));
       body.push(Post({
+        defs: this.props.defs,
         post: post,
         expand: true,
-        on_click_title: () => {},
+        on_click_post: this.props.on_click_post,
       }));
       body.push(h("div", {
         style: {
@@ -238,17 +304,20 @@ class Posts extends Component {
         body.push(Post({
           post: ciby_post,
           expand: false,
-          on_click_title: () => this.props.on_click_post(ciby_post),
+          on_click_post: () => this.props.on_click_post(ciby_post.post),
         }));
       };
     } else {
       var post_list = [];
       for (let i = 1; posts && i < posts.length; ++i) {
-        post_list.push(Post({
-          post: posts[i],
-          expand: false,
-          on_click_title: () => this.props.on_click_post(posts[i]),
-        }));
+        var post = posts[i];
+        if (post.cite === "0x0000000000000000" && post.head[0] !== "/") {
+          post_list.push(Post({
+            post: post,
+            expand: false,
+            on_click_post: () => this.props.on_click_post(posts[i].post),
+          }));
+        }
       };
       var body = post_list.reverse();
     };
@@ -336,7 +405,7 @@ class Moonad extends Component {
   }
   componentDidMount() {
     this.post_watcher = moonad.watch_posts((posts) => {
-      console.log(posts);
+      //console.log(posts);
       this.posts = posts;
       for (var i = 0; i < this.posts.length; ++i) {
         this.posts[i].ciby = [];
@@ -344,34 +413,29 @@ class Moonad extends Component {
       for (var i = 0; i < this.posts.length; ++i) {
         if (this.posts[i].cite !== "0x0000000000000000") {
           var idx = common.hex_to_num(this.posts[i].cite);
-          console.log(idx, this.posts[i].cite);
           this.posts[idx].ciby.push(this.posts[i].post);
         }
       }
-
-      window.onpopstate = () => {
-        console.log(window.location.pathname);
-        this.forceUpdate();
-        //contentDiv.innerHTML = routes[window.location.pathname];
-      }
-
+      var defs = {};
+      for (var post of this.posts) {
+        var code = common.get_post_code(post);
+        var new_defs = fm.lang.parse(code).defs;
+        for (var def in new_defs) {
+          defs[def] = new_defs[def];
+          defs[def].orig = post.post;
+        };
+      };
+      this.defs = defs;
       this.forceUpdate();
     });
+    window.onpopstate = () => this.forceUpdate();
   }
   check_all() {
-    var defs = {};
-    for (var post of this.posts) {
-      var code = common.get_post_code(post);
-      var new_defs = fm.lang.parse(code);
-      for (var def in new_defs) {
-        defs[def] = new_defs[def];
-      };
-    };
     var text = "";
-    for (var def in defs) {
+    for (var def in this.defs) {
       try {
-        fm.synt.typesynth(defs[def].term, defs[def].type, defs);
-        text += def + ": " + fm.lang.stringify(defs[def].type) + "\n";
+        fm.synt.typesynth(this.defs[def].term, this.defs[def].type, this.defs);
+        text += def + ": " + fm.lang.stringify(this.defs[def].type) + "\n";
       } catch (e) {
         console.log(e);
         text += def + ": " + "ERROR" + "\n";
@@ -392,7 +456,6 @@ class Moonad extends Component {
   }
   render() {
     var route = this.get_route();
-    console.log(route);
     
     var head = h(Head, {
       route: route,
@@ -417,11 +480,13 @@ class Moonad extends Component {
         break;
       case "posts":
         var body = h(Posts, {
+          defs: this.defs,
           on_click_reply: () => {
             this.set_route("/write?cite="+paths[1]);
           },
           on_click_post: (post) => {
-            this.set_route("/posts/"+post.post);
+            console.log("clicked", post);
+            this.set_route("/posts/"+post);
           },
           focus: paths[1] || null,
           posts: this.posts,

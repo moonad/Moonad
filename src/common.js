@@ -39,24 +39,39 @@ function hex_to_num(hex) {
   return parseInt(hex.slice(-52), 16);
 };
 
-// Returns the code portions of a post
-function get_post_code(post) {
-  var code = "";
+function get_post_blocks(post) {
+  var blocks = [{ctor:"text", text:""}];
   var inside_code = false;
   for (var i = 0; i < post.body.length; ++i) {
     if (i >= 1 && !inside_code && post.body[i-1] === "@" && (i === 1 || post.body[i-2] === "\n")) {
       inside_code = true;
+      blocks.push({ctor:"code", code:""});
     }
     if (inside_code && post.body[i-1] === "\n" && post.body[i-2] === "\n") {
       inside_code = false;
+      blocks.push({ctor:"text", text:""});
     }
     if (inside_code) {
-      code += post.body[i];
+      blocks[blocks.length - 1].code += post.body[i];
+    } else {
+      blocks[blocks.length - 1].text += post.body[i];
     };
+  };
+  return blocks;
+};
+
+// Returns the code portions of a post
+function get_post_code(post) {
+  var blocks = get_post_blocks(post);
+  var code = "";
+  for (var block of blocks) {
+    if (block.ctor === "code") {
+      code += block.code;
+    }
   };
   return code;
 };
 
 module.exports = {
-  hex, nam, num, hex_to_num, get_post_code,
+  hex, nam, num, hex_to_num, get_post_code, get_post_blocks,
 };
