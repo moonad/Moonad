@@ -40,16 +40,24 @@ function num(val) {
 
 const hex_char = "0123456789abcdef".split("");
 
-function hex_to_uint52(hex) {
-  return parseInt(hex.slice(-52), 16);
+function hex_to_uint48(hex) {
+  return parseInt(hex.slice(-48), 16);
 };
 
-function uint52_to_hex(num) {
+function uint48_to_hex(num) {
   var hex = "0x";
   for (var i = 0; i < 13; ++i) {
     hex += hex_char[(num / (2**((13-i-1)*4))) & 0xF];
   };
   return hex;
+};
+
+function uint32_to_bytes(num) {
+  return new Uint8Array(new Uint32Array([num]).buffer);
+};
+
+function bytes_to_uint32(buf) {
+  return (new Uint32Array(buf.buffer))[0];
 };
 
 function bytes_to_hex(buf) {
@@ -96,7 +104,7 @@ function get_hex_from_bytes(idx, lim, buf) {
 
 function bytes_to_post(buf) {
   return {
-    date: hex_to_uint52(get_hex_from_bytes(0, 64, buf)),
+    date: hex_to_uint48(get_hex_from_bytes(0, 64, buf)),
     cite: get_hex_from_bytes(64, 128, buf),
     sign: get_hex_from_bytes(128, 648, buf),
     head: hex_to_string(get_hex_from_bytes(648, 1024, buf)).replace(/\0/g,""),
@@ -114,7 +122,7 @@ function put_hex_on_array(hex, arr) {
 
 function post_to_bytes(post) {
   var arr = [];
-  put_hex_on_array(hex(64, uint52_to_hex(post.date)), arr);
+  put_hex_on_array(hex(64, uint48_to_hex(post.date)), arr);
   put_hex_on_array(post.cite, arr);
   put_hex_on_array(post.sign, arr);
   put_hex_on_array(hex(376, string_to_hex(post.head)), arr);
@@ -175,8 +183,10 @@ function get_post_auth(post) {
 };
 
 function sign_post(post, pkey) {
-  post.sign = sig.signMessage(sig.keccak(get_post_msge(post)), pkey);
-  return post;
+  return {
+    ...post,
+    sign: post.sign || sig.signMessage(sig.keccak(get_post_msge(post)), pkey),
+  };
 };
 
 function get_term_refs(term, refs = {}) {
@@ -210,12 +220,39 @@ function hex_to_hex64s(hex) {
   return split_hex_in_chunks(64, hex);
 };
 
+function bytes_concat(bytes) {
+  var size = 0;
+  for (var arr of bytes) {
+    size += arr.length;
+  }
+  var done = new Uint8Array(size);
+  var indx = 0;
+  for (var arr of bytes) {
+    for (var x of arr) {
+      done[indx++] = x
+    };
+  }
+  return done;
+};
+
+// Net message codes
+const POST = 65;
+const WATCH = 66;
+const UNWATCH = 67;
+const MISSED = 68;
+const PING = 69;
+const SHOW = 97;
+const PONG = 98;
+const ROOM = 99;
+
 module.exports = {
   hex,
   nam,
   num,
-  hex_to_uint52,
-  uint52_to_hex,
+  hex_to_uint48,
+  uint48_to_hex,
+  uint32_to_bytes,
+  bytes_to_uint32,
   bytes_to_hex,
   hex_to_bytes,
   string_to_bytes,
@@ -231,6 +268,16 @@ module.exports = {
   get_post_blocks,
   get_post_msge,
   get_post_auth,
+  split_hex_in_chunks,
   hex_to_hex64s,
+  bytes_concat,
   sign_post,
+  POST,
+  WATCH,
+  UNWATCH,
+  MISSED,
+  PING,
+  SHOW,
+  PONG,
+  ROOM,
 };
