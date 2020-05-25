@@ -20,10 +20,10 @@ var app = express();
 var fs = require("fs-extra");
 var path = require("path");
 var cors = require("cors");
-var db = require("./db.js");
+var db = require("./database.js");
 var sig = require("nano-ethereum-signer");
 var fm = require("formality-lang");
-var lib = require("./../lib.js");
+var lib = require("./lib.js");
 
 function path_of(base, file = "") {
   return path.join(__dirname, "..", "..", base, file).toLowerCase();
@@ -36,11 +36,11 @@ var TIMEOUT = 6000; // Number -- time before considering client disconnected
 var Defs = {}; // Map Name {term:Term,type:Term} -- global fm definitions
 var Watcher = {}; // Map Poid [Peer] -- peers watching a poid
 var Peer = {}; // Map Addr SimplePeer -- peer of address
-var Online = 0;  // Number -- how many peers are connected
+var Size = 0;  // Number
 
 async function new_post({cite, sign, head, body}) {
   var date = Date.now();
-  var poid = lib.hex(64, "0x"+Online.toString(16));
+  var poid = lib.hex(64, "0x"+Size.toString(16));
   var post = {date, cite, sign, head, body, poid};
 
   // Validates signature
@@ -74,7 +74,7 @@ async function new_post({cite, sign, head, body}) {
   };
 
   // Validates post body (namespace-check)
-  var code = lib.get_post_code(post);
+  var code = lib.get_post_code(post, name);
   var defs = fm.lang.parse(code).defs;
   for (var def in defs) {
     if (def.slice(0, name.length+1) !== name+".") {
@@ -103,7 +103,7 @@ async function new_post({cite, sign, head, body}) {
     await db.set(post.poid+".post", Buffer.from(lib.post_to_bytes(post)));
     await db.set(post.poid+".cite", Buffer.from([]));
     await db.set(post.poid+".refs", Buffer.from([]));
-    Online += 1;
+    Size += 1;
 
     // Adds post.poid to cited_post.cite
     await db.con(cite+".cite", Buffer.from(lib.hex_to_bytes(post.poid)));
@@ -136,7 +136,7 @@ async function new_post({cite, sign, head, body}) {
 
     // Reports to watchers
     for (var watcher of Watcher[cite]) {
-      send_nth_cited(watcher, cite, null, false);
+      send_nth_cite(watcher, cite, null, false);
     }
 
     console.log("New post: "+post.poid+" '"+post.head+"'.");
@@ -174,7 +174,7 @@ async function startup() {
   var post_files = post_files.filter(name => name.slice(-5) === ".post");
   var post_files = post_files.sort((a,b) => a > b ? 1 : -1);
   if (post_files.length === 0) {
-    Online = 1;
+    Size = 1;
     await db.set("0x0000000000000000.post", Buffer.from(lib.post_to_bytes({
       date: 0,
       cite: "0x0000000000000000",
@@ -188,20 +188,23 @@ async function startup() {
     for (var post_file of post_files) {
       var poid = post_file.slice(0,-5);
       var post = lib.bytes_to_post(await db.get(poid+".post"));
-      var code = lib.get_post_code(post);
-      Online += 1;
-      console.log("Loaded: " + post_file);
-      try {
-        var defs = fm.lang.parse(code).defs;
-        for (var def in defs) {
-          console.log("- Defined: "+def);
-          Defs[def] = defs[def];
+      Size += 1;
+      if (poid !== "0x0000000000000000") {
+        var name = await db.get(lib.get_post_auth(post)+".name");
+        var code = lib.get_post_code(post, name);
+        console.log("Loaded: " + post_file);
+        try {
+          var defs = fm.lang.parse(code).defs;
+          for (var def in defs) {
+            console.log("- Defined: "+def);
+            Defs[def] = defs[def];
+          }
+        } catch (e) {
+          console.log("Startup error:", e);
+          process.exit();
         }
-      } catch (e) {
-        console.log("Startup error:", e);
-        process.exit();
       }
-    }
+    };
   };
   app.listen(80);
   setInterval(() => {
@@ -219,6 +222,15 @@ startup();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "..", "docs")));
+
+app.get("*", async (req, res) => {
+  var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
+  if (fs.existsSync(path_of("docs", file))) {
+    res.sendFile(path_of("docs", file));
+  } else {
+    res.sendFile(path_of("docs", "index.html"));
+  }
+});
 
 // Makes a post
 app.post("/post", async (req, res) => {
@@ -307,9 +319,9 @@ app.post("/peer_offer", (req, res) => {
     var data = new Uint8Array(data);
     switch (data[0]) {
       case lib.POST:
-        //console.log("got lib.POST");
+        console.log("got lib.POST");
         var post = lib.bytes_to_post(data.slice(1));
-        //console.log(post);
+        console.log(post);
         // TODO: notify author?
         // already notified if he/she watches post.cite though
         new_post(post).then(()=>{}).catch(()=>{});
@@ -328,11 +340,15 @@ app.post("/peer_offer", (req, res) => {
         Watcher[poid] = (Watcher[poid]||[]).filter(p => p !== peer);
         break;
 
-      case lib.MISSED:
-        //console.log("got lib.MISSED");
+      case lib.GET_POST:
+        var poid = lib.bytes_to_hex(data.slice(1, 9));
+        send_post(peer, poid);
+        break;
+
+      case lib.GET_NTH_CITE:
         var poid = lib.bytes_to_hex(data.slice(1, 9));
         var nth  = lib.bytes_to_uint32(data.slice(9,13));
-        send_nth_cited(peer, poid, nth, true);
+        send_nth_cite(peer, poid, nth, true);
         break;
 
       case lib.PING:
@@ -345,9 +361,13 @@ app.post("/peer_offer", (req, res) => {
     }
   });
 
-  peer.on("error", (err) => {});
+  peer.on("error", (err) => {
+    console.log(addr+" error.", err);
+    peer.kill();
+  });
 
-  peer.on("close", () => {
+  peer.on("close", (err) => {
+    console.log(addr+" closed.", err);
     peer.kill();
   });
 });
@@ -362,34 +382,52 @@ app.post("/peer_answer", (req, res) => {
   };
 });
 
+// Sends a post to peer.
+async function send_post(peer, poid) {
+  var cite  = await db.get(poid+".cite");
+  var post  = await db.get(poid+".post")
+  if (cite && post) {
+    var bytes = [
+      new Uint8Array([lib.SHOW_POST]),
+      lib.uint32_to_bytes(cite.length / 8),
+      lib.hex_to_bytes(poid),
+      lib.uint32_to_bytes(post.length),
+      post,
+    ];
+    peer.do_send(lib.bytes_concat(bytes));
+  };
+};
+
 // Sends the nth post on poid.cite to peer.
 // If peek = false, sends nth-1, nth-2 to recover lost packets for free.
 // If peek = true, sends nth+1, nth+2 to speed up download of misseds.
-async function send_nth_cited(peer, poid, nth, peek) {
+async function send_nth_cite(peer, poid, nth, peek) {
   var pcite = await db.get(poid+".cite");
-  var cites = lib.split_hex_in_chunks(64, lib.bytes_to_hex(pcite));
-  var bytes = [new Uint8Array([lib.SHOW]), lib.uint32_to_bytes(cites.length)];
-  var nth  = nth === null ? cites.length - 1 : nth;
-  var from = peek ? nth : Math.max(nth-2, 0);
-  var upto = peek ? Math.min(nth+2, cites.length-1) : nth;
-  //console.log("sending "+nth+"/"+cites.length+" cited of "+poid+" to peer...");
-  for (var i = from; i <= upto; ++i) { 
-    var cpoid = cites[i];
-    var cpost = await db.get(cpoid+".post")
-    if (cpost) {
-      //console.log("- adding post "+cpoid+" with "+cpost.length*8+" bits");
-      //console.log(".", lib.uint32_to_bytes(i));
-      //console.log(".", lib.hex_to_bytes(cpoid));
-      //console.log(".", lib.uint32_to_bytes(cpost.length));
-      //console.log(".", new Uint8Array(cpost));
-      bytes.push(lib.uint32_to_bytes(i));
-      bytes.push(lib.hex_to_bytes(cpoid));
-      bytes.push(lib.uint32_to_bytes(cpost.length));
-      bytes.push(cpost);
-    }
+  if (pcite) {
+    var cites = lib.split_hex_in_chunks(64, lib.bytes_to_hex(pcite));
+    var bytes = [new Uint8Array([lib.SHOW_NTH_CITE]), lib.uint32_to_bytes(cites.length)];
+    var nth  = nth === null ? cites.length - 1 : nth;
+    var from = peek ? nth : Math.max(nth-2, 0);
+    var upto = peek ? Math.min(nth+2, cites.length-1) : nth;
+    //console.log("sending "+nth+"/"+cites.length+" cited of "+poid+" to peer...");
+    for (var i = from; i <= upto; ++i) { 
+      var cpoid = cites[i];
+      var cpost = await db.get(cpoid+".post")
+      if (cpost) {
+        //console.log("- adding post "+cpoid+" with "+cpost.length*8+" bits");
+        //console.log(".", lib.uint32_to_bytes(i));
+        //console.log(".", lib.hex_to_bytes(cpoid));
+        //console.log(".", lib.uint32_to_bytes(cpost.length));
+        //console.log(".", new Uint8Array(cpost));
+        bytes.push(lib.uint32_to_bytes(i));
+        bytes.push(lib.hex_to_bytes(cpoid));
+        bytes.push(lib.uint32_to_bytes(cpost.length));
+        bytes.push(cpost);
+      }
+    };
+    //console.log("Sending buffer:", lib.bytes_to_hex(lib.bytes_concat(bytes)));
+    peer.do_send(lib.bytes_concat(bytes));
   };
-  //console.log("Sending buffer:", lib.bytes_to_hex(lib.bytes_concat(bytes)));
-  peer.do_send(lib.bytes_concat(bytes));
 };
 
 function timeout_peers() {

@@ -46,8 +46,8 @@ function hex_to_uint48(hex) {
 
 function uint48_to_hex(num) {
   var hex = "0x";
-  for (var i = 0; i < 13; ++i) {
-    hex += hex_char[(num / (2**((13-i-1)*4))) & 0xF];
+  for (var i = 0; i < 12; ++i) {
+    hex += hex_char[(num / (2**((12-i-1)*4))) & 0xF];
   };
   return hex;
 };
@@ -138,15 +138,19 @@ function post_to_hex(post) {
   return bytes_to_hex(post_to_bytes(post));
 };
 
-function get_post_blocks(post) {
+function get_post_blocks(post, author) {
   var blocks = [{ctor:"text", text:""}];
   var inside_code = false;
   for (var i = 0; i < post.body.length; ++i) {
-    if (i >= 1 && !inside_code && post.body[i-1] === "@" && (i === 1 || post.body[i-2] === "\n")) {
+    if (!inside_code                            
+      && author
+      && (i === 0 || post.body[i-1] === "\n")
+      && post.body.slice(i, i+author.length+1) === author+".") {
       inside_code = true;
       blocks.push({ctor:"code", code:""});
-    }
-    if (inside_code && post.body[i-1] === "\n" && post.body[i-2] === "\n") {
+    } else if (inside_code
+      && post.body[i-1] === "\n"
+      && post.body[i-2] === "\n") {
       inside_code = false;
       blocks.push({ctor:"text", text:""});
     }
@@ -160,8 +164,8 @@ function get_post_blocks(post) {
 };
 
 // Returns the code portions of a post
-function get_post_code(post) {
-  var blocks = get_post_blocks(post);
+function get_post_code(post, author) {
+  var blocks = get_post_blocks(post, author);
   var code = "";
   for (var block of blocks) {
     if (block.ctor === "code") {
@@ -239,11 +243,13 @@ function bytes_concat(bytes) {
 const POST = 65;
 const WATCH = 66;
 const UNWATCH = 67;
-const MISSED = 68;
-const PING = 69;
-const SHOW = 97;
-const PONG = 98;
-const ROOM = 99;
+const GET_POST = 68;
+const GET_NTH_CITE = 69;
+const PING = 70;
+const SHOW_POST = 97;
+const SHOW_NTH_CITE = 98;
+const PONG = 99;
+const ROOM = 100;
 
 module.exports = {
   hex,
@@ -275,9 +281,11 @@ module.exports = {
   POST,
   WATCH,
   UNWATCH,
-  MISSED,
+  GET_POST,
+  GET_NTH_CITE,
   PING,
-  SHOW,
+  SHOW_POST,
+  SHOW_NTH_CITE,
   PONG,
   ROOM,
 };

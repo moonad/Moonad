@@ -1,18 +1,107 @@
+// Assets
+// ======
+
 require("./IBMPlexMono-Light.ttf");
 const logo = require("./moonad_logo.png").default;
 
+// Account
+// =======
+
+const utils = require("./utils.js");
+var pkey = utils.get_pkey();
+var addr = utils.get_addr();
+var name = "user";
+
+// User interface
+// ==============
+
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
-const moonad = require("./client.js")(window.location.origin+"/");
-const utils = require("./utils.js");
-const common = require("./../common.js");
-const fm = require("formality-lang");
 
-function formatHexDate(hex_date) {
-  var date = new Date(common.hex_to_num(hex_date));
-  return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()
-    + ", "+date.getHours()+"h "+date.getMinutes()+"min";
+// Libraries
+// =========
+
+const fm = require("formality-lang");
+const moonad = require("./../back/client.js")({url: window.location.origin+"/", addr}).direct();
+
+// Login & Startup
+// ===============
+
+async function register(taken = false) {
+  var name = prompt((taken ? "Name taken. " : "") + "Choose a name:");
+  try {
+    await moonad.api.register({name, addr});
+    return name;
+  } catch (e) {
+    console.log(e);
+    register(true);
+  }
+};
+
+async function login() {
+  console.log("Logging in...");
+  try {
+    return await moonad.api.get_name({addr})
+  } catch (e) {
+    return await register();
+  }
+};
+
+window.onload = () => render(h(Moonad), document.getElementById("main"));
+
+moonad.on_init = () => {
+  console.log("Connected to Moonad.");
+  refresh_watching();
+  setInterval(refresh_watching, 1000);
+  //setInterval(() => {
+    //var watching = get_watching();
+    //if (watching) {
+      //console.log("MAKING RANDOM POST TO", watching);
+      //moonad.do_post({
+        //cite: watching,
+        //head: "Random: " + Math.floor(Math.random()*(2**32)),
+        //body: "This is a random number."
+      //}, pkey);
+    //};
+  //}, 3000);
+};
+
+moonad.on_stop = () => {
+  console.log("Disconnected from Moonad.");
+};
+
+login().then((login_name) => { name = login_name; });
+
+// Routing
+// =======
+
+function get_route() {
+  var route = window.location.pathname;
+  return route === "/" ? "/p" : route;
 }
+
+function get_paths() {
+  return get_route().split("/").slice(1)
+};
+
+function get_watching() {
+  var paths = get_paths(); 
+  if (paths[0] === "p") {
+    return paths[1] || "0x0000000000000000";
+  } else {
+    return null;
+  };
+};
+
+function refresh_watching() {
+  var watching = get_watching();
+  if (watching) {
+    moonad.do_watch_only(watching);
+  };
+};
+
+// Components
+// ==========
 
 class Write extends Component {
   constructor(props) {
@@ -25,15 +114,12 @@ class Write extends Component {
 
   async post({cite, head, body}) {
     // Checks if citation is correct
-    if (!common.hex(64, cite)) {
+    if (!moonad.hex(64, cite)) {
       return alert("Incorrect cited post.");
     }
 
-    // Gets private key
-    var pkey = utils.get_pkey();
-
     try {
-      alert(await moonad.post({pkey, cite, head, body}));
+      alert(await moonad.api.post({cite, head, body}, pkey));
       window.history.back();
     } catch (e) {
       alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
@@ -106,15 +192,11 @@ class Write extends Component {
       },
       onClick: () => {
         var cite = this.cite;
-        var head = this.head;
-        var body = this.body;
+        var head = this.head.replace(/\n/g,"");
+        var body = this.body.replace(/\n{3,}/g, "\n\n");
         this.post({cite, head, body});
       },
-    }, [
-      this.cite === "0x0000000000000000"
-      ? "Submit post."
-      : "Submit reply to " + this.cite + "."
-    ]);
+    }, ["Submit reply to " + this.cite + "."]);
 
     const repl = h("pre", { 
       style: {
@@ -139,7 +221,7 @@ class Write extends Component {
   }
 };
 
-const Code = ({code, defs, on_click_post}) => {
+const Code = ({code, on_click_post}) => {
   var tags = fm.lang.parse(code).tags;
   var elems = [];
   var txt_col = "rgb(102,172,182)";
@@ -175,7 +257,7 @@ const Code = ({code, defs, on_click_post}) => {
         break;
       case "ref":
         color = ref_col;
-        click = () => defs[tag.text] && on_click_post(defs[tag.text].orig);
+        click = () => {console.log("TODO")};
         decor = "underline";
         cursr = "pointer";
         break;
@@ -192,61 +274,69 @@ const Code = ({code, defs, on_click_post}) => {
   return elems;
 };
 
-const Post = ({defs, post, expand, on_click_post}) => {
-  const title = h("div", {
-      style: {
-        "font-family": "IBMPlexMono-Light",
-        "user-select": "none",
-        "font-size": expand ? "16px" : "14px",
-        "text-decoration": "underline",
-        "color": "rgb(41, 42, 44)",
-        "cursor": "pointer",
-      },
-      onClick: () => on_click_post(post.post),
-    }, post.head);
+const Post = ({poid, expand, on_click_post}) => {
+  const post = moonad.post[poid];
+  if (poid === "0x0000000000000000") {
+    return h("div", {}, "Welcome to Moonad.");
+  } else if (poid === null || !post) {
+    return h("div", {}, "[loading...]");
+  } else {
+    const title = h("div", {
+        style: {
+          "font-family": "IBMPlexMono-Light",
+          "user-select": "none",
+          "font-size": expand ? "16px" : "14px",
+          "text-decoration": "underline",
+          "color": "rgb(41, 42, 44)",
+          "cursor": "pointer",
+        },
+        onClick: () => on_click_post(poid),
+      }, post.head);
 
-  var blocks = common.get_post_blocks(post);
-  var post_body = [];
-  for (var block of blocks) {
-    switch (block.ctor) {
-      case "code":
-        post_body.push(Code({code: block.code, defs, on_click_post}));
-        break;
-      case "text":
-        post_body.push(block.text);
-        break;
-    }
-  };
-
-  const body = !expand ? null : h("pre", {
-      style: {
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "12px",
-        "padding": "2px 0px",
-        "color": "rgb(101,102,105)",
+    var blocks = moonad.get_post_blocks(post, moonad.name[moonad.get_post_auth(post)]);
+    //console.log("...", blocks);
+    //console.log(moonad.name);
+    var post_body = [];
+    for (var block of blocks) {
+      switch (block.ctor) {
+        case "code":
+          post_body.push(Code({code: block.code, on_click_post}));
+          break;
+        case "text":
+          post_body.push(block.text);
+          break;
       }
-    }, post_body);
+    };
 
-  const author = h("div", {
+    const body = !expand ? null : h("pre", {
+        style: {
+          "font-family": "IBMPlexMono-Light",
+          "font-size": "12px",
+          "padding": "2px 0px",
+          "color": "rgb(101,102,105)",
+        }
+      }, post_body);
+
+    const author = h("div", {
+        style: {
+          "font-family": "IBMPlexMono-Light",
+          "font-size": "8px",
+          //"font-style": "italic",
+          "color": "rgb(161, 162, 168)",
+          "padding-bottom": "8px",
+        },
+      }, ""
+        + ((moonad.cite[poid] ? moonad.cite[poid].length : 0) + " replies")
+        + " | at " + utils.format_date(post.date)
+        + " | by " + (moonad.name[post.auth] || post.auth || "someone")
+        );
+
+    return h("div", {
       style: {
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "8px",
-        //"font-style": "italic",
-        "color": "rgb(161, 162, 168)",
-        "padding-bottom": "8px",
-      },
-    }, ""
-      + post.ciby.length + " replies"
-      + " | 0 points"
-      + " | at " + formatHexDate(post.date)
-      + " | by " + post.auth
-      );
-
-  return h("div", {
-    style: {
-      //"border-bottom": "1px solid rgb(240, 240, 240)",
-      //"padding-bottom": "16px",
-    }}, [title, body, author]);
+        //"border-bottom": "1px solid rgb(240, 240, 240)",
+        //"padding-bottom": "16px",
+      }}, [title, body, author]);
+  }
 };
 
 class Posts extends Component {
@@ -254,26 +344,21 @@ class Posts extends Component {
     super(props);
   }
   render() {
-    var posts = this.props.posts;
-    //console.log("....", this.props.focus, posts);
-    if (!posts) {
-      return null;
-    } else if (this.props.focus) {
-      var post = posts[common.hex_to_num(this.props.focus)];
+    var poid = this.props.poid;
+    var post = moonad.post[poid];
+    if (!post) {
+      var body = ["Loading..."];
+    } else {
       var body = [];
-      //body.push(h("div", {
-        //style: {
-          //"cursor": "pointer",
-          //"text-decoration": "underline",
-          //"margin-bottom": "12px",
-        //},
-      //}, "Back to " + post.cite + "..."));
+
+      // Main post
       body.push(Post({
-        defs: this.props.defs,
-        post: post,
+        poid,
         expand: true,
-        on_click_post: this.props.on_click_post,
+        on_click_post: this.props.on_click_post
       }));
+
+      // Reply separator
       body.push(h("div", {
         style: {
           "margin-top": "8px",
@@ -299,31 +384,22 @@ class Posts extends Component {
           onClick: () => this.props.on_click_reply(),
         }, "write reply"),
       ]));
-      for (let i = post.ciby.length - 1; i >= 0; --i) {
-        let ciby_post = posts[common.hex_to_num(post.ciby[i])];
-        body.push(Post({
-          post: ciby_post,
-          expand: false,
-          on_click_post: () => this.props.on_click_post(ciby_post.post),
-        }));
-      };
-    } else {
-      var post_list = [];
-      for (let i = 1; posts && i < posts.length; ++i) {
-        var post = posts[i];
-        if (post.cite === "0x0000000000000000" && post.head[0] !== "/") {
-          post_list.push(Post({
-            post: post,
+
+      // Post replies
+      if (moonad.cite[poid]) {
+        for (let i = moonad.cite[poid].length - 1; i >= 0; --i) {
+          body.push(Post({
+            poid: moonad.cite[poid][i],
             expand: false,
-            on_click_post: () => this.props.on_click_post(posts[i].post),
+            on_click_post: () => this.props.on_click_post(moonad.cite[poid][i]),
           }));
-        }
+        };
       };
-      var body = post_list.reverse();
-    };
+
+    }
+    //console.log("Done...", body.length);
     return h("div", {
       style: {
-        "background": "rgb(242, 242, 242)",
         "min-height": "calc(100% - 30px)",
         "display": "flex",
         "flex-flow": "row nowrap",
@@ -351,24 +427,24 @@ class Head extends Component {
       },
     }, ["Moonad"]);
     const head_rgt = h("div", {}, [
-      h("span", {
-        style: {
-          "cursor": "pointer",
-          "text-decoration": "underline",
-          "color": "rgb(101,102,105)",
-        },
-        onClick: () => this.props.on_click_link("check"),
-      }, "check"),
-      h("span", {}, " "),
-      h("span", {
-        style: {
-          "cursor": "pointer",
-          "text-decoration": "underline",
-          "color": "rgb(101,102,105)",
-        },
-        onClick: () => this.props.on_click_link("write"),
-      }, "write"),
-      h("span", {}, " "),
+      //h("span", {
+        //style: {
+          //"cursor": "pointer",
+          //"text-decoration": "underline",
+          //"color": "rgb(101,102,105)",
+        //},
+        //onClick: () => this.props.on_click_link("check"),
+      //}, "check"),
+      //h("span", {}, " "),
+      //h("span", {
+        //style: {
+          //"cursor": "pointer",
+          //"text-decoration": "underline",
+          //"color": "rgb(101,102,105)",
+        //},
+        //onClick: () => this.props.on_click_link("write"),
+      //}, "write"),
+      //h("span", {}, " "),
       h("span", {
         style: {
           "cursor": "pointer",
@@ -376,7 +452,7 @@ class Head extends Component {
           "color": "rgb(101,102,105)",
         },
         onClick: () => this.props.on_click_link("user"),
-      }, "user"),
+      }, name),
     ]);
 
     const head = h("div", {
@@ -399,50 +475,24 @@ class Head extends Component {
 class Moonad extends Component {
   constructor(props) {
     super(props);
-    this.post_watcher = null;
-    this.posts = null;
-    //this.route = "posts";
   }
   componentDidMount() {
-    this.post_watcher = moonad.watch_posts((posts) => {
-      //console.log(posts);
-      this.posts = posts;
-      for (var i = 0; i < this.posts.length; ++i) {
-        this.posts[i].ciby = [];
-      };
-      for (var i = 0; i < this.posts.length; ++i) {
-        if (this.posts[i].cite !== "0x0000000000000000") {
-          var idx = common.hex_to_num(this.posts[i].cite);
-          this.posts[idx].ciby.push(this.posts[i].post);
-        }
-      }
-      var defs = {};
-      for (var post of this.posts) {
-        var code = common.get_post_code(post);
-        var new_defs = fm.lang.parse(code).defs;
-        for (var def in new_defs) {
-          defs[def] = new_defs[def];
-          defs[def].orig = post.post;
-        };
-      };
-      this.defs = defs;
-      this.forceUpdate();
-    });
-    window.onpopstate = () => this.forceUpdate();
+    setInterval(() => this.forceUpdate(), 250);
   }
   check_all() {
-    var text = "";
-    for (var def in this.defs) {
-      try {
-        fm.synt.typesynth(this.defs[def].term, this.defs[def].type, this.defs);
-        text += def + ": " + fm.lang.stringify(this.defs[def].type) + "\n";
-      } catch (e) {
-        console.log(e);
-        text += def + ": " + "ERROR" + "\n";
-      }
-    };
-    text += "All terms check!";
-    alert(text);
+    alert("TODO");
+    //var text = "";
+    //for (var def in this.defs) {
+      //try {
+        //fm.synt.typesynth(this.defs[def].term, this.defs[def].type, this.defs);
+        //text += def + ": " + fm.lang.stringify(this.defs[def].type) + "\n";
+      //} catch (e) {
+        //console.log(e);
+        //text += def + ": " + "ERROR" + "\n";
+      //}
+    //};
+    //text += "All terms check!";
+    //alert(text);
   }
   set_route(route) {
     window.history.pushState({}, route, window.location.origin+route);
@@ -450,46 +500,42 @@ class Moonad extends Component {
     this.route = route;
     this.forceUpdate();
   }
-  get_route() {
-    var route = window.location.pathname;
-    return route === "/" ? "/posts" : route;
-  }
   render() {
-    var route = this.get_route();
-    
+    var route = get_route();
+
     var head = h(Head, {
       route: route,
       posts: this.posts,
       on_click_link: (name) => {
         if (name === "posts") {
-          this.set_route("/posts");
+          this.set_route("/p");
         } else if (name === "user") {
-          alert("Logged as " + utils.pkey_to_addr(utils.get_pkey()));
+          var msge = "Logged with Ethereum.\n- Address: "+addr+"\n- PrivKey: "+pkey+"\nCopy on the console.";
+          alert(msge);
+          console.log(msge);
         } else if (name === "write") {
-          this.set_route("/write");
+          this.set_route("/w");
         } else if (name === "check") {
           this.check_all();
         }
       },
     });
 
-    var paths = route.split("/").slice(1);
+    let paths = get_paths();
     switch (paths[0]) {
-      case "write":
+      case "w":
         var body = h(Write, {});
         break;
-      case "posts":
+      case "p":
         var body = h(Posts, {
-          defs: this.defs,
           on_click_reply: () => {
-            this.set_route("/write?cite="+paths[1]);
+            this.set_route("/w?cite="+(paths[1]||"0x0000000000000000"));
           },
-          on_click_post: (post) => {
-            console.log("clicked", post);
-            this.set_route("/posts/"+post);
+          on_click_post: (poid) => {
+            console.log("clicked", poid);
+            this.set_route("/p/"+poid);
           },
-          focus: paths[1] || null,
-          posts: this.posts,
+          poid: paths[1] || "0x0000000000000000",
         });
         break;
     }
@@ -498,7 +544,7 @@ class Moonad extends Component {
       style: {
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
-        "background": "rgb(242, 242, 242)",
+        "background": "white",
         "width": "100%",
         "height": "100%",
       }}, [
@@ -507,5 +553,3 @@ class Moonad extends Component {
       ]);
   }
 };
-
-window.onload = () => render(h(Moonad), document.getElementById("main"));

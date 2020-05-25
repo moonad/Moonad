@@ -3,7 +3,6 @@ const ethsig = require("nano-ethereum-signer");
 function memoize(fn) {
   var memo = {};
   return function(arg) {
-    console.log("->",arg);
     if (!memo[arg]) {
       memo[arg] = fn(arg);
     }
@@ -29,10 +28,18 @@ function get_addr() {
   return pkey_to_addr(get_pkey());
 };
 
+function format_date(date) {
+  var date = new Date(date);
+  return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()
+    + ", "+date.getHours()+"h "+date.getMinutes()+"min";
+}
+
 const pkey_to_addr = memoize(ethsig.addressFromKey);
 
 module.exports = {
   gen_pkey,
   get_pkey,
+  get_addr,
   pkey_to_addr,
+  format_date,
 };
