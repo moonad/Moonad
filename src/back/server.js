@@ -384,8 +384,8 @@ app.post("/peer_answer", (req, res) => {
 
 // Sends a post to peer.
 async function send_post(peer, poid) {
-  var cite  = await db.get(poid+".cite");
-  var post  = await db.get(poid+".post")
+  var cite = await db.get(poid+".cite");
+  var post = await db.get(poid+".post")
   if (cite && post) {
     var bytes = [
       new Uint8Array([lib.SHOW_POST]),
@@ -405,13 +405,17 @@ async function send_nth_cite(peer, poid, nth, peek) {
   var pcite = await db.get(poid+".cite");
   if (pcite) {
     var cites = lib.split_hex_in_chunks(64, lib.bytes_to_hex(pcite));
-    var bytes = [new Uint8Array([lib.SHOW_NTH_CITE]), lib.uint32_to_bytes(cites.length)];
+    var bytes = [
+      new Uint8Array([lib.SHOW_NTH_CITE]),
+      lib.uint32_to_bytes(cites.length),
+    ];
     var nth  = nth === null ? cites.length - 1 : nth;
     var from = peek ? nth : Math.max(nth-2, 0);
     var upto = peek ? Math.min(nth+2, cites.length-1) : nth;
     //console.log("sending "+nth+"/"+cites.length+" cited of "+poid+" to peer...");
     for (var i = from; i <= upto; ++i) { 
       var cpoid = cites[i];
+      var ccite = await db.get(cpoid+".cite");
       var cpost = await db.get(cpoid+".post")
       if (cpost) {
         //console.log("- adding post "+cpoid+" with "+cpost.length*8+" bits");
@@ -420,6 +424,7 @@ async function send_nth_cite(peer, poid, nth, peek) {
         //console.log(".", lib.uint32_to_bytes(cpost.length));
         //console.log(".", new Uint8Array(cpost));
         bytes.push(lib.uint32_to_bytes(i));
+        bytes.push(lib.uint32_to_bytes(ccite.length / 8));
         bytes.push(lib.hex_to_bytes(cpoid));
         bytes.push(lib.uint32_to_bytes(cpost.length));
         bytes.push(cpost);

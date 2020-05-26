@@ -49,10 +49,11 @@ async function login() {
 
 window.onload = () => render(h(Moonad), document.getElementById("main"));
 
+console.log("Starting...");
 moonad.on_init = () => {
   console.log("Connected to Moonad.");
   refresh_watching();
-  setInterval(refresh_watching, 1000);
+  setInterval(refresh_watching, 100);
   //setInterval(() => {
     //var watching = get_watching();
     //if (watching) {
@@ -93,10 +94,11 @@ function get_watching() {
   };
 };
 
+var last_watching = null;
 function refresh_watching() {
   var watching = get_watching();
-  if (watching) {
-    moonad.do_watch_only(watching);
+  if (last_watching !== watching) {
+    moonad.do_watch_only(watching); // TODO: fire more than once
   };
 };
 
@@ -119,7 +121,7 @@ class Write extends Component {
     }
 
     try {
-      alert(await moonad.api.post({cite, head, body}, pkey));
+      await moonad.api.post({cite, head, body}, pkey);
       window.history.back();
     } catch (e) {
       alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
@@ -496,7 +498,7 @@ class Moonad extends Component {
   }
   set_route(route) {
     window.history.pushState({}, route, window.location.origin+route);
-    console.log(route);
+    //console.log(route);
     this.route = route;
     this.forceUpdate();
   }

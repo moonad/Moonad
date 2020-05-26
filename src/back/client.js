@@ -88,29 +88,29 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
       get_post,
     };
 
-    // We received a post.
-    self.got_post = function got_post(poid, post, cite_len) {
-      self.post[poid] = post;
+    // We received the length of the cites of a poid.
+    self.got_clen = function got_clen(poid, clen) {
+      //console.log("got_clen", poid, clen);
       if (!self.cite[poid]) {
         self.cite[poid] = [];
         self.cite[poid].hole_at = 0;
       };
-      for (var n = self.cite[poid].length; n < cite_len; ++n) {
+      for (var n = self.cite[poid].length; n < clen; ++n) {
         self.cite[poid][n] = null;
       }
     };
 
+    // We received a post.
+    self.got_post = function got_post(poid, post, clen) {
+      self.post[poid] = post;
+      self.got_clen(poid, clen);
+    };
+
     // We received the information that `cite_post` is the `nth` cite of `poid`. 
-    self.got_nth_cite = function got_nth_cite(poid, nth, cite_len, cite_poid, cite_post) {
-      console.log("got "+cite_poid+" as "+nth+"/"+cite_len+"th cite of "+poid);
-      self.post[cite_poid] = cite_post;
-      if (!self.cite[poid]) {
-        self.cite[poid] = [];
-        self.cite[poid].hole_at = 0;
-      };
-      for (var n = self.cite[poid].length; n < cite_len; ++n) {
-        self.cite[poid][n] = null;
-      }
+    self.got_nth_cite = function got_nth_cite(poid, nth, clen, cite_poid, cite_post, cite_clen) {
+      //console.log("got_nth_cite", poid, nth, clen, cite_poid, cite_post, cite_clen);
+      self.got_post(cite_poid, cite_post, cite_clen);
+      self.got_clen(poid, clen);
       self.cite[poid][nth] = cite_poid;
       while (self.cite[poid].hole_at < self.cite[poid].length
           && self.cite[poid][self.cite[poid].hole_at] !== null) {
@@ -202,12 +202,12 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
         console.log("signal", data);
         try {
           var ok = await request("peer_answer", {addr, data: JSON.stringify(data)});
-          setTimeout(() => {
+          self.reconnecter = setTimeout(() => {
             if (!self.ison) {
               console.log("Problem connecting. Retrying.");
               self.stop();
             };
-          }, 400);
+          }, 1000);
           //console.log("...", ok);
         } catch (e) {
           //console.log("...", e);
@@ -217,7 +217,10 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
       self.did_connect = () => {
         self.ison = true;
         if (self.on_init) self.on_init();
+        if (self.reconnecter) clearTimeout(self.reconnecter);
       };
+
+      self.reconnecter = null;
 
       self.timeouter = setInterval(() => {
         if (self.last_pong && Date.now() - self.last_pong > self.timeout) {
@@ -267,6 +270,8 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
             if (!self.post[poid]) {
               self.do_get_post(poid);
             }
+            //console.log("~~", poid, self.cite[poid]);
+            //console.log("oo", poid, self.post[poid]);
             if (!self.cite[poid]) {
               self.do_get_nth_cite(poid, 0);
             } else if (self.cite[poid].hole_at < self.cite[poid].length) {
@@ -309,12 +314,12 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
               //console.log(".len ", data.slice(i+12, i+16));
               //console.log(".post", data.slice(i+16, i+16+Math.floor(len8)));
               var nth  = lib.bytes_to_uint32(data.slice(idx+0, idx+4));
-              var poid = lib.bytes_to_hex(data.slice(idx+4, idx+12));
-              var len8 = lib.bytes_to_uint32(data.slice(idx+12, idx+16));
-              var post = lib.bytes_to_post(data.slice(idx+16, idx+16+len8));
-              //console.log(JSON.stringify(post));
-              self.got_nth_cite(post.cite, nth, clen, poid, post);
-              idx = idx + 16 + len8;
+              var slen = lib.bytes_to_uint32(data.slice(idx+4, idx+8));
+              var poid = lib.bytes_to_hex(data.slice(idx+8, idx+16));
+              var len8 = lib.bytes_to_uint32(data.slice(idx+16, idx+20));
+              var post = lib.bytes_to_post(data.slice(idx+20, idx+20+len8));
+              self.got_nth_cite(post.cite, nth, clen, poid, post, slen);
+              idx = idx + 20 + len8;
             };
             break;
           case lib.PONG:
@@ -331,7 +336,7 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
           case lib.ROOM:
             var poid = lib.bytes_to_hex(data.slice(1,9));
             var room = lib.split_hex_in_chunks(160, lib.bytes_to_hex(data.slice(9)));
-            console.log("watching "+poid+":",room);
+            console.log("Adresses watching "+poid+":",room);
             break;
         };
       });
@@ -345,6 +350,7 @@ module.exports = ({url = "", wrtc = null, addr = null}) => {
       clearTimeout(self.pinger);
       clearTimeout(self.timeouter);
       clearTimeout(self.watcher);
+      if (self.reconnecter) clearTimeout(self.reconnecter);
       self.peer = null;
       self.ison = false;
       self.pinger = null;
