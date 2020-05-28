@@ -240,15 +240,11 @@ function bytes_concat(bytes) {
 };
 
 // Net message codes
-const POST = 65;
-const WATCH = 66;
-const UNWATCH = 67;
-const GET_POST = 68;
-const GET_NTH_CITE = 69;
-const PING = 70;
-const SHOW_POST = 97;
-const SHOW_NTH_CITE = 98;
-const PONG = 99;
+const DO_POST = 66;
+const DO_WATCH = 67;
+const POST = 97;
+const CITE = 98;
+const NAME = 99;
 const ROOM = 100;
 
 module.exports = {
@@ -278,14 +274,10 @@ module.exports = {
   hex_to_hex64s,
   bytes_concat,
   sign_post,
+  DO_POST,
+  DO_WATCH,
   POST,
-  WATCH,
-  UNWATCH,
-  GET_POST,
-  GET_NTH_CITE,
-  PING,
-  SHOW_POST,
-  SHOW_NTH_CITE,
-  PONG,
+  CITE,
+  NAME,
   ROOM,
 };

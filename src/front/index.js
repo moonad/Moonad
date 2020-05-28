@@ -4,29 +4,44 @@
 require("./IBMPlexMono-Light.ttf");
 const logo = require("./moonad_logo.png").default;
 
+// Libraries
+// =========
+const utils = require("./utils.js");
+const fm = require("formality-lang");
+const {Component, render} = require("inferno");
+const h = require("inferno-hyperscript").h;
+const moonad_client = require("./../back/client.js")({url:window.location.origin});
+
 // Account
 // =======
 
-const utils = require("./utils.js");
+// Gets the private key stored on browser
 var pkey = utils.get_pkey();
 var addr = utils.get_addr();
+
+// Startup
+// =======
+
+// Renders interface when site loads up.
+window.onload = () => render(h(Moonad), document.getElementById("main"));
+
+// Starts the moonad object. It gets data from server, allows making posts, etc.
+var moonad = moonad_client.direct();
+
+// Logs in.
 var name = "user";
+login().then((login_name) => {
+  console.log("logged as", login_name);
+  name = login_name;
+});
 
-// User interface
-// ==============
+// Periodically sends watched poid to server.
+setInterval(refresh_watched_poid, 50);
 
-const {Component, render} = require("inferno");
-const h = require("inferno-hyperscript").h;
+// Login
+// =====
 
-// Libraries
-// =========
-
-const fm = require("formality-lang");
-const moonad = require("./../back/client.js")({url: window.location.origin+"/", addr}).direct();
-
-// Login & Startup
-// ===============
-
+// Asks the user a name, registers a new (name,addr) pair.
 async function register(taken = false) {
   var name = prompt((taken ? "Name taken. " : "") + "Choose a name:");
   try {
@@ -38,6 +53,7 @@ async function register(taken = false) {
   }
 };
 
+// Logs in with the private key. If not registered, registers.
 async function login() {
   console.log("Logging in...");
   try {
@@ -46,32 +62,6 @@ async function login() {
     return await register();
   }
 };
-
-window.onload = () => render(h(Moonad), document.getElementById("main"));
-
-console.log("Starting...");
-moonad.on_init = () => {
-  console.log("Connected to Moonad.");
-  refresh_watching();
-  setInterval(refresh_watching, 100);
-  //setInterval(() => {
-    //var watching = get_watching();
-    //if (watching) {
-      //console.log("MAKING RANDOM POST TO", watching);
-      //moonad.do_post({
-        //cite: watching,
-        //head: "Random: " + Math.floor(Math.random()*(2**32)),
-        //body: "This is a random number."
-      //}, pkey);
-    //};
-  //}, 3000);
-};
-
-moonad.on_stop = () => {
-  console.log("Disconnected from Moonad.");
-};
-
-login().then((login_name) => { name = login_name; });
 
 // Routing
 // =======
@@ -82,10 +72,10 @@ function get_route() {
 }
 
 function get_paths() {
-  return get_route().split("/").slice(1)
+  return get_route().split("/").slice(1);
 };
 
-function get_watching() {
+function get_watched_poid() {
   var paths = get_paths(); 
   if (paths[0] === "p") {
     return paths[1] || "0x0000000000000000";
@@ -94,11 +84,13 @@ function get_watching() {
   };
 };
 
-var last_watching = null;
-function refresh_watching() {
-  var watching = get_watching();
-  if (last_watching !== watching) {
-    moonad.do_watch_only(watching); // TODO: fire more than once
+var last_watched_poid = null;
+function refresh_watched_poid() {
+  var watched_poid = get_watched_poid();
+  if (watched_poid !== null && last_watched_poid !== watched_poid) {
+    //console.log("watch:", watched_poid);
+    moonad.do_watch(watched_poid);
+    last_watched_poid = watched_poid;
   };
 };
 
@@ -116,14 +108,15 @@ class Write extends Component {
 
   async post({cite, head, body}) {
     // Checks if citation is correct
-    if (!moonad.hex(64, cite)) {
+    if (!moonad.lib.hex(64, cite)) {
       return alert("Incorrect cited post.");
     }
 
     try {
-      await moonad.api.post({cite, head, body}, pkey);
+      moonad.do_post({cite, head, body}, pkey);
       window.history.back();
     } catch (e) {
+      console.log(e);
       alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
     }
   }
@@ -295,7 +288,7 @@ const Post = ({poid, expand, on_click_post}) => {
         onClick: () => on_click_post(poid),
       }, post.head);
 
-    var blocks = moonad.get_post_blocks(post, moonad.name[moonad.get_post_auth(post)]);
+    var blocks = moonad.lib.get_post_blocks(post, moonad.name[moonad.lib.get_post_auth(post)]);
     //console.log("...", blocks);
     //console.log(moonad.name);
     var post_body = [];
@@ -348,57 +341,53 @@ class Posts extends Component {
   render() {
     var poid = this.props.poid;
     var post = moonad.post[poid];
-    if (!post) {
-      var body = ["Loading..."];
-    } else {
-      var body = [];
+    var body = [];
 
-      // Main post
-      body.push(Post({
-        poid,
-        expand: true,
-        on_click_post: this.props.on_click_post
-      }));
+    // Main post
+    body.push(Post({
+      poid,
+      expand: true,
+      on_click_post: this.props.on_click_post
+    }));
 
-      // Reply separator
-      body.push(h("div", {
+    // Reply separator
+    body.push(h("div", {
+      style: {
+        "margin-top": "8px",
+        "margin-bottom": "8px",
+        "border-bottom": "1px solid rgb(240, 240, 240)",
+        "font-size": "16px",
+        "display": "flex",
+        "flex-flow": "row nowrap",
+        "justify-content": "space-between",
+        "align-items": "flex-end",
+      },
+    }, [
+      h("span", {
+        style: {"font-size": "16px"},
+      }, "Replies:"),
+      h("span", {
         style: {
-          "margin-top": "8px",
-          "margin-bottom": "8px",
-          "border-bottom": "1px solid rgb(240, 240, 240)",
-          "font-size": "16px",
-          "display": "flex",
-          "flex-flow": "row nowrap",
-          "justify-content": "space-between",
-          "align-items": "flex-end",
+          "font-size": "12px",
+          "text-decoration": "underline",
+          "cursor": "pointer",
+          "padding-bottom": "1px",
         },
-      }, [
-        h("span", {
-          style: {"font-size": "16px"},
-        }, "Replies:"),
-        h("span", {
-          style: {
-            "font-size": "12px",
-            "text-decoration": "underline",
-            "cursor": "pointer",
-            "padding-bottom": "1px",
-          },
-          onClick: () => this.props.on_click_reply(),
-        }, "write reply"),
-      ]));
+        onClick: () => this.props.on_click_reply(),
+      }, "write reply"),
+    ]));
 
-      // Post replies
-      if (moonad.cite[poid]) {
-        for (let i = moonad.cite[poid].length - 1; i >= 0; --i) {
-          body.push(Post({
-            poid: moonad.cite[poid][i],
-            expand: false,
-            on_click_post: () => this.props.on_click_post(moonad.cite[poid][i]),
-          }));
-        };
+    // Post replies
+    if (moonad.cite[poid]) {
+      for (let i = moonad.cite[poid].length - 1; i >= 0; --i) {
+        body.push(Post({
+          poid: moonad.cite[poid][i],
+          expand: false,
+          on_click_post: () => this.props.on_click_post(moonad.cite[poid][i]),
+        }));
       };
+    };
 
-    }
     //console.log("Done...", body.length);
     return h("div", {
       style: {

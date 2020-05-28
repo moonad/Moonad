@@ -17,6 +17,7 @@
 
 var express = require("express");
 var app = express();
+var ws = require('express-ws')(app);
 var fs = require("fs-extra");
 var path = require("path");
 var cors = require("cors");
@@ -34,8 +35,7 @@ function path_of(base, file = "") {
 
 var TIMEOUT = 6000; // Number -- time before considering client disconnected
 var Defs = {}; // Map Name {term:Term,type:Term} -- global fm definitions
-var Watcher = {}; // Map Poid [Peer] -- peers watching a poid
-var Peer = {}; // Map Addr SimplePeer -- peer of address
+var Peer = []; // Arr WebSocket -- peer of address
 var Size = 0;  // Number
 
 async function new_post({cite, sign, head, body}) {
@@ -134,12 +134,8 @@ async function new_post({cite, sign, head, body}) {
       Defs[def] = defs[def];
     }
 
-    // Reports to watchers
-    for (var watcher of Watcher[cite]) {
-      send_nth_cite(watcher, cite, null, false);
-    }
-
     console.log("New post: "+post.poid+" '"+post.head+"'.");
+    //console.log("->", post);
     return post.poid;
   } catch (e) {
     console.log(e);
@@ -207,11 +203,11 @@ async function startup() {
     };
   };
   app.listen(80);
-  setInterval(() => {
-    timeout_peers();
-    clear_watchers();
-    room_sender();
-  }, TIMEOUT);
+  //setInterval(() => {
+    //timeout_peers();
+    //clear_watchers();
+    //room_sender();
+  //}, TIMEOUT);
   console.log("Server open!");
 };
 startup();
@@ -223,13 +219,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "..", "docs")));
 
-app.get("*", async (req, res) => {
-  var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
-  if (fs.existsSync(path_of("docs", file))) {
-    res.sendFile(path_of("docs", file));
+app.get("*", async (req, res, next) => {
+  //console.log(req.url);
+  if (req.url === "/.websocket") {
+    next();
   } else {
-    res.sendFile(path_of("docs", "index.html"));
-  }
+    var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
+    if (fs.existsSync(path_of("docs", file))) {
+      res.sendFile(path_of("docs", file));
+    } else {
+      res.sendFile(path_of("docs", "index.html"));
+    }
+  };
 });
 
 // Makes a post
@@ -269,204 +270,139 @@ app.post("/get", async (req, res) => {
   };
 });
 
-// P2P API
+// TCP API
 // =======
 
-var SimplePeer = require("simple-peer");
-var wrtc = require("wrtc");
-
-app.post("/peer_offer", (req, res) => {
-  var addr = req.query.addr;
-  var peer = new SimplePeer({initiator: true, wrtc, tricke: true});
-  peer.ping = null;
-  peer.addr = addr;
-  if (!Peer[addr]) Peer.size = (Peer.size || 0) + 1;
-  Peer[addr] = peer;
-
-  peer.do_send = (msg) => {
-    //console.log("do_send", msg);
-    if (Peer[addr] === peer && peer.connected) {
-      try {
-        peer.send(msg);
-      } catch (e) {
-        console.log("Error on peer.send:", e);
-      };
-    };
-  };
-
-  peer.kill = () => {
-    if (Peer[addr] === peer) {
-      delete Peer[addr];
-      Peer.size--;
-      console.log(addr+" disconnected. "+Peer.size+ " online.");
-    }
-  };
-
-  peer.on("signal", data => {
-    //console.log("peer signal:", data);
-    if (data.type === "offer") {
-      res.send(JSON.stringify(data))
-    }
-  })
-
-  peer.on("connect", () => {
-    peer.ping = Date.now();
-    console.log(addr+" connected. "+Peer.size+ " online.");
-  })
-
-  // Deals with messages sent by peer
-  peer.on("data", (data) => {
-    var data = new Uint8Array(data);
-    switch (data[0]) {
-      case lib.POST:
-        console.log("got lib.POST");
-        var post = lib.bytes_to_post(data.slice(1));
-        console.log(post);
-        // TODO: notify author?
-        // already notified if he/she watches post.cite though
-        new_post(post).then(()=>{}).catch(()=>{});
-        break;
-
-      case lib.WATCH:
-        //console.log("got lib.WATCH");
-        var poid = lib.bytes_to_hex(data.slice(1, 9));
-        Watcher[poid] = Watcher[poid] || [];
-        Watcher[poid].push(peer);
-        break;
-
-      case lib.UNWATCH:
-        //console.log("got lib.UNWATCH");
-        var poid = lib.bytes_to_hex(data.slice(1, 9));
-        Watcher[poid] = (Watcher[poid]||[]).filter(p => p !== peer);
-        break;
-
-      case lib.GET_POST:
-        var poid = lib.bytes_to_hex(data.slice(1, 9));
-        send_post(peer, poid);
-        break;
-
-      case lib.GET_NTH_CITE:
-        var poid = lib.bytes_to_hex(data.slice(1, 9));
-        var nth  = lib.bytes_to_uint32(data.slice(9,13));
-        send_nth_cite(peer, poid, nth, true);
-        break;
-
-      case lib.PING:
-        //console.log("got lib.PING");
-        var tnow = Date.now();
-        var time = lib.hex_to_bytes(lib.uint48_to_hex(tnow));
-        peer.ping = tnow;
-        peer.do_send(lib.bytes_concat([[lib.PONG], time]));
-        break;
-    }
-  });
-
-  peer.on("error", (err) => {
-    console.log(addr+" error.", err);
-    peer.kill();
-  });
-
-  peer.on("close", (err) => {
-    console.log(addr+" closed.", err);
-    peer.kill();
-  });
-});
-
-app.post("/peer_answer", (req, res) => {
-  //console.log("hmmm", req.query);
-  if (Peer[req.query.addr]) {
-    Peer[req.query.addr].signal(JSON.parse(req.query.data));
-    res.send('"+"');
-  } else {
-    res.send('"-"');
-  };
-});
-
-// Sends a post to peer.
-async function send_post(peer, poid) {
-  var cite = await db.get(poid+".cite");
-  var post = await db.get(poid+".post")
-  if (cite && post) {
-    var bytes = [
-      new Uint8Array([lib.SHOW_POST]),
-      lib.uint32_to_bytes(cite.length / 8),
+// Poid -> Buff -> Buff
+async function serialize_post(poid, post) {
+  if (post) {
+    return lib.bytes_concat([
+      [lib.POST],
       lib.hex_to_bytes(poid),
       lib.uint32_to_bytes(post.length),
       post,
-    ];
-    peer.do_send(lib.bytes_concat(bytes));
-  };
+    ]);
+  } else {
+    return null;
+  }
 };
 
-// Sends the nth post on poid.cite to peer.
-// If peek = false, sends nth-1, nth-2 to recover lost packets for free.
-// If peek = true, sends nth+1, nth+2 to speed up download of misseds.
-async function send_nth_cite(peer, poid, nth, peek) {
-  var pcite = await db.get(poid+".cite");
-  if (pcite) {
-    var cites = lib.split_hex_in_chunks(64, lib.bytes_to_hex(pcite));
+// Poid -> Buff -> Uint -> Uint -> Buff 
+async function serialize_cite(poid, cite, from, upto) {
+  if (cite && from*8 < cite.length && upto*8 <= cite.length) {
     var bytes = [
-      new Uint8Array([lib.SHOW_NTH_CITE]),
-      lib.uint32_to_bytes(cites.length),
+      [lib.CITE],
+      lib.hex_to_bytes(poid),
+      lib.uint32_to_bytes(from),
+      lib.uint32_to_bytes(upto),
     ];
-    var nth  = nth === null ? cites.length - 1 : nth;
-    var from = peek ? nth : Math.max(nth-2, 0);
-    var upto = peek ? Math.min(nth+2, cites.length-1) : nth;
-    //console.log("sending "+nth+"/"+cites.length+" cited of "+poid+" to peer...");
-    for (var i = from; i <= upto; ++i) { 
-      var cpoid = cites[i];
-      var ccite = await db.get(cpoid+".cite");
-      var cpost = await db.get(cpoid+".post")
-      if (cpost) {
-        //console.log("- adding post "+cpoid+" with "+cpost.length*8+" bits");
-        //console.log(".", lib.uint32_to_bytes(i));
-        //console.log(".", lib.hex_to_bytes(cpoid));
-        //console.log(".", lib.uint32_to_bytes(cpost.length));
-        //console.log(".", new Uint8Array(cpost));
-        bytes.push(lib.uint32_to_bytes(i));
-        bytes.push(lib.uint32_to_bytes(ccite.length / 8));
-        bytes.push(lib.hex_to_bytes(cpoid));
-        bytes.push(lib.uint32_to_bytes(cpost.length));
-        bytes.push(cpost);
-      }
+    for (var i = from; i < upto; ++i) {
+      bytes.push(cite.slice(i*8, i*8+8));
     };
-    //console.log("Sending buffer:", lib.bytes_to_hex(lib.bytes_concat(bytes)));
-    peer.do_send(lib.bytes_concat(bytes));
-  };
+    return lib.bytes_concat(bytes);
+  } else {
+    return null;
+  }
 };
 
-function timeout_peers() {
-  for (var addr in Peer) { 
-    if (Peer[addr].ping && Date.now() - Peer[addr].ping > TIMEOUT) {
-      console.log(addr + " timed out.");
-      Peer[addr].kill();
-    };
-  };
+// Addr -> Buff -> Buff
+async function serialize_name(addr, name) {
+  return lib.bytes_concat([
+    [lib.NAME],
+    lib.hex_to_bytes(addr),
+    lib.uint32_to_bytes(name.length),
+    name,
+  ]);
 };
 
-function clear_watchers() {
-  for (var poid in Watcher) {
-    var old_arr = Watcher[poid];
-    var new_arr = [];
-    for (var i = 0; i < old_arr.length; ++i) {
-      if (Peer[old_arr[i].addr] === old_arr[i]) {
-        new_arr.push(old_arr[i]);
+app.ws('/', function(ws, req) {
+  var peer = {};
+  peer.has_post = {}; // Map Poid Bool
+  peer.len_cite = {}; // Map Poid Uint
+  peer.has_name = {}; // Map Addr Bool
+  peer.ws = ws;
+  peer.ws.binaryType = "arraybuffer";
+  peer.poid = "0x0000000000000000"
+  Peer.push(peer);
+  console.log("New connection. "+Peer.length+" online.");
+
+  // Watches replies to the watched poid and sends to peer
+  peer.refresher = setInterval(async function refresh() {
+    var bufs = [];
+
+    // Sends a post to peer
+    async function view_post(poid) {
+      //console.log("view_post", poid);
+      if (poid !== "0x0000000000000000" && !peer.has_post[poid]) {
+        peer.has_post[poid] = true;
+        var post = await db.get(poid+".post");
+        //console.log("...", post);
+        if (post) {
+          var auth = lib.get_post_auth(lib.bytes_to_post(post));
+          var name = await db.get(auth+".name");
+          var pbuf = await serialize_post(poid, post);
+          bufs.push(pbuf);
+          //console.log("pushing post", pbuf.length);
+          if (name && !peer.has_name[auth]) {
+            peer.has_name[auth] = true;
+            var nbuf = await serialize_name(auth, name);
+            bufs.push(nbuf);
+            //console.log("pushing name", nbuf.length);
+          };
+        };
       };
     };
-    Watcher[poid] = new_arr;
-  };
-};
 
-function room_sender() {
-  for (var poid in Watcher) {
-    //console.log("sending "+poid+" room "+Watcher[poid].length);
-    var buff = lib.bytes_concat([
-      [lib.ROOM],
-      lib.hex_to_bytes(poid),
-      ...Watcher[poid].map(peer => lib.hex_to_bytes(peer.addr))
-    ]);
-    for (var peer of Watcher[poid]) {
-      peer.do_send(buff);
+    // Sends watched post
+    await view_post(peer.poid);
+
+    // Sends watched cites
+    var cite = await db.get(peer.poid+".cite");
+    if (cite) {
+      var from = peer.len_cite[peer.poid]||0;
+      var upto = cite.length / 8;
+      if (from < upto) {
+        peer.len_cite[peer.poid] = upto;
+        for (var i = from; i < upto; ++i) {
+          var cite_poid = lib.bytes_to_hex(cite.slice(i*8, (i+1)*8));
+          await view_post(cite_poid);
+        };
+        var cbuf = await serialize_cite(peer.poid, cite, from, upto);
+        bufs.push(cbuf);
+      };
     };
-  };
-};
+
+    // Sends bufs
+    if (bufs.length > 0) {
+      peer.ws.send(Buffer.concat(bufs));
+    };
+
+  }, 100);
+
+  ws.on("message", function(data) {
+    var data = new Uint8Array(data);
+    switch (data[0]) {
+      // User makes a new post
+      case lib.DO_POST:
+        var post = lib.bytes_to_post(data.slice(1));
+        new_post(post).then(()=>{}).catch((e)=>{console.log(e)});
+        break;
+
+      // Users requests to watch a poid
+      case lib.DO_WATCH:
+        var poid = lib.bytes_to_hex(data.slice(1, 9));
+        peer.poid = poid;
+        break;
+    }
+  });
+
+  ws.on("close", function() {
+    Peer = Peer.filter(x => x !== peer);
+    clearTimeout(peer.refresher);
+    console.log("Disconnection. "+Peer.length+" online.");
+  });
+
+  ws.on("error", function(err) {
+    console.log(err);
+  });
+});
