@@ -288,9 +288,9 @@ const Post = ({poid, expand, on_click_post}) => {
         onClick: () => on_click_post(poid),
       }, post.head);
 
-    var blocks = moonad.lib.get_post_blocks(post, moonad.name[moonad.lib.get_post_auth(post)]);
-    //console.log("...", blocks);
-    //console.log(moonad.name);
+    var auth_addr = moonad.lib.get_post_auth(post).toLowerCase();
+    var auth_name = moonad.name[auth_addr];
+    var blocks = moonad.lib.get_post_blocks(post, moonad.name[auth_addr]);
     var post_body = [];
     for (var block of blocks) {
       switch (block.ctor) {
