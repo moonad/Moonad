@@ -48,7 +48,7 @@ async function register(taken = false) {
     await moonad.api.register({name, addr});
     return name;
   } catch (e) {
-    console.log(e);
+    console.log("register error:", e);
     register(true);
   }
 };
@@ -59,6 +59,7 @@ async function login() {
   try {
     return await moonad.api.get_name({addr})
   } catch (e) {
+    console.log("login error:", e);
     return await register();
   }
 };
@@ -323,7 +324,7 @@ const Post = ({poid, expand, on_click_post}) => {
       }, ""
         + ((moonad.cite[poid] ? moonad.cite[poid].length : 0) + " replies")
         + " | at " + utils.format_date(post.date)
-        + " | by " + (moonad.name[post.auth] || post.auth || "someone")
+        + " | by " + (moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         );
 
     return h("div", {
