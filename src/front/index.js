@@ -114,7 +114,7 @@ class Write extends Component {
     }
 
     try {
-      moonad.do_post({cite, head, body}, pkey);
+      await moonad.api.post({cite, head, body}, pkey);
       window.history.back();
     } catch (e) {
       console.log(e);
@@ -267,7 +267,12 @@ const Code = ({code, on_click_post}) => {
       }
     }, tag.text));
   };
-  return elems;
+  return h("div", {
+    style: {
+      "background": "rgb(247,248,250)",
+      "padding": "4px",
+    }
+  }, elems);
 };
 
 const Post = ({poid, expand, on_click_post}) => {
@@ -299,7 +304,7 @@ const Post = ({poid, expand, on_click_post}) => {
           post_body.push(Code({code: block.code, on_click_post}));
           break;
         case "text":
-          post_body.push(block.text);
+          post_body.push(block.text.replace(/^\n/,""));
           break;
       }
     };

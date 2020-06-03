@@ -145,12 +145,13 @@ function get_post_blocks(post, author) {
     if (!inside_code                            
       && author
       && (i === 0 || post.body[i-1] === "\n")
-      && post.body.slice(i, i+author.length+1) === author+".") {
+      && ( post.body.slice(i, i+author.length+1) === author+"."
+        || post.body[i] === "T" && post.body.slice(i+2, i+2+author.length+1) === author+".")) {
       inside_code = true;
       blocks.push({ctor:"code", code:""});
     } else if (inside_code
-      && post.body[i-1] === "\n"
-      && post.body[i-2] === "\n") {
+      && post.body[i] === "\n"
+      && post.body[i+1] === "\n") {
       inside_code = false;
       blocks.push({ctor:"text", text:""});
     }
