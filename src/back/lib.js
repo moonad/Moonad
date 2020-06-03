@@ -164,6 +164,14 @@ function get_post_blocks(post, author) {
   return blocks;
 };
 
+const case0 = get_post_blocks({body: `T user_name.Bool
+| true;
+| false;
+`}, "user_name");
+
+console.log(case0);
+
+
 // Returns the code portions of a post
 function get_post_code(post, author) {
   var blocks = get_post_blocks(post, author);
