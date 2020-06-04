@@ -328,7 +328,7 @@ const Post = ({poid, expand, on_click_post}) => {
         },
       }, ""
         + ((moonad.cite[poid] ? moonad.cite[poid].length : 0) + " replies")
-        + " | at " + utils.format_date(post.date)
+        + " | " + utils.format_date(post.date)
         + " | by " + (moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         );
 
