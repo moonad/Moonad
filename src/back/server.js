@@ -91,7 +91,7 @@ async function new_post({cite, sign, head, body}) {
     try {
       var term = defs[def].term;
       var type = defs[def].type;
-      var {term, type} = fm.synt.typesynth(def, defs, fm.lang.stringify);
+      var {term, type} = fm.synt.typesynth(def, all_defs, fm.lang.stringify);
     } catch (e) {
       throw fm.lang.stringify_err(e(), code);
     }
