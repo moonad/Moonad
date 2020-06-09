@@ -76,33 +76,20 @@ class Term extends Component {
 
       // Prints result
       if (argm_term.length === argm_type.length) {
-        var has_errors = false;
+        var term = fm.synt.Ref(name);
         for (let i = 0; i < argm_term.length; ++i) {
-          try {
-            defs["_arg_"+i+"_"] = {
-              term: argm_term[i],
-              type: argm_type[i],
-            };
-            //console.log("check", fm.lang.stringify(defs["_arg_"+i+"_"].term));
-            //console.log("hasty", fm.lang.stringify(defs["_arg_"+i+"_"].type));
-            fm.synt.typesynth("_arg_"+i+"_", defs, fm.lang.stringify);
-          } catch (e) {
-            has_errors = true;
-            if (typeof e === "function") {
-              var emsg = front.remove_colors(e().msg);
-              argm_divs.push(h("pre", {}, "\nOn argument "+i+":\n"+emsg));
-            } else {
-              argm_divs.push(h("pre", {}, "\nError on argument " + i + "."));
-            }
-          }
-        }
-        if (!has_errors) {
-          var term = fm.synt.Ref(name);
-          for (let i = 0; i < argm_term.length; ++i) {
-            term = fm.synt.App(argm_eras[i], term, argm_term[i]);
-          };
+          term = fm.synt.App(argm_eras[i], term, argm_term[i]);
+        };
+        defs["_main_"] = {term, type: fm.synt.Hol("_main_", fm.synt.Nil())};
+        try {
+          fm.synt.typesynth("_main_", defs, fm.lang.stringify);
           var result = fm.lang.stringify(fm.synt.normalize(term, defs));
           argm_divs.push(h("pre", {}, "\nResult:\n" + result));
+        } catch (e) {
+          var emsg = typeof e === "function"
+            ? front.remove_colors(e().msg)
+            : e.toString();
+          argm_divs.push(h("pre", {}, "\nError:\n" + emsg));
         }
       };
 
