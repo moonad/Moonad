@@ -6,14 +6,25 @@ const front = require("./../front.js");
 
 const Code = require("./Code.js");
 
-const Post = ({poid, expand}) => {
+const Post = ({poid, expand, top}) => {
   const post = front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
     return h("div", {}, "Welcome to Moonad.");
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {
-    const title = h("div", {
+    const title_back = h("span", {
+        style: {
+          "font-family": "IBMPlexMono-Light",
+          "user-select": "none",
+          "font-size": expand ? "16px" : "14px",
+          "text-decoration": "underline",
+          "color": "rgb(41, 42, 44)",
+          "cursor": "pointer",
+        },
+        onClick: () => front.set_route("/p/"+post.cite),
+      }, "↩");
+    const title_head = h("span", {
         style: {
           "font-family": "IBMPlexMono-Light",
           "user-select": "none",
@@ -24,6 +35,7 @@ const Post = ({poid, expand}) => {
         },
         onClick: () => front.set_route("/p/"+poid),
       }, post.head);
+    const title = h("div", {}, top ? [title_back," ",title_head] : title_head);
 
     var auth_addr = front.moonad.lib.get_post_auth(post).toLowerCase();
     var auth_name = front.moonad.name[auth_addr];

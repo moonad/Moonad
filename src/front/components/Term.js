@@ -11,6 +11,7 @@ class Term extends Component {
     this.poid = null;
     this.defs = null;
     this.argm = [];
+    this.memo = {};
   }
   async componentDidMount() {
     this.poid = await front.moonad.api.get_orig({name: this.props.name});
@@ -92,16 +93,25 @@ class Term extends Component {
           var js_code = fm.tojs.compile("_main_", core_defs, true);
           var js_eval = eval(js_code);
           argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._main_));
-          // Shows normal form
-          var norm = fm.lang.stringify(fm.synt.normalize(term, defs));
-          var text = "";
-          for (var i = 0; i < norm.length; ++i) {
-            text += norm[i];
-            if (i % 80 === 79) {
-              text += "\n";
+          argm_divs.push(h("pre", {}, "\nNorm:"));
+          argm_divs.push(h("pre", {
+            style: {
+              "text-decoration": "underline",
+              "cursor": "pointer",
+            },
+            onClick: () => {
+              // Shows normal form
+              var norm = fm.lang.stringify(fm.synt.normalize(term, defs));
+              var text = "";
+              for (var i = 0; i < norm.length; ++i) {
+                text += norm[i];
+                if (i % 80 === 79) {
+                  text += "\n";
+                }
+              }
+              console.log(text);
             }
-          }
-          argm_divs.push(h("pre", {}, "\nNorm:\n" + text));
+          }, "(click to print on console)"));
         } catch (e) {
           var emsg = typeof e === "function"
             ? front.remove_colors(e().msg)
