@@ -146,7 +146,7 @@ function get_post_blocks(post, author) {
       && author
       && (i === 0 || post.body[i-1] === "\n")
       && ( post.body.slice(i, i+author.length+1) === author+"."
-        || post.body[i] === "T" && post.body.slice(i+2, i+2+author.length+1) === author+".")) {
+        || post.body[i] === "T" && post.body.slice(i+2, i+2+author.length) === author)) {
       inside_code = true;
       blocks.push({ctor:"code", code:""});
     } else if (inside_code
