@@ -59,7 +59,7 @@ const Post = ({poid, expand, on_click_post}) => {
         },
       }, ""
         + ((front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0) + " replies")
-        + " | at " + front.format_date(post.date)
+        + " | " + front.format_date(post.date)
         + " | by " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         );
 
