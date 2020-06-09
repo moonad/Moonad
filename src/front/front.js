@@ -1,6 +1,7 @@
 const fm = require("formality-lang");
 const moonad_client = require("./../back/client.js")({url:window.location.origin});
 const ethsig = require("nano-ethereum-signer");
+const moment = require("moment");
 
 function memoize(fn) {
   var memo = {};
@@ -31,9 +32,38 @@ function get_addr() {
 };
 
 function format_date(date) {
-  var date = new Date(date);
-  return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()
-    + ", "+date.getHours()+"h "+date.getMinutes()+"min";
+  var now  = moment(new Date());
+  var date = moment(new Date(date));
+
+  function pluralize(n) {
+    return n > 1 ? "s" : "";
+  }
+  
+  if (now.isSame(date, 'minute')) {
+    return "just now";
+  }
+
+  if (now.isSame(date, 'hour')) {
+    var diff = now.minutes() - date.minutes();
+    return `${diff} min${pluralize(diff)} ago`;
+  }
+
+  if (now.isSame(date, 'day')) {
+    var diff = now.hours() - date.hours();
+    return `${diff} hr${pluralize(diff)} ago`;
+  }
+
+  if (now.isSame(date, 'month')) {
+    var diff = now.day() - date.day();
+    return `${diff} day${pluralize(diff)} ago`;
+  }
+
+  if (now.isSame(date, 'year')) {
+    var diff = now.month() - date.month();
+    return `${diff} month${pluralize(diff)} ago`;
+  }
+
+  return `on ${now.format("MMM DD YYYY")}`;
 }
 
 const pkey_to_addr = memoize(ethsig.addressFromKey);
