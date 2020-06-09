@@ -45,7 +45,8 @@ const pkey_to_addr = memoize(ethsig.addressFromKey);
 async function register(taken = false) {
   var name = prompt((taken ? "Name taken. " : "") + "Choose a name:");
   try {
-    await lib.moonad.api.register({name: lib.name, addr: lib.addr});
+    console.log("Registering", name);
+    await lib.moonad.api.register({name, addr: lib.addr});
     return name;
   } catch (e) {
     console.log("register error:", e);
@@ -72,6 +73,10 @@ function get_route() {
   return route === "/" ? "/p" : route;
 }
 
+function set_route(route) {
+  window.history.pushState({}, route, window.location.origin+route);
+}
+
 function get_paths() {
   return get_route().split("/").slice(1);
 };
@@ -93,6 +98,42 @@ function refresh_watched_poid() {
     lib.moonad.do_watch(watched_poid);
     last_watched_poid = watched_poid;
   };
+};
+
+// Formality
+// =========
+
+function remove_colors(msg) {
+  return msg.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
+};
+
+async function load_defs_of(name, defs = {}) {
+  //console.log("loading", name);
+  if (!defs[name]) {
+    var poid = await lib.moonad.api.get_orig({name});
+    //console.log("- poid: ", poid);
+    var post = await lib.moonad.api.get_post({poid});
+    //console.log("- post: ", post);
+    var auth = lib.moonad.lib.get_post_auth(post);
+    //console.log("- auth: ", auth);
+    var anam = await lib.moonad.api.get_name({addr: auth.toLowerCase()});
+    //console.log("- anam: ", anam);
+    var code = lib.moonad.lib.get_post_code(post, anam);
+    //console.log("- code: ", code);
+    var new_defs = fm.lang.parse(code).defs;
+    for (var def in new_defs) {
+      //console.log("- defn: " + def);
+      defs[def] = new_defs[def];
+    };
+    var deps = await lib.moonad.api.get_deps({name});
+    //console.log("- deps:", deps);
+    var deps_loads = [];
+    for (var dep of deps) {
+      deps_loads.push(load_defs_of(dep, defs));
+    };
+    await Promise.all(deps_loads);
+  };
+  return defs;
 };
 
 // Startup
@@ -124,8 +165,11 @@ lib.format_date = format_date;
 lib.register = register;
 lib.login = login;
 lib.get_route = get_route;
+lib.set_route = set_route;
 lib.get_paths = get_paths;
 lib.get_watched_poid = get_watched_poid;
 lib.refresh_watched_poid = refresh_watched_poid;
+lib.remove_colors = remove_colors;
+lib.load_defs_of = load_defs_of;
 
 module.exports = lib;

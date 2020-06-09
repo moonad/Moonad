@@ -31,6 +31,16 @@ module.exports = ({url = "http://moonad.org"}) => {
     return await query("get", {key});
   };
 
+  async function get_orig({name}) {
+    return await get({key: name+".orig"});
+  };
+
+  async function get_deps({name}) {
+    return lib.hex_to_string(await get({key: name+".deps"}))
+      .split(";")
+      .filter(s => s !== "");
+  };
+
   async function get_addr({name}) {
     return lib.hex_to_string(await get({key: name+".addr"}));
   };
@@ -56,6 +66,8 @@ module.exports = ({url = "http://moonad.org"}) => {
     self.post = {}; // Map Poid Post
     self.cite = {}; // Map Poid [Poid]
     self.name = {}; // Map Addr String
+    self.orig = {};
+    self.deps = {};
     self.ws = new WebSocket(url.replace("http","ws")+"/");
 
     self.api = {};
@@ -65,10 +77,32 @@ module.exports = ({url = "http://moonad.org"}) => {
     self.api.register = register;
     self.api.get = get;
     self.api.get_addr = get_addr;
-    self.api.get_name = get_name;
     self.api.get_cite = get_cite;
     self.api.get_refs = get_refs;
-    self.api.get_post = get_post;
+    self.api.get_orig = async function ({name}) {
+      if (!self.orig[name]) {
+        self.orig[name] = await get_orig({name});
+      }
+      return self.orig[name];
+    };
+    self.api.get_deps = async function ({name}) {
+      if (!self.deps[name]) {
+        self.deps[name] = await get_deps({name});
+      }
+      return self.deps[name];
+    };
+    self.api.get_name = async function ({addr}) {
+      if (!self.name[addr]) {
+        self.name[addr] = await get_name({addr});
+      };
+      return self.name[addr];
+    };
+    self.api.get_post = async function ({poid}) {
+      if (!self.post[poid]) {
+        self.post[poid] = await get_post({poid});
+      };
+      return self.post[poid];
+    };
     self.lib = lib;
 
     self.do_watch = (poid) => {

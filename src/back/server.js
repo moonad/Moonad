@@ -3,6 +3,7 @@
 // - PostId.cite // list of files that cite (directly reply to) this post
 // - PostId.refs // list of files that refer this post (via terms on body)
 // - FmTerm.orig // origin post where a FmTerm is defined
+// - FmTerm.deps // lists of terms that this term depends on
 // - EthAdr.name // name of an address
 // - UsrNam.addr // address of a name 
 // Post = {
@@ -116,8 +117,14 @@ async function new_post({cite, sign, head, body}) {
     // For each external reference, add post.poid to referenced_post.refs
     var external_refs = {};
     for (var def in defs) {
-      lib.get_term_refs(defs[def].type, external_refs);
-      lib.get_term_refs(defs[def].term, external_refs);
+      var def_deps = {};
+      lib.get_term_refs(defs[def].core.type, def_deps);
+      lib.get_term_refs(defs[def].core.term, def_deps);
+      await db.set(def+".deps", Buffer.from(lib.string_to_bytes(Object.keys(def_deps).join(";"))));
+      for (var dep in def_deps) {
+        //console.log("- " + def + " depends on " + dep);
+        external_refs[dep] = 1;
+      };
     };
     var external_refs_posts = {};
     for (var ref in external_refs) {

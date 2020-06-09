@@ -46,7 +46,7 @@ class Posts extends Component {
           "cursor": "pointer",
           "padding-bottom": "1px",
         },
-        onClick: () => this.props.on_click_reply(),
+        onClick: () => front.set_route("/w?cite="+poid),
       }, "write reply"),
     ]));
 
@@ -57,7 +57,6 @@ class Posts extends Component {
           poid: front.moonad.cite[poid][i],
           expand: false,
           moonad: front.moonad,
-          on_click_post: () => this.props.on_click_post(front.moonad.cite[poid][i]),
         }));
       };
     };

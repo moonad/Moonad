@@ -6,7 +6,7 @@ const front = require("./../front.js");
 
 const Code = require("./Code.js");
 
-const Post = ({poid, expand, on_click_post}) => {
+const Post = ({poid, expand}) => {
   const post = front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
     return h("div", {}, "Welcome to Moonad.");
@@ -22,7 +22,7 @@ const Post = ({poid, expand, on_click_post}) => {
           "color": "rgb(41, 42, 44)",
           "cursor": "pointer",
         },
-        onClick: () => on_click_post(poid),
+        onClick: () => front.set_route("/p/"+poid),
       }, post.head);
 
     var auth_addr = front.moonad.lib.get_post_auth(post).toLowerCase();
@@ -32,7 +32,7 @@ const Post = ({poid, expand, on_click_post}) => {
     for (var block of blocks) {
       switch (block.ctor) {
         case "code":
-          post_body.push(Code({code: block.code, on_click_post}));
+          post_body.push(Code({code: block.code}));
           break;
         case "text":
           post_body.push(block.text.replace(/^\n/,""));

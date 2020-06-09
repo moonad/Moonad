@@ -24,7 +24,7 @@ class Write extends Component {
       window.history.back();
     } catch (e) {
       console.log(e);
-      alert(e.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,""));
+      alert(front.remove_colors(e));
     }
   }
 

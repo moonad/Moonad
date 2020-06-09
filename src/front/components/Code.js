@@ -3,10 +3,12 @@
 const fm = require("formality-lang");
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
+const front = require("./../front.js");
 
-const Code = ({code, on_click_post}) => {
+const Code = ({code}) => {
   var tags = fm.lang.parse(code).tags;
   var elems = [];
+  var def_col = "rgb(20,120,32)";
   var txt_col = "rgb(102,172,182)";
   var nam_col = "rgb(160,162,166)";
   var nul_col = "rgb(112,146,188)";
@@ -19,6 +21,12 @@ const Code = ({code, on_click_post}) => {
     let decor = null;
     let cursr = null;
     switch (tag.ctor) {
+      case "def":
+        color = def_col;
+        click = () => front.set_route("/t/"+tag.text);
+        decor = "underline";
+        cursr = "pointer";
+        break;
       case "nam":
         color = nam_col;
         break;

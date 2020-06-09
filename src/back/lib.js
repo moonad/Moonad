@@ -170,6 +170,7 @@ function get_post_code(post, author) {
   var code = "";
   for (var block of blocks) {
     if (block.ctor === "code") {
+      code += code.length > 0 ? "\n\n" : "";
       code += block.code;
     }
   };
