@@ -56,6 +56,7 @@ async function new_post({cite, sign, head, body}) {
   if (!name) {
     throw "Post author not registered.";
   }
+  name = name.toString();
 
   // Validates if cited file exists
   if (!await db.get(post.cite+".post")) {
@@ -78,7 +79,7 @@ async function new_post({cite, sign, head, body}) {
   var code = lib.get_post_code(post, name);
   var defs = fm.lang.parse(code).defs;
   for (var def in defs) {
-    if (def.slice(0, name.length+1) !== name+".") {
+    if (def.slice(0, name.length+1) !== name+"." && def !== name) {
       throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
     }
     if (Defs[def]) {
@@ -193,7 +194,7 @@ async function startup() {
       var post = lib.bytes_to_post(await db.get(poid+".post"));
       Size += 1;
       if (poid !== "0x0000000000000000") {
-        var name = await db.get(lib.get_post_auth(post)+".name");
+        var name = (await db.get(lib.get_post_auth(post)+".name")).toString();
         var code = lib.get_post_code(post, name);
         console.log("Loaded: " + post_file);
         try {
