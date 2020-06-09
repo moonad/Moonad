@@ -82,9 +82,26 @@ class Term extends Component {
         };
         defs["_main_"] = {term, type: fm.synt.Hol("_main_", fm.synt.Nil())};
         try {
+          // Synthetizes
           fm.synt.typesynth("_main_", defs, fm.lang.stringify);
-          var result = fm.lang.stringify(fm.synt.normalize(term, defs));
-          argm_divs.push(h("pre", {}, "\nResult:\n" + result));
+          // Shows JS evaluation
+          var core_defs = {};
+          for (var def in defs) {
+            core_defs[def] = defs[def].core;
+          };
+          var js_code = fm.tojs.compile("_main_", core_defs, true);
+          var js_eval = eval(js_code);
+          argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._main_));
+          // Shows normal form
+          var norm = fm.lang.stringify(fm.synt.normalize(term, defs));
+          var text = "";
+          for (var i = 0; i < norm.length; ++i) {
+            text += norm[i];
+            if (i % 80 === 79) {
+              text += "\n";
+            }
+          }
+          argm_divs.push(h("pre", {}, "\nNorm:\n" + text));
         } catch (e) {
           var emsg = typeof e === "function"
             ? front.remove_colors(e().msg)
