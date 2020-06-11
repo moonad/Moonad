@@ -38,6 +38,16 @@ var TIMEOUT = 6000; // Number -- time before considering client disconnected
 var Defs = {}; // Map Name {term:Term,type:Term} -- global fm definitions
 var Peer = []; // Arr WebSocket -- peer of address
 var Size = 0;  // Number
+// Moderator addresses: can publish to any namespace
+var Mods = {
+  "0x11271CbE61c48Cf8C5347F481d6DF8e9C6c1Fc61": 1
+};
+// Posts that only moderators can post
+var Lock = {
+  "0x0000000000000000": 1,
+  "0x0000000000000003": 1,
+};
+
 
 async function new_post({cite, sign, head, body}) {
   var date = Date.now();
@@ -75,11 +85,16 @@ async function new_post({cite, sign, head, body}) {
     throw "Invalid post body.";
   };
 
+  // Validates post cite (authorization to reply)
+  if (Lock[poid] && !Mods[auth]) {
+    throw "Not authorized to post here.";
+  };
+
   // Validates post body (namespace-check)
   var code = lib.get_post_code(post, name);
   var defs = fm.lang.parse(code).defs;
   for (var def in defs) {
-    if (def.slice(0, name.length+1) !== name+"." && def !== name) {
+    if (!Mods[auth] && def.slice(0, name.length+1) !== name+"." && def !== name) {
       throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
     }
     if (Defs[def]) {
