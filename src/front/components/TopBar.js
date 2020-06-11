@@ -19,7 +19,8 @@ class TopBar extends Component {
     }, [h("img", {
       src: logo, 
       alt: "moonad-logo",
-      style: {"width": "29px", height: "23px" }
+      style: {"width": "29px", height: "23px" },
+      onClick: () => this.props.on_click_link("posts")
       })]
     );
     const head_rgt = h("div", {}, [

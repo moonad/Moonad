@@ -24,12 +24,11 @@ class Posts extends Component {
       on_click_post: this.props.on_click_post
     }));
 
-    // Reply separator
+    // Reply 
     body.push(h("div", {
       style: {
         "margin-top": "8px",
-        "margin-bottom": "8px",
-        "border-bottom": "1px solid rgb(240, 240, 240)",
+        "margin-bottom": "10px",
         "font-size": "16px",
         "display": "flex",
         "flex-flow": "row nowrap",
@@ -38,8 +37,11 @@ class Posts extends Component {
       },
     }, [
       h("span", {
-        style: {"font-size": "16px"},
-      }, "Replies:"),
+        style: {
+          "color": "#003F63", 
+          "font-size": "16px", 
+          "font-family": "IBMPlexMono-Regular"
+      }}, "Replies"),
       h("span", {
         style: {
           "font-size": "12px",
@@ -56,7 +58,7 @@ class Posts extends Component {
       for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
         body.push(Post({
           poid: front.moonad.cite[poid][i],
-          expand: true,
+          expand: poid !== "0x0000000000000000",
           moonad: front.moonad,
         }));
       };

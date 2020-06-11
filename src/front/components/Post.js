@@ -3,7 +3,6 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
-const Welcome = require("./Welcome.js")
 
 const Code = require("./Code.js");
 
@@ -19,8 +18,8 @@ const Post = ({poid, expand, top}) => {
         window.location.href = "https://github.com/moonad/formality";
       },
     }, "Formality");
-    return h("div", {}, [
-      h("h3", {}, "Moonad: a p2p academic journal, or a social network for code?"),
+    return h("div", {style: { "margin-top": "10px", "margin-bottom": "20px"}}, [
+      h("h3", {style: { "color": "#003F63", }}, "Moonad: a p2p academic journal, or a social network for code?"),
       h("br"),
       h("div", {}, [
         "Here you can post and share contents, like a social network. But your posts can ",
@@ -29,8 +28,7 @@ const Post = ({poid, expand, top}) => {
         "store. But it can also link citations and verify proofs, making it kinda like a ",
         "p2p academic journal. Whatever it is, we hope it improves your life. Gl, hf! <3 ",
       ]),
-      h("br"),
-    ]);
+      h("br")]);
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {
@@ -48,17 +46,17 @@ const Post = ({poid, expand, top}) => {
       }, "↩");
     const title_head = h("h3", {
         style: {
-          //"font-family": "IBMPlexMono-Light",
+          "font-family": "IBMPlexMono-Light",
           //"user-select": "none",
           //"font-size": expand ? "16px" : "14px",
           "display": "inline-block",
           "text-decoration": "underline",
-          //"color": "rgb(41, 42, 44)",
+          "color": "#2F3035",
           "cursor": "pointer",
         },
         onClick: () => front.set_route("/p/"+poid),
       }, post.head);
-    const title = h("div", {}, top ? [title_back," ",title_head] : title_head);
+    const title = h("div", {style: {"margin-top": "10px"}}, top ? [title_back," ",title_head] : title_head);
 
     var auth_addr = front.moonad.lib.get_post_auth(post).toLowerCase();
     var auth_name = front.moonad.name[auth_addr];
@@ -90,14 +88,22 @@ const Post = ({poid, expand, top}) => {
       }
     };
 
+    const separator = h("div", {
+      style: { 
+        "border-bottom": "1px dashed rgb(240,240,240)",
+        "margin-top": "5px"
+      }}, "");
+
     const body = !expand ? null : h("pre", {
         style: {
           "font-family": "IBMPlexMono-Light",
           "font-size": "12px",
-          "padding": "2px 0px",
+          "padding": "5px 0px 5px 0px",
           "color": "rgb(101,102,105)",
         }
-      }, post_body);
+      }, [post_body]);
+  
+    const replies_aux = front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0;
 
     const author = h("div", {
         style: {
@@ -105,24 +111,24 @@ const Post = ({poid, expand, top}) => {
           "font-size": "8px",
           //"font-style": "italic",
           "color": "rgb(161, 162, 168)",
-          "margin-top": "8px",
+          "margin-top": "3px",
           "padding-bottom": "4px",
-          "border-bottom": "1px dashed rgb(240,240,240)",
-          "margin-bottom": "12px",
         },
-      }, ""
-        //+ ((front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0) + " replies")
+      }, [""
         + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
-        + " at " + front.format_date(post.date)
-        + "."
-        );
+        + " · " + front.format_date(post.date)
+        + " · " + (replies_aux > 1 ? replies_aux+" replies" : replies_aux+" reply")
+      ]);
+    
+
 
     return h("div", {
       style: {
         //"border-bottom": "1px solid rgb(240, 240, 240)",
         //"padding-bottom": "16px",
-      }}, [title, body, author]);
+      }}, [title, author, body, separator]);
   }
 };
+
 
 module.exports = Post;
