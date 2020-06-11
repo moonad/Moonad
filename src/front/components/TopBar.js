@@ -1,6 +1,7 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
+const User_info = require("./User_info.js");
 
 class TopBar extends Component {
   constructor(props) {
@@ -53,7 +54,7 @@ class TopBar extends Component {
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
       },
-    }, [head_lft, head_rgt]);
+    }, [head_lft, head_rgt, h(User_info, {})]);
 
     return head;
   }
