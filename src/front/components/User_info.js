@@ -6,8 +6,9 @@ class User_info extends Component {
   
   constructor(props) {
     super(props);
+    this.show_pkey = false;
   }
-  
+
   render() {
     var eth_address = front.get_addr();
     eth_address = eth_address ? eth_address : "-";
@@ -15,52 +16,57 @@ class User_info extends Component {
     var eth_pkey = front.get_pkey();
     eth_pkey = eth_pkey ? eth_pkey : "-";
 
-    const eth_address_div =
-      h("div", {
+    // Address
+    const eth_address_div = h("div", {
         style: { "font-family": "IBMPlexMono-Medium", }},
-        "Ethereum Address"
-      )
-    const eth_address_info =
-      h("div", {
+        "Ethereum Address" );
+
+    const eth_address_info = h("span", {
         style: { "font-family": "IBMPlexMono-Light",}},
-        eth_address
-      )
-    const address_section = 
-      h("div", {
-        style: { "margin-top": "15px" }},
-        [ eth_address_div, eth_address_info]
-      )
-      
-    const eth_pkey_div =
-      h("div", {
+        eth_address );
+
+    const address_section = h("div", {
+        style: { "margin-top": "15px" }}, 
+        [ eth_address_div, eth_address_info ]);
+    
+    // Pkey
+    const eth_pkey_div = h("div", {
         style: { "font-family": "IBM Plex Mono", "font-weight": "500" }},
-        "Private key"
-      )
-    const eth_pkey_info =
-      h("div", {
+        "Private key");
+
+    const eth_pkey_info = h("span", {
         style: { "font-family": "IBMPlexMono-Light", }},
-        eth_pkey
-      )
-    const pkey_section = 
-      h("div", {
+        eth_pkey);
+
+    const pkey_button = h("span", {
+      style: {
+        "id": "user_pkey",
+        "cursor": "pointer",
+        "text-decoration": "underline",
+        "color": "rgb(101,102,105)",
+        "margin-left": "10px",
+      },
+      onClick: () => this.show_pkey = !this.show_pkey
+    }, this.show_pkey ? "hide" : "show");
+
+    const pkey_section = h("div", {
         style: { "margin-top": "15px", }},
-        [ eth_pkey_div, eth_pkey_info ]
-      )
-    // TODO: copy button
+        [ eth_pkey_div,
+          this.show_pkey ? eth_pkey_info : "* * * * * * * * *", 
+          pkey_button
+        ])
 
     return h("div", {
       style: {
         "descr": "user-info-container",
         "width": "300px",
-        "height": "200px",
-        "margin-top": "15px",
-        "margin-right": "20px",
+        "height": "300px",
+        "margin-top": "0px",
         "background": "white",
-        "z-index": "3",
+        "z-index": "10",
         "font-size": "10px",
         "word-wrap": "break-word",
-        "padding-right": "10px",
-        "padding-left": "10px",
+        "padding": "0px 10px 20px 10px",
         "border": "solid 1px #D6D6D6"
       }}, [
         address_section,
