@@ -19,7 +19,7 @@ class TopBar extends Component {
     }, [h("img", {
       src: logo, 
       alt: "moonad-logo",
-      style: {"width": "29px", height: "23px" },
+      style: {"width": "29px", "height": "23px" },
       onClick: () => this.props.on_click_link("posts")
       })]
     );
@@ -57,7 +57,7 @@ class TopBar extends Component {
         "background": "black",
         "padding": "5px 80px 5px 80px",
         "height": "32px",
-        "font-size": "16px",
+        "font-size": "14px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
