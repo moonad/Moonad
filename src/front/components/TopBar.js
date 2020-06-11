@@ -52,7 +52,7 @@ class TopBar extends Component {
         },
         onClick: () => this.display_user_info = !this.display_user_info,
       }, front.name),
-      this.display_user_info ? h(UserInfo) : h("span"),
+      this.display_user_info ? h(UserInfo, {eth_address: front.get_addr(), pkey: front.get_pkey()}) : h("span"),
     ]);
 
     const head = h("div", {

@@ -1,6 +1,5 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
-const front = require("../front.js");
 
 class User_info extends Component {
   
@@ -9,34 +8,28 @@ class User_info extends Component {
     this.show_pkey = false;
   }
 
+  set_title(title) {
+    return h("div", {
+      style: { "font-family": "IBMPlexMono-Medium"}},
+      title )
+  }
+
+  set_info(info) {
+    return h("span", {
+      style: { "font-family": "IBMPlexMono-Light",}},
+      info );
+  }
+
   render() {
-    var eth_address = front.get_addr();
+    var eth_address = this.props.eth_address;
     eth_address = eth_address ? eth_address : "-";
 
-    var eth_pkey = front.get_pkey();
+    var eth_pkey = this.props.pkey;
     eth_pkey = eth_pkey ? eth_pkey : "-";
-
-    // Address
-    const eth_address_text = h("div", {
-        style: { "font-family": "IBMPlexMono-Light", "font-weight": "bold"}}, // TODO: bold
-        "Ethereum Address" );
-
-    const eth_address_info = h("span", {
-        style: { "font-family": "IBMPlexMono-Light",}},
-        eth_address );
 
     const address_section = h("div", {
         style: { "margin-top": "15px" }}, 
-        [ eth_address_text, eth_address_info ]);
-    
-    // Pkey
-    const eth_pkey_span = h("div", {
-        style: { "font-family": "IBMPlexMono-Light", "font-weight": "bold"}}, // TODO: bold
-        "Private key");
-
-    const eth_pkey_info = h("span", {
-        style: { "font-family": "IBMPlexMono-Light", }},
-        eth_pkey);
+        [ this.set_title("Ethereum Address"), this.set_info(eth_address) ]);
 
     const pkey_button = h("span", {
       style: {
@@ -51,8 +44,8 @@ class User_info extends Component {
 
     const pkey_section = h("div", {
         style: { "margin-top": "15px", }},
-        [ eth_pkey_span,
-          this.show_pkey ? eth_pkey_info : "•••••••••••••••••••••", 
+        [ this.set_title("Private key"),
+          this.show_pkey ? this.set_info(eth_pkey) : "•••••••••••••••••••••", 
           pkey_button
         ])
 
