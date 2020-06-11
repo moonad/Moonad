@@ -9,28 +9,50 @@ const Code = require("./Code.js");
 const Post = ({poid, expand, top}) => {
   const post = front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
-    return h("div", {}, "Welcome to Moonad.");
+    const Formality = h("span", {
+      style: {
+        "text-decoration": "underline",
+        "cursor": "pointer",
+      },
+      onClick: () => {
+        window.location.href = "https://github.com/moonad/formality";
+      },
+    }, "Formality");
+    return h("div", {}, [
+      h("h3", {}, "Moonad: a p2p academic journal, or a social network for code?"),
+      h("br"),
+      h("div", {}, [
+        "Here you can post and share contents, like a social network. But your posts can ",
+        "contain code in ",Formality,", which merges programming and mathematics in a single ",
+        "syntax. Moonad can host code and run apps, making it kind of an open-source app ",
+        "store. But it can also link citations and verify proofs, making it kinda like a ",
+        "p2p academic journal. Whatever it is, we hope it improves your life. Gl, hf! <3 ",
+      ]),
+      h("br"),
+    ]);
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {
-    const title_back = h("span", {
+    const title_back = h("h3", {
         style: {
-          "font-family": "IBMPlexMono-Light",
-          "user-select": "none",
-          "font-size": expand ? "16px" : "14px",
+          //"font-family": "IBMPlexMono-Light",
+          //"user-select": "none",
+          //"font-size": expand ? "16px" : "14px",
+          "display": "inline-block",
           "text-decoration": "underline",
-          "color": "rgb(41, 42, 44)",
+          //"color": "rgb(41, 42, 44)",
           "cursor": "pointer",
         },
         onClick: () => front.set_route("/p/"+post.cite),
       }, "↩");
-    const title_head = h("span", {
+    const title_head = h("h3", {
         style: {
-          "font-family": "IBMPlexMono-Light",
-          "user-select": "none",
-          "font-size": expand ? "16px" : "14px",
+          //"font-family": "IBMPlexMono-Light",
+          //"user-select": "none",
+          //"font-size": expand ? "16px" : "14px",
+          "display": "inline-block",
           "text-decoration": "underline",
-          "color": "rgb(41, 42, 44)",
+          //"color": "rgb(41, 42, 44)",
           "cursor": "pointer",
         },
         onClick: () => front.set_route("/p/"+poid),
@@ -47,7 +69,22 @@ const Post = ({poid, expand, top}) => {
           post_body.push(Code({code: block.code}));
           break;
         case "text":
-          post_body.push(block.text.replace(/^\n/,""));
+          var text = block.text.replace(/^\n/,"");
+          var done = "";
+          var llen = 0;
+          for (var i = 0; i < text.length; ++i) {
+            if (text[i] === "\n") {
+              llen = 0;
+              done += "\n";
+            } else if (llen === 80) {
+              llen = 1;
+              done += "\n" + text[i];
+            } else {
+              llen += 1;
+              done += text[i];
+            }
+          };
+          post_body.push(done);
           break;
       }
     };
@@ -67,12 +104,16 @@ const Post = ({poid, expand, top}) => {
           "font-size": "8px",
           //"font-style": "italic",
           "color": "rgb(161, 162, 168)",
-          "padding-bottom": "8px",
+          "margin-top": "8px",
+          "padding-bottom": "4px",
+          "border-bottom": "1px dashed rgb(240,240,240)",
+          "margin-bottom": "12px",
         },
       }, ""
-        + ((front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0) + " replies")
-        + " | at " + front.format_date(post.date)
-        + " | by " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
+        //+ ((front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0) + " replies")
+        + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
+        + " at " + front.format_date(post.date)
+        + "."
         );
 
     return h("div", {

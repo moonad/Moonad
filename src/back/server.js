@@ -38,6 +38,16 @@ var TIMEOUT = 6000; // Number -- time before considering client disconnected
 var Defs = {}; // Map Name {term:Term,type:Term} -- global fm definitions
 var Peer = []; // Arr WebSocket -- peer of address
 var Size = 0;  // Number
+// Moderator addresses: can publish to any namespace
+var Mods = {
+  "0x11271CbE61c48Cf8C5347F481d6DF8e9C6c1Fc61": 1
+};
+// Posts that only moderators can post
+var Lock = {
+  "0x0000000000000000": 1,
+  "0x0000000000000003": 1,
+};
+
 
 async function new_post({cite, sign, head, body}) {
   var date = Date.now();
@@ -75,11 +85,16 @@ async function new_post({cite, sign, head, body}) {
     throw "Invalid post body.";
   };
 
+  // Validates post cite (authorization to reply)
+  if (Lock[poid] && !Mods[auth]) {
+    throw "Not authorized to post here.";
+  };
+
   // Validates post body (namespace-check)
   var code = lib.get_post_code(post, name);
   var defs = fm.lang.parse(code).defs;
   for (var def in defs) {
-    if (def.slice(0, name.length+1) !== name+"." && def !== name) {
+    if (!Mods[auth] && def.slice(0, name.length+1) !== name+"." && def !== name) {
       throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
     }
     if (Defs[def]) {
@@ -228,9 +243,24 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "..", "docs")));
 
 app.get("*", async (req, res, next) => {
-  //console.log(req.url);
   if (req.url === "/.websocket") {
     next();
+  } else if (req.url === "/a") {
+    var code = "";
+    var poix = 0;
+    var poid = (i) => "0x00000000" + ("00000000" + i.toString(16)).slice(-8);
+    var post = await db.get(poid(poix)+".post");
+    while (post) {
+      var post_post = lib.bytes_to_post(post);
+      var post_code = lib.get_post_code(post_post);
+      if (post_code) {
+        var post_auth = lib.get_post_auth(post_post);
+        code += "// Post by " + post_auth + " (" + (await db.get(post_auth+".name")) + "):\n\n";
+        code += post_code+"\n\n";
+      }
+      post = await db.get(poid(++poix)+".post");
+    };
+    res.set("Content-Type", "text/plain").send(code);
   } else {
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (fs.existsSync(path_of("docs", file))) {
