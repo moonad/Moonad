@@ -1,7 +1,7 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
-const User_info = require("./User_info.js");
+const UserInfo = require("./UserInfo.js");
 
 class TopBar extends Component {
   constructor(props) {
@@ -52,7 +52,7 @@ class TopBar extends Component {
         },
         onClick: () => this.display_user_info = !this.display_user_info,
       }, front.name),
-      this.display_user_info ? h(User_info) : h("span"),
+      this.display_user_info ? h(UserInfo) : h("span"),
     ]);
 
     const head = h("div", {

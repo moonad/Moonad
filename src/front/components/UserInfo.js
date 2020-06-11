@@ -1,6 +1,6 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
-const front = require("./../front.js");
+const front = require("../front.js");
 
 class User_info extends Component {
   
@@ -17,8 +17,8 @@ class User_info extends Component {
     eth_pkey = eth_pkey ? eth_pkey : "-";
 
     // Address
-    const eth_address_div = h("div", {
-        style: { "font-family": "IBMPlexMono-Medium", }},
+    const eth_address_text = h("div", {
+        style: { "font-family": "IBMPlexMono-Light", "font-weight": "bold"}}, // TODO: bold
         "Ethereum Address" );
 
     const eth_address_info = h("span", {
@@ -27,11 +27,11 @@ class User_info extends Component {
 
     const address_section = h("div", {
         style: { "margin-top": "15px" }}, 
-        [ eth_address_div, eth_address_info ]);
+        [ eth_address_text, eth_address_info ]);
     
     // Pkey
-    const eth_pkey_div = h("div", {
-        style: { "font-family": "IBMPlexMono-Medium"}},
+    const eth_pkey_span = h("div", {
+        style: { "font-family": "IBMPlexMono-Light", "font-weight": "bold"}}, // TODO: bold
         "Private key");
 
     const eth_pkey_info = h("span", {
@@ -51,8 +51,8 @@ class User_info extends Component {
 
     const pkey_section = h("div", {
         style: { "margin-top": "15px", }},
-        [ eth_pkey_div,
-          this.show_pkey ? eth_pkey_info : "* * * * * * * * *", 
+        [ eth_pkey_span,
+          this.show_pkey ? eth_pkey_info : "•••••••••••••••••••••", 
           pkey_button
         ])
 
