@@ -3,13 +3,14 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
+const Welcome = require("./Welcome.js")
 
 const Code = require("./Code.js");
 
 const Post = ({poid, expand, top}) => {
   const post = front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
-    return h("div", {}, "Welcome to Moonad.");
+    return h(Welcome);
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {

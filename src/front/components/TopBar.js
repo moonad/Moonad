@@ -2,17 +2,26 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 
+const logo = "98fa68c534f7e398f266ad94641b55ce.png"
+
 class TopBar extends Component {
   constructor(props) {
     super(props);
   }
   render() {
+
     const head_lft = h("div", {
       onClick: () => this.props.on_click_link("posts"),
       style: {
         "cursor": "pointer",
+        "color": "white"
       },
-    }, ["Moonad"]);
+    }, [h("img", {
+      src: logo, 
+      alt: "moonad-logo",
+      style: {"width": "29px", height: "23px" }
+      })]
+    );
     const head_rgt = h("div", {}, [
       //h("span", {
         //style: {
@@ -36,7 +45,7 @@ class TopBar extends Component {
         style: {
           "cursor": "pointer",
           "text-decoration": "underline",
-          "color": "rgb(101,102,105)",
+          "color": "white",
         },
         onClick: () => this.props.on_click_link("user"),
       }, front.name),
@@ -44,10 +53,9 @@ class TopBar extends Component {
 
     const head = h("div", {
       style: {
-        "background": "white",
-        "padding": "1px 6px",
-        "border-bottom": "2px solid rgb(240, 240, 240)",
-        "height": "26px",
+        "background": "black",
+        "padding": "5px 80px 5px 80px",
+        "height": "32px",
         "font-size": "16px",
         "display": "flex",
         "flex-flow": "row nowrap",
