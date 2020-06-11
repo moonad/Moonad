@@ -260,7 +260,7 @@ app.get("*", async (req, res, next) => {
       }
       post = await db.get(poid(++poix)+".post");
     };
-    res.send("<pre>"+code+"</pre>");
+    res.set("Content-Type", "text/plain").send(code);
   } else {
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (fs.existsSync(path_of("docs", file))) {
