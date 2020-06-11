@@ -36,6 +36,8 @@ const Code = ({code}) => {
       case "txt":
         if (tag.text === "Type") {
           color = typ_col;
+        } else if (tag.text === '"') {
+          color = str_col;
         } else {
           color = txt_col;
         }
@@ -48,7 +50,7 @@ const Code = ({code}) => {
         break;
       case "ref":
         color = ref_col;
-        click = () => {console.log("TODO")};
+        click = async () => front.set_route("/p/" + await front.moonad.api.get_orig({name: tag.text}));
         decor = "underline";
         cursr = "pointer";
         break;
@@ -62,7 +64,7 @@ const Code = ({code}) => {
       }
     }, tag.text));
   };
-  return h("div", {
+  return h("pre", {
     style: {
       "background": "rgb(247,248,250)",
       "padding": "4px",

@@ -1,4 +1,4 @@
-moonad.org
-==========
+Moonad: a p2p academic journal, or a social network for code?
+-------------------------------------------------------------
 
-A place to run .fmc apps.
+[http://moonad.org](http://moonad.org)

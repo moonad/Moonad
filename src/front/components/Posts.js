@@ -56,7 +56,7 @@ class Posts extends Component {
       for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
         body.push(Post({
           poid: front.moonad.cite[poid][i],
-          expand: poid !== "0x0000000000000000",
+          expand: true,
           moonad: front.moonad,
         }));
       };
