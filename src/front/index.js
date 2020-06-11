@@ -1,4 +1,6 @@
 require("./IBMPlexMono-Light.ttf");
+require("./IBMPlexMono-Medium.ttf");
+
 const logo = require("./moonad_logo.png").default;
 
 const {Component, render} = require("inferno");
