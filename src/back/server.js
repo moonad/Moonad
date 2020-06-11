@@ -243,9 +243,24 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "..", "docs")));
 
 app.get("*", async (req, res, next) => {
-  //console.log(req.url);
   if (req.url === "/.websocket") {
     next();
+  } else if (req.url === "/a") {
+    var code = "";
+    var poix = 0;
+    var poid = (i) => "0x00000000" + ("00000000" + i.toString(16)).slice(-8);
+    var post = await db.get(poid(poix)+".post");
+    while (post) {
+      var post_post = lib.bytes_to_post(post);
+      var post_code = lib.get_post_code(post_post);
+      if (post_code) {
+        var post_auth = lib.get_post_auth(post_post);
+        code += "// Post by " + post_auth + " (" + (await db.get(post_auth+".name")) + "):\n\n";
+        code += post_code+"\n\n";
+      }
+      post = await db.get(poid(++poix)+".post");
+    };
+    res.send("<pre>"+code+"</pre>");
   } else {
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (fs.existsSync(path_of("docs", file))) {

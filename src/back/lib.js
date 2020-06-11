@@ -139,12 +139,11 @@ function post_to_hex(post) {
 };
 
 // ...
-function get_post_blocks(post, author) {
+function get_post_blocks(post) {
   var blocks = [{ctor:"text", text:""}];
   var inside_code = false;
   for (var i = 0; i < post.body.length; ++i) {
     if (!inside_code
-      && author
       && (i === 0 || post.body[i-1] === "\n")
       && post.body[i] === "+") {
       inside_code = true;
@@ -167,8 +166,8 @@ function get_post_blocks(post, author) {
 };
 
 // Returns the code portions of a post
-function get_post_code(post, author) {
-  var blocks = get_post_blocks(post, author);
+function get_post_code(post) {
+  var blocks = get_post_blocks(post);
   var code = "";
   for (var block of blocks) {
     if (block.ctor === "code") {
