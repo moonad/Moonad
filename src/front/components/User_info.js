@@ -31,7 +31,7 @@ class User_info extends Component {
     
     // Pkey
     const eth_pkey_div = h("div", {
-        style: { "font-family": "IBM Plex Mono", "font-weight": "500" }},
+        style: { "font-family": "IBMPlexMono-Medium"}},
         "Private key");
 
     const eth_pkey_info = h("span", {
