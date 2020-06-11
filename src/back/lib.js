@@ -138,6 +138,7 @@ function post_to_hex(post) {
   return bytes_to_hex(post_to_bytes(post));
 };
 
+// ...
 function get_post_blocks(post, author) {
   var blocks = [{ctor:"text", text:""}];
   var inside_code = false;
