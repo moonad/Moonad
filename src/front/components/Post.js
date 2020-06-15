@@ -112,7 +112,7 @@ const Post = ({poid, expand, top}) => {
       }, ""
         //+ ((front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0) + " replies")
         + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
-        + " at " + front.format_date(post.date)
+        + ", " + front.format_date(post.date)
         + "."
         );
 
