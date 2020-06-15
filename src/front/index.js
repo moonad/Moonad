@@ -3,7 +3,7 @@ require("./fonts/IBMPlexMono-Light.ttf");
 require("./fonts/IBMPlexMono-SemiBold.ttf");
 require("./fonts/Roboto-Regular.ttf");
 
-const logo = require("./moonad_logo_white.png").default;
+require("./moonad_logo.png").default;
 
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;

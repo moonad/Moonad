@@ -2,7 +2,7 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 
-const logo = "98fa68c534f7e398f266ad94641b55ce.png"
+// const logo = "98fa68c534f7e398f266ad94641b55ce.png"
 
 class TopBar extends Component {
   constructor(props) {
@@ -14,14 +14,16 @@ class TopBar extends Component {
       onClick: () => this.props.on_click_link("posts"),
       style: {
         "cursor": "pointer",
-        "color": "white"
+        "color": "white",
+        "width": "29px", 
+        "height": "23px"
       },
-    }, [h("img", {
-      src: logo, 
+    }, h("img", {
+      src: "237db229f1e6a224797029452b2c75f0.png", 
       alt: "moonad-logo",
       style: {"width": "29px", "height": "23px" },
       onClick: () => this.props.on_click_link("posts")
-      })]
+      })
     );
     const head_rgt = h("div", {}, [
       //h("span", {
@@ -46,7 +48,7 @@ class TopBar extends Component {
         style: {
           "cursor": "pointer",
           "text-decoration": "underline",
-          "color": "white",
+          "color": "black",
         },
         onClick: () => this.props.on_click_link("user"),
       }, front.name),
@@ -54,13 +56,15 @@ class TopBar extends Component {
 
     const head = h("div", {
       style: {
-        "background": "black",
+        "background": "white",
+        "border-bottom": "1px solid #AEAEAE",
         "padding": "5px 80px 5px 80px",
-        "height": "32px",
+        "height": "34px",
         "font-size": "14px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
+        "align-items": "flex-end"
       },
     }, [head_lft, head_rgt]);
 
