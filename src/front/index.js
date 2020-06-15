@@ -1,3 +1,4 @@
+require("./IBMPlexMono-Medium.ttf");
 require("./fonts/IBMPlexMono-Regular.ttf");
 require("./fonts/IBMPlexMono-Light.ttf");
 require("./fonts/IBMPlexMono-SemiBold.ttf");

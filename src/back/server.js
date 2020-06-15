@@ -86,8 +86,8 @@ async function new_post({cite, sign, head, body}) {
   };
 
   // Validates post cite (authorization to reply)
-  if (Lock[poid] && !Mods[auth]) {
-    throw "Not authorized to post here.";
+  if (Lock[cite] && !Mods[auth]) {
+    throw "Not authorized to reply to this thread.";
   };
 
   // Validates post body (namespace-check)
