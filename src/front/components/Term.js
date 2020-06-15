@@ -18,7 +18,7 @@ class Term extends Component {
   }
   async componentDidMount() {
     this.poid = await front.moonad.api.get_orig({name: this.props.name});
-    this.defs = await front.load_defs_of(this.props.name);
+    this.defs = await front.load_core_defs_of(this.props.name);
   }
   render() {
     const name = this.props.name;
@@ -34,15 +34,9 @@ class Term extends Component {
         && type.func.ctor === "Ref"
         && type.func.name === "App.V0") {
 
-        // Type-checks, compiles and initializes application
+        // Compiles and initializes application
         if (!this.app) {
-          fm.synt.typesynth(name, defs, fm.lang.stringify);
-          var core_defs = {};
-          for (var def in defs) {
-            core_defs[def] = defs[def].core;
-          };
-          var js_code = fm.tojs.compile(name, core_defs, true);
-          console.log(js_code);
+          var js_code = fm.tojs.compile(name, defs, true);
           this.app = eval(js_code);
           this.app = this.app[name];
         }
@@ -113,18 +107,13 @@ class Term extends Component {
           for (let i = 0; i < argm_term.length; ++i) {
             term = fm.synt.App(argm_eras[i], term, argm_term[i]);
           };
-          defs["_main_"] = {term, type: fm.synt.Hol("_main_", fm.synt.Nil())};
+          defs["_run_"] = {term, type: fm.synt.Hol("_run_", fm.synt.Nil())};
+          defs["_run_"] = fm.synt.typesynth("_run_", defs, fm.lang.stringify);
           try {
-            // Synthetizes
-            fm.synt.typesynth("_main_", defs, fm.lang.stringify);
             // Shows JS evaluation
-            var core_defs = {};
-            for (var def in defs) {
-              core_defs[def] = defs[def].core;
-            };
-            var js_code = fm.tojs.compile("_main_", core_defs, true);
+            var js_code = fm.tojs.compile("_run_", defs, true);
             var js_eval = eval(js_code);
-            argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._main_));
+            argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._run_));
             argm_divs.push(h("pre", {}, "\nNorm:"));
             argm_divs.push(h("pre", {
               style: {
