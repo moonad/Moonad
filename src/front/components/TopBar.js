@@ -60,6 +60,7 @@ class TopBar extends Component {
           "cursor": "pointer",
           "text-decoration": "underline",
           "color": "black",
+          "padding-top": "5px"
         },
         onClick: () => this.display_user_info = !this.display_user_info,
       }, front.name),
@@ -76,7 +77,7 @@ class TopBar extends Component {
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
-        "align-items": "flex-end"
+        // "align-items": "flex-end"
       },
     }, [head_lft, head_rgt]);
 

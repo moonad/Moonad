@@ -117,7 +117,6 @@ const Post = ({poid, expand, top}) => {
       }, [""
         + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         + " · " + front.format_date(post.date)
-        + " · " + (replies_aux > 1 ? replies_aux+" replies" : replies_aux+" reply")
       ]);
     
 
