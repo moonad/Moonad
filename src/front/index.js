@@ -3,6 +3,8 @@ require("./fonts/IBMPlexMono-Regular.ttf");
 require("./fonts/IBMPlexMono-Light.ttf");
 require("./fonts/IBMPlexMono-SemiBold.ttf");
 require("./fonts/Roboto-Regular.ttf");
+require("./fonts/OpenSans-Light.ttf");
+require("./fonts/OpenSans-Regular.ttf");
 
 require("./moonad_logo.png").default;
 

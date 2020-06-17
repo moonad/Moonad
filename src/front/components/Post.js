@@ -34,29 +34,34 @@ const Post = ({poid, expand, top}) => {
   } else {
     const title_back = h("h3", {
         style: {
-          //"font-family": "IBMPlexMono-Light",
           //"user-select": "none",
           //"font-size": expand ? "16px" : "14px",
           "display": "inline-block",
-          "text-decoration": "underline",
           //"color": "rgb(41, 42, 44)",
           "cursor": "pointer",
+          // "text-decoration": "underline",
         },
         onClick: () => front.set_route("/p/"+post.cite),
       }, "↩");
-    const title_head = h("h3", {
+
+    const title_head = h("p", {
         style: {
-          "font-family": "IBMPlexMono-Light",
+          "font-size": "15px",
           //"user-select": "none",
           //"font-size": expand ? "16px" : "14px",
           "display": "inline-block",
-          "text-decoration": "underline",
-          "color": "#2F3035",
           "cursor": "pointer",
+          // "text-decoration": "underline",
         },
         onClick: () => front.set_route("/p/"+poid),
       }, post.head);
-    const title = h("div", {style: {"margin-top": "10px"}}, top ? [title_back," ",title_head] : title_head);
+
+    const title = h("div", {
+      style: {
+        "margin-top": "10px", 
+        "color": "rgb(74, 74, 74)",
+        "font-family": "IBMPlexMono-Light",
+      }}, top ? [title_back," ",title_head] : title_head);
 
     var auth_addr = front.moonad.lib.get_post_auth(post).toLowerCase();
     var auth_name = front.moonad.name[auth_addr];
@@ -91,7 +96,7 @@ const Post = ({poid, expand, top}) => {
     const separator = h("div", {
       style: { 
         "border-bottom": "1px dashed rgb(240,240,240)",
-        "margin-top": "5px"
+        "margin-top": "8px"
       }}, "");
 
     const body = !expand ? null : h("pre", {

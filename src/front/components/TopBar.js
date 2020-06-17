@@ -37,24 +37,6 @@ class TopBar extends Component {
       },
       onMouseLeave: () => this.display_user_info = false
     }, [
-      //h("span", {
-        //style: {
-          //"cursor": "pointer",
-          //"text-decoration": "underline",
-          //"color": "rgb(101,102,105)",
-        //},
-        //onClick: () => this.props.on_click_link("check"),
-      //}, "check"),
-      //h("span", {}, " "),
-      //h("span", {
-        //style: {
-          //"cursor": "pointer",
-          //"text-decoration": "underline",
-          //"color": "rgb(101,102,105)",
-        //},
-        //onClick: () => this.props.on_click_link("write"),
-      //}, "write"),
-      //h("span", {}, " "),
       h("div", {
         style: {
           "cursor": "pointer",
@@ -74,11 +56,11 @@ class TopBar extends Component {
         "box-shadow": "0px 1px 5px 0px rgb(219,216,219)",
         "padding": "5px 60px",
         "height": "38px",
-        "font-size": "14px",
+        "font-size": "12px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
-        // "align-items": "flex-end"
+        "font-family": "OpenSans-Regular"
       },
     }, [head_lft, head_rgt]);
 

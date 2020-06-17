@@ -68,8 +68,8 @@ class Posts extends Component {
       h("span", {
         style: {
           "color": "#003F63", 
-          "font-size": "16px", 
-          "font-family": "IBMPlexMono-Regular"
+          "font-size": "16px",
+          "font-family": "OpenSans-Regular",
       }}, "Replies"),
       h("span", {
         style: {
@@ -77,9 +77,10 @@ class Posts extends Component {
           "text-decoration": "underline",
           "cursor": "pointer",
           "padding-bottom": "1px",
+          "font-family": "OpenSans-Light",
         },
         onClick: () => front.set_route("/w?cite="+poid),
-      }, "write reply"),
+      }, "reply"),
     ]));
 
     // Post replies
