@@ -20,6 +20,30 @@ class Posts extends Component {
     var post = front.moonad.post[poid];
     var body = [];
 
+    const link_style = {
+      "padding-left": "10px",
+      "color": "rgb(100, 100, 100)",
+      "margin-top": "8px",
+      "text-decoration": "none",
+    }
+
+    const MoonadInfo = h("div", {
+      style: {
+        "font-size": "10px",
+        "border-left": "1px solid rgb(187, 199, 207)",
+        "width": "140px",
+        "height": "70px",
+        "z-index": "3",
+        "margin-left": "-100px",
+        "margin-top": "20px",
+        "display": "flex",
+        "flex-direction": "column"
+      }}, [
+        h("a", {style: link_style, href: "https://github.com/moonad/Moonad", target: "_blank"}, "Moonad"),
+        h("a", {style: link_style, href: "https://github.com/moonad/Formality", target: "_blank"}, "Formality"),
+        h("a", {style: link_style, href: "https://t.me/formality_lang", target: "_blank"}, "Come talk to us")
+      ] );
+
     // Main post
     body.push(Post({
       top: true,
@@ -72,20 +96,25 @@ class Posts extends Component {
       };
     };
 
+    const show_info = poid === "0x0000000000000000" ? MoonadInfo : h("span");
+
     return h("div", {
       style: {
         "min-height": "calc(100% - 30px)",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "center",
+        "margin-top": "5px"
       },
-    }, h("div", {
+    }, [
+      show_info,
+      h("div", {
       style: {
         "background": "white",
         "padding": "2px 6px",
         "width": "586px",
       }
-    }, body));
+    }, body)]);
   }
 };
 

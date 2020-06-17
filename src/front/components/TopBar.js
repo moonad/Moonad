@@ -70,9 +70,10 @@ class TopBar extends Component {
     const head = h("div", {
       style: {
         "background": "white",
-        "border-bottom": "1px solid #AEAEAE",
-        "padding": "5px 80px 5px 80px",
-        "height": "34px",
+        "border-top": "2px solid rgb(59,186,218)",
+        "box-shadow": "0px 1px 5px 0px rgb(219,216,219)",
+        "padding": "5px 60px",
+        "height": "38px",
         "font-size": "14px",
         "display": "flex",
         "flex-flow": "row nowrap",
