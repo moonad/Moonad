@@ -8,8 +8,8 @@ class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.head = "Title...";
-    this.body = "Contents...";
+    this.head = "Title";
+    this.body = "Type your code and/or text here";
     this.cleared = {};
   }
 
@@ -43,6 +43,14 @@ class Write extends Component {
 
   render() {
 
+    const title = h("div", {
+      style: {"margin": "20px 60px 10px 60px",}
+    }, [ 
+      h("h3", { 
+        style: { "color": "rgb(0, 63, 99)"}
+      }, "Replying to "+ this.cite)
+    ]);
+
     const head = h("pre", {
       contentEditable: true,
       style: {
@@ -51,10 +59,9 @@ class Write extends Component {
         "color": "rgb(101,102,105)",
         "outline": "none",
         "width": "100%",
-        "height": "20px",
-        "padding": "2px 4px",
-        "border-bottom": "1px solid rgb(240,240,240)",
-        "background": "white",
+        "height": "30px",
+        "padding": "8px 10px 5px 10px",
+        "border-bottom": "1px solid rgb(187,199,207)"
       },
       onClick: (e) => this.click("head", e.target),
       onInput: (e) => this.refresh("head", e.target),
@@ -69,26 +76,19 @@ class Write extends Component {
         "outline": "none",
         "width": "100%",
         "height": "360px",
-        "padding": "2px 4px",
+        "padding": "8px 10px",
         "overflow-y": "scroll",
-        "border-bottom": "1px solid rgb(240,240,240)",
-        "background": "white",
+        // "border-bottom": "1px solid rgb(240,240,240)",
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
     }, [this.body]);
 
-    const send = h("pre", {
+    const send = h("span", {
       style: {
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "12px",
-        "color": "rgb(101,102,105)",
         "outline": "none",
-        "width": "100%",
         "height": "20px",
         "padding": "2px 4px",
-        "background": "rgb(241,242,246)",
-        "border-bottom": "1px solid rgb(240,240,240)",
         "text-decoration": "underline",
         "cursor": "pointer",
       },
@@ -98,7 +98,21 @@ class Write extends Component {
         var body = this.body.replace(/\n{3,}/g, "\n\n");
         this.post({cite, head, body});
       },
-    }, ["Submit reply to " + this.cite + "."]);
+    }, "Submit");
+
+    const buttons = h("div", {
+      style: {
+        "font-family": "IBMPlexMono-Light",
+        "font-size": "12px",
+        "color": "rgb(101,102,105)",
+        "height": "20px",
+        "display": "flex",
+        "flex-direction": "row",
+        "justify-content": "flex-end",
+        "margin-bottom": "20px",
+        "margin-right": "60px"
+      }
+    }, [send])
 
     const repl = h("pre", { 
       style: {
@@ -108,16 +122,28 @@ class Write extends Component {
         "border-top": "1px solid rgb(201,202,204)",
         "padding": "4px 4px",
       },
-    }, ["*type-checker console and REPL here*"]);
+    }, ["*type-checker console and REPL will be here soon*"]);
+
+    const container_editable = h("div", {
+      style: {
+        "margin": "20px 60px",
+        "border-radius": "5px 5px 5px 5px",
+        "border": "1px solid rgb(187, 199, 207)",
+        "border-collapse": "separate",
+        "display": "flex",
+        "flex-direction": "column",
+        "background": "white"
+      }
+    }, [head, body]);
 
     return h("div", {
       style: {
         "height": "calc(100% - 20px)",
       },
     }, [
-      head,
-      body,
-      send,
+      title,
+      container_editable,
+      buttons,
       repl,
     ]);
   }
