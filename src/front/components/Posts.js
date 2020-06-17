@@ -41,7 +41,7 @@ class Posts extends Component {
       }}, [
         h("a", {style: link_style, href: "https://github.com/moonad/Moonad", target: "_blank"}, "Moonad"),
         h("a", {style: link_style, href: "https://github.com/moonad/Formality", target: "_blank"}, "Formality"),
-        h("a", {style: link_style, href: "https://t.me/formality_lang", target: "_blank"}, "Come talk to us")
+        h("a", {style: link_style, href: "https://t.me/formality_lang", target: "_blank"}, "Chat with us")
       ] );
 
     // Main post
