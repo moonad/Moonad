@@ -11,6 +11,7 @@ class Write extends Component {
     this.head = "Title";
     this.body = "Type your code and/or text here";
     this.cleared = {};
+    this.display_info = false;
   }
 
   async post({cite, head, body}) {
@@ -43,12 +44,59 @@ class Write extends Component {
 
   render() {
 
-    const title = h("div", {
-      style: {"margin": "20px 60px 10px 60px",}
+    const info_view = h("div", {
+      style: {
+        "width": "300px",
+        "height": "100px",
+        "margin-top": "3px",
+        "background": "white",
+        "z-index": "8",
+        "font-size": "10px",
+        "padding": "10px",
+        "border": "solid 1px #D6D6D6",
+      }, onMouseLeave: () => this.display_info = false
+     },[
+        h("p", {}, ["Style your code using '+':", h("br")]),
+        h("div", {style: {"color": "rgb(150, 150, 150)"}}, [
+          h("p", {}, "+ your_name.fst_function"),,
+          h("p", {}, "+ // next function on the same block of code"),
+          h("p", {}, "+ your_name.snd_function")
+        ])
+     ]);
+    
+    const info_button = h("div", {
+      style: {
+        "display": "flex", 
+        "flex-direction": "column",
+        "align-items": "flex-end",
+        "margin-right": "5px",
+        "margin-top": "3px",
+      },
+    } , [
+      h("div", {
+        style: {
+          "text-decoration": "underline",
+          "cursor": "pointer",
+          "color": "rgb(101,102,105)",
+        },
+        onClick: () => this.display_info = !this.display_info
+      }, "?"),
+      this.display_info ? info_view : h("span")
+    ]);
+
+    const title_div = h("div", {
+      style: {
+        "margin": "20px 60px 10px 60px",
+        "display": "flex",
+        "flex-flow": "row nowrap",
+        "justify-content": "space-between",
+        "height": "20px",
+      }
     }, [ 
-      h("h3", { 
-        style: { "color": "rgb(0, 63, 99)"}
-      }, "Replying to "+ this.cite)
+      h("div", { 
+        style: { "color": "rgb(0, 63, 99)", "font-size": "15px"}
+      }, "Replying to "+ this.cite),
+      info_button
     ]);
 
     const head = h("pre", {
@@ -78,7 +126,6 @@ class Write extends Component {
         "height": "360px",
         "padding": "8px 10px",
         "overflow-y": "scroll",
-        // "border-bottom": "1px solid rgb(240,240,240)",
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
@@ -112,7 +159,7 @@ class Write extends Component {
         "margin-bottom": "20px",
         "margin-right": "60px"
       }
-    }, [send])
+    }, [send]) // TODO: add preview
 
     const repl = h("pre", { 
       style: {
@@ -141,7 +188,7 @@ class Write extends Component {
         "height": "calc(100% - 20px)",
       },
     }, [
-      title,
+      title_div,
       container_editable,
       buttons,
       repl,
