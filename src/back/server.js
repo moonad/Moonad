@@ -224,6 +224,16 @@ async function startup() {
         }
       }
     };
+    for (var def in Defs) {
+      try {
+        var term = Defs[def].term;
+        var type = Defs[def].type;
+        fm.synt.typesynth(def, Defs, fm.lang.stringify);
+        console.log("- Checked " + def);
+      } catch (e) {
+        throw fm.lang.stringify_err(e(), code);
+      }
+    };
   };
   app.listen(80);
   //setInterval(() => {
@@ -245,6 +255,15 @@ app.use(express.static(path.join(__dirname, "..", "..", "docs")));
 app.get("*", async (req, res, next) => {
   if (req.url === "/.websocket") {
     next();
+  } else if (req.url.slice(0,3) === "/c/") {
+    var name = req.url.slice(3);
+    if (Defs[name] && Defs[name].core) {
+      res.set("Content-Type", "text/plain").send(name + ": "
+        + fm.synt.stringify(Defs[name].core.type) + "\n  "
+        + fm.synt.stringify(Defs[name].core.term));
+    } else {
+      res.set("Content-Type", "text/plain").send("-term_not_found");
+    };
   } else if (req.url === "/a") {
     var code = "";
     var poix = 0;

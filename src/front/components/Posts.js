@@ -6,6 +6,11 @@ const front = require("./../front.js");
 
 const Post = require("./Post.js");
 
+// Since we don't have a hide feature yet, this is hard-coded for now
+const hide = {
+  "0x0000000000000040": true
+};
+
 class Posts extends Component {
   constructor(props) {
     super(props);
@@ -56,11 +61,14 @@ class Posts extends Component {
     // Post replies
     if (front.moonad.cite[poid]) {
       for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
-        body.push(Post({
-          poid: front.moonad.cite[poid][i],
-          expand: poid !== "0x0000000000000000",
-          moonad: front.moonad,
-        }));
+        var reply_poid = front.moonad.cite[poid][i];
+        if (!hide[reply_poid]) {
+          body.push(Post({
+            poid: reply_poid,
+            expand: true,
+            moonad: front.moonad,
+          }));
+        };
       };
     };
 
