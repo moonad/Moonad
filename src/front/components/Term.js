@@ -52,7 +52,7 @@ class Term extends Component {
         var app_el = null;
         switch (rendered._) {
           case "App.Render.txt":
-            app_el = rendered.str;
+            app_el = rendered.text;
             break;
         }
 
