@@ -94,7 +94,6 @@ var last_watched_poid = null;
 function refresh_watched_poid() {
   var watched_poid = get_watched_poid();
   if (watched_poid !== null && last_watched_poid !== watched_poid) {
-    //console.log("watch:", watched_poid);
     lib.moonad.do_watch(watched_poid);
     last_watched_poid = watched_poid;
   };

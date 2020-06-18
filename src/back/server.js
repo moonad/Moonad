@@ -16,6 +16,9 @@
 // Post header is up to 1024 bits, 96 are unused.
 // Post titles hold up to 80 chars.
 
+// Uncomment to rebuild db
+var REMAKE = false;
+
 var express = require("express");
 var app = express();
 var ws = require('express-ws')(app);
@@ -40,7 +43,8 @@ var Peer = []; // Arr WebSocket -- peer of address
 var Size = 0;  // Number
 // Moderator addresses: can publish to any namespace
 var Mods = {
-  "0x11271cbe61c48cf8c5347f481d6df8e9c6c1fc61": 1
+  "0x0000000000000000000000000000000000000000": 1,
+  "0x11271cbe61c48cf8c5347f481d6df8e9c6c1fc61": 1,
 };
 // Posts that only moderators can post
 var Lock = {
@@ -48,12 +52,11 @@ var Lock = {
   "0x0000000000000003": 1,
 };
 
-
 async function new_post(post/*{cite, sign, head, body}*/) {
   var date = Date.now();
   var poid = lib.hex(64, "0x"+Size.toString(16));
   try {
-    var auth = lib.get_post_auth(post);
+    var auth = post.auth || lib.get_post_auth(post);
   } catch (e) {
     throw "Invalid signature.";
   }
@@ -61,7 +64,12 @@ async function new_post(post/*{cite, sign, head, body}*/) {
   var post = {date, cite, auth, head, body};
 
   // Validates name
-  var name = await db.get(auth+".name");
+  
+  if (auth !== "0x0000000000000000000000000000000000000000") {
+    var name = await db.get(auth+".name");
+  } else {
+    var name = "ROOT";
+  }
   if (!name) {
     throw "Post author not registered.";
   }
@@ -122,7 +130,9 @@ async function new_post(post/*{cite, sign, head, body}*/) {
     Size += 1;
 
     // Adds poid to cited_post.cite
-    await db.con(cite+".cite", Buffer.from(lib.hex_to_bytes(poid)));
+    if (poid !== "0x0000000000000000") {
+      await db.con(cite+".cite", Buffer.from(lib.hex_to_bytes(poid)));
+    };
 
     // For each defined term, set def.orig to poid
     for (var def in defs) {
@@ -231,6 +241,43 @@ async function startup() {
       }
     };
   };
+
+  if (REMAKE) {
+    (async () => {
+      console.log("Remaking...");
+      var files = fs.readdirSync("db");
+      files.sort((a,b) => a > b ? 1 : 0);
+      var posts = [];
+      for (var file of files) {
+        var ext = file.slice(-5);
+        if (ext === ".post") {
+          posts.push(lib.bytes_to_post(await db.get(file)));
+        }
+      }
+      for (var file of files) {
+        var ext = file.slice(-5);
+        if ( ext === ".orig"
+          || ext === ".deps"
+          || ext === ".cite"
+          || ext === ".refs") {
+          fs.unlinkSync("db/"+file);
+        }
+      }
+      Defs = {};
+      Size = 0;
+      for (var post of posts) {
+        console.log("remaking", post);
+        try {
+          await new_post(post);
+        } catch (e) {
+          console.log(e);
+          process.exit();
+        }
+      }
+      process.exit();
+    })();
+  };
+
   app.listen(80);
   console.log("Server open!");
 };
@@ -284,6 +331,9 @@ app.get("*", async (req, res, next) => {
 // Makes a post
 app.post("/post", async (req, res) => {
   var post = req.query;
+  if (req.query && req.query.auth) {
+    delete req.query.auth;
+  }
   try {
     res.send(await new_post(post));
   } catch (e) {

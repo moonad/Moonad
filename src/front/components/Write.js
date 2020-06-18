@@ -94,9 +94,13 @@ class Write extends Component {
       },
       onClick: () => {
         var cite = this.cite;
-        var head = this.head.replace(/\n/g,"");
-        var body = this.body.replace(/\n{3,}/g, "\n\n");
-        this.post({cite, head, body});
+        if (this.head === "Title..." || this.body === "Contents...") {
+          alert("Write something first!");
+        } else {
+          var head = this.head.replace(/\n/g,"");
+          var body = this.body.replace(/\n{3,}/g, "\n\n");
+          this.post({cite, head, body});
+        };
       },
     }, ["Submit reply to " + this.cite + "."]);
 
