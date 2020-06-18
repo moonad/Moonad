@@ -47,7 +47,7 @@ class Write extends Component {
     const info_view = h("div", {
       style: {
         "width": "300px",
-        "height": "100px",
+        "height": "250px",
         "margin-top": "3px",
         "background": "white",
         "z-index": "8",
@@ -58,9 +58,17 @@ class Write extends Component {
      },[
         h("p", {}, ["Style your code using '+':", h("br")]),
         h("div", {style: {"color": "rgb(150, 150, 150)"}}, [
-          h("p", {}, "+ your_name.fst_function"),,
+          h("p", {}, "+ your_name.foo: Type"),
+          h("p", {}, "code"),
           h("p", {}, "+ // next function on the same block of code"),
-          h("p", {}, "+ your_name.snd_function")
+          h("p", {}, "your_name.bar: Type"),
+          h("p", {}, "code"),
+          h("br"),
+          h("p", {}, "+ your_name.foo: Type"),
+          h("p", {}, "code"),
+          h("p", {}, "// next function in another block of code"),
+          h("p", {}, "+ your_name.bar: Type"),
+          h("p", {}, "code")
         ])
      ]);
     
