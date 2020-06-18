@@ -1,8 +1,8 @@
 {
-  "name": "moonad.org",
+  "name": "moonad",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/back/client.js",
   "scripts": {
     "build": "webpack",
     "test": "mocha"
