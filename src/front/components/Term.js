@@ -38,6 +38,7 @@ class Term extends Component {
   }
   start_app(name) {
     var js_code = fm.tojs.compile(name, this.defs, true);
+    console.log(js_code);
     this.app = eval(js_code);
     this.app = this.app[name];
 
@@ -282,6 +283,7 @@ class Term extends Component {
       try {
         // Shows JS evaluation
         var js_code = fm.tojs.compile("_run_", defs, true);
+        console.log(js_code);
         var js_eval = eval(js_code);
         argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._run_));
         argm_divs.push(h("pre", {}, "\nNorm:"));
