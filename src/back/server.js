@@ -9,12 +9,12 @@
 // Post = {
 //   date: Word64,   // date it was posted
 //   cite: Word64,   // post it cites (directly replies to)
-//   sign: Word520,  // signature
-//   head: Word376,  // post title or commands in case of apps & games
+//   auth: Word160,  // signature
+//   head: Word640,  // post title or commands in case of apps & games
 //   body: Bits,     // text and code
 // }
-// Post header is 1024 bits. Allows for 47-char titles max...
-// 012345678901234567890123456789012345678901234567
+// Post header is up to 1024 bits, 96 are unused.
+// Post titles hold up to 80 chars.
 
 var express = require("express");
 var app = express();
@@ -49,17 +49,16 @@ var Lock = {
 };
 
 
-async function new_post({cite, sign, head, body}) {
+async function new_post(post/*{cite, sign, head, body}*/) {
   var date = Date.now();
   var poid = lib.hex(64, "0x"+Size.toString(16));
-  var post = {date, cite, sign, head, body, poid};
-
-  // Validates signature
   try {
     var auth = lib.get_post_auth(post);
   } catch (e) {
     throw "Invalid signature.";
   }
+  var {cite, head, body} = post;
+  var post = {date, cite, auth, head, body};
 
   // Validates name
   var name = await db.get(auth+".name");
@@ -117,20 +116,20 @@ async function new_post({cite, sign, head, body}) {
   // Saves it
   try {
     // Saves new post
-    await db.set(post.poid+".post", Buffer.from(lib.post_to_bytes(post)));
-    await db.set(post.poid+".cite", Buffer.from([]));
-    await db.set(post.poid+".refs", Buffer.from([]));
+    await db.set(poid+".post", Buffer.from(lib.post_to_bytes(post)));
+    await db.set(poid+".cite", Buffer.from([]));
+    await db.set(poid+".refs", Buffer.from([]));
     Size += 1;
 
-    // Adds post.poid to cited_post.cite
-    await db.con(cite+".cite", Buffer.from(lib.hex_to_bytes(post.poid)));
+    // Adds poid to cited_post.cite
+    await db.con(cite+".cite", Buffer.from(lib.hex_to_bytes(poid)));
 
-    // For each defined term, set def.orig to post.poid
+    // For each defined term, set def.orig to poid
     for (var def in defs) {
-      await db.set(def+".orig", Buffer.from(lib.hex_to_bytes(post.poid)));
+      await db.set(def+".orig", Buffer.from(lib.hex_to_bytes(poid)));
     };
 
-    // For each external reference, add post.poid to referenced_post.refs
+    // For each external reference, add poid to referenced_post.refs
     var external_refs = {};
     for (var def in defs) {
       var def_deps = {};
@@ -138,7 +137,6 @@ async function new_post({cite, sign, head, body}) {
       lib.get_term_refs(defs[def].core.term, def_deps);
       await db.set(def+".deps", Buffer.from(lib.string_to_bytes(Object.keys(def_deps).join(";"))));
       for (var dep in def_deps) {
-        //console.log("- " + def + " depends on " + dep);
         external_refs[dep] = 1;
       };
     };
@@ -147,8 +145,8 @@ async function new_post({cite, sign, head, body}) {
       external_refs_posts[lib.bytes_to_hex(await db.get(ref+".orig"))] = 1;
     };
     for (var ref_post in external_refs_posts) {
-      if (ref_post !== post.poid) {
-        await db.con(ref_post+".refs", Buffer.from(lib.hex_to_bytes(post.poid)));
+      if (ref_post !== poid) {
+        await db.con(ref_post+".refs", Buffer.from(lib.hex_to_bytes(poid)));
       };
     };
 
@@ -157,9 +155,7 @@ async function new_post({cite, sign, head, body}) {
       Defs[def] = defs[def];
     }
 
-    console.log("New post: "+post.poid+" '"+post.head+"'.");
-    //console.log("->", post);
-    return post.poid;
+    return poid;
   } catch (e) {
     console.log(e);
     throw "Internal error.";
@@ -197,7 +193,7 @@ async function startup() {
     await db.set("0x0000000000000000.post", Buffer.from(lib.post_to_bytes({
       date: 0,
       cite: "0x0000000000000000",
-      sign: "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      auth: "0x0000000000000000000000000000000000000000",
       head: "",
       body: "",
     })));
@@ -206,10 +202,10 @@ async function startup() {
   } else {
     for (var post_file of post_files) {
       var poid = post_file.slice(0,-5);
-      var post = lib.bytes_to_post(await db.get(poid+".post"));
       Size += 1;
       if (poid !== "0x0000000000000000") {
-        var name = (await db.get(lib.get_post_auth(post)+".name")).toString();
+        var post = lib.bytes_to_post(await db.get(poid+".post"));
+        var name = (await db.get(post.auth+".name")).toString();
         var code = lib.get_post_code(post, name);
         console.log("Loaded: " + post_file);
         try {
@@ -236,11 +232,6 @@ async function startup() {
     };
   };
   app.listen(80);
-  //setInterval(() => {
-    //timeout_peers();
-    //clear_watchers();
-    //room_sender();
-  //}, TIMEOUT);
   console.log("Server open!");
 };
 startup();
@@ -273,7 +264,7 @@ app.get("*", async (req, res, next) => {
       var post_post = lib.bytes_to_post(post);
       var post_code = lib.get_post_code(post_post);
       if (post_code) {
-        var post_auth = lib.get_post_auth(post_post);
+        var post_auth = post_post.auth;
         code += "// Post by " + post_auth + " (" + (await db.get(post_auth+".name")) + "):\n\n";
         code += post_code+"\n\n";
       }
@@ -292,12 +283,9 @@ app.get("*", async (req, res, next) => {
 
 // Makes a post
 app.post("/post", async (req, res) => {
-  var cite = req.query.cite;
-  var head = req.query.head;
-  var body = req.query.body;
-  var sign = req.query.sign;
+  var post = req.query;
   try {
-    res.send(await new_post({cite,head,body,sign}));
+    res.send(await new_post(post));
   } catch (e) {
     res.send(e.toString());
   }
@@ -389,22 +377,18 @@ app.ws('/', function(ws, req) {
 
     // Sends a post to peer
     async function view_post(poid) {
-      //console.log("view_post", poid);
       if (poid !== "0x0000000000000000" && !peer.has_post[poid]) {
         peer.has_post[poid] = true;
         var post = await db.get(poid+".post");
-        //console.log("...", post);
         if (post) {
-          var auth = lib.get_post_auth(lib.bytes_to_post(post));
+          var auth = lib.bytes_to_post(post).auth;
           var name = await db.get(auth+".name");
           var pbuf = await serialize_post(poid, post);
           bufs.push(pbuf);
-          //console.log("pushing post", pbuf.length);
           if (name && !peer.has_name[auth]) {
             peer.has_name[auth] = true;
             var nbuf = await serialize_name(auth, name);
             bufs.push(nbuf);
-            //console.log("pushing name", nbuf.length);
           };
         };
       };

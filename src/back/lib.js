@@ -106,9 +106,9 @@ function bytes_to_post(buf) {
   return {
     date: hex_to_uint48(get_hex_from_bytes(0, 64, buf)),
     cite: get_hex_from_bytes(64, 128, buf),
-    sign: get_hex_from_bytes(128, 648, buf),
-    head: hex_to_string(get_hex_from_bytes(648, 1024, buf)).replace(/\0/g,""),
-    body: hex_to_string(get_hex_from_bytes(1024, buf.length*8, buf)),
+    auth: get_hex_from_bytes(128, 288, buf),
+    head: hex_to_string(get_hex_from_bytes(288, 928, buf)).replace(/\0/g,""),
+    body: hex_to_string(get_hex_from_bytes(928, buf.length*8, buf)),
   };
 };
 
@@ -124,8 +124,8 @@ function post_to_bytes(post) {
   var arr = [];
   put_hex_on_array(hex(64, uint48_to_hex(post.date)), arr);
   put_hex_on_array(post.cite, arr);
-  put_hex_on_array(post.sign, arr);
-  put_hex_on_array(hex(376, string_to_hex(post.head)), arr);
+  put_hex_on_array(post.auth, arr);
+  put_hex_on_array(hex(640, string_to_hex(post.head)), arr);
   put_hex_on_array(string_to_hex(post.body), arr);
   return new Uint8Array(arr);
 };
@@ -183,10 +183,7 @@ function get_post_msge(post) {
 };
 
 function get_post_auth(post) {
-  if (!post.auth) {
-    post.auth = sig.signerAddress(sig.keccak(get_post_msge(post)), post.sign)
-  };
-  return post.auth;
+  return sig.signerAddress(sig.keccak(get_post_msge(post)), post.sign).toLowerCase();
 };
 
 function sign_post(post, pkey) {
@@ -250,6 +247,16 @@ const CITE = 98;
 const NAME = 99;
 const ROOM = 100;
 
+//function old_bytes_to_post(buf) {
+  //var date = hex_to_uint48(get_hex_from_bytes(0, 64, buf));
+  //var cite = get_hex_from_bytes(64, 128, buf);
+  //var sign = get_hex_from_bytes(128, 648, buf);
+  //var head = hex_to_string(get_hex_from_bytes(648, 1024, buf)).replace(/\0/g,"");
+  //var body = hex_to_string(get_hex_from_bytes(1024, buf.length*8, buf));
+  //var auth = sig.signerAddress(sig.keccak(get_post_msge({cite,head,body})), sign).toLowerCase();
+  //return {date, cite, auth, head, body};
+//};
+
 module.exports = {
   hex,
   nam,
@@ -283,4 +290,5 @@ module.exports = {
   CITE,
   NAME,
   ROOM,
+  //old_bytes_to_post,
 };
