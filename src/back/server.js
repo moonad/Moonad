@@ -40,7 +40,7 @@ var Peer = []; // Arr WebSocket -- peer of address
 var Size = 0;  // Number
 // Moderator addresses: can publish to any namespace
 var Mods = {
-  "0x11271CbE61c48Cf8C5347F481d6DF8e9C6c1Fc61": 1
+  "0x11271cbe61c48cf8c5347f481d6df8e9c6c1fc61": 1
 };
 // Posts that only moderators can post
 var Lock = {
