@@ -308,7 +308,7 @@ app.post("/get", async (req, res) => {
     if (got !== null) {
       res.send(lib.bytes_to_hex(got));
     } else {
-      throw "Key not found.";
+      throw "Key not found: '"+req.query.key+"'.";
     }
   } catch (e) {
     res.send(e.toString());

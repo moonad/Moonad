@@ -18,7 +18,11 @@ class Term extends Component {
   }
   async componentDidMount() {
     this.poid = await front.moonad.api.get_orig({name: this.props.name});
-    this.defs = await front.load_core_defs_of(this.props.name);
+    try {
+      this.defs = await front.load_core_defs_of(this.props.name);
+    } catch (e) {
+      console.log(e());
+    }
   }
   render() {
     const name = this.props.name;
@@ -32,7 +36,7 @@ class Term extends Component {
       // If this is an application...
       if ( type.ctor === "App"
         && type.func.ctor === "Ref"
-        && type.func.name === "App.V0") {
+        && type.func.name === "App") {
 
         // Compiles and initializes application
         if (!this.app) {
@@ -47,7 +51,7 @@ class Term extends Component {
         // Converts rendered object to an HTML element
         var app_el = null;
         switch (rendered._) {
-          case "App.V0.Render.text":
+          case "App.Render.txt":
             app_el = rendered.str;
             break;
         }
@@ -60,7 +64,7 @@ class Term extends Component {
           },
           onClick: () => {
             // When user clicks, sends an event to the app
-            var app_event = {_: "App.V0.Event.keypress", keycode: 0};
+            var app_event = {_: "App.Event.ukey", keycode: 0};
             this.app.init = this.app.when(app_event)(this.app.init);
           },
         }, app_el);
