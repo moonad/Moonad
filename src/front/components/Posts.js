@@ -58,7 +58,8 @@ class Posts extends Component {
 
     // Post replies
     if (front.moonad.cite[poid]) {
-      for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
+      //for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
+      for (let i = 0; i < front.moonad.cite[poid].length; ++i) {
         var reply_poid = front.moonad.cite[poid][i];
         if (!hide[reply_poid]) {
           body.push(Post({
