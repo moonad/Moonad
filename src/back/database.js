@@ -29,6 +29,7 @@ async function set(key, buf) {
       return false;
     }
   } catch (e) {
+    console.log(e);
     return false;
   };
 };
