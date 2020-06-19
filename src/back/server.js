@@ -94,7 +94,7 @@ async function startup() {
   });
 
   // Static post: Prelude (post)
-  var prelude = fs.readFileSync(path_of("", "Prelude.fm"), "utf8");
+  var prelude = fs.readFileSync("./Prelude.fm", "utf8");
   var prelude_lines = prelude.split("\n");
   for (var i = 0; i < prelude_lines.length; ++i) {
     if (/[A-Z]/.test(prelude_lines[i][0])) {
