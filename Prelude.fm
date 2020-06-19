@@ -590,18 +590,18 @@ IO.monad: Monad(IO)
 
 // The App type represents an interactive application
 T App<S: Type>
-| new(
+| App.new(
   init: S,
   draw: S -> App.Render,
   when: App.Event -> S -> S);
 
 // The App type render format
 T App.Render
-| txt(text: String);
-| pix(size: U32, draw: U32 -> Pair(U32,U32));
+| App.Render.txt(text: String);
+| App.Render.pix(size: U32, draw: U32 -> Pair(U32,U32));
 
 // The App type event format
 T App.Event
-| tick(date: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
-| ukey(down: Bool, code: U16);
-| post(date: U64, auth: String, name: String, head: String, body: String);
+| App.Event.tick(date: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
+| App.Event.ukey(down: Bool, code: U16);
+| App.Event.post(date: U64, auth: String, name: String, head: String, body: String);
