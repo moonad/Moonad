@@ -47,7 +47,7 @@ var Mods = {
 // Posts that only moderators can post
 var Lock = {
   "0x0000000000000000": 1,
-  "0x0000000000000003": 1,
+  "0x0000000000000001": 1,
 };
 
 // Initializes everything
