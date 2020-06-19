@@ -3,99 +3,102 @@ T Empty
 
 // The Unit type has 1 element.
 T Unit
-| new;
+| Unit.new;
 
 // The Bool type has 2 elements.
 T Bool
-| true;
-| false;
+| Bool.true;
+| Bool.false;
 
 // The Bit type has 2 elements.
 T Bit
-| b0;
-| b1;
+| Bit.0;
+| Bit.1;
 
 // The Cmp type has 3 elements.
 // It represents a size comparison.
 T Cmp
-| ltn;
-| eql;
-| gtn;
+| Cmp.ltn;
+| Cmp.eql;
+| Cmp.gtn;
 
 // The Nat type has ∞ elements.
 // It represents the set of non-negative integers.
 T Nat
-| zero;
-| succ(pred: Nat);
+| Nat.zero;
+| Nat.succ(pred: Nat);
 
 // The Bits type has ∞ elements.
 // It represents the set of bitstrings.
 T Bits
-| nil;
-| b0(pred: Bits);
-| b1(pred: Bits);
+| Bits.nil;
+| Bits.0(pred: Bits);
+| Bits.1(pred: Bits);
 
 // The Word type has ∞ elements.
 // It represents the set of fixed-length bitstrings.
-T Word                            ~ (size: Nat)
-| nil                             ~ (Nat.zero);
-| w0<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
-| w1<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
+T Word                                ~ (size: Nat)
+| Word.nil                            ~ (Nat.zero);
+| Word.0<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
+| Word.1<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
 
 // The Pair type contains 2 elements of both of 2 possibly different types.
 T Pair<A: Type, B: Type>
-| new(fst: A, snd: B);
+| Pair.new(fst: A, snd: B);
 
 // The Maybe type contains either an element of some type, or nothing at all.
 T Maybe<A: Type>
-| none;
-| some(value: A);
+| Maybe.none;
+| Maybe.some(value: A);
 
 // The Either type contains 1 element of either of 2 possibly different types.
 T Either<A: Type, B: Type>
-| left(value: A);
-| right(value: B);
+| Either.left(value: A);
+| Either.right(value: B);
 
 // The List type contains a varying number of elements of some type.
 T List<A: Type>
-| nil;
-| cons(head: A, tail: List(A));
+| List.nil;
+| List.cons(head: A, tail: List(A));
 
 // The Vector type contains a fixed number of elements of some type.
-T Vector<A: Type>                          ~ (size: Nat)
-| nil                                      ~ (Nat.zero);
-| ext<size: Nat>(x: A, xs: Vector(A,size)) ~ (Nat.succ(size));
+T Vector<A: Type>                                 ~ (size: Nat)
+| Vector.nil                                      ~ (Nat.zero);
+| Vector.ext<size: Nat>(x: A, xs: Vector(A,size)) ~ (Nat.succ(size));
 
 // The Array type contains 2^depth elements of some type.
 // It allows O(log(depth)) write and reads for fixed length binary keys.
-T Array<A: Type>                                            ~ (depth: Nat)
-| tip(value: A)                                             ~ (Nat.zero);
-| tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth)) ~ (Nat.succ(depth));
+T Array<A: Type>
+  ~ (depth: Nat)
+| Array.tip(value: A)
+  ~ (Nat.zero);
+| Array.tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth))
+  ~ (Nat.succ(depth));
 
 // The Map type maps from bitstrings to elements of some type.
-T Map (A: Type)
-| new;
-| tie(val: Maybe(A), lft: Map(A), rgt: Map(A));
+T Map<A: Type>
+| Map.new;
+| Map.tie(val: Maybe(A), lft: Map(A), rgt: Map(A));
 
 // The U8 type has 256 elements.
 // It represents 8-bit unsigned integers.
 T U8
-| new(a: Word(8));
+| U8.new(a: Word(8));
 
 // The U16 type has 65536 elements.
 // It represents 16-bit unsigned integers.
 T U16
-| new(a: Word(16));
+| U16.new(a: Word(16));
 
 // The U32 type has 4294967296 elements.
 // It represents 32-bit unsigned integers.
 T U32
-| new(a: Word(32));
+| U32.new(a: Word(32));
 
 // The U64 type has 18446744073709551616 elements.
 // It represents 64-bit unsigned integers.
 T U64
-| new(a: Word(64));
+| U64.new(a: Word(64));
 
 // The Char type represents a Unicode codepoint on the Basic Multilingual Plane.
 Char: Type
@@ -103,28 +106,28 @@ Char: Type
 
 // The String type represents a sequence of chars.
 T String
-| nil;
-| cons(head: Char, tail: String);
+| String.nil;
+| String.cons(head: Char, tail: String);
 
 // The Buffer32 type contains 2^depth 32-bit unsigned integers.
 T Buffer32
-| new(depth: Nat, array: Array(U32, depth));
+| Buffer32.new(depth: Nat, array: Array(U32, depth));
 
 // The Equal type represents an evidence that two values are the same.
 T Equal<A: Type>(a: A) ~ (b: A)
-| to                   ~ (a);
+| Equal.to             ~ (a);
 
 // A monad is just a monoid in the category of endofunctors.
 // We reassure there is nothing wrong with that.
 T Monad<M: Type -> Type>
-| new(
+| Monad.new(
   bind: <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B),
   pure: <A: Type> -> A -> M(A));
 
 // A string-based question-and-answer interface with an external environment.
 T IO<A: Type>
-| end(value: A);
-| ask(query: String, param: String, then: String -> IO(A));
+| IO.end(value: A);
+| IO.ask(query: String, param: String, then: String -> IO(A));
 
 // Not represents a logical negation.
 Not(P: Type): Type
@@ -402,15 +405,15 @@ Equal.right<A: Type, x: A, a: A, b: A>(r: Equal(A, x, a), s: Equal(A, x, b))
 Word.inc<size: Nat>(word: Word(size)): Word(size)
   case word:
   | Word.nil;
-  | Word.w1<word.size>(word.pred);
-  | Word.w0<word.size>(Word.inc<word.size>(word.pred));
+  | Word.1<word.size>(word.pred);
+  | Word.0<word.size>(Word.inc<word.size>(word.pred));
   : Word(word.size);
 
 // Zero word
 Word.zero(size: Nat): Word(size)
   case size:
   | Word.nil;
-  | Word.w0<size.pred>(Word.zero(size.pred));
+  | Word.0<size.pred>(Word.zero(size.pred));
   : Word(size.self);
 
 // Trims a word
@@ -418,16 +421,16 @@ Word.trim<size: Nat>(new_size: Nat, word: Word(size)): Word(new_size)
   case new_size:
   | Word.nil;
   | case word:
-    | Word.w0<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.nil));
-    | Word.w0<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));
-    | Word.w1<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));;
+    | Word.0<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.nil));
+    | Word.0<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));
+    | Word.1<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));;
   : Word(new_size.self);
 
 // Reverses a word
 Word.reverse<size: Nat>(word: Word(size)): Word(size)
   def nil = Word.nil
-  def w0  = <size> (rev) Word.w0<size>(rev)
-  def w1  = <size> (rev) Word.w1<size>(rev)
+  def w0  = <size> (rev) Word.0<size>(rev)
+  def w1  = <size> (rev) Word.1<size>(rev)
   Word.indl<Word, size>(nil, w0, w1, word)
 
 // Left induce a words
@@ -509,22 +512,22 @@ Char.new
 (b8: Bit) (b9: Bit) (bA: Bit) (bB: Bit)
 (bC: Bit) (bD: Bit) (bE: Bit) (bF: Bit)
 : U16
-  let kF = b0<>(Word.w0<>, Word.w1<>)
-  let kE = b1<>(Word.w0<>, Word.w1<>)
-  let kD = b2<>(Word.w0<>, Word.w1<>)
-  let kC = b3<>(Word.w0<>, Word.w1<>)
-  let kB = b4<>(Word.w0<>, Word.w1<>)
-  let kA = b5<>(Word.w0<>, Word.w1<>)
-  let k9 = b6<>(Word.w0<>, Word.w1<>)
-  let k8 = b7<>(Word.w0<>, Word.w1<>)
-  let k7 = b8<>(Word.w0<>, Word.w1<>)
-  let k6 = b9<>(Word.w0<>, Word.w1<>)
-  let k5 = bA<>(Word.w0<>, Word.w1<>)
-  let k4 = bB<>(Word.w0<>, Word.w1<>)
-  let k3 = bC<>(Word.w0<>, Word.w1<>)
-  let k2 = bD<>(Word.w0<>, Word.w1<>)
-  let k1 = bE<>(Word.w0<>, Word.w1<>)
-  let k0 = bF<>(Word.w0<>, Word.w1<>)
+  let kF = b0<>(Word.0<>, Word.1<>)
+  let kE = b1<>(Word.0<>, Word.1<>)
+  let kD = b2<>(Word.0<>, Word.1<>)
+  let kC = b3<>(Word.0<>, Word.1<>)
+  let kB = b4<>(Word.0<>, Word.1<>)
+  let kA = b5<>(Word.0<>, Word.1<>)
+  let k9 = b6<>(Word.0<>, Word.1<>)
+  let k8 = b7<>(Word.0<>, Word.1<>)
+  let k7 = b8<>(Word.0<>, Word.1<>)
+  let k6 = b9<>(Word.0<>, Word.1<>)
+  let k5 = bA<>(Word.0<>, Word.1<>)
+  let k4 = bB<>(Word.0<>, Word.1<>)
+  let k3 = bC<>(Word.0<>, Word.1<>)
+  let k2 = bD<>(Word.0<>, Word.1<>)
+  let k1 = bE<>(Word.0<>, Word.1<>)
+  let k0 = bF<>(Word.0<>, Word.1<>)
   let kx = Word.nil
   U16.new(k0(k1(k2(k3(k4(k5(k6(k7(k8(k9(kA(kB(kC(kD(kE(kF(kx)))))))))))))))))
 
