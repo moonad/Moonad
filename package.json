@@ -30,7 +30,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express-ws": "^4.0.0",
-    "formality-lang": "^0.4.56",
+    "formality-lang": "^0.4.57",
     "fs-extra": "^9.0.0",
     "isomorphic-ws": "^4.0.1",
     "nano-ethereum-signer": "^0.1.2",
