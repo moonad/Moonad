@@ -33,6 +33,7 @@
     "formality-lang": "^0.4.57",
     "fs-extra": "^9.0.0",
     "isomorphic-ws": "^4.0.1",
+    "moment": "^2.26.0",
     "nano-ethereum-signer": "^0.1.2",
     "simple-peer": "^9.7.2",
     "wrtc": "^0.4.5",

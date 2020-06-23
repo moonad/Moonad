@@ -1,6 +1,7 @@
 const fm = require("formality-lang");
 const moonad_client = require("./../back/client.js")({url:window.location.origin});
 const ethsig = require("nano-ethereum-signer");
+const moment = require("moment");
 
 function memoize(fn) {
   var memo = {};
@@ -31,9 +32,9 @@ function get_addr() {
 };
 
 function format_date(date) {
-  var date = new Date(date);
-  return date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()
-    + ", "+date.getHours()+"h "+date.getMinutes()+"min";
+  const now       = moment();
+  const post_date = moment(date);
+  return now.isSame(post_date, 'year') ? post_date.fromNow() : `on ${post_date.format("MMM DD YYYY")}`;
 }
 
 const pkey_to_addr = memoize(ethsig.addressFromKey);
