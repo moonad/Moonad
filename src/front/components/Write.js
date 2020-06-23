@@ -152,7 +152,7 @@ class Write extends Component {
       onClick: () => {
         var cite = this.cite;
         if (this.head === default_title || this.body === default_content 
-            || empty_content(this.body) || empty_content(this.title)) {
+            || empty_content(this.head) || empty_content(this.body)) {
           alert("Write something first!");
         } else {
           var head = this.head.replace(/\n/g,"");
