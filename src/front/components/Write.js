@@ -4,12 +4,19 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 
+const default_title = "Title";
+const default_content = "Type your code and/or text here";
+
+const empty_content = (text) => {
+  return text.trim() === "";
+}
+
 class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.head = "Title";
-    this.body = "Type your code and/or text here";
+    this.head = default_title;
+    this.body = default_content;
     this.cleared = {};
     this.display_info = false;
   }
@@ -144,7 +151,7 @@ class Write extends Component {
       },
       onClick: () => {
         var cite = this.cite;
-        if (this.head === "Title..." || this.body === "Contents...") {
+        if (this.head === default_title|| this.body === default_content || empty_content(this.body)) {
           alert("Write something first!");
         } else {
           var head = this.head.replace(/\n/g,"");
@@ -192,7 +199,7 @@ class Write extends Component {
 
     return h("div", {
       style: {
-        "height": "calc(100% - 20px)",
+        "height": "calc(100% - 40px)",
       },
     }, [
       title_div,

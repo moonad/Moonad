@@ -101,7 +101,7 @@ class Posts extends Component {
 
     return h("div", {
       style: {
-        "min-height": "calc(100% - 30px)",
+        "min-height": "calc(100% - 43px)",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "center",
