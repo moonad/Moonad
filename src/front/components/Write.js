@@ -20,13 +20,15 @@ mymai.pair: Pair(Bits, Bits)
    0 + 1
 */
 
+const default_title = "Title";
+const default_body  = "Type your code and/or text here";
 
 class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.head = "Title";
-    this.body = body_test; //"Type your code and/or text here";
+    this.head = default_title;
+    this.body = default_body;
     this.cleared = {};
     this.display_info = false;
     this.repl = "";
@@ -149,17 +151,25 @@ class Write extends Component {
       info_button
     ]);
 
+    const def_input_text_style = {
+      "color": "rgb(211,211,211)"
+    }
+
+    const input_text_style = {
+      "color": "rgb(105,105,105)",
+    }
+
     const head = h("pre", {
       contentEditable: true,
       style: {
+        ... this.head === default_title ? def_input_text_style : input_text_style,
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
-        "color": "rgb(101,102,105)",
         "outline": "none",
         "width": "100%",
         "height": "30px",
-        "padding": "8px 10px 5px 10px",
-        "border-bottom": "1px solid rgb(187,199,207)"
+        "padding": "8px 10px 8px 60px",
+        "border-bottom": "1px solid rgb(240,240,240)"
       },
       onClick: (e) => this.click("head", e.target),
       onInput: (e) => this.refresh("head", e.target),
@@ -168,13 +178,13 @@ class Write extends Component {
     const body = h("pre", {
       contentEditable: true,
       style: {
+        ... this.body === default_body ? def_input_text_style : input_text_style,
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
-        "color": "rgb(101,102,105)",
         "outline": "none",
         "width": "100%",
         "height": "360px",
-        "padding": "8px 10px",
+        "padding": "8px 10px 8px 60px",
         "overflow-y": "scroll",
       },
       onClick: (e) => this.click("body", e.target),
@@ -211,21 +221,20 @@ class Write extends Component {
         "display": "flex",
         "flex-direction": "row",
         "justify-content": "flex-end",
-        "margin-bottom": "20px",
-        "margin-right": "60px"
+        "margin": "20px 60px"
       }
     }, [send]) // TODO: add preview
 
     const repl = h("div", { 
       style: {
         // "height": "calc(100% - 20px - 20px - 360px)",
-        "color": "rgb(101,102,105)",
-        "background": "rgb(221,222,224)",
+        "color": "white",//"rgb(101,102,105)",
+        "background": "rgb(66,64,64)",//"rgb(221,222,224)",
         // "border-top": "1px solid rgb(201,202,204)",
         "padding": "4px 4px",
         "word-wrap": "break-word",
-        "padding": "8px 10px",
-        "width": "300px"
+        "padding": "8px 50px 8px 10px",
+        "width": "50%"
       },
     }, [ 
       h("p", {
@@ -235,32 +244,31 @@ class Write extends Component {
         }, "Types checked: "),
       h("pre", {
         style: {
-          // "width": "100%",
-          // "word-wrap": "break-word",
-          "white-space": "pre-wrap"
+          "white-space": "pre-wrap",
+          "white-space": "-o-pre-wrap",
+          "white-space": "-moz-pre-wrap !important",
         }}, this.repl)] );
 
     const container_editable = h("div", {
       style: {
-        // "margin": "20px 60px",
-        // "border-radius": "5px 5px 5px 5px",
-        "border": "1px solid rgb(187, 199, 207)",
-        // "border-collapse": "separate",
-        // "display": "flex",
         "flex-direction": "column",
-        "background": "white",
-        "flex": "1 1 0",
+        "background": "white",//"rgb(246, 246, 246)",
+        // "flex": "1 1 0",
+        // "border-top": "1px solid rgb(180,180,180)",
+        // "border-bottom": "1px solid rgb(180,180,180)",
+        "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
         "width": "100%",
-        "word-wrap": "break-word"
+        "word-wrap": "break-word",
       }
     }, [head, body]);
 
     const container = h("div", {
       style: {
         "border-collapse": "separate",
-        "margin": "20px 60px",
+        // "margin": "30px",
         "display": "flex",
         "flex-direction": "row",
+        "height": "83%",
         // "flex": "2 1",
         // "justify-content": "space-between"
       }
@@ -268,7 +276,7 @@ class Write extends Component {
 
     return h("div", {
       style: {
-        "height": "calc(100% - 20px)",
+        "height": "calc(100% - 38px)",
       },
     }, [
       title_div,
