@@ -100,6 +100,11 @@ T U32
 T U64
 | U64.new(word: Word(64));
 
+// The F64 type has 18446744073709551616 elements.
+// It represents IEEE 754 doubles.
+T F64
+| F64.new(word: Word(64));
+
 // The Char type represents a Unicode codepoint on the Basic Multilingual Plane.
 Char: Type
   U16
@@ -368,9 +373,25 @@ Nat.apply.go<A: Type>(n: Nat, f: A -> A, x: A): A
   | x;
   | Nat.apply.go<A>(n.pred, f, f(x));
 
+// Conversion to u8
+Nat.to_u8(n: Nat): U8
+  Nat.apply<U8>(n, U8.inc, U8.0)
+
+// Conversion to u16
+Nat.to_u16(n: Nat): U16
+  Nat.apply<U16>(n, U16.inc, U16.0)
+
 // Conversion to u32
 Nat.to_u32(n: Nat): U32
   Nat.apply<U32>(n, U32.inc, U32.0)
+
+// Conversion to u64
+Nat.to_u64(n: Nat): U64
+  Nat.apply<U64>(n, U64.inc, U64.0)
+
+// Conversion to f64
+Nat.to_f64(s: Bool, n: Nat, m: Nat): F64
+  Nat.to_f64(s, n, m)
 
 // Right fold for Bits
 Bits.fold<P: Type>(nil: P, b0: P -> P, b1: P -> P, bits: Bits): P
@@ -869,6 +890,79 @@ Map.union<A: Type>(a: Map(A), b: Map(A)) : Map(A)
       | Map.tie<>(b.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));
       | Map.tie<>(a.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));;;
 
+// U8 zero
+U8.0: U8
+  U8.new(Word.zero(8))
+
+// Increments a u8
+U8.inc(a: U8): U8
+  get a_val = a
+  U8.new(Word.inc<>(a_val))
+
+// TODO
+U8.add(a: U8, b: U8): U8
+  U8.add(a, b)
+
+// TODO
+U8.sub(a: U8, b: U8): U8
+  U8.sub(a, b)
+
+// TODO
+U8.mul(a: U8, b: U8): U8
+  U8.mul(a, b)
+
+// TODO
+U8.div(a: U8, b: U8): U8
+  U8.div(a, b)
+
+// TODO
+U8.mod(a: U8, b: U8): U8
+  U8.mod(a, b)
+
+// TODO
+U8.pow(a: U8, b: U8): U8
+  U8.pow(a, b)
+
+// TODO
+U8.ltn(a: U8, b: U8): Bool
+  case a: | case b: | Word.ltn<8>(a.word, b.word);;
+
+// TODO
+U8.lte(a: U8, b: U8): Bool
+  case a: | case b: | Word.lte<8>(a.word, b.word);;
+
+// TODO
+U8.eql(a: U8, b: U8): Bool
+  case a: | case b: | Word.eql<8>(a.word, b.word);;
+
+// TODO
+U8.gte(a: U8, b: U8): Bool
+  case a: | case b: | Word.gte<8>(a.word, b.word);;
+
+// TODO
+U8.gtn(a: U8, b: U8): Bool
+  case a: | case b: | Word.gtn<8>(a.word, b.word);;
+
+// TODO
+U8.shr(n: Nat, a: U8): U8
+  U8.shr(n, a)
+
+// TODO
+U8.shl(n: Nat, a: U8): U8
+  U8.shl(n, a)
+
+// TODO
+U8.and(a: U8, b: U8): U8
+  U8.and(a, b)
+
+// TODO
+U8.or(a: U8, b: U8): U8
+  U8.or(a, b)
+
+// TODO
+U8.xor(a: U8, b: U8): U8
+  U8.xor(a, b)
+
 // U16 zero
 U16.0: U16
   U16.new(Word.zero(16))
@@ -923,11 +1017,11 @@ U16.gtn(a: U16, b: U16): Bool
   case a: | case b: | Word.gtn<16>(a.word, b.word);;
 
 // TODO
-U16.shr(n: Nat, a: U16): U16
+U16.shr(n: U16, a: U16): U16
   U16.shr(n, a)
 
 // TODO
-U16.shl(n: Nat, a: U16): U16
+U16.shl(n: U16, a: U16): U16
   U16.shl(n, a)
 
 // TODO
@@ -996,11 +1090,11 @@ U32.gtn(a: U32, b: U32): Bool
   case a: | case b: | Word.gtn<32>(a.word, b.word);;
 
 // TODO
-U32.shr(n: Nat, a: U32): U32
+U32.shr(n: U32, a: U32): U32
   U32.shr(n, a)
 
 // TODO
-U32.shl(n: Nat, a: U32): U32
+U32.shl(n: U32, a: U32): U32
   U32.shl(n, a)
 
 // TODO
@@ -1021,6 +1115,131 @@ U32.for<S: Type>(state: S, from: U32, til: U32, func: U32 -> S -> S): S
     state
   else
     U32.for<S>(func(from, state), U32.inc(from), til, func)
+
+// U64 zero
+U64.0: U64
+  U64.new(Word.zero(64))
+
+// Increments a u64
+U64.inc(a: U64): U64
+  get a_val = a 
+  U64.new(Word.inc<>(a_val))
+
+// TODO
+U64.add(a: U64, b: U64): U64
+  U64.add(a, b)
+
+// TODO
+U64.sub(a: U64, b: U64): U64
+  U64.sub(a, b)
+
+// TODO
+U64.mul(a: U64, b: U64): U64
+  U64.mul(a, b)
+
+// TODO
+U64.div(a: U64, b: U64): U64
+  U64.div(a, b)
+
+// TODO
+U64.mod(a: U64, b: U64): U64
+  U64.mod(a, b)
+
+// TODO
+U64.pow(a: U64, b: U64): U64
+  U64.pow(a, b)
+
+// TODO
+U64.ltn(a: U64, b: U64): Bool
+  case a: | case b: | Word.ltn<64>(a.word, b.word);;
+
+// TODO
+U64.lte(a: U64, b: U64): Bool
+  case a: | case b: | Word.lte<64>(a.word, b.word);;
+
+// TODO
+U64.eql(a: U64, b: U64): Bool
+  case a: | case b: | Word.eql<64>(a.word, b.word);;
+
+// TODO
+U64.gte(a: U64, b: U64): Bool
+  case a: | case b: | Word.gte<64>(a.word, b.word);;
+
+// TODO
+U64.gtn(a: U64, b: U64): Bool
+  case a: | case b: | Word.gtn<64>(a.word, b.word);;
+
+// TODO
+U64.shr(n: U64, a: U64): U64
+  U64.shr(n, a)
+
+// TODO
+U64.shl(n: U64, a: U64): U64
+  U64.shl(n, a)
+
+// TODO
+U64.and(a: U64, b: U64): U64
+  U64.and(a, b)
+
+// TODO
+U64.or(a: U64, b: U64): U64
+  U64.or(a, b)
+
+// TODO
+U64.xor(a: U64, b: U64): U64
+  U64.xor(a, b)
+
+// TODO
+F64.0: F64
+  F64.0
+
+// TODO
+F64.inc(a: F64): F64
+  F64.inc(a)
+
+// TODO
+F64.add(a: F64, b: F64): F64
+  F64.add(a, b)
+
+// TODO
+F64.sub(a: F64, b: F64): F64
+  F64.sub(a, b)
+
+// TODO
+F64.mul(a: F64, b: F64): F64
+  F64.mul(a, b)
+
+// TODO
+F64.div(a: F64, b: F64): F64
+  F64.div(a, b)
+
+// TODO
+F64.mod(a: F64, b: F64): F64
+  F64.mod(a, b)
+
+// TODO
+F64.pow(a: F64, b: F64): F64
+  F64.pow(a, b)
+
+// TODO
+F64.ltn(a: F64, b: F64): Bool
+  F64.ltn(a, b)
+
+// TODO
+F64.lte(a: F64, b: F64): Bool
+  F64.lte(a, b)
+
+// TODO
+F64.eql(a: F64, b: F64): Bool
+  F64.eql(a, b)
+
+// TODO
+F64.gte(a: F64, b: F64): Bool
+  F64.gte(a, b)
+
+// TODO
+F64.gtn(a: F64, b: F64): Bool
+  F64.gtn(a, b)
 
 // Creates a char from 16 bits
 Char.new
