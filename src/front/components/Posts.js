@@ -32,14 +32,13 @@ class Posts extends Component {
         "font-size": "10px",
         "border-left": "1px solid rgb(187, 199, 207)",
         "width": "140px",
-        "height": "70px",
+        "height": "50px",
         "z-index": "3",
         "margin-left": "-100px",
         "margin-top": "20px",
         "display": "flex",
         "flex-direction": "column"
       }}, [
-        h("a", {style: link_style, href: "https://github.com/moonad/Moonad", target: "_blank"}, "Moonad"),
         h("a", {style: link_style, href: "https://github.com/moonad/Formality", target: "_blank"}, "Formality"),
         h("a", {style: link_style, href: "https://t.me/formality_lang", target: "_blank"}, "Chat with us")
       ] );
