@@ -389,9 +389,9 @@ Nat.to_u32(n: Nat): U32
 Nat.to_u64(n: Nat): U64
   Nat.apply<U64>(n, U64.inc, U64.0)
 
-// Conversion to f64
-Nat.to_f64(s: Bool, n: Nat, m: Nat): F64
-  Nat.to_f64(s, n, m)
+// Conversion to f64: x = (s ? 1 : -1) * (a / 10 ** b)
+Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
+  Nat.to_f64(s, a, b)
 
 // Right fold for Bits
 Bits.fold<P: Type>(nil: P, b0: P -> P, b1: P -> P, bits: Bits): P
