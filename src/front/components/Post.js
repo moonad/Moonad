@@ -63,7 +63,7 @@ const Post = ({poid, expand, top}) => {
         "font-family": "IBMPlexMono-Light",
       }}, top ? [title_back," ",title_head] : title_head);
 
-    var auth_addr = front.moonad.lib.get_post_auth(post).toLowerCase();
+    var auth_addr = post.auth.toLowerCase();
     var auth_name = front.moonad.name[auth_addr];
     var blocks = front.moonad.lib.get_post_blocks(post, front.moonad.name[auth_addr]);
     var post_body = [];
@@ -122,9 +122,8 @@ const Post = ({poid, expand, top}) => {
       }, [""
         + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         + " · " + front.format_date(post.date)
-      ]);
-    
-
+        + "."
+        ]);
 
     return h("div", {
       style: {

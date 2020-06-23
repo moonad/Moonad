@@ -1,0 +1,1215 @@
+// The Empty type has no elements.
+T Empty
+
+// The Unit type has 1 element.
+T Unit
+| Unit.new;
+
+// The Bool type has 2 elements.
+T Bool
+| Bool.true;
+| Bool.false;
+
+// The Bit type has 2 elements.
+T Bit
+| Bit.0;
+| Bit.1;
+
+// The Cmp type has 3 elements.
+// It represents a size comparison.
+T Cmp
+| Cmp.ltn;
+| Cmp.eql;
+| Cmp.gtn;
+
+// The Nat type has ∞ elements.
+// It represents the set of non-negative integers.
+T Nat
+| Nat.zero;
+| Nat.succ(pred: Nat);
+
+// The Bits type has ∞ elements.
+// It represents the set of bitstrings.
+T Bits
+| Bits.nil;
+| Bits.0(pred: Bits);
+| Bits.1(pred: Bits);
+
+// The Word type has ∞ elements.
+// It represents the set of fixed-length bitstrings.
+T Word                                ~ (size: Nat)
+| Word.nil                            ~ (Nat.zero);
+| Word.0<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
+| Word.1<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
+
+// The Pair type contains 2 elements of both of 2 possibly different types.
+T Pair<A: Type, B: Type>
+| Pair.new(fst: A, snd: B);
+
+// The Maybe type contains either an element of some type, or nothing at all.
+T Maybe<A: Type>
+| Maybe.none;
+| Maybe.some(value: A);
+
+// The Either type contains 1 element of either of 2 possibly different types.
+T Either<A: Type, B: Type>
+| Either.left(value: A);
+| Either.right(value: B);
+
+// The List type contains a varying number of elements of some type.
+T List<A: Type>
+| List.nil;
+| List.cons(head: A, tail: List(A));
+
+// The Vector type contains a fixed number of elements of some type.
+T Vector<A: Type>                                 ~ (size: Nat)
+| Vector.nil                                      ~ (Nat.zero);
+| Vector.ext<size: Nat>(x: A, xs: Vector(A,size)) ~ (Nat.succ(size));
+
+// The Array type contains 2^depth elements of some type.
+// It allows O(log(depth)) write and reads for fixed length binary keys.
+T Array<A: Type>
+  ~ (depth: Nat)
+| Array.tip(value: A)
+  ~ (Nat.zero);
+| Array.tie<depth: Nat>(lft: Array(A,depth), rgt: Array(A,depth))
+  ~ (Nat.succ(depth));
+
+// The Map type maps from bitstrings to elements of some type.
+T Map<A: Type>
+| Map.new;
+| Map.tie(val: Maybe(A), lft: Map(A), rgt: Map(A));
+
+// The U8 type has 256 elements.
+// It represents 8-bit unsigned integers.
+T U8
+| U8.new(word: Word(8));
+
+// The U16 type has 65536 elements.
+// It represents 16-bit unsigned integers.
+T U16
+| U16.new(word: Word(16));
+
+// The U32 type has 4294967296 elements.
+// It represents 32-bit unsigned integers.
+T U32
+| U32.new(word: Word(32));
+
+// The U64 type has 18446744073709551616 elements.
+// It represents 64-bit unsigned integers.
+T U64
+| U64.new(word: Word(64));
+
+// The Char type represents a Unicode codepoint on the Basic Multilingual Plane.
+Char: Type
+  U16
+
+// The String type represents a sequence of chars.
+T String
+| String.nil;
+| String.cons(head: Char, tail: String);
+
+// The Buffer32 type contains 2^depth 32-bit unsigned integers.
+T Buffer32
+| Buffer32.new(depth: Nat, array: Array(U32, depth));
+
+// The Equal type represents an evidence that two values are the same.
+T Equal<A: Type>(a: A) ~ (b: A)
+| Equal.to             ~ (a);
+
+// A monad is just a monoid in the category of endofunctors.
+// We reassure there is nothing wrong with that.
+T Monad<M: Type -> Type>
+| Monad.new(
+  bind: <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B),
+  pure: <A: Type> -> A -> M(A));
+
+// A string-based question-and-answer interface with an external environment.
+T IO<A: Type>
+| IO.end(value: A);
+| IO.ask(query: String, param: String, then: String -> IO(A));
+
+// The App type represents an interactive application
+T App<S: Type>
+| App.new(
+  init: S,
+  draw: S -> App.Render,
+  when: App.Event -> S -> S);
+
+// The App type render format
+T App.Render
+| App.Render.txt(text: String);
+| App.Render.pix(size: U32, draw: U32 -> Pair(U32,U32));
+
+// The App type event format
+T App.Event
+| App.Event.tick(date: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
+| App.Event.ukey(down: Bool, code: U16);
+| App.Event.post(date: U64, auth: String, name: String, head: String, body: String);
+
+// Not represents a logical negation.
+Not(P: Type): Type
+  P -> Empty
+
+// And represents a logical conjunction.
+And(A: Type, B: Type): Type
+  Pair(A, B)
+
+// Or represents a logical disjunction.
+Or(A: Type, B: Type): Type
+  Either(A, B)
+
+// If we have an element of the empty type, then we can prove anything.
+Empty.absurd<P: Type>(x: Empty): P
+  case x:
+
+// What is the opposite of this bool?
+Bool.not(a: Bool):  Bool
+  case a:
+  | Bool.false;
+  | Bool.true;
+
+// Is any of these bools true?
+Bool.or(a: Bool, b: Bool): Bool
+  case a:
+  | Bool.true;
+  | case b:
+    | Bool.true;
+    | Bool.false;;
+
+// Are both of these bools true?
+Bool.and(a: Bool, b: Bool): Bool
+  case a:
+  | case b:
+    | Bool.true;
+    | Bool.false;;
+  | Bool.false;
+
+// If, then, else
+Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
+  case cond:
+  | true_case;
+  | false_case;
+
+// To prove that `true != false`, we:
+// 1. Define a predicate `P : Bool -> Type` such that:
+//   - `P(true)  == Unit`
+//   - `P(false) == Empty`
+// 2. Define a value `p_true : P(true)`.
+//   - Since `P(true) ~> Unit`, then we use `Unit.new`.
+// 3. Assume that `true == false`.
+//   - Since we're proving a `Not(X)`, we can assume `X` with a lambda.
+// 4. Since `p_true : P(true)` and `true == false`, then `p_true : P(false)`.
+//   - We can cast using `Equal.rewrite`. 
+// 5. Since `P(false) ~> Empty`, we have a contradiction. Thus, `false != true`.
+Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
+  def P(b : Bool)
+    case b:
+    | Unit;
+    | Empty;
+  def p_true
+    Unit.new
+  (true_is_false)
+    Equal.rewrite<_,_,_,P>(true_is_false, p_true)
+
+// The proof of `false != true` is similar.
+Bool.false_isnt_true: Not(Equal(Bool, Bool.false, Bool.true))
+  def P(b : Bool)
+    case b:
+    | Empty;
+    | Unit;
+  def p_false
+    Unit.new
+  (false_is_true)
+    Equal.rewrite<_,_,_,P>(false_is_true, p_false)
+
+// n < m
+Cmp.as_ltn(cmp: Cmp): Bool
+  case cmp:
+  | Bool.true;
+  | Bool.false;
+  | Bool.false;
+
+// n <= m
+Cmp.as_lte(cmp: Cmp): Bool
+  case cmp:
+  | Bool.true;
+  | Bool.true;
+  | Bool.false;
+
+// n == m
+Cmp.as_eql(cmp: Cmp): Bool
+  case cmp:
+  | Bool.false;
+  | Bool.true;
+  | Bool.false;
+
+// n >= m
+Cmp.as_gte(cmp: Cmp): Bool
+  case cmp:
+  | Bool.false;
+  | Bool.true;
+  | Bool.true;
+
+// n > m
+Cmp.as_gtn(cmp: Cmp): Bool
+  case cmp:
+  | Bool.false;
+  | Bool.false;
+  | Bool.true;
+
+// Decreases a nat by one:
+Nat.pred(n: Nat): Nat
+  case n:
+  | Nat.zero;
+  | n.pred;
+
+// Adds two nats:
+Nat.add(n: Nat, m: Nat): Nat
+  case n:
+  | m;
+  | Nat.succ(Nat.add(n.pred, m));
+
+// Multiplies two nats:
+Nat.mul(n: Nat, m: Nat): Nat
+  case n:
+  | Nat.zero;
+  | Nat.add(m, Nat.mul(n.pred, m));
+
+// Subtracts two nats:
+Nat.sub(n: Nat, m: Nat): Nat
+  case m:
+  | n;
+  | case n:
+    | Nat.zero;
+    | Nat.sub(n.pred, m.pred);;
+
+// If `a >= b`, returns `right(a - b)`, else, returns `left(b - a)`.
+Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
+  case m:
+  | Either.left<_,_>(n);
+  | case n:
+    | Either.right<_,_>(Nat.succ(m.pred));
+    | Nat.sub_rem(n.pred, m.pred);;
+
+// Division and modulus:
+Nat.div_mod(n: Nat, m: Nat): Pair(Nat, Nat)
+  Nat.div_mod.go(n, m, Nat.zero)
+Nat.div_mod.go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
+  case Nat.sub_rem(n, m) as p:
+  | Nat.div_mod.go(p.value, m, Nat.succ(d));
+  | Pair.new<_,_>(d, n);
+
+// Returns `n` modulus `m`:
+Nat.mod(n: Nat, m: Nat): Nat
+  Pair.snd<_,_>(Nat.div_mod(n, m))
+
+// Divides two nats:
+Nat.div(n: Nat, m: Nat): Nat
+  Pair.fst<_,_>(Nat.div_mod(n, m))
+
+// Compares two nats:
+Nat.cmp(a: Nat, b: Nat): Cmp
+  case a:
+  | case b:
+    | Cmp.eql;
+    | Cmp.ltn;;
+  | case b:
+    | Cmp.gtn;
+    | Nat.cmp(a.pred, b.pred);;
+
+// Is `n < m`?
+Nat.ltn(n: Nat, m: Nat): Bool
+  Cmp.as_ltn(Nat.cmp(n, m))
+
+// Is `n <= m`?
+Nat.lte(n: Nat, m: Nat): Bool
+  Cmp.as_lte(Nat.cmp(n, m))
+
+// Is `n == m`?
+Nat.eql(n: Nat, m: Nat): Bool
+  Cmp.as_eql(Nat.cmp(n, m))
+
+// Is `n >= m`?
+Nat.gte(n: Nat, m: Nat): Bool
+  Cmp.as_gte(Nat.cmp(n, m))
+
+// Is `n > m`?
+Nat.gtn(n: Nat, m: Nat): Bool
+  Cmp.as_gtn(Nat.cmp(n, m))
+
+// 1+x != 0
+Nat.succ_isnt_zero<n: Nat>: Not(Equal(Nat, Nat.succ(n), Nat.zero))
+  def P(n : Nat)
+    case n:
+    | Empty;
+    | Unit;
+  def p_succ
+    Unit.new
+  (succ_is_zero)
+    Equal.rewrite<_,_,_,P>(succ_is_zero, p_succ)
+
+// 0 != 1+x
+Nat.zero_isnt_succ<n: Nat>: Not(Equal(Nat, Nat.zero, Nat.succ(n)))
+  def P(n : Nat)
+    case n:
+    | Unit;
+    | Empty;
+  def p_zero
+    Unit.new
+  (zero_is_succ)
+    Equal.rewrite<_,_,_,P>(zero_is_succ, p_zero)
+
+// Repeated application
+Nat.apply: <A: Type> -> (n: Nat, f: A -> A, x: A) -> A
+  Nat.apply.go
+Nat.apply.go<A: Type>(n: Nat, f: A -> A, x: A): A
+  case n:
+  | x;
+  | Nat.apply.go<A>(n.pred, f, f(x));
+
+// Conversion to u32
+Nat.to_u32(n: Nat): U32
+  Nat.apply<U32>(n, U32.inc, U32.0)
+
+// Right fold for Bits
+Bits.fold<P: Type>(nil: P, b0: P -> P, b1: P -> P, bits: Bits): P
+  case bits:
+  | nil;
+  | b0(Bits.fold<P>(nil, b0, b1, bits.pred));
+  | b1(Bits.fold<P>(nil, b0, b1, bits.pred));
+
+// Left fold for Bits
+Bits.foldl<P: Type>(nil: P, b0: P -> P, b1: P -> P, bits: Bits): P
+  case bits:
+  | nil;
+  | Bits.foldl<P>(b0(nil), b0, b1, bits.pred);
+  | Bits.foldl<P>(b1(nil), b0, b1, bits.pred);
+
+// Reverses a Bits
+Bits.reverse(bits: Bits): Bits
+  Bits.foldl<Bits>(Bits.nil, Bits.0, Bits.1, bits)
+
+// Increment a Bits
+Bits.inc(a: Bits): Bits
+  case a:
+  | Bits.nil;
+  | Bits.1(a.pred);
+  | Bits.0(Bits.inc(a.pred));
+
+// Bits concatenation
+Bits.concat(a: Bits, b: Bits): Bits
+  case a:
+  | b;
+  | Bits.0(Bits.concat(a.pred, b));
+  | Bits.1(Bits.concat(a.pred, b));
+
+// Bits equality
+Bits.eql(a: Bits, b: Bits): Bool
+  case a:
+  | case b:
+    | Bool.true;
+    | Bool.false;
+    | Bool.false;;
+  | case b:
+    | Bool.false;
+    | Bits.eql(a.pred, b.pred);
+    | Bool.false;;
+  | case b:
+    | Bool.false;
+    | Bool.false;
+    | Bits.eql(a.pred, b.pred);;
+
+// If `a == b`, then `f(a) == f(b)`
+Equal.apply<A: Type, B: Type, a: A, b: A, f: A -> B>(e: Equal(A,a,b))
+: Equal(B, f(a), f(b))
+  case e:
+  | Equal.to<B, f(a)>;
+  : Equal(B, f(a), f(e.b));
+
+// If `a == b` and `b == c`, then `a == c`
+Equal.chain<A: Type, a: A, b: A, c: A>(d: Equal(A, a, b), e: Equal(A, b, c))
+: Equal(A, a, c)
+  case e:
+  | d;
+  : Equal(A, a, e.b);
+
+// If `a == b`, then `b == a`:
+Equal.mirror<A: Type, a: A, b: A>(e: Equal(A, a, b))
+: Equal(A, b, a)
+  case e:
+  | Equal.to<A, a>;
+  : Equal(A, e.b, a);
+
+// If `a == b`, then, cast `x : P(a)` to `x : P(b)`:
+Equal.rewrite<A:Type, a:A, b:A, P: A -> Type>(e: Equal(A,a,b), x: P(a)): P(b)
+  case e:
+  | x;
+  : P(e.b);
+
+// If `a == x` and `b == x`, then `a == b`
+Equal.left<A: Type, x: A, a: A, b: A>(r: Equal(A, a, x), s: Equal(A, b, x))
+: Equal(A, a, b)
+  Equal.chain<A, a, x, b>(r, Equal.mirror<A, b, x>(s))
+
+// If `x == a` and `x == b`, then `a == b`
+Equal.right<A: Type, x: A, a: A, b: A>(r: Equal(A, x, a), s: Equal(A, x, b))
+: Equal(A, a, b)
+  Equal.chain<A, a, x, b>(Equal.mirror<A, x, a>(r), s)
+
+// Increments a word
+Word.inc<size: Nat>(word: Word(size)): Word(size)
+  case word:
+  | Word.nil;
+  | Word.1<word.size>(word.pred);
+  | Word.0<word.size>(Word.inc<word.size>(word.pred));
+  : Word(word.size);
+
+// Zero word
+Word.zero(size: Nat): Word(size)
+  case size:
+  | Word.nil;
+  | Word.0<size.pred>(Word.zero(size.pred));
+  : Word(size.self);
+
+// Trims a word
+Word.trim<size: Nat>(new_size: Nat, word: Word(size)): Word(new_size)
+  case new_size:
+  | Word.nil;
+  | case word:
+    | Word.0<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.nil));
+    | Word.0<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));
+    | Word.1<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));;
+  : Word(new_size.self);
+
+// Reverses a word
+Word.reverse<size: Nat>(word: Word(size)): Word(size)
+  def nil = Word.nil
+  def w0  = <size> (rev) Word.0<size>(rev)
+  def w1  = <size> (rev) Word.1<size>(rev)
+  Word.foldl<Word, size>(nil, w0, w1, word)
+
+// Left fold a words
+Word.foldl<P: Nat -> Type, m: Nat>
+(nil  : P(Nat.zero))
+(w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)))
+(w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)))
+(word : Word(m))
+: P(m)
+  case word:
+  | nil;
+  | def P   = (n) P(Nat.succ(n))
+    def nil = w0<Nat.zero>(nil)
+    def w0  = <x> w0<Nat.succ(x)>
+    def w1  = <x> w1<Nat.succ(x)>
+    Word.foldl<P, word.size>(nil, w0, w1, word.pred);
+  | def P   = (n) P(Nat.succ(n))
+    def nil = w1<Nat.zero>(nil)
+    def w0  = <x> w0<Nat.succ(x)>
+    def w1  = <x> w1<Nat.succ(x)>
+    Word.foldl<P, word.size>(nil, w0, w1, word.pred);
+  : P(word.size);
+
+// Compares two words
+Word.cmp.go<size: Nat>(a: Word(size), b: Word(size), c: Cmp): Cmp
+  case a:
+  with b : Word(a.size) = b;
+  | c;
+  | case b:
+    with a.pred : Word(Nat.pred(b.size)) = a.pred;
+    | c;
+    | Word.cmp.go<b.size>(a.pred, b.pred, c);
+    | Word.cmp.go<b.size>(a.pred, b.pred, Cmp.ltn);;
+  | case b:
+    with a.pred : Word(Nat.pred(b.size)) = a.pred;
+    | c;
+    | Word.cmp.go<b.size>(a.pred, b.pred, Cmp.gtn);
+    | Word.cmp.go<b.size>(a.pred, b.pred, c);;
+
+// Compares two words
+Word.cmp<size: Nat>(a: Word(size), b: Word(size)): Cmp
+  Word.cmp.go<size>(a, b, Cmp.eql)
+
+// a < b
+Word.ltn<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_ltn(Word.cmp<size>(a, b))
+
+// a <= b
+Word.lte<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_lte(Word.cmp<size>(a, b))
+
+// a == b
+Word.eql<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_eql(Word.cmp<size>(a, b))
+
+// a >= b
+Word.gte<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_gte(Word.cmp<size>(a, b))
+
+// a > b
+Word.gtn<size:Nat>(a: Word(size), b: Word(size)): Bool
+  Cmp.as_gtn(Word.cmp<size>(a, b))
+
+// Extracts the first element of a pair
+Pair.fst<A: Type, B: Type>(pair: Pair(A,B)): A
+  case pair:
+  | pair.fst;
+
+// Extracts the second element of a pair
+Pair.snd<A: Type, B: Type>(pair: Pair(A,B)): B
+  case pair:
+  | pair.snd;
+
+// Extracts the value of a maybe with a default
+Maybe.extract<A: Type>(m: Maybe(A), a: A): A
+  case m:
+  | a;
+  | m.value;
+
+// Applies a function to the contents of a maybe
+Maybe.map<A: Type, B: Type>(f: A -> B, m: Maybe(A)): Maybe(B)
+  case m:
+  | Maybe.none<B>;
+  | Maybe.some<B>(f(m.value));
+
+// Monad instance for Maybe
+Maybe.bind<A: Type, B: Type>(m: Maybe(A), f: A -> Maybe(B)): Maybe(B)
+  case m:
+  | Maybe.none<B>;
+  | f(m.value);
+Maybe.pure<A: Type>(a: A): Maybe(A)
+  Maybe.some<A>(a)
+Maybe.monad: Monad(Maybe)
+  Monad.new<Maybe>(Maybe.bind, Maybe.pure)
+
+// Eiter binder
+Either.bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C))
+: Either(A,C)
+  case e:
+  | Either.left<A,C>(e.value);
+  | f(e.value);
+
+// Converts a list to its non-inductive Church encoding
+List.fold<A: Type>(list: List(A))<P: Type>(nil: P, cons: A -> P -> P): P
+  case list:
+  | nil;
+  | cons(list.head, List.fold<A>(list.tail)<P>(nil, cons));
+
+// Foldl for List
+List.foldl<A: Type>(list: List(A))<P: Type>(nil: P, cons: A -> P -> P): P
+  case list:
+  | nil;
+  | List.foldl<A>(list.tail)<P>(cons(list.head, nil), cons);
+
+// Applies a function to every element of a list
+List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
+  case as:
+  | List.nil<B>;
+  | List.cons<B>(f(as.head), List.map<A,B>(f, as.tail));
+
+// Concatenates two lists.
+List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
+  case as:
+  | bs;
+  | List.cons<>(as.head, List.concat<>(as.tail,bs));
+
+// Flattens a list of lists into a single list.
+List.flatten<A: Type>(xs: List(List(A))): List(A)
+  case xs:
+  | List.nil<>;
+  | List.concat<>(xs.head, List.flatten<>(xs.tail));
+
+// Do all elements satisfy a condition?
+List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list:
+  | Bool.true;
+  | case cond(list.head):
+    | List.all<>(cond, list.tail);
+    | Bool.false;;
+
+// Are all elements true?
+List.and(list: List(Bool)): Bool
+  List.all<>((x) x, list)
+
+/// Do any element satisfy a condition?
+List.any<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list:
+  | Bool.false;
+  | case cond(list.head):
+    | Bool.true;
+    | List.any<>(cond, list.tail);;
+
+// Is any element true?
+List.or(list: List(Bool)): Bool
+  List.any<>((x) x, list)
+
+// Summation of numbers in a list
+List.sum(list: List(Nat)): Nat
+  List.foldl<Nat>(list)<Nat>(0, Nat.add)
+
+// Product of numbers in a list
+List.product(list: List(Nat)): Nat
+  List.foldl<Nat>(list)<Nat>(1, Nat.mul)
+
+// Reverses a List
+List.reverse<A: Type>(list: List(A)): List(A)
+  List.foldl<A>(list)<List(A)>(List.nil<A>, List.cons<A>)
+
+// Computes the length of a list
+List.length<A: Type>(list: List(Nat)): Nat
+  List.foldl<Nat>(list)<Nat>(0, () Nat.succ)
+
+// A list with only one element.
+List.pure<A : Type>(x : A) : List(A)
+  List.cons<A>(x, List.nil<A>)
+
+// The bind function of the list Monad.
+List.bind<A: Type,B: Type>(xs: List(A), f: A -> List(B)): List(B)
+  List.flatten<>(List.map<,>(f, xs))
+
+// Removes the first elements of a list.
+List.drop<A: Type>(n: Nat, xs: List(A)):  List(A)
+  case n:
+  | xs;
+  | case xs:
+    | List.nil<>;
+    | List.drop<>(n.pred,xs.tail);;
+
+// Returns the first elements of a list, discards the rest.
+List.take<A: Type>(n: Nat, xs: List(A)): List(A)
+  case xs:
+  | List.nil<>;
+  | case n:
+    | List.nil<>;
+    | List.cons<>(xs.head,List.take<>(n.pred, xs.tail));;
+
+// Remove elements while a condition is true
+List.drop_while<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  case xs:
+  | List.nil<>;
+  | case f(xs.head):
+    | List.drop_while<>(f,xs.tail);
+    | xs;;
+
+// Takes elements while a condition is true
+List.take_while<A: Type>(f: A -> Bool, xs: List(A)) : List(A)
+  case xs:
+  | List.nil<>;
+  | case f(xs.head):
+    | List.cons<>(xs.head,List.take_while<>(f,xs.tail));
+    | List.nil<>;;
+
+// Breaks a list in two lists at a specific position
+List.split_at<A: Type>(n : Nat, xs: List(A)) : Pair(List(A),List(A))
+  case xs:
+  | Pair.new<,>(List.nil<>, List.nil<>);
+  | case n:
+    | Pair.new<,>(List.nil<>, xs);
+    | get fst snd = List.split_at<>(n.pred, xs.tail)
+      Pair.new<,>(List.cons<>(xs.head, fst), snd);;
+
+// Removes all elements that do not satisfy a condition.
+List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  case xs:
+  | List.nil<>;
+  | case f(xs.head):
+    | List.cons<>(xs.head,List.filter<>(f, xs.tail));
+    | List.filter<>(f, xs.tail);;
+
+//Finds the first occurrence that satisfies a condition
+List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
+  case xs:
+  | Maybe.none<>;
+  | case cond(xs.head):
+    | Maybe.some<>(xs.head);
+    | List.find<>(cond, xs.tail);;
+
+// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
+List.zip_with<A:Type, B:Type, C:Type>(f: A -> B -> C, as: List(A), bs: List(B))
+: List(C)
+  case as:
+  | List.nil<>;
+  | case bs:
+    | List.nil<>;
+    | List.cons<>(f(as.head,bs.head),List.zip_with<,,>(f,as.tail,bs.tail));;
+
+// TODO
+Array.rget<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
+  case idx:
+  with e0: Equal(Nat, depth, idx.size) = Equal.to<Nat, depth>;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | arr.value;
+    | Empty.absurd<>(Nat.zero_isnt_succ<>(Equal.right<,,,>(e0, e1)));;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | Empty.absurd<>(Nat.succ_isnt_zero<>(Equal.right<,,,>(e0, e1)));
+    | let e2 = Equal.right<,,,>(e1, e0)
+      let e3 = Equal.apply<_,_,_,_,Nat.pred>(e2)
+      let l0 = Equal.rewrite<Nat,arr.depth,idx.size,(x) Array(A,x)>(e3, arr.lft)
+      Array.rget<A, idx.size>(idx.pred, l0);;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | Empty.absurd<>(Nat.succ_isnt_zero<>(Equal.right<,,,>(e0, e1)));
+    | let e2 = Equal.right<,,,>(e1, e0)
+      let e3 = Equal.apply<_,_,_,_,Nat.pred>(e2)
+      let r0 = Equal.rewrite<Nat,arr.depth,idx.size,(x) Array(A,x)>(e3, arr.rgt)
+      Array.rget<A, idx.size>(idx.pred, r0);;
+
+// TODO
+Array.rmut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth))
+: Array(A,depth)
+  case idx:
+  with e0: Equal(Nat, depth, idx.size) = Equal.to<Nat, depth>;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | Array.tip<A>(f(arr.value));
+    | let e2 = Equal.right<,,,>(e0, e1)
+      Empty.absurd<Array(A,Nat.zero)>(Nat.zero_isnt_succ<arr.depth>(e2));;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | let e2 = Equal.right<Nat,depth,Nat.succ(idx.size),Nat.zero>(e0, e1)
+      let e3 = Nat.succ_isnt_zero<idx.size>(e2)
+      Empty.absurd<Array(A, Nat.succ(idx.size))>(e3);
+    | def ad = arr.depth
+      def is = idx.size
+      let e2 = Equal.right<Nat,depth,Nat.succ(ad),Nat.succ(is)>(e1,e0)
+      let e3 = Equal.apply<Nat,Nat,Nat.succ(ad),Nat.succ(is),Nat.pred>(e2)
+      let l0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.lft)
+      let l1 = Array.rmut<A, is>(idx.pred, f, l0)
+      let r0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.rgt)
+      let a0 = Array.tie<A, is>(l1, r0)
+      a0;;
+  | case arr:
+    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
+    | let e2 = Equal.right<Nat,depth,Nat.succ(idx.size),Nat.zero>(e0, e1)
+      let e3 = Nat.succ_isnt_zero<idx.size>(e2)
+      Empty.absurd<Array(A, Nat.succ(idx.size))>(e3);
+    | def ad = arr.depth
+      def is = idx.size
+      let e2 = Equal.right<Nat,depth,Nat.succ(ad),Nat.succ(is)>(e1, e0)
+      let e3 = Equal.apply<Nat,Nat,Nat.succ(ad),Nat.succ(is),Nat.pred>(e2)
+      let l0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.lft)
+      let r0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.rgt)
+      let r1 = Array.rmut<A, is>(idx.pred, f, r0)
+      let a0 = Array.tie<A, is>(l0, r1)
+      a0;;
+  : Array(A, idx.size);
+
+// TODO
+Array.rset<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
+: Array(A,depth)
+  Array.rmut<A,depth>(idx, () val, arr)
+
+// TODO
+Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth))
+: A
+  Array.rget<A, depth>(Word.reverse<depth>(idx), arr)
+
+// TODO
+Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth))
+: Array(A,depth)
+  Array.rmut<A, depth>(Word.reverse<depth>(idx), f, arr)
+
+// TODO
+Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
+: Array(A,depth)
+  Array.rset<A,depth>(Word.reverse<depth>(idx), val, arr)
+
+// TODO
+Array.alloc<A: Type>(depth: Nat, x: A): Array(A, depth)
+  case depth:
+  | Array.tip<A>(x);
+  | let half = Array.alloc<A>(depth.pred, x)
+    Array.tie<A, depth.pred>(half, half);
+  : Array(A, depth.self);
+
+// Returns the element stored at a given key, if any:
+Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
+  case bits:
+  | case map:
+    | Maybe.none<>;
+    | map.val;;
+  | case map:
+    | Maybe.none<>;
+    | Map.get<>(bits.pred, map.lft);;
+  | case map:
+    | Maybe.none<>;
+    | Map.get<>(bits.pred, map.rgt);;
+
+// Inserts a (key,val) pair:
+Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
+  case bits:
+  | case map:
+    | Map.tie<>(Maybe.some<>(val), Map.new<>, Map.new<>);
+    | Map.tie<>(Maybe.some<>(val), map.lft, map.rgt);;
+  | case map:
+    | Map.tie<>(Maybe.none<>, Map.set<>(bits.pred, val, Map.new<>), Map.new<>);
+    | Map.tie<>(map.val, Map.set<>(bits.pred, val, map.lft), map.rgt);;
+  | case map:
+    | Map.tie<>(Maybe.none<>, Map.new<>, Map.set<>(bits.pred, val, Map.new<>));
+    | Map.tie<>(map.val, map.lft, Map.set<>(bits.pred, val, map.rgt));;
+
+// Removes a key
+Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
+  case map:
+  | Map.new<>;
+  | case key:
+    | Map.tie<>(Maybe.none<>,map.lft,map.rgt);
+    | Map.delete<>(key.pred,map.lft);
+    | Map.delete<>(key.pred,map.rgt);;
+
+// Combines two maps, preferring the left-hand map in case of duplicates entries
+Map.union<A: Type>(a: Map(A), b: Map(A)) : Map(A)
+  case a:
+  | b;
+  | case b:
+    | a;
+    | case a.val:
+      | Map.tie<>(b.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));
+      | Map.tie<>(a.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));;;
+
+// U16 zero
+U16.0: U16
+  U16.new(Word.zero(16))
+
+// Increments a u16
+U16.inc(a: U16): U16
+  get a_val = a
+  U16.new(Word.inc<>(a_val))
+
+// TODO
+U16.add(a: U16, b: U16): U16
+  U16.add(a, b)
+
+// TODO
+U16.sub(a: U16, b: U16): U16
+  U16.sub(a, b)
+
+// TODO
+U16.mul(a: U16, b: U16): U16
+  U16.mul(a, b)
+
+// TODO
+U16.div(a: U16, b: U16): U16
+  U16.div(a, b)
+
+// TODO
+U16.mod(a: U16, b: U16): U16
+  U16.mod(a, b)
+
+// TODO
+U16.pow(a: U16, b: U16): U16
+  U16.pow(a, b)
+
+// TODO
+U16.ltn(a: U16, b: U16): Bool
+  case a: | case b: | Word.ltn<16>(a.word, b.word);;
+
+// TODO
+U16.lte(a: U16, b: U16): Bool
+  case a: | case b: | Word.lte<16>(a.word, b.word);;
+
+// TODO
+U16.eql(a: U16, b: U16): Bool
+  case a: | case b: | Word.eql<16>(a.word, b.word);;
+
+// TODO
+U16.gte(a: U16, b: U16): Bool
+  case a: | case b: | Word.gte<16>(a.word, b.word);;
+
+// TODO
+U16.gtn(a: U16, b: U16): Bool
+  case a: | case b: | Word.gtn<16>(a.word, b.word);;
+
+// TODO
+U16.shr(n: Nat, a: U16): U16
+  U16.shr(n, a)
+
+// TODO
+U16.shl(n: Nat, a: U16): U16
+  U16.shl(n, a)
+
+// TODO
+U16.and(a: U16, b: U16): U16
+  U16.and(a, b)
+
+// TODO
+U16.or(a: U16, b: U16): U16
+  U16.or(a, b)
+
+// TODO
+U16.xor(a: U16, b: U16): U16
+  U16.xor(a, b)
+
+// U32 zero
+U32.0: U32
+  U32.new(Word.zero(32))
+
+// Increments a u32
+U32.inc(a: U32): U32
+  get a_val = a 
+  U32.new(Word.inc<>(a_val))
+
+// TODO
+U32.add(a: U32, b: U32): U32
+  U32.add(a, b)
+
+// TODO
+U32.sub(a: U32, b: U32): U32
+  U32.sub(a, b)
+
+// TODO
+U32.mul(a: U32, b: U32): U32
+  U32.mul(a, b)
+
+// TODO
+U32.div(a: U32, b: U32): U32
+  U32.div(a, b)
+
+// TODO
+U32.mod(a: U32, b: U32): U32
+  U32.mod(a, b)
+
+// TODO
+U32.pow(a: U32, b: U32): U32
+  U32.pow(a, b)
+
+// TODO
+U32.ltn(a: U32, b: U32): Bool
+  case a: | case b: | Word.ltn<32>(a.word, b.word);;
+
+// TODO
+U32.lte(a: U32, b: U32): Bool
+  case a: | case b: | Word.lte<32>(a.word, b.word);;
+
+// TODO
+U32.eql(a: U32, b: U32): Bool
+  case a: | case b: | Word.eql<32>(a.word, b.word);;
+
+// TODO
+U32.gte(a: U32, b: U32): Bool
+  case a: | case b: | Word.gte<32>(a.word, b.word);;
+
+// TODO
+U32.gtn(a: U32, b: U32): Bool
+  case a: | case b: | Word.gtn<32>(a.word, b.word);;
+
+// TODO
+U32.shr(n: Nat, a: U32): U32
+  U32.shr(n, a)
+
+// TODO
+U32.shl(n: Nat, a: U32): U32
+  U32.shl(n, a)
+
+// TODO
+U32.and(a: U32, b: U32): U32
+  U32.and(a, b)
+
+// TODO
+U32.or(a: U32, b: U32): U32
+  U32.or(a, b)
+
+// TODO
+U32.xor(a: U32, b: U32): U32
+  U32.xor(a, b)
+
+// U32 for-loop
+U32.for<S: Type>(state: S, from: U32, til: U32, func: U32 -> S -> S): S
+  if U32.eql(from, til) then
+    state
+  else
+    U32.for<S>(func(from, state), U32.inc(from), til, func)
+
+// Creates a char from 16 bits
+Char.new
+(b0: Bit) (b1: Bit) (b2: Bit) (b3: Bit)
+(b4: Bit) (b5: Bit) (b6: Bit) (b7: Bit)
+(b8: Bit) (b9: Bit) (bA: Bit) (bB: Bit)
+(bC: Bit) (bD: Bit) (bE: Bit) (bF: Bit)
+: U16
+  let kF = b0<>(Word.0<>, Word.1<>)
+  let kE = b1<>(Word.0<>, Word.1<>)
+  let kD = b2<>(Word.0<>, Word.1<>)
+  let kC = b3<>(Word.0<>, Word.1<>)
+  let kB = b4<>(Word.0<>, Word.1<>)
+  let kA = b5<>(Word.0<>, Word.1<>)
+  let k9 = b6<>(Word.0<>, Word.1<>)
+  let k8 = b7<>(Word.0<>, Word.1<>)
+  let k7 = b8<>(Word.0<>, Word.1<>)
+  let k6 = b9<>(Word.0<>, Word.1<>)
+  let k5 = bA<>(Word.0<>, Word.1<>)
+  let k4 = bB<>(Word.0<>, Word.1<>)
+  let k3 = bC<>(Word.0<>, Word.1<>)
+  let k2 = bD<>(Word.0<>, Word.1<>)
+  let k1 = bE<>(Word.0<>, Word.1<>)
+  let k0 = bF<>(Word.0<>, Word.1<>)
+  let kx = Word.nil
+  U16.new(k0(k1(k2(k3(k4(k5(k6(k7(k8(k9(kA(kB(kC(kD(kE(kF(kx)))))))))))))))))
+
+// Folds over a string
+String.fold(str: String)<P: Type>(nil: P, cons: Char -> P -> P): P
+  case str:
+  | nil;
+  | cons(str.head, String.fold(str.tail)<P>(nil, cons));
+
+// Left folds over a String
+String.foldl(str: String)<P: Type>(nil: P, cons: Char -> P -> P): P
+  case str:
+  | nil;
+  | String.foldl(str.tail)<P>(cons(str.head, nil), cons);
+
+// Converts a string to a list
+String.to_list(str: String): List(Char)
+  case str:
+  | List.nil<>;
+  | List.cons<>(str.head, String.to_list(str.tail));
+
+// Converts a list to a string
+List.to_string(xs: List(Char)): String
+  case xs:
+  | String.nil;
+  | String.cons(xs.head, List.to_string(xs.tail));
+
+// Compares two strings
+String.eql(a: String, b: String): Bool
+  case a:
+  | case b:
+    | Bool.true;
+    | Bool.false;;
+  | case b:
+    | Bool.false;
+    | Bool.and(U16.eql(a.head,b.head), String.eql(a.tail,b.tail));;
+
+// Concatenates two strings.
+String.concat(as: String, bs: String): String
+  case as:
+  | bs;
+  | String.cons(as.head, String.concat(as.tail,bs));
+
+// Applies a function to all characters of the string.
+String.map(f: Char -> Char, as: String): String
+  case as:
+  | String.nil;
+  | String.cons(f(as.head),String.map(f,as.tail));
+
+// Map over a string with the index
+String.imap(f: Nat -> Char -> Char, xs: String): String
+  case xs:
+  | String.nil;
+  | String.cons(f(0,xs.head),String.imap((n) f(Nat.succ(n)),xs.tail));
+
+// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+String.intersperse(sep: Char, xs: String): String
+  case xs:
+  | String.nil;
+  | case xs.tail:
+    | String.pure(xs.head);
+    | String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)));;
+
+// Flattens a string of strings into a single string.
+String.flatten(xs: List(String)): String
+  case xs:
+  | String.nil;
+  | String.concat(xs.head, String.flatten(xs.tail));
+
+// A string with only one character.
+String.pure(x : Char) : String
+  String.cons(x, String.nil)
+
+// The bind function of the string Monad.
+String.bind(xs: String, f: Char -> String): String
+  case xs:
+  | String.nil;
+  | String.concat(f(xs.head), String.bind(xs.tail,f));
+
+// Removes the first characters of a string.
+String.drop(n: Nat, xs: String):  String
+  case n:
+  | xs;
+  | case xs:
+    | String.nil;
+    | String.drop(n.pred,xs.tail);;
+
+// Remove characters while a condition is true
+String.drop_while(f: Char -> Bool, xs: String): String
+  case xs:
+  | String.nil;
+  | case f(xs.head):
+    | String.drop_while(f,xs.tail);
+    | xs;;
+
+// Removes all characters that do not satisfy a condition.
+String.filter(f: Char -> Bool, xs: String): String
+  case xs:
+  | String.nil;
+  | case f(xs.head):
+    | String.cons(xs.head,String.filter(f, xs.tail));
+    | String.filter(f, xs.tail);;
+
+// Returns the first characters of a string, discards the rest.
+String.take(n: Nat, xs: String): String
+  case xs:
+  | String.nil;
+  | case n:
+    | String.nil;
+    | String.cons(xs.head,String.take(n.pred, xs.tail));;
+
+// Splits a string at a given position
+String.split_at(n : Nat, xs: String) : Pair(String,String)
+  Pair.new<,>(String.take(n,xs),String.drop(n,xs))
+
+// Takes a substring between two indices
+String.slice(i: Nat, j: Nat, xs: String): String
+  String.take(Nat.sub(j, i), String.drop(i, xs))
+
+// TODO
+Buffer32.get(idx: U32, buf: Buffer32): U32
+  get dep arr = buf
+  get wrd = idx
+  let idx = Word.trim<32>(dep, wrd)
+  Array.get<U32, dep>(idx, arr)
+
+// TODO
+Buffer32.set(idx: U32, val: U32, buf: Buffer32): Buffer32
+  get dep arr = buf
+  get wrd = idx
+  let idx = Word.trim<32>(dep, wrd)
+  def arr = Array.set<U32, dep>(idx, val, arr)
+  Buffer32.new(dep, arr)
+
+// TODO
+Buffer32.alloc(depth: Nat): Buffer32
+  Buffer32.new(depth, Array.alloc<U32>(depth, U32.0))
+
+// The monadic pure:
+Monad.pure<M: Type -> Type>(m: Monad(M))
+: <A: Type> -> A -> M(A)
+  case m:
+  | m.pure;
+
+// The monadic bind:
+Monad.bind<M: Type -> Type>(m: Monad(M))
+: <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B)
+  case m:
+  | m.bind;
+
+// Asks a question and returns the answer:
+IO.prompt(text: String): IO(String)
+  use skip = IO.ask<String>("print", text)
+  use line = IO.ask<String>("get_line", "")
+  IO.end<String>(line)
+
+// Prints a string and returns:
+IO.print(text: String): IO(Unit)
+  use skip = IO.ask<Unit>("print", text)
+  IO.end<Unit>(Unit.new)
+
+// IO monad instance
+IO.bind<A: Type, B: Type>(a: IO(A), f: A -> IO(B)): IO(B)
+  case a:
+  | f(a.value);
+  | IO.ask<B>(a.query, a.param, (x) IO.bind<A,B>(a.then(x), f));
+IO.monad: Monad(IO)
+  Monad.new<IO>(IO.bind, IO.end)
