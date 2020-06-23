@@ -3,6 +3,8 @@ const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const UserInfo = require("./UserInfo.js");
 
+// const logo = "98fa68c534f7e398f266ad94641b55ce.png"
+
 class TopBar extends Component {
   constructor(props) {
     super(props);
@@ -10,13 +12,22 @@ class TopBar extends Component {
   }
 
   render() {
+
     const head_lft = h("div", {
       onClick: () => this.props.on_click_link("posts"),
       style: {
         "cursor": "pointer",
-        "margin-left": "20px"
+        "color": "white",
+        "width": "29px", 
+        "height": "23px"
       },
-    }, ["Moonad"]);
+    }, h("img", {
+      src: "237db229f1e6a224797029452b2c75f0.png", 
+      alt: "moonad-logo",
+      style: {"width": "29px", "height": "23px" },
+      onClick: () => this.props.on_click_link("posts")
+      })
+    );
     const head_rgt = h("div", {
       style: {
         "display": "flex", 
@@ -26,29 +37,12 @@ class TopBar extends Component {
       },
       onMouseLeave: () => this.display_user_info = false
     }, [
-      //h("span", {
-        //style: {
-          //"cursor": "pointer",
-          //"text-decoration": "underline",
-          //"color": "rgb(101,102,105)",
-        //},
-        //onClick: () => this.props.on_click_link("check"),
-      //}, "check"),
-      //h("span", {}, " "),
-      //h("span", {
-        //style: {
-          //"cursor": "pointer",
-          //"text-decoration": "underline",
-          //"color": "rgb(101,102,105)",
-        //},
-        //onClick: () => this.props.on_click_link("write"),
-      //}, "write"),
-      //h("span", {}, " "),
       h("div", {
         style: {
           "cursor": "pointer",
           "text-decoration": "underline",
-          "color": "rgb(101,102,105)",
+          "color": "black",
+          "padding-top": "5px"
         },
         onClick: () => this.display_user_info = !this.display_user_info,
       }, front.name),
@@ -58,13 +52,15 @@ class TopBar extends Component {
     const head = h("div", {
       style: {
         "background": "white",
-        "padding": "1px 6px",
-        "border-bottom": "2px solid rgb(240, 240, 240)",
-        "height": "26px",
-        "font-size": "16px",
+        "border-top": "2px solid rgb(59,186,218)",
+        "box-shadow": "0px 1px 5px 0px rgb(219,216,219)",
+        "padding": "5px 60px",
+        "height": "38px",
+        "font-size": "12px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
+        "font-family": "OpenSans-Regular"
       },
     }, [head_lft, head_rgt]);
 
