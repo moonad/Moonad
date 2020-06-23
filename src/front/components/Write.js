@@ -170,25 +170,41 @@ class Write extends Component {
 
     const repl = h("pre", { 
       style: {
-        "height": "calc(100% - 20px - 20px - 360px)",
+        // "height": "calc(100% - 20px - 20px - 360px)",
         "color": "rgb(101,102,105)",
         "background": "rgb(221,222,224)",
-        "border-top": "1px solid rgb(201,202,204)",
+        // "border-top": "1px solid rgb(201,202,204)",
         "padding": "4px 4px",
+        "word-wrap": "break-word",
+        "padding": "8px 10px",
       },
-    }, ["*type-checker console and REPL will be here soon*"]);
+    }, "*type-checker console and REPL will be here soon*");
 
     const container_editable = h("div", {
       style: {
-        "margin": "20px 60px",
-        "border-radius": "5px 5px 5px 5px",
+        // "margin": "20px 60px",
+        // "border-radius": "5px 5px 5px 5px",
         "border": "1px solid rgb(187, 199, 207)",
-        "border-collapse": "separate",
-        "display": "flex",
+        // "border-collapse": "separate",
+        // "display": "flex",
         "flex-direction": "column",
-        "background": "white"
+        "background": "white",
+        "flex": "1 1 0",
+        "width": "100%",
+        "word-wrap": "break-word"
       }
     }, [head, body]);
+
+    const container = h("div", {
+      style: {
+        "border-collapse": "separate",
+        "margin": "20px 60px",
+        "display": "flex",
+        "flex-direction": "row",
+        // "flex": "2 1",
+        // "justify-content": "space-between"
+      }
+    }, [container_editable, repl]);
 
     return h("div", {
       style: {
@@ -196,9 +212,9 @@ class Write extends Component {
       },
     }, [
       title_div,
-      container_editable,
+      container,
       buttons,
-      repl,
+      // repl,
     ]);
   }
 };
