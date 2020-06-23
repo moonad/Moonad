@@ -120,6 +120,22 @@ async function load_core_defs_of(name) {
   return core_defs;
 };
 
+async function check_block_code(post_content) {
+  var code    = lib.moonad.lib.get_post_code({body: post_content});
+  var {defs}  = fm.lang.parse(code);
+  var checked = [];
+  var errors  = [];
+  for (var def in defs) {
+    try {
+      var {term, type} = await fm.load.load_and_typesynth(def, defs, fm.lang.stringify, true);
+      checked.push([def, fm.lang.stringify(type)]);
+    } catch (e) {
+      errors.push([def, fm.lang.stringify_err(e)]);
+    }
+  }
+  return {terms: checked, errors: errors};
+}
+
 // Startup
 // =======
 
@@ -155,5 +171,6 @@ lib.get_watched_poid = get_watched_poid;
 lib.refresh_watched_poid = refresh_watched_poid;
 lib.remove_colors = remove_colors;
 lib.load_core_defs_of = load_core_defs_of;
+lib.check_block_code = check_block_code;
 
 module.exports = lib;

@@ -3,15 +3,33 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
+const e = require("cors");
+
+const body_test =
+` aaaaaaaaaaa
++mymai: Bool
+  Bool.true
++
+mymai.pair: Pair(Bits, Bits)
+  Pair.new<Bits,Bits>(Bits.0, Bits.1)
+`
+
+// error_example
+/*
+ +mymai.term: Bool
+   0 + 1
+*/
+
 
 class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
     this.head = "Title";
-    this.body = "Type your code and/or text here";
+    this.body = body_test; //"Type your code and/or text here";
     this.cleared = {};
     this.display_info = false;
+    this.repl = "";
   }
 
   async post({cite, head, body}) {
@@ -29,10 +47,39 @@ class Write extends Component {
     }
   }
 
+  async update_repl_content(content) {
+    const terms_aux = (aux, term) => aux +"\n✓ "+ term[0]+":"+term[1];
+    var terms_formatted  = "";
+    var errors_formatted = "";
+    try {
+      var {terms, errors}   = await front.check_block_code(content);
+      if (terms.length > 0){
+        terms_formatted = terms.map(info => "✓ "+ info[0]+": "+info[1]+"\n");
+      }
+      if (errors.length > 0){
+        errors_formatted = "\nErrors:\n";
+        errors_formatted += errors.map(info => info[0]+": "+info[1]+"\n");
+      } else {
+        terms_formatted += "\nAll terms checked!";
+      }
+    } catch (e) {
+      errors_formatted += e; // TODO: is a string but to not print as one. Check with error_example
+    }
+    this.repl = terms_formatted + errors_formatted;
+    this.forceUpdate();
+  }
+
   click(key, elem) {
     if (!this.cleared[key]) {
       this.cleared[key] = true;
       elem.innerText = "";
+      this.forceUpdate();
+    }
+  }
+
+  keyPressed(e){
+    if(this.body && e.key === "Enter"){
+      this.update_repl_content(this.body);
       this.forceUpdate();
     }
   }
@@ -132,6 +179,7 @@ class Write extends Component {
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
+      onKeyPress: (e) => this.keyPressed(e)
     }, [this.body]);
 
     const send = h("span", {
@@ -168,7 +216,7 @@ class Write extends Component {
       }
     }, [send]) // TODO: add preview
 
-    const repl = h("pre", { 
+    const repl = h("div", { 
       style: {
         // "height": "calc(100% - 20px - 20px - 360px)",
         "color": "rgb(101,102,105)",
@@ -177,8 +225,20 @@ class Write extends Component {
         "padding": "4px 4px",
         "word-wrap": "break-word",
         "padding": "8px 10px",
+        "width": "300px"
       },
-    }, "*type-checker console and REPL will be here soon*");
+    }, [ 
+      h("p", {
+        style: {
+          "margin-bottom": "5px", 
+          "font-family": "IBMPlexMono-Light"}
+        }, "Types checked: "),
+      h("pre", {
+        style: {
+          // "width": "100%",
+          // "word-wrap": "break-word",
+          "white-space": "pre-wrap"
+        }}, this.repl)] );
 
     const container_editable = h("div", {
       style: {
