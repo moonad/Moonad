@@ -3,6 +3,7 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
+const e = require("cors");
 
 const default_title = "Title";
 const default_content = "Type your code and/or text here";
@@ -19,6 +20,7 @@ class Write extends Component {
     this.body = default_content;
     this.cleared = {};
     this.display_info = false;
+    this.repl = {terms: [], errors: []};
   }
 
   async post({cite, head, body}) {
@@ -36,10 +38,48 @@ class Write extends Component {
     }
   }
 
+  async update_repl_content(content) {
+    const terms_aux = (aux, term) => aux +"\n✓ "+ term[0]+":"+term[1];
+    var terms_formatted  = [];
+    var errors_formatted = [];
+    try {
+      var {terms, errors}   = await front.check_block_code(content);
+      if (terms.length > 0){
+        terms_formatted = terms.map(
+          info => h("p", {}, [
+            h("span", {}, "✓ "+ info[0]+": "), 
+            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
+          ] ));
+      }
+      if (errors.length > 0){
+        errors_formatted.push(h("p", {style: {"color": "rgb(223,119,15)"}}, [h("br"), "Errors"]));
+        errors_formatted.push(errors.map(
+          info => h("p", {}, [
+            h("span", {}, info[0]+": "), 
+            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
+          ] )));
+      } else {
+        terms_formatted.push(h("p", {style: {"color": "rgb(152,240,255)"}}, [h("br"), "All terms checked!"]));
+      }
+    } catch (e) {
+      errors_formatted.push(h("p", {}, e)); // TODO: is a string but to not print as one. Check with error_example
+    }
+    console.log(this.repl);
+    this.repl = {terms: terms_formatted, errors: errors_formatted}//.push(errors_formatted);
+    this.forceUpdate();
+  }
+
   click(key, elem) {
     if (!this.cleared[key]) {
       this.cleared[key] = true;
       elem.innerText = "";
+      this.forceUpdate();
+    }
+  }
+
+  keyPressed(e){
+    if(this.body && e.key === "Enter"){
+      this.update_repl_content(this.body);
       this.forceUpdate();
     }
   }
@@ -109,17 +149,25 @@ class Write extends Component {
       info_button
     ]);
 
+    const def_input_text_style = {
+      "color": "rgb(211,211,211)"
+    }
+
+    const input_text_style = {
+      "color": "rgb(105,105,105)",
+    }
+
     const head = h("pre", {
       contentEditable: true,
       style: {
+        ... this.head === default_title ? def_input_text_style : input_text_style,
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
-        "color": "rgb(101,102,105)",
         "outline": "none",
         "width": "100%",
         "height": "30px",
-        "padding": "8px 10px 5px 10px",
-        "border-bottom": "1px solid rgb(187,199,207)"
+        "padding": "8px 10px 8px 60px",
+        "border-bottom": "1px solid rgb(240,240,240)"
       },
       onClick: (e) => this.click("head", e.target),
       onInput: (e) => this.refresh("head", e.target),
@@ -128,17 +176,19 @@ class Write extends Component {
     const body = h("pre", {
       contentEditable: true,
       style: {
+        ... this.body === default_content ? def_input_text_style : input_text_style,
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
-        "color": "rgb(101,102,105)",
         "outline": "none",
         "width": "100%",
         "height": "360px",
-        "padding": "8px 10px",
+        "padding": "8px 10px 8px 60px",
         "overflow-y": "scroll",
+        "word-wrap": "break-word",
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
+      onKeyPress: (e) => this.keyPressed(e)
     }, [this.body]);
 
     const send = h("span", {
@@ -171,32 +221,76 @@ class Write extends Component {
         "display": "flex",
         "flex-direction": "row",
         "justify-content": "flex-end",
-        "margin-bottom": "20px",
-        "margin-right": "60px"
+        "margin": "20px 60px"
       }
     }, [send]) // TODO: add preview
 
-    const repl = h("pre", { 
+    const repl = h("div", { 
       style: {
-        "height": "calc(100% - 20px - 20px - 360px)",
-        "color": "rgb(101,102,105)",
-        "background": "rgb(221,222,224)",
-        "border-top": "1px solid rgb(201,202,204)",
+        "color": "white",//"rgb(101,102,105)",
+        "background": "rgb(66,64,64)",//"rgb(221,222,224)",
         "padding": "4px 4px",
+        "padding": "8px 50px 8px 10px",
+        "width": "70%",
+        "overflow-y": "scroll"
       },
-    }, ["*type-checker console and REPL will be here soon*"]);
+    }, [ 
+      h("p", {
+        style: {
+          "margin-bottom": "5px", 
+          "font-family": "IBMPlexMono-Light"}
+        }, "Types checked: "),
+      h("pre", {
+        style: {
+          "white-space": "pre-wrap",
+          "white-space": "-o-pre-wrap",
+          "white-space": "-moz-pre-wrap !important",
+        }}, [this.repl.terms, this.repl.errors] )] );
 
     const container_editable = h("div", {
       style: {
-        "margin": "20px 60px",
-        "border-radius": "5px 5px 5px 5px",
-        "border": "1px solid rgb(187, 199, 207)",
-        "border-collapse": "separate",
-        "display": "flex",
         "flex-direction": "column",
-        "background": "white"
+        "background": "white",//"rgb(246, 246, 246)",
+        // "flex": "1 1 0",
+        // "border-top": "1px solid rgb(180,180,180)",
+        // "border-bottom": "1px solid rgb(180,180,180)",
+        // "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
+        "width": "100%",
       }
     }, [head, body]);
+
+    const separator = h("div", {
+      style: {
+        // "position": "absolute",
+        "display": "flex",
+        "justify-content": "center",
+        "align-items": "center",
+        "flex": "1 0 auto",
+        "overflow": "hidden",
+        "background": "rgb(221, 221, 221)",
+        // "cursor": "col-resize",
+        "left": "calc(59.3507% + 25.5851px)",
+        "width": "5px",
+        // "height": "100%"//"calc(100% + -60px)"
+      }
+    }, 
+    // h("div", {
+    //       style: {
+    //       "border-right": "1px solid rgb(119, 120, 121)",
+    //       "height": "25px"
+    //     }}
+    //     )
+    );
+
+
+    const container = h("div", {
+      style: {
+        "display": "flex",
+        "flex-direction": "row",
+        "height": "83%",
+        "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
+      }
+    }, [container_editable, separator, repl]);
 
     return h("div", {
       style: {
@@ -204,9 +298,9 @@ class Write extends Component {
       },
     }, [
       title_div,
-      container_editable,
+      container,
       buttons,
-      repl,
+      // repl,
     ]);
   }
 };
