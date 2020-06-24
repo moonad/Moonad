@@ -161,53 +161,24 @@ class Write extends Component {
   }
 
   render() {
-
-    // INFO VIEW
-    // =========
-    // The "?" button on top.
-
-    const submit = h("span", {
-      style: {
-        "outline": "none",
-        "height": "20px",
-        "padding": "2px 4px",
-        "font-size": "15px",
-        "text-decoration": "underline",
-        "cursor": "pointer",
-      },
-      onClick: () => {
-        var cite = this.cite;
-        if ( this.post_head === default_post_head
-          || this.post_body === default_content 
-          || this.post_head.trim() === ""
-          || this.post_body.trim() === "") {
-          alert("Write something first!");
-        } else {
-          var head = this.post_head.replace(/\n/g,"");
-          var body = this.post_body.replace(/\n{3,}/g, "\n\n");
-          this.post({cite, head, body});
-        };
-      },
-    }, "Submit");
-
     // POSTER HEAD
     // ===========
     // Where you write the post title
 
-    const title_div = h("div", {
-      style: {
-        "margin": "10px 10px 10px 10px",
-        "display": "flex",
-        "flex-flow": "row nowrap",
-        "justify-content": "space-between",
-        "height": "20px",
-      }
-    }, [ 
-      h("div", { 
-        style: {"color": "rgb(0, 63, 99)", "font-size": "15px"}
-      }, "Replying to "+ this.cite + "..."),
-      submit,
-    ]);
+    //const title_div = h("div", {
+      //style: {
+        //"margin": "10px 10px 10px 10px",
+        //"display": "flex",
+        //"flex-flow": "row nowrap",
+        //"justify-content": "space-between",
+        //"height": "20px",
+      //}
+    //}, [ 
+      //h("div", { 
+        //style: {"color": "rgb(0, 63, 99)", "font-size": "15px"}
+      //}, "Replying to "+ this.cite + "..."),
+      //submit,
+    //]);
 
     const def_input_text_style = {
       "color": "rgb(211,211,211)"
@@ -313,6 +284,42 @@ class Write extends Component {
           this.repl.errors,
         ] )] );
 
+
+    // SUBMIT
+    // ======
+    
+    const submit = h("span", {
+      style: {
+        "position": "absolute",
+        "bottom": "2px",
+        "left": "8px",
+        "outline": "none",
+        "height": "20px",
+        "font-size": "13px",
+      },
+    }, [ 
+      h("span", {
+        style: {
+          "text-decoration": "underline",
+          "cursor": "pointer",
+        },
+        onClick: () => {
+          var cite = this.cite;
+          if ( this.post_head === default_post_head
+            || this.post_body === default_content 
+            || this.post_head.trim() === ""
+            || this.post_body.trim() === "") {
+            alert("Write something first!");
+          } else {
+            var head = this.post_head.replace(/\n/g,"");
+            var body = this.post_body.replace(/\n{3,}/g, "\n\n");
+            this.post({cite, head, body});
+          };
+        },
+      }, "Submit"),
+      h("span", {}, " reply to " + this.cite + ". "),
+    ]);
+
     // POSTER
     // ======
     // Poster head + body + repl
@@ -343,14 +350,15 @@ class Write extends Component {
 
     const container = h("div", {
       style: {
+        "position": "relative",
         "display": "flex",
         "flex-direction": "row",
-        "height": "calc(100% - "+consts.top_height+"px - 40px)",
-        "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
+        "height": "calc(100% - "+consts.top_height+"px)",
+        //"box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
       }
-    }, [container_editable, separator, repl]);
+    }, [container_editable, separator, repl, submit]);
 
-    return [title_div, container];
+    return [container];
   }
 };
 

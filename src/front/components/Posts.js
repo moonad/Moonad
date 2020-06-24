@@ -28,7 +28,6 @@ class Posts extends Component {
     var cite_obj = front.moonad.cite[this.props.poid];
     var cite_key = cite_obj ? String(cite_obj.length) : "nil";
     var render_key = poid_key+"|"+post_key+"|"+cite_key;
-    console.log(render_key);
     if (this.render_key !== render_key) {
       this.render_key = render_key;
       this.forceUpdate();

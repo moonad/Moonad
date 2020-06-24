@@ -59,6 +59,8 @@ class TopBar extends Component {
 
     const head = h("div", {
       style: {
+        "position": "relative",
+        "z-index": "100",
         "background": "white",
         "border-top": "2px solid rgb(59,186,218)",
         "box-shadow": "0px 1px 5px 0px rgb(219,216,219)",
