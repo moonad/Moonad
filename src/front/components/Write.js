@@ -295,7 +295,7 @@ class Write extends Component {
         "color": "white",//"rgb(101,102,105)",
         "background": "rgb(66,64,64)",//"rgb(221,222,224)",
         "padding": "8px 50px 8px 10px",
-        "width": "100%",
+        "width": "70%",
         "overflow-y": "scroll"
       },
     }, [ 
@@ -399,7 +399,7 @@ class Write extends Component {
         "overflow": "hidden",
         "background": "rgb(221, 221, 221)",
         // "cursor": "col-resize",
-        "left": "60%",
+        //"left": "60%",
         "width": "5px",
         // "height": "100%"//"calc(100% + -60px)"
       }
