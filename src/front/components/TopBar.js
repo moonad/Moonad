@@ -2,6 +2,7 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const UserInfo = require("./UserInfo.js");
+const consts = require("./consts.js");
 
 // const logo = "98fa68c534f7e398f266ad94641b55ce.png"
 
@@ -33,7 +34,6 @@ class TopBar extends Component {
         "display": "flex", 
         "flex-direction": "column",
         "align-items": "flex-end",
-        "margin-right": "20px"
       },
       onMouseLeave: () => {
         this.display_user_info = false;
@@ -62,8 +62,8 @@ class TopBar extends Component {
         "background": "white",
         "border-top": "2px solid rgb(59,186,218)",
         "box-shadow": "0px 1px 5px 0px rgb(219,216,219)",
-        "padding": "5px 60px",
-        "height": "38px",
+        "padding": "5px 10px",
+        "height": consts.top_height+"px",
         "font-size": "12px",
         "display": "flex",
         "flex-flow": "row nowrap",

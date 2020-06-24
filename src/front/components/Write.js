@@ -4,23 +4,116 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const e = require("cors");
+const Code = require("./Code.js");
+const consts = require("./consts.js");
 
-const default_title = "Title";
-const default_content = "Type your code and/or text here";
+const default_post_head = "Your title.";
+const default_post_body = `Your words.
 
-const empty_content = (text) => {
-  return text.trim() === "";
-}
++YourName.term: String
+  "Your code/proof."
+
+Your conclusion.`;
 
 class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.head = default_title;
-    this.body = default_content;
+    this.post_head = default_post_head;
+    this.post_body = default_post_body;
     this.cleared = {};
     this.display_info = false;
-    this.repl = {terms: [], errors: []};
+    this.repl = {types: [], holes: [], errors: []};
+    this.render_key = "";
+    this.typecheck_key = "";
+    this.pb_width = 200;
+    this.pb_height = 200;
+    this.pb_scroll = 0;
+    this.refresher = null;
+    this.typechecker = null;
+  }
+
+  componentDidMount() {
+    this.refresher = setInterval(() => this.refresh(), 1000 / 16);
+    this.typechecker = setInterval(() => this.typecheck(), 1000 / 2);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.refresher);
+    clearInterval(this.typechecker);
+  }
+
+  async typecheck() {
+    var content = this.post_body;
+    if (this.typecheck_key !== content) {
+      this.typecheck_key = content;
+      var types_formatted = [];
+      var holes_formatted = [];
+      var errors_formatted = [];
+      try {
+        var {types, holes, errors} = await front.check_block_code(content);
+        if (types.length > 0) {
+          types_formatted = types.map(info => {
+            return h("p", {}, [
+              h("span", {}, "✓ "+ info[0]+": "), 
+              h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
+            ]);
+          });
+        }
+        if (holes.length > 0) {
+          holes_formatted.push(h("p", {style: {"color": "rgb(223,119,15)"}}, [h("br"), "Holes"]));
+          holes_formatted.push(holes.map(info => {
+            return h("p", {}, [
+              h("span", {}, info[0]+":\n"),
+              h("span", {style: {"color": "rgb(175,175,175)"}}, info[1]),
+            ]);
+          }));
+        }
+        if (errors.length > 0) {
+          errors_formatted.push(h("p", {style: {"color": "rgb(223,119,15)"}}, [h("br"), "Errors"]));
+          errors_formatted.push(errors.map(
+            info => h("p", {}, [
+              h("span", {}, info[0]+":\n"), 
+              h("span", {style: {"color": "rgb(175,175,175)"}}, info[1]),
+            ])));
+        } else {
+          types_formatted.push(h("p", {style: {"color": "rgb(152,240,255)"}}, [h("br"), "All terms check!"]));
+        }
+      } catch (e) {
+        console.log("typ err:", e);
+        errors_formatted.push(h("p", {}, front.remove_colors(e))); // TODO: is a string but to not print as one. Check with error_example
+      }
+      //console.log(this.repl);
+      this.repl = {
+        types: types_formatted,
+        errors: errors_formatted,
+        holes: holes_formatted,
+      };//.push(errors_formatted);
+    }
+    this.forceUpdate();
+  }
+
+  refresh() {
+    var poster_body_editor = document.getElementById("poster_body_editor");
+    var poster_body_drawer = document.getElementById("poster_body_drawer");
+    this.pb_width = poster_body_editor.offsetWidth;
+    this.pb_height = poster_body_editor.offsetHeight;
+    this.pb_scroll = poster_body_editor.scrollTop;
+    poster_body_drawer.scrollTop = this.pb_scroll;
+    var render_key = [
+      this.post_body,
+      this.post_head,
+      String(this.pb_width),
+      String(this.pb_height),
+      String(this.pb_scroll),
+      String(this.display_info),
+      String(window.LW),
+    ].join("|");
+    if (render_key !== this.render_key) {
+      //console.log("update", render_key);
+      this.render_key = render_key;
+      this.forceUpdate();
+    }
   }
 
   async post({cite, head, body}) {
@@ -33,110 +126,77 @@ class Write extends Component {
       await front.moonad.api.post({cite, head, body}, front.pkey);
       window.history.back();
     } catch (e) {
-      console.log(e);
+      console.log("post err:",e);
       alert(front.remove_colors(e));
     }
   }
 
-  async update_repl_content(content) {
-    const terms_aux = (aux, term) => aux +"\n✓ "+ term[0]+":"+term[1];
-    var terms_formatted  = [];
-    var errors_formatted = [];
-    try {
-      var {terms, errors}   = await front.check_block_code(content);
-      if (terms.length > 0){
-        terms_formatted = terms.map(
-          info => h("p", {}, [
-            h("span", {}, "✓ "+ info[0]+": "), 
-            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
-          ] ));
+  render_post_body() {
+    var blocks = front.moonad.lib.get_post_blocks({body: this.post_body});
+    //console.log(JSON.stringify(blocks, null, 2));
+    var elems = [];
+    for (var i = 0; i < blocks.length; ++i) {
+      var block = blocks[i];
+      switch (block.ctor) {
+        case "text":
+          //console.log("text->", block.text);
+          elems.push(h("span", {}, block.text));
+          break;
+        case "code":
+          //console.log("code->", block.text);
+          elems.push(Code({
+            code: block.text,
+            plus: true,
+            style: {
+              "opacity": "0.5",
+              "padding": "0px",
+              //"line-height": window.LW+"px",
+              //"border": "1px solid blue",
+            },
+          }));
+          break;
       }
-      if (errors.length > 0){
-        errors_formatted.push(h("p", {style: {"color": "rgb(223,119,15)"}}, [h("br"), "Errors"]));
-        errors_formatted.push(errors.map(
-          info => h("p", {}, [
-            h("span", {}, info[0]+": "), 
-            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
-          ] )));
-      } else {
-        terms_formatted.push(h("p", {style: {"color": "rgb(152,240,255)"}}, [h("br"), "All terms checked!"]));
-      }
-    } catch (e) {
-      errors_formatted.push(h("p", {}, e)); // TODO: is a string but to not print as one. Check with error_example
     }
-    console.log(this.repl);
-    this.repl = {terms: terms_formatted, errors: errors_formatted}//.push(errors_formatted);
-    this.forceUpdate();
-  }
-
-  click(key, elem) {
-    if (!this.cleared[key]) {
-      this.cleared[key] = true;
-      elem.innerText = "";
-      this.forceUpdate();
-    }
-  }
-
-  key_pressed(e){
-    if(this.body && e.key === "Enter"){
-      this.update_repl_content(this.body);
-      this.forceUpdate();
-    }
-  }
-
-  refresh(key, elem) {
-    this[key] = elem.innerText;
-    this.forceUpdate();
+    return h("div", {}, elems);
   }
 
   render() {
 
-    const info_view = h("div", {
+    // INFO VIEW
+    // =========
+    // The "?" button on top.
+
+    const submit = h("span", {
       style: {
-        "width": "300px",
-        "height": "150px",
-        "margin-top": "3px",
-        "background": "white",
-        "z-index": "8",
-        "font-size": "10px",
-        "padding": "10px",
-        "border": "solid 1px #D6D6D6",
-      }, onMouseLeave: () => this.display_info = false
-     },[
-        h("p", {}, "Style your code using '+':"),
-        h("br"),
-        h("pre", {style: {"color": "rgb(150, 150, 150)"}}, [
-          h("p", {}, "+your_name.foo: Type"),
-          h("p", {}, "  code"),
-          h("p", {}, "+ // next function in the same block of code"),
-          h("p", {}, "your_name.bar: Type"),
-          h("p", {}, "  code")
-        ])
-     ]);
-    
-    const info_button = h("div", {
-      style: {
-        "display": "flex", 
-        "flex-direction": "column",
-        "align-items": "flex-end",
-        "margin-right": "5px",
-        "margin-top": "3px",
+        "outline": "none",
+        "height": "20px",
+        "padding": "2px 4px",
+        "font-size": "15px",
+        "text-decoration": "underline",
+        "cursor": "pointer",
       },
-    } , [
-      h("div", {
-        style: {
-          "text-decoration": "underline",
-          "cursor": "pointer",
-          "color": "rgb(101,102,105)",
-        },
-        onClick: () => this.display_info = !this.display_info
-      }, "?"),
-      this.display_info ? info_view : h("span")
-    ]);
+      onClick: () => {
+        var cite = this.cite;
+        if ( this.post_head === default_post_head
+          || this.post_body === default_content 
+          || this.post_head.trim() === ""
+          || this.post_body.trim() === "") {
+          alert("Write something first!");
+        } else {
+          var head = this.post_head.replace(/\n/g,"");
+          var body = this.post_body.replace(/\n{3,}/g, "\n\n");
+          this.post({cite, head, body});
+        };
+      },
+    }, "Submit");
+
+    // POSTER HEAD
+    // ===========
+    // Where you write the post title
 
     const title_div = h("div", {
       style: {
-        "margin": "20px 60px 10px 60px",
+        "margin": "10px 10px 10px 10px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
@@ -144,9 +204,9 @@ class Write extends Component {
       }
     }, [ 
       h("div", { 
-        style: { "color": "rgb(0, 63, 99)", "font-size": "15px"}
-      }, "Replying to "+ this.cite),
-      info_button
+        style: {"color": "rgb(0, 63, 99)", "font-size": "15px"}
+      }, "Replying to "+ this.cite + "..."),
+      submit,
     ]);
 
     const def_input_text_style = {
@@ -157,79 +217,81 @@ class Write extends Component {
       "color": "rgb(105,105,105)",
     }
 
-    const head = h("pre", {
-      contentEditable: true,
+    const poster_head = h("textarea", {
+      //contentEditable: true,
       style: {
-        ... this.head === default_title ? def_input_text_style : input_text_style,
+        ... this.post_head === default_post_head ? def_input_text_style : input_text_style,
+        "vertical-align": "top",
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
         "outline": "none",
         "width": "100%",
         "height": "30px",
-        "padding": "8px 10px 8px 60px",
+        "margin": "0px",
+        "padding": "8px 10px 8px 10px",
+        "border": "0px solid black",
         "border-bottom": "1px solid rgb(240,240,240)"
       },
-      onClick: (e) => this.click("head", e.target),
-      onInput: (e) => this.refresh("head", e.target),
-    }, [this.head]);
-
-    const body = h("pre", {
-      contentEditable: true,
-      style: {
-        ... this.body === default_content ? def_input_text_style : input_text_style,
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "12px",
-        "outline": "none",
-        "width": "100%",
-        "height": "360px",
-        "padding": "8px 10px 8px 60px",
-        "overflow-y": "scroll",
-        "word-wrap": "break-word",
+      onClick: (e) => {
+        if (this.post_head === default_post_head) {
+          this.post_head = "";
+        }
       },
-      onClick: (e) => this.click("body", e.target),
-      onInput: (e) => this.refresh("body", e.target),
-      onKeyPress: (e) => this.key_pressed(e)
-    }, [this.body]);
+      onInput: (e) => this.post_head = e.target.value,
+    }, [this.post_head]);
 
-    const send = h("span", {
-      style: {
-        "outline": "none",
-        "height": "20px",
-        "padding": "2px 4px",
-        "text-decoration": "underline",
-        "cursor": "pointer",
-      },
-      onClick: () => {
-        var cite = this.cite;
-        if (this.head === default_title || this.body === default_content 
-            || empty_content(this.head) || empty_content(this.body)) {
-          alert("Write something first!");
-        } else {
-          var head = this.head.replace(/\n/g,"");
-          var body = this.body.replace(/\n{3,}/g, "\n\n");
-          this.post({cite, head, body});
-        };
-      },
-    }, "Submit");
+    // POSTER BODY
+    // ===========
+    // Where you write the post body
 
-    const buttons = h("div", {
+    const poster_body_style = {
+      ... this.post_body === default_post_body ? def_input_text_style : input_text_style,
+      "font-family": "IBMPlexMono-Light",
+      "font-size": "12px",
+      "outline": "none",
+      "width": "100%",
+      "height": "calc(100% - 30px)",
+      "padding": "8px 10px 8px 10px",
+      "overflow-y": "scroll",
+      "word-wrap": "break-word",
+      "border": "0px solid black",
+    };
+
+    const poster_body_drawer = h("pre", {
+      id: "poster_body_drawer",
       style: {
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "12px",
-        "color": "rgb(101,102,105)",
-        "height": "20px",
-        "display": "flex",
-        "flex-direction": "row",
-        "justify-content": "flex-end",
-        "margin": "20px 60px"
-      }
-    }, [send]) // TODO: add preview
+        ...poster_body_style,
+        "vertical-align": "top",
+        "position": "absolute",
+        "width": this.pb_width + "px",
+        "height": this.pb_height + "px",
+        "margin": "0px",
+        //"border": "2px solid blue",
+        "pointer-events": "none",
+        //"color": "blue",
+      },
+    }, [this.render_post_body()]);
+
+    const poster_body_editor = h("textarea", {
+      id: "poster_body_editor",
+      style: poster_body_style,
+      onClick: (e) => {
+        if (this.post_body === default_post_body) {
+          this.post_body = "";
+        }
+      },
+      onInput: (e) => this.post_body = e.target.value,
+      //onKeyPress: (e) => this.key_pressed(e)
+    }, [this.post_body]);
+
+    // REPL
+    // ====
+    // The code window with types etc.
 
     const repl = h("div", { 
       style: {
         "color": "white",//"rgb(101,102,105)",
         "background": "rgb(66,64,64)",//"rgb(221,222,224)",
-        "padding": "4px 4px",
         "padding": "8px 50px 8px 10px",
         "width": "70%",
         "overflow-y": "scroll"
@@ -237,7 +299,7 @@ class Write extends Component {
     }, [ 
       h("p", {
         style: {
-          "margin-bottom": "5px", 
+          //"margin-bottom": "5px", 
           "font-family": "IBMPlexMono-Light"}
         }, "Types checked: "),
       h("pre", {
@@ -245,15 +307,23 @@ class Write extends Component {
           "white-space": "pre-wrap",
           "white-space": "-o-pre-wrap",
           "white-space": "-moz-pre-wrap !important",
-        }}, [this.repl.terms, this.repl.errors] )] );
+        }}, [
+          this.repl.types,
+          this.repl.holes,
+          this.repl.errors,
+        ] )] );
 
+    // POSTER
+    // ======
+    // Poster head + body + repl
+    
     const container_editable = h("div", {
       style: {
         "flex-direction": "column",
         "background": "white",//"rgb(246, 246, 246)",
         "width": "100%",
       }
-    }, [head, body]);
+    }, [poster_head, poster_body_drawer, poster_body_editor]);
 
     const separator = h("div", {
       style: {
@@ -265,7 +335,7 @@ class Write extends Component {
         "overflow": "hidden",
         "background": "rgb(221, 221, 221)",
         // "cursor": "col-resize",
-        "left": "calc(59.3507% + 25.5851px)",
+        "left": "60%",
         "width": "5px",
         // "height": "100%"//"calc(100% + -60px)"
       }
@@ -275,23 +345,15 @@ class Write extends Component {
       style: {
         "display": "flex",
         "flex-direction": "row",
-        "height": "83%",
+        "height": "calc(100% - "+consts.top_height+"px - 40px)",
         "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
       }
     }, [container_editable, separator, repl]);
 
-    return h("div", {
-      style: {
-        "height": "calc(100% - 40px)",
-      },
-    }, [
-      title_div,
-      container,
-      buttons,
-      // repl,
-    ]);
+    return [title_div, container];
   }
 };
 
 module.exports = Write;
 
+window.LW = 10;

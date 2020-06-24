@@ -6,8 +6,8 @@ const front = require("./../front.js");
 
 const Code = require("./Code.js");
 
-const Post = ({poid, expand, top}) => {
-  const post = front.moonad.post[poid];
+const Post = ({post, poid, expand, top}) => {
+  post = post || front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
     const Formality = h("span", {
       style: {
@@ -70,7 +70,7 @@ const Post = ({poid, expand, top}) => {
     for (var block of blocks) {
       switch (block.ctor) {
         case "code":
-          post_body.push(Code({code: block.code}));
+          post_body.push(Code({code: block.text}));
           break;
         case "text":
           var text = block.text.replace(/^\n/,"");

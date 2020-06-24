@@ -121,19 +121,30 @@ async function load_core_defs_of(name) {
 };
 
 async function check_block_code(post_content) {
-  var code    = lib.moonad.lib.get_post_code({body: post_content});
-  var {defs}  = fm.lang.parse(code);
-  var checked = [];
-  var errors  = [];
+  var code   = lib.moonad.lib.get_post_code({body: post_content});
+  var {defs} = fm.lang.parse(code);
+  var types  = [];
+  var errors = [];
+  var holes  = [];
+  fm.synt.clear_hole_logs();
   for (var def in defs) {
     try {
       var {term, type} = await fm.load.load_and_typesynth(def, defs, fm.lang.stringify, true);
-      checked.push([def, fm.lang.stringify(type)]);
+      types.push([def, fm.lang.stringify(type)]);
     } catch (e) {
-      errors.push([def, fm.lang.stringify_err(e)]);
+      errors.push([def, lib.remove_colors(fm.lang.stringify_err(e()))]);
     }
   }
-  return {terms: checked, errors: errors};
+  var hole_logs_len = Object.keys(fm.synt.HOLE_LOGS).length;
+  if (hole_logs_len > 0) {
+    console.log(fm.synt.HOLE_LOGS);
+    for (var hole in fm.synt.HOLE_LOGS) {
+      var hole_msg = lib.remove_colors(fm.synt.HOLE_LOGS[hole]);
+      var hole_lns = hole_msg.split("\n");
+      holes.push([hole, hole_lns.slice(1).join("\n")]);
+    }
+  }
+  return {types, errors, holes};
 }
 
 // Startup

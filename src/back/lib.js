@@ -143,21 +143,15 @@ function get_post_blocks(post) {
   var blocks = [{ctor:"text", text:""}];
   var inside_code = false;
   for (var i = 0; i < post.body.length; ++i) {
-    if (!inside_code
-      && (i === 0 || post.body[i-1] === "\n")
-      && post.body[i] === "+") {
+    var at_new_line = i === 0 || post.body[i-1] === "\n";
+    var at_code_init = at_new_line && post.body[i] === "+";
+    var at_code_stop = post.body[i] === "\n" && post.body[i+1] === "\n";
+    if (!inside_code && at_code_init) {
       inside_code = true;
-      blocks.push({ctor:"code", code:""});
-    } else if (inside_code
-      && post.body[i] === "\n"
-      && post.body[i+1] === "\n") {
+      blocks.push({ctor:"code", text:""});
+    } else if (inside_code && at_code_stop) {
       inside_code = false;
       blocks.push({ctor:"text", text:""});
-    }
-    if (inside_code) {
-      if (!((i === 0 || post.body[i-1] === "\n") && post.body[i] === "+")) {
-        blocks[blocks.length - 1].code += post.body[i];
-      }
     } else {
       blocks[blocks.length - 1].text += post.body[i];
     };
@@ -172,7 +166,7 @@ function get_post_code(post) {
   for (var block of blocks) {
     if (block.ctor === "code") {
       code += code.length > 0 ? "\n\n" : "";
-      code += block.code;
+      code += block.text;
     }
   };
   return code;
