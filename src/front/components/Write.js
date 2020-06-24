@@ -14,6 +14,43 @@ mymai.pair: Pair(Bits, Bits)
   Pair.new<Bits,Bits>(Bits.0, Bits.1)
 `
 
+const repl_test = `
+List.last: <A: Type> -> (xs: List(A)) -> (not_empty: List.not_empty<A>(xs)) -> A
+List.uncons: <A: Type> -> (xs: List(A)) -> Maybe(Pair(A,List(A)))
+List.null: <A: Type> -> (xs: List(A)) -> Bool
+List.length: <A: Type> -> (xs: List(A)) -> (n: Nat) -> Nat
+List.append: <A: Type> -> (as: List(A)) -> (a: A) -> List(A)
+List.map: <A: Type> -> <B: Type> -> (f: A -> B) -> (as: List(A)) -> List(B)
+List.imap: <A: Type> -> <B: Type> -> (f: Nat -> A -> B) -> (xs: List(A)) -> List(B)
+List.reverse: <A: Type> -> (xs: List(A)) -> List(A)
+List.reverse.go: <A: Type> -> (xs: List(A)) -> (res: List(A)) -> List(A)
+List.intersperse: <A: Type> -> (sep: A) -> (xs: List(A)) -> List(A)
+List.intercalate: <A: Type> -> (sep: List(A)) -> (xs: List(List(A))) -> List(A)
+List.subsequences: <A: Type> -> (xs: List(A)) -> List(List(A))
+List.subsequences.go: <A: Type> -> (xs: List(A)) -> List(List(A))
+List.commute_cons_map: <A: Type> -> <B: Type> -> (a: A) -> (ls: List(A)) -> (f: A -> B) -> Equal(List(B),List.cons<B>(f(a),List.map<A,B>(f,ls)),List.map<A,B>(f,List.cons<A>(a,ls)))
+List.fold: <A: Type> -> (list: List(A)) -> <P: Type> -> P -> (A -> P -> P) -> P
+List.fold1: <A: Type> -> (xs: List(A)) -> <ne: List.not_empty<A>(xs)> -> <P: Type> -> P -> (A -> P -> P) -> P
+List.foldr: <A: Type> -> <B: Type> -> (b: B) -> (f: A -> B -> B) -> (xs: List(A)) -> B
+List.last: <A: Type> -> (xs: List(A)) -> (not_empty: List.not_empty<A>(xs)) -> A
+List.uncons: <A: Type> -> (xs: List(A)) -> Maybe(Pair(A,List(A)))
+List.null: <A: Type> -> (xs: List(A)) -> Bool
+List.length: <A: Type> -> (xs: List(A)) -> (n: Nat) -> Nat
+List.append: <A: Type> -> (as: List(A)) -> (a: A) -> List(A)
+List.map: <A: Type> -> <B: Type> -> (f: A -> B) -> (as: List(A)) -> List(B)
+List.imap: <A: Type> -> <B: Type> -> (f: Nat -> A -> B) -> (xs: List(A)) -> List(B)
+List.reverse: <A: Type> -> (xs: List(A)) -> List(A)
+List.reverse.go: <A: Type> -> (xs: List(A)) -> (res: List(A)) -> List(A)
+List.intersperse: <A: Type> -> (sep: A) -> (xs: List(A)) -> List(A)
+List.intercalate: <A: Type> -> (sep: List(A)) -> (xs: List(List(A))) -> List(A)
+List.subsequences: <A: Type> -> (xs: List(A)) -> List(List(A))
+List.subsequences.go: <A: Type> -> (xs: List(A)) -> List(List(A))
+List.commute_cons_map: <A: Type> -> <B: Type> -> (a: A) -> (ls: List(A)) -> (f: A -> B) -> Equal(List(B),List.cons<B>(f(a),List.map<A,B>(f,ls)),List.map<A,B>(f,List.cons<A>(a,ls)))
+List.fold: <A: Type> -> (list: List(A)) -> <P: Type> -> P -> (A -> P -> P) -> P
+List.fold1: <A: Type> -> (xs: List(A)) -> <ne: List.not_empty<A>(xs)> -> <P: Type> -> P -> (A -> P -> P) -> P
+List.foldr: <A: Type> -> <B: Type> -> (b: B) -> (f: A -> B -> B) -> (xs: List(A)) -> B
+`
+
 // error_example
 /*
  +mymai.term: Bool
@@ -31,7 +68,7 @@ class Write extends Component {
     this.body = default_body;
     this.cleared = {};
     this.display_info = false;
-    this.repl = "";
+    this.repl = {terms: [], errors: []};
   }
 
   async post({cite, head, body}) {
@@ -51,23 +88,32 @@ class Write extends Component {
 
   async update_repl_content(content) {
     const terms_aux = (aux, term) => aux +"\n✓ "+ term[0]+":"+term[1];
-    var terms_formatted  = "";
-    var errors_formatted = "";
+    var terms_formatted  = [];
+    var errors_formatted = [];
     try {
       var {terms, errors}   = await front.check_block_code(content);
       if (terms.length > 0){
-        terms_formatted = terms.map(info => "✓ "+ info[0]+": "+info[1]+"\n");
+        terms_formatted = terms.map(
+          info => h("p", {}, [
+            h("span", {}, "✓ "+ info[0]+": "), 
+            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
+          ] ));
       }
       if (errors.length > 0){
-        errors_formatted = "\nErrors:\n";
-        errors_formatted += errors.map(info => info[0]+": "+info[1]+"\n");
+        errors_formatted.push(h("p", {style: {"color": "rgb(223,119,15)"}}, [h("br"), "Errors"]));
+        errors_formatted.push(errors.map(
+          info => h("p", {}, [
+            h("span", {}, info[0]+": "), 
+            h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
+          ] )));
       } else {
-        terms_formatted += "\nAll terms checked!";
+        terms_formatted.push(h("p", {style: {"color": "rgb(152,240,255)"}}, [h("br"), "All terms checked!"]));
       }
     } catch (e) {
-      errors_formatted += e; // TODO: is a string but to not print as one. Check with error_example
+      errors_formatted.push(h("p", {}, e)); // TODO: is a string but to not print as one. Check with error_example
     }
-    this.repl = terms_formatted + errors_formatted;
+    console.log(this.repl);
+    this.repl = {terms: terms_formatted, errors: errors_formatted}//.push(errors_formatted);
     this.forceUpdate();
   }
 
@@ -186,6 +232,7 @@ class Write extends Component {
         "height": "360px",
         "padding": "8px 10px 8px 60px",
         "overflow-y": "scroll",
+        "word-wrap": "break-word",
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
@@ -227,14 +274,12 @@ class Write extends Component {
 
     const repl = h("div", { 
       style: {
-        // "height": "calc(100% - 20px - 20px - 360px)",
         "color": "white",//"rgb(101,102,105)",
         "background": "rgb(66,64,64)",//"rgb(221,222,224)",
-        // "border-top": "1px solid rgb(201,202,204)",
         "padding": "4px 4px",
-        "word-wrap": "break-word",
         "padding": "8px 50px 8px 10px",
-        "width": "50%"
+        "width": "70%",
+        "overflow-y": "scroll"
       },
     }, [ 
       h("p", {
@@ -247,7 +292,7 @@ class Write extends Component {
           "white-space": "pre-wrap",
           "white-space": "-o-pre-wrap",
           "white-space": "-moz-pre-wrap !important",
-        }}, this.repl)] );
+        }}, [this.repl.terms, this.repl.errors] )] );
 
     const container_editable = h("div", {
       style: {
@@ -256,23 +301,43 @@ class Write extends Component {
         // "flex": "1 1 0",
         // "border-top": "1px solid rgb(180,180,180)",
         // "border-bottom": "1px solid rgb(180,180,180)",
-        "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
+        // "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
         "width": "100%",
-        "word-wrap": "break-word",
       }
     }, [head, body]);
 
+    const separator = h("div", {
+      style: {
+        // "position": "absolute",
+        "display": "flex",
+        "justify-content": "center",
+        "align-items": "center",
+        "flex": "1 0 auto",
+        "overflow": "hidden",
+        "background": "rgb(221, 221, 221)",
+        // "cursor": "col-resize",
+        "left": "calc(59.3507% + 25.5851px)",
+        "width": "5px",
+        // "height": "100%"//"calc(100% + -60px)"
+      }
+    }, 
+    // h("div", {
+    //       style: {
+    //       "border-right": "1px solid rgb(119, 120, 121)",
+    //       "height": "25px"
+    //     }}
+    //     )
+    );
+
+
     const container = h("div", {
       style: {
-        "border-collapse": "separate",
-        // "margin": "30px",
         "display": "flex",
         "flex-direction": "row",
         "height": "83%",
-        // "flex": "2 1",
-        // "justify-content": "space-between"
+        "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
       }
-    }, [container_editable, repl]);
+    }, [container_editable, separator, repl]);
 
     return h("div", {
       style: {
