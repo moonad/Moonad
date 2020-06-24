@@ -14,6 +14,25 @@ const hide = {
 class Posts extends Component {
   constructor(props) {
     super(props);
+    this.render_key = null;
+  }
+  componentDidMount() {
+    setInterval(() => this.refresh(), 1000 / 8);
+  }
+  componentWillUnmount() {
+    clearInterval(this.refresher);
+  }
+  refresh() {
+    var poid_key = this.props.poid;
+    var post_key = front.moonad.post[this.props.poid] ? "has" : "nil";
+    var cite_obj = front.moonad.cite[this.props.poid];
+    var cite_key = cite_obj ? String(cite_obj.length) : "nil";
+    var render_key = poid_key+"|"+post_key+"|"+cite_key;
+    console.log(render_key);
+    if (this.render_key !== render_key) {
+      this.render_key = render_key;
+      this.forceUpdate();
+    }
   }
   render() {
     var poid = this.props.poid;

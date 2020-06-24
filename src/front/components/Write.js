@@ -77,7 +77,7 @@ class Write extends Component {
     }
   }
 
-  keyPressed(e){
+  key_pressed(e){
     if(this.body && e.key === "Enter"){
       this.update_repl_content(this.body);
       this.forceUpdate();
@@ -188,7 +188,7 @@ class Write extends Component {
       },
       onClick: (e) => this.click("body", e.target),
       onInput: (e) => this.refresh("body", e.target),
-      onKeyPress: (e) => this.keyPressed(e)
+      onKeyPress: (e) => this.key_pressed(e)
     }, [this.body]);
 
     const send = h("span", {
@@ -251,10 +251,6 @@ class Write extends Component {
       style: {
         "flex-direction": "column",
         "background": "white",//"rgb(246, 246, 246)",
-        // "flex": "1 1 0",
-        // "border-top": "1px solid rgb(180,180,180)",
-        // "border-bottom": "1px solid rgb(180,180,180)",
-        // "box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
         "width": "100%",
       }
     }, [head, body]);
@@ -273,15 +269,7 @@ class Write extends Component {
         "width": "5px",
         // "height": "100%"//"calc(100% + -60px)"
       }
-    }, 
-    // h("div", {
-    //       style: {
-    //       "border-right": "1px solid rgb(119, 120, 121)",
-    //       "height": "25px"
-    //     }}
-    //     )
-    );
-
+    });
 
     const container = h("div", {
       style: {

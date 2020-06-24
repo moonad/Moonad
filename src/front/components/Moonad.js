@@ -10,11 +10,24 @@ const Term = require("./Term.js");
 class Moonad extends Component {
   constructor(props) {
     super(props);
+    this.render_key = null;
+    this.refresher = null;
+  }
+  refresh() {
+    if (front.get_route() !== this.render_key) {
+      this.render_key = front.get_route();
+      this.forceUpdate();
+    }
   }
   componentDidMount() {
-    setInterval(() => this.forceUpdate(), 250);
+    setInterval(() => this.refresh(), 1000 / 8);
+  }
+  componentWillUnmount() {
+    clearInterval(this.refresher);
   }
   render() {
+    console.log("Render Moonad");
+
     var route = front.get_route();
 
     var head = h(TopBar, {
@@ -43,7 +56,7 @@ class Moonad extends Component {
       case "p":
         var body = h(Posts, {
           moonad: front.moonad,
-          poid: paths[1] || "0x0000000000000000",
+          poid: front.get_watched_poid(),
         });
         break;
       case "t":
