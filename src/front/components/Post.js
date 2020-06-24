@@ -120,9 +120,8 @@ const Post = ({poid, expand, top}) => {
           "padding-bottom": "4px",
         },
       }, [""
-        + " By " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
+        + " by " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         + " · " + front.format_date(post.date)
-        + "."
         ]);
 
     return h("div", {

@@ -5,67 +5,19 @@ const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const e = require("cors");
 
-const body_test =
-` aaaaaaaaaaa
-+mymai: Bool
-  Bool.true
-+
-mymai.pair: Pair(Bits, Bits)
-  Pair.new<Bits,Bits>(Bits.0, Bits.1)
-`
-
-const repl_test = `
-List.last: <A: Type> -> (xs: List(A)) -> (not_empty: List.not_empty<A>(xs)) -> A
-List.uncons: <A: Type> -> (xs: List(A)) -> Maybe(Pair(A,List(A)))
-List.null: <A: Type> -> (xs: List(A)) -> Bool
-List.length: <A: Type> -> (xs: List(A)) -> (n: Nat) -> Nat
-List.append: <A: Type> -> (as: List(A)) -> (a: A) -> List(A)
-List.map: <A: Type> -> <B: Type> -> (f: A -> B) -> (as: List(A)) -> List(B)
-List.imap: <A: Type> -> <B: Type> -> (f: Nat -> A -> B) -> (xs: List(A)) -> List(B)
-List.reverse: <A: Type> -> (xs: List(A)) -> List(A)
-List.reverse.go: <A: Type> -> (xs: List(A)) -> (res: List(A)) -> List(A)
-List.intersperse: <A: Type> -> (sep: A) -> (xs: List(A)) -> List(A)
-List.intercalate: <A: Type> -> (sep: List(A)) -> (xs: List(List(A))) -> List(A)
-List.subsequences: <A: Type> -> (xs: List(A)) -> List(List(A))
-List.subsequences.go: <A: Type> -> (xs: List(A)) -> List(List(A))
-List.commute_cons_map: <A: Type> -> <B: Type> -> (a: A) -> (ls: List(A)) -> (f: A -> B) -> Equal(List(B),List.cons<B>(f(a),List.map<A,B>(f,ls)),List.map<A,B>(f,List.cons<A>(a,ls)))
-List.fold: <A: Type> -> (list: List(A)) -> <P: Type> -> P -> (A -> P -> P) -> P
-List.fold1: <A: Type> -> (xs: List(A)) -> <ne: List.not_empty<A>(xs)> -> <P: Type> -> P -> (A -> P -> P) -> P
-List.foldr: <A: Type> -> <B: Type> -> (b: B) -> (f: A -> B -> B) -> (xs: List(A)) -> B
-List.last: <A: Type> -> (xs: List(A)) -> (not_empty: List.not_empty<A>(xs)) -> A
-List.uncons: <A: Type> -> (xs: List(A)) -> Maybe(Pair(A,List(A)))
-List.null: <A: Type> -> (xs: List(A)) -> Bool
-List.length: <A: Type> -> (xs: List(A)) -> (n: Nat) -> Nat
-List.append: <A: Type> -> (as: List(A)) -> (a: A) -> List(A)
-List.map: <A: Type> -> <B: Type> -> (f: A -> B) -> (as: List(A)) -> List(B)
-List.imap: <A: Type> -> <B: Type> -> (f: Nat -> A -> B) -> (xs: List(A)) -> List(B)
-List.reverse: <A: Type> -> (xs: List(A)) -> List(A)
-List.reverse.go: <A: Type> -> (xs: List(A)) -> (res: List(A)) -> List(A)
-List.intersperse: <A: Type> -> (sep: A) -> (xs: List(A)) -> List(A)
-List.intercalate: <A: Type> -> (sep: List(A)) -> (xs: List(List(A))) -> List(A)
-List.subsequences: <A: Type> -> (xs: List(A)) -> List(List(A))
-List.subsequences.go: <A: Type> -> (xs: List(A)) -> List(List(A))
-List.commute_cons_map: <A: Type> -> <B: Type> -> (a: A) -> (ls: List(A)) -> (f: A -> B) -> Equal(List(B),List.cons<B>(f(a),List.map<A,B>(f,ls)),List.map<A,B>(f,List.cons<A>(a,ls)))
-List.fold: <A: Type> -> (list: List(A)) -> <P: Type> -> P -> (A -> P -> P) -> P
-List.fold1: <A: Type> -> (xs: List(A)) -> <ne: List.not_empty<A>(xs)> -> <P: Type> -> P -> (A -> P -> P) -> P
-List.foldr: <A: Type> -> <B: Type> -> (b: B) -> (f: A -> B -> B) -> (xs: List(A)) -> B
-`
-
-// error_example
-/*
- +mymai.term: Bool
-   0 + 1
-*/
-
 const default_title = "Title";
-const default_body  = "Type your code and/or text here";
+const default_content = "Type your code and/or text here";
+
+const empty_content = (text) => {
+  return text.trim() === "";
+}
 
 class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
     this.head = default_title;
-    this.body = default_body;
+    this.body = default_content;
     this.cleared = {};
     this.display_info = false;
     this.repl = {terms: [], errors: []};
@@ -249,7 +201,8 @@ class Write extends Component {
       },
       onClick: () => {
         var cite = this.cite;
-        if (this.head === "Title..." || this.body === "Contents...") {
+        if (this.head === default_title || this.body === default_content 
+            || empty_content(this.head) || empty_content(this.body)) {
           alert("Write something first!");
         } else {
           var head = this.head.replace(/\n/g,"");
@@ -341,7 +294,7 @@ class Write extends Component {
 
     return h("div", {
       style: {
-        "height": "calc(100% - 38px)",
+        "height": "calc(100% - 40px)",
       },
     }, [
       title_div,

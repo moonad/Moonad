@@ -42,7 +42,7 @@ class TopBar extends Component {
           "cursor": "pointer",
           "text-decoration": "underline",
           "color": "black",
-          "padding-top": "5px"
+          "padding-top": "7px"
         },
         onClick: () => this.display_user_info = !this.display_user_info,
       }, front.name),
