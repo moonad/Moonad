@@ -39,7 +39,10 @@ class User_info extends Component {
         "color": "rgb(101,102,105)",
         "margin-left": "10px",
       },
-      onClick: () => this.show_pkey = !this.show_pkey
+      onClick: () => {
+        this.show_pkey = !this.show_pkey;
+        this.forceUpdate();
+      }
     }, this.show_pkey ? "hide" : "show");
 
     const pkey_section = h("div", {

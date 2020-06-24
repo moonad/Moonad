@@ -35,7 +35,10 @@ class TopBar extends Component {
         "align-items": "flex-end",
         "margin-right": "20px"
       },
-      onMouseLeave: () => this.display_user_info = false
+      onMouseLeave: () => {
+        this.display_user_info = false;
+        this.forceUpdate();
+      },
     }, [
       h("div", {
         style: {
@@ -44,9 +47,14 @@ class TopBar extends Component {
           "color": "black",
           "padding-top": "7px"
         },
-        onClick: () => this.display_user_info = !this.display_user_info,
+        onClick: () => {
+          this.display_user_info = !this.display_user_info;
+          this.forceUpdate();
+        },
       }, front.name),
-      this.display_user_info ? h(UserInfo, {eth_address: front.get_addr(), pkey: front.get_pkey()}) : h("span"),
+      this.display_user_info
+        ? h(UserInfo, {eth_address: front.get_addr(), pkey: front.get_pkey()})
+        : h("span"),
     ]);
 
     const head = h("div", {
