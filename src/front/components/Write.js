@@ -19,8 +19,8 @@ class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.post_head = default_post_head;
-    this.post_body = default_post_body;
+    this.post_head = this.get_entry("post_head", default_post_head);
+    this.post_body = this.get_entry("post_body", default_post_body);
     this.cleared = {};
     this.display_info = false;
     this.repl = {types: [], holes: [], errors: []};
@@ -124,6 +124,8 @@ class Write extends Component {
 
     try {
       await front.moonad.api.post({cite, head, body}, front.pkey);
+      this.del_entry("post_body");
+      this.del_entry("post_head");
       window.history.back();
     } catch (e) {
       console.log("post err:",e);
@@ -158,6 +160,20 @@ class Write extends Component {
       }
     }
     return h("div", {}, elems);
+  }
+
+  set_entry(key, val) {
+    this[key] = val;
+    localStorage.setItem("Write/"+key, val);
+  }
+
+  get_entry(key, default_val) {
+    var val = localStorage.getItem("Write/"+key);
+    return val || default_val;
+  }
+
+  del_entry(key) {
+    localStorage.removeItem("Write/"+key);
   }
 
   render() {
@@ -205,10 +221,10 @@ class Write extends Component {
       },
       onClick: (e) => {
         if (this.post_head === default_post_head) {
-          this.post_head = "";
+          this.set_entry("post_head", "");
         }
       },
-      onInput: (e) => this.post_head = e.target.value,
+      onInput: (e) => this.set_entry("post_head", e.target.value),
     }, [this.post_head]);
 
     // POSTER BODY
@@ -248,10 +264,10 @@ class Write extends Component {
       style: poster_body_style,
       onClick: (e) => {
         if (this.post_body === default_post_body) {
-          this.post_body = "";
+          this.set_entry("post_body", "");
         }
       },
-      onInput: (e) => this.post_body = e.target.value,
+      onInput: (e) => this.set_entry("post_body", e.target.value),
       //onKeyPress: (e) => this.key_pressed(e)
     }, [this.post_body]);
 
@@ -306,7 +322,7 @@ class Write extends Component {
         onClick: () => {
           var cite = this.cite;
           if ( this.post_head === default_post_head
-            || this.post_body === default_content 
+            || this.post_body === default_post_body 
             || this.post_head.trim() === ""
             || this.post_body.trim() === "") {
             alert("Write something first!");
