@@ -754,90 +754,54 @@ List.zip_with<A:Type, B:Type, C:Type>(f: A -> B -> C, as: List(A), bs: List(B))
     | List.nil<>;
     | List.cons<>(f(as.head,bs.head),List.zip_with<,,>(f,as.tail,bs.tail));;
 
-// TODO
-Array.rget<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
-  case idx:
-  with e0: Equal(Nat, depth, idx.size) = Equal.to<Nat, depth>;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | arr.value;
-    | Empty.absurd<>(Nat.zero_isnt_succ<>(Equal.right<,,,>(e0, e1)));;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | Empty.absurd<>(Nat.succ_isnt_zero<>(Equal.right<,,,>(e0, e1)));
-    | let e2 = Equal.right<,,,>(e1, e0)
-      let e3 = Equal.apply<_,_,_,_,Nat.pred>(e2)
-      let l0 = Equal.rewrite<Nat,arr.depth,idx.size,(x) Array(A,x)>(e3, arr.lft)
-      Array.rget<A, idx.size>(idx.pred, l0);;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | Empty.absurd<>(Nat.succ_isnt_zero<>(Equal.right<,,,>(e0, e1)));
-    | let e2 = Equal.right<,,,>(e1, e0)
-      let e3 = Equal.apply<_,_,_,_,Nat.pred>(e2)
-      let r0 = Equal.rewrite<Nat,arr.depth,idx.size,(x) Array(A,x)>(e3, arr.rgt)
-      Array.rget<A, idx.size>(idx.pred, r0);;
+// Extracts the unique value of an array of depth 0.
+Array.extract_tip<A: Type>(arr: Array(A,0)): A
+  case arr:
+  | arr.value;
+  | Unit.new;
+  : case arr.depth:
+    | A;
+    | Unit;;
 
-// TODO
-Array.rmut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth))
-: Array(A,depth)
-  case idx:
-  with e0: Equal(Nat, depth, idx.size) = Equal.to<Nat, depth>;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | Array.tip<A>(f(arr.value));
-    | let e2 = Equal.right<,,,>(e0, e1)
-      Empty.absurd<Array(A,Nat.zero)>(Nat.zero_isnt_succ<arr.depth>(e2));;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | let e2 = Equal.right<Nat,depth,Nat.succ(idx.size),Nat.zero>(e0, e1)
-      let e3 = Nat.succ_isnt_zero<idx.size>(e2)
-      Empty.absurd<Array(A, Nat.succ(idx.size))>(e3);
-    | def ad = arr.depth
-      def is = idx.size
-      let e2 = Equal.right<Nat,depth,Nat.succ(ad),Nat.succ(is)>(e1,e0)
-      let e3 = Equal.apply<Nat,Nat,Nat.succ(ad),Nat.succ(is),Nat.pred>(e2)
-      let l0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.lft)
-      let l1 = Array.rmut<A, is>(idx.pred, f, l0)
-      let r0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.rgt)
-      let a0 = Array.tie<A, is>(l1, r0)
-      a0;;
-  | case arr:
-    with e1: Equal(Nat, depth, arr.depth) = Equal.to<Nat, depth>;
-    | let e2 = Equal.right<Nat,depth,Nat.succ(idx.size),Nat.zero>(e0, e1)
-      let e3 = Nat.succ_isnt_zero<idx.size>(e2)
-      Empty.absurd<Array(A, Nat.succ(idx.size))>(e3);
-    | def ad = arr.depth
-      def is = idx.size
-      let e2 = Equal.right<Nat,depth,Nat.succ(ad),Nat.succ(is)>(e1, e0)
-      let e3 = Equal.apply<Nat,Nat,Nat.succ(ad),Nat.succ(is),Nat.pred>(e2)
-      let l0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.lft)
-      let r0 = Equal.rewrite<Nat,ad,is,(x) Array(A, x)>(e3, arr.rgt)
-      let r1 = Array.rmut<A, is>(idx.pred, f, r0)
-      let a0 = Array.tie<A, is>(l0, r1)
-      a0;;
-  : Array(A, idx.size);
+// Extracts the two subarrays of an array of depth greater than 0.
+Array.extract_tie<A: Type, depth: Nat>(arr: Array(A,Nat.succ(depth))): Pair(Array(A,depth), Array(A,depth))
+  case arr:
+  | Unit.new;
+  | Pair.new<,>(arr.lft, arr.rgt);
+  : case arr.depth:
+    | Unit;
+    | Pair(Array(A,arr.depth.pred), Array(A,arr.depth.pred));;
 
-// TODO
-Array.rset<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
-: Array(A,depth)
-  Array.rmut<A,depth>(idx, () val, arr)
+// Given array `arr` and little-endian word `idx`, extracts value `arr[idx]`.
+Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth)): A
+  def P = (depth) Array(A,depth) -> A
+  def nil = Array.extract_tip<A>
+  def w0 = <idx.size> (rec) (arr)
+    get arr_l _ = Array.extract_tie<A, idx.size>(arr)
+    rec(arr_l)
+  def w1 = <idx.size> (rec) (arr)
+    get _ arr_r = Array.extract_tie<A, idx.size>(arr)
+    rec(arr_r)
+  Word.foldl<P, depth>(nil, w0, w1, idx, arr)
 
-// TODO
-Array.get<A:Type, depth:Nat>(idx: Word(depth), arr: Array(A,depth))
-: A
-  Array.rget<A, depth>(Word.reverse<depth>(idx), arr)
+// Given array `arr`, little-endian word `idx` and function `f`, assigns `arr[idx] = f(arr[idx])`.
+Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth)): Array(A,depth)
+  def P = (depth) Array(A,depth) -> Array(A,depth)
+  def nil = (arr) Array.tip<A>(f(Array.extract_tip<A>(arr)))
+  def w0 = <idx.size> (rec) (arr)
+    get arr_l arr_r = Array.extract_tie<A, idx.size>(arr)
+    Array.tie<A, idx.size>(rec(arr_l), arr_r)
+  def w1 = <idx.size> (rec) (arr)
+    get arr_l arr_r = Array.extract_tie<A, idx.size>(arr)
+    Array.tie<A, idx.size>(arr_l, rec(arr_r))
+  Word.foldl<P, depth>(nil, w0, w1, idx, arr)
 
-// TODO
-Array.mut<A:Type, depth:Nat>(idx: Word(depth), f: A -> A, arr: Array(A,depth))
-: Array(A,depth)
-  Array.rmut<A, depth>(Word.reverse<depth>(idx), f, arr)
-
-// TODO
+// Given array `arr`, little-endian word `idx` and value `val`, assigns `arr[idx] = val`.
 Array.set<A:Type, depth:Nat>(idx: Word(depth), val: A, arr: Array(A,depth))
 : Array(A,depth)
-  Array.rset<A,depth>(Word.reverse<depth>(idx), val, arr)
+  Array.mut<A,depth>(idx, () val, arr)
 
-// TODO
+// Creates an array of depth `depth` and initial value `x`.
 Array.alloc<A: Type>(depth: Nat, x: A): Array(A, depth)
   case depth:
   | Array.tip<A>(x);
