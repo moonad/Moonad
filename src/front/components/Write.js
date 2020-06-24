@@ -5,6 +5,7 @@ const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const e = require("cors");
 const Code = require("./Code.js");
+const Term = require("./Term.js");
 const consts = require("./consts.js");
 
 const default_post_head = "Your title.";
@@ -12,6 +13,9 @@ const default_post_body = `Your words.
 
 +YourName.term: String
   "Your code/proof."
+
++YourName.main: App(Pair(U32,U32))
+  App.demo.0
 
 Your conclusion.`;
 
@@ -31,6 +35,7 @@ class Write extends Component {
     this.pb_scroll = 0;
     this.refresher = null;
     this.typechecker = null;
+    this.play_term = null;
   }
 
   componentDidMount() {
@@ -55,7 +60,15 @@ class Write extends Component {
         if (types.length > 0) {
           types_formatted = types.map(info => {
             return h("p", {}, [
-              h("span", {}, "✓ "+ info[0]+": "), 
+              h("span", {}, "✓ "),
+              h("span", {
+                style: {
+                  "text-decoration": "underline",
+                  "cursor": "pointer",
+                },
+                onClick: () => { this.play_term = info[0]; },
+              }, info[0]),
+              h("span", {}, ": "), 
               h("span", {style: {"color": "rgb(175,175,175)"}}, info[1])
             ]);
           });
@@ -103,6 +116,7 @@ class Write extends Component {
     var render_key = [
       this.post_body,
       this.post_head,
+      String(this.play_term),
       String(this.pb_width),
       String(this.pb_height),
       String(this.pb_scroll),
@@ -275,12 +289,13 @@ class Write extends Component {
     // ====
     // The code window with types etc.
 
+
     const repl = h("div", { 
       style: {
         "color": "white",//"rgb(101,102,105)",
         "background": "rgb(66,64,64)",//"rgb(221,222,224)",
         "padding": "8px 50px 8px 10px",
-        "width": "70%",
+        "width": "100%",
         "overflow-y": "scroll"
       },
     }, [ 
@@ -300,6 +315,32 @@ class Write extends Component {
           this.repl.errors,
         ] )] );
 
+    // PLAYER
+    // ======
+
+    var play = null;
+    if (this.play_term) {
+      var play = h("div", {}, [
+        h("div", {
+          style: {"padding": "2px"},
+        }, [
+          h("span", {}, "Running '"+this.play_term+"'. "),
+          h("span", {
+            style: {
+              "cursor": "pointer",
+              "text-decoration": "underline",
+              "padding": "2px",
+            },
+            onClick: () => { this.play_term = ""; },
+          }, "Exit"),
+        ]),
+        h(Term, {
+          poid: "0x0000000000000000",
+          code: front.moonad.lib.get_post_code({body: this.post_body}),
+          name: this.play_term,
+        })
+      ]);
+    }
 
     // SUBMIT
     // ======
@@ -372,7 +413,7 @@ class Write extends Component {
         "height": "calc(100% - "+consts.top_height+"px)",
         //"box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
       }
-    }, [container_editable, separator, repl, submit]);
+    }, [container_editable, separator, play || repl, submit]);
 
     return [container];
   }

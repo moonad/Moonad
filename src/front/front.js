@@ -107,12 +107,22 @@ function remove_colors(msg) {
   return msg.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
 };
 
-async function load_core_defs_of(name) {
-  var defs = {_main_: {
-    type: fm.synt.Hol("_Main_", fm.synt.Nil()),
-    term: fm.synt.Ref(name),
-  }};
-  await fm.load.load_and_typesynth("_main_", defs, fm.lang.stringify, true);
+async function load_core_defs_of({name, code}) {
+  var defs = {
+    _main_: {
+      type: fm.synt.Hol("_Main_", fm.synt.Nil()),
+      term: fm.synt.Ref(name),
+    }
+  };
+  if (code) {
+    var {defs: extra_defs} = fm.lang.parse(code);
+    for (var def in extra_defs) {
+      defs[def] = extra_defs[def];
+    }
+  }
+  for (var def in defs) {
+    await fm.load.load_and_typesynth(def, defs, fm.lang.stringify, true);
+  }
   var core_defs = {};
   for (var def in defs) {
     core_defs[def] = defs[def].core;

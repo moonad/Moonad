@@ -18,12 +18,17 @@ class Term extends Component {
     this.mouse_pos = {_:"Pair.new", fst: 0, snd: 0};
     this.app_elem = null;
     this.canvas = null;
+    this.run_term = null;
   }
   async componentDidMount() {
-    this.poid = await front.moonad.api.get_orig({name: this.props.name});
+    this.poid = this.props.poid || (await front.moonad.api.get_orig({name: this.props.name}));
     front.moonad.do_watch(this.poid);
     try {
-      this.defs = await front.load_core_defs_of(this.props.name);
+      this.defs = await front.load_core_defs_of({
+        name: this.props.name,
+        code: this.props.code || null,
+      });
+      this.forceUpdate();
     } catch (e) {
       console.log(e());
     }
@@ -283,10 +288,9 @@ class Term extends Component {
       try {
         // Shows JS evaluation
         var js_code = fm.tojs.compile("_run_", defs, true);
-        console.log(js_code);
         var js_eval = eval(js_code);
         argm_divs.push(h("pre", {}, "\nEval:\n" + js_eval._run_));
-        argm_divs.push(h("pre", {}, "\nNorm:"));
+        argm_divs.push(h("pre", {}, "\nJS Code and λ Norm:"));
         argm_divs.push(h("pre", {
           style: {
             "text-decoration": "underline",
@@ -302,6 +306,7 @@ class Term extends Component {
                 text += "\n";
               }
             }
+            console.log(js_code);
             console.log(text);
           }
         }, "(click to print on console)"));
