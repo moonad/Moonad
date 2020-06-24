@@ -176,7 +176,7 @@ class Write extends Component {
     const body = h("pre", {
       contentEditable: true,
       style: {
-        ... this.body === default_body ? def_input_text_style : input_text_style,
+        ... this.body === default_content ? def_input_text_style : input_text_style,
         "font-family": "IBMPlexMono-Light",
         "font-size": "12px",
         "outline": "none",
