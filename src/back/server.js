@@ -197,9 +197,9 @@ async function new_post(post) {
   };
 
   // Validates post cite (authorization to reply)
-  //if (Lock[cite] && !Mods[auth]) {
-    //throw "Not authorized to reply to this thread.";
-  //};
+  if (Lock[cite] && !Mods[auth]) {
+    throw "Not authorized to reply to this thread.";
+  };
 
   // Validates post body (namespace-check)
   var code = lib.get_post_code(post, name);
