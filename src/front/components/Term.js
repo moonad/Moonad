@@ -219,24 +219,43 @@ class Term extends Component {
     var rendered = this.app.draw(this.app.init);
 
     // Converts rendered object to an HTML element
-    var app_el = null;
+    var app_ins = null;
     switch (rendered._) {
       case "App.Render.txt":
-        app_el = rendered.text;
+        app_ins = rendered.text;
         break;
       case "App.Render.vox":
-        app_el = h("span", {id:"app_insert_canvas"});
+        app_ins = h("span", {id:"app_insert_canvas"});
         break;
     }
 
-    // Builds the body
-    return h("div", {
+    // App element container
+    var app_elem = h("div", {
       id: "app_elem",
       style: {
         "width": "100%",
         "min-height": "calc(100% - 30px)",
       },
-    }, app_el);
+    }, app_ins);
+
+    // Go back to origin post
+    var go_back = null;
+    console.log("->", this.poid);
+    if (this.poid && this.poid !== "0x0000000000000000") {
+      go_back = h("div", {
+        style: {
+          "cursor": "pointer",
+          "text-decoration": "underline",
+        },
+        onClick: () => front.set_route("/p/"+this.poid),
+      }, "Go to origin post.");
+    }
+
+    // Builds the body
+    return h("div", {}, [
+      app_elem,
+      go_back,
+    ]);
   }
   render_fun(type) {
     const name = this.props.name;
