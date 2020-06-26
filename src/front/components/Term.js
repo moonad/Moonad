@@ -201,6 +201,11 @@ class Term extends Component {
         canvas.clear.size = 0;
       };
     }, 1000/32);
+
+    // Refreshes
+    this.intervals.refresher = setInterval(() => {
+      this.forceUpdate();
+    }, 1000 / 2);
   }
   send_event(app_event) {
     if (this.app) {

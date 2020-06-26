@@ -1,4 +1,4 @@
-const version = "7";
+const version = "8";
 
 require("./IBMPlexMono-Medium.ttf");
 require("./fonts/IBMPlexMono-Regular.ttf");
