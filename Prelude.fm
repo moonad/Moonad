@@ -1115,6 +1115,10 @@ U32.slice(i: U32, j: U32, str: String): String
   U32.slice(i, j, str)
 
 // TODO
+U32.to_f64(a: U32): F64
+  U32.to_f64(a)
+
+// TODO
 U32.read_base(base: U32, str: String): U32
   U32.read_base(base, str)
 
@@ -1264,6 +1268,10 @@ F64.gte(a: F64, b: F64): Bool
 // TODO
 F64.gtn(a: F64, b: F64): Bool
   F64.gtn(a, b)
+
+// TODO
+F64.to_u32(a: F64): U32
+  F64.to_u32(a)
 
 // Creates a char from 16 bits
 Char.new
