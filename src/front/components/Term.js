@@ -164,7 +164,7 @@ class Term extends Component {
       var rendered = this.app.draw(this.app.init);
       if (rendered._ === "App.Render.pix") {
         var size = rendered.size;
-        var draw = rendered.draw;
+        var buff = rendered.buff;
         //var size = 256;
         //var draw = (i) => {
           //var col = 0xFF0000FF;
@@ -176,9 +176,8 @@ class Term extends Component {
         //};
         // Renders pixels to buffers
         for (var i = 0; i < size; ++i) {
-          var pix = draw(i);
-          var pos = pix.fst;
-          var col = pix.snd;
+          var pos = buff[i*2+0];
+          var col = buff[i*2+1];
           var p_x = (pos >>> 20) & 0xFFF;
           var p_y = (pos >>> 8) & 0xFFF;
           var p_z = (pos >>> 0) & 0xFF;

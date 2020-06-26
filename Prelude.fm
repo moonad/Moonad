@@ -144,13 +144,25 @@ T App<S: Type>
 // The App type render format
 T App.Render
 | App.Render.txt(text: String);
-| App.Render.pix(size: U32, draw: U32 -> Pair(U32,U32));
+| App.Render.vox(size: U32, buff: Buffer32);
 
 // The App type event format
 T App.Event
 | App.Event.tick(date: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
 | App.Event.ukey(down: Bool, code: U16);
 | App.Event.post(date: U64, auth: String, name: String, head: String, body: String);
+
+// TODO 
+Pos32: Type
+  U32
+
+// TODO 
+Col32: Type
+  U32
+
+// TODO 
+VoxModel: Type
+  Buffer32
 
 // Not represents a logical negation.
 Not(P: Type): Type
@@ -510,7 +522,20 @@ Word.reverse<size: Nat>(word: Word(size)): Word(size)
   def w1  = <size> (rev) Word.1<size>(rev)
   Word.foldl<Word, size>(nil, w0, w1, word)
 
-// Left fold a words
+// Right fold a word
+Word.fold<P: Nat -> Type, m: Nat>
+(nil  : P(Nat.zero))
+(w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)))
+(w1   : <n: Nat> -> P(n) -> P(Nat.succ(n)))
+(word : Word(m))
+: P(m)
+  case word:
+  | nil;
+  | w0<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred));
+  | w1<word.size>(Word.fold<P,word.size>(nil, w0, w1, word.pred));
+  : P(word.size);
+
+// Left fold a word
 Word.foldl<P: Nat -> Type, m: Nat>
 (nil  : P(Nat.zero))
 (w0   : <n: Nat> -> P(n) -> P(Nat.succ(n)))
@@ -530,6 +555,10 @@ Word.foldl<P: Nat -> Type, m: Nat>
     def w1  = <x> w1<Nat.succ(x)>
     Word.foldl<P, word.size>(nil, w0, w1, word.pred);
   : P(word.size);
+
+// Converts a Word to a Nat
+Word.to_nat<size: Nat>(word: Word(size)): Nat
+  Word.fold<()Nat,size>(0, <> Nat.mul(2), <> (x) Nat.succ(Nat.mul(2, x)), word)
 
 // Compares two words
 Word.cmp.go<size: Nat>(a: Word(size), b: Word(size), c: Cmp): Cmp
@@ -639,6 +668,14 @@ List.flatten<A: Type>(xs: List(List(A))): List(A)
   case xs:
   | List.nil<>;
   | List.concat<>(xs.head, List.flatten<>(xs.tail));
+
+// Returns the element at given position.
+List.at<A: Type>(list: List(A), index: Nat): Maybe(A)
+  case list:
+  | Maybe.none<>;
+  | case index:
+    | Maybe.some<>(list.head);
+    | List.at<>(list.tail)(index.pred);;
 
 // Do all elements satisfy a condition?
 List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
@@ -1073,6 +1110,29 @@ U32.or(a: U32, b: U32): U32
 U32.xor(a: U32, b: U32): U32
   U32.xor(a, b)
 
+// TODO
+U32.slice(i: U32, j: U32, str: String): String
+  U32.slice(i, j, str)
+
+// TODO
+U32.read_base(base: U32, str: String): U32
+  U32.read_base(base, str)
+
+// TODO
+U32.length(str: String): U32
+  U32.length(str)
+
+// Helper function
+U32.needed_depth.go(n: U32): Nat
+  if U32.eql(n, 0u) then
+    0
+  else
+    Nat.succ(U32.needed_depth.go(U32.shr(n,1u)))
+
+// Gets the needed depth to fit a number of elements in an Array
+U32.needed_depth(size: U32): Nat
+  U32.needed_depth.go(U32.sub(size, 1u))
+
 // U32 for-loop
 U32.for<S: Type>(state: S, from: U32, til: U32, func: U32 -> S -> S): S
   if U32.eql(from, til) then
@@ -1396,3 +1456,65 @@ IO.bind<A: Type, B: Type>(a: IO(A), f: A -> IO(B)): IO(B)
   | IO.ask<B>(a.query, a.param, (x) IO.bind<A,B>(a.then(x), f));
 IO.monad: Monad(IO)
   Monad.new<IO>(IO.bind, IO.end)
+
+// Logs a message to the console
+Debug.log<A: Type>(s: String, x: Unit -> A): A
+  x(Unit.new)
+
+// TODO 
+Pos32.from_xyz(x: U32, y: U32, z: U32): Pos32
+  let pos = 0u
+  let pos = U32.or(pos, U32.shl(x, 20u))
+  let pos = U32.or(pos, U32.shl(y, 8u))
+  let pos = U32.or(pos, z)
+  pos
+
+// TODO 
+Col32.from_rgba(r: U32, g: U32, b: U32, a: U32): Col32
+  let col = 0u
+  let col = U32.or(col, U32.shl(r, 24u))
+  let col = U32.or(col, U32.shl(g, 16u))
+  let col = U32.or(col, U32.shl(b,  8u))
+  let col = U32.or(col, a)
+  col
+
+// TODO 
+VoxModel.alloc_size(size: U32): VoxModel
+  Buffer32.alloc(U32.needed_depth(U32.mul(2u,size)))
+
+// TODO 
+VoxModel.get_pos(idx: U32, vox: VoxModel): U32
+  Buffer32.get(U32.mul(idx,2u), vox)
+
+// TODO 
+VoxModel.get_col(idx: U32, vox: VoxModel): U32
+  Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox)
+
+// TODO 
+VoxModel.set_pos(idx: U32, pos: U32, vox: VoxModel): VoxModel
+  Buffer32.set(U32.mul(idx,2u), pos, vox)
+
+// TODO 
+VoxModel.set_col(idx: U32, col: U32, vox: VoxModel): VoxModel
+  Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, vox)
+
+// TODO 
+VoxModel.parse_byte(idx: U32, voxdata: String): U32
+  let chr = U32.slice(U32.mul(idx,2u), U32.add(U32.mul(idx,2u),2u), voxdata)
+  U32.read_base(16u, chr)
+
+// TODO 
+VoxModel.parse(voxdata: String): VoxModel
+  let voxsize = U32.div(U32.length(voxdata), 12u)
+  let voxmodel = VoxModel.alloc_size(voxsize);
+  U32.for<VoxModel>(voxmodel, 0u, voxsize)
+  | (i, voxmodel)
+    let x = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 0u), voxdata)
+    let y = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 1u), voxdata)
+    let z = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 2u), voxdata)
+    let r = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 3u), voxdata)
+    let g = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 4u), voxdata)
+    let b = VoxModel.parse_byte(U32.add(U32.mul(i, 6u), 5u), voxdata)
+    let voxmodel = VoxModel.set_col(i, Col32.from_rgba(r,g,b,0u), voxmodel)
+    let voxmodel = VoxModel.set_pos(i, Pos32.from_xyz(x,y,z), voxmodel)
+    voxmodel;

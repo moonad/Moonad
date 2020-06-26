@@ -96,15 +96,15 @@ async function startup() {
   // Static post: Prelude (post)
   var prelude = fs.readFileSync("./Prelude.fm", "utf8");
   var prelude_lines = prelude.split("\n");
+  var in_comment = 0;
   for (var i = 0; i < prelude_lines.length; ++i) {
     if (/[A-Z]/.test(prelude_lines[i][0])) {
       prelude_lines[i] = "\n+" + prelude_lines[i];
+      in_comment = false;
     }
     if (prelude_lines[i].slice(0,3) === "// ") {
-      prelude_lines[i] = prelude_lines[i].slice(3);
-    }
-    if (prelude_lines[i].slice(0,2) === "//") {
-      prelude_lines[i] = prelude_lines[i].slice(2);
+      prelude_lines[i] = (!in_comment ? "\n" : "") + prelude_lines[i].slice(3);
+      in_comment = true;
     }
   };
   await new_post({
