@@ -245,7 +245,6 @@ class Term extends Component {
 
     // Go back to origin post
     var go_back = null;
-    console.log("->", this.poid);
     if (this.poid && this.poid !== "0x0000000000000000") {
       go_back = h("div", {
         style: {
