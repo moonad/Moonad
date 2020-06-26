@@ -163,8 +163,8 @@ class Term extends Component {
       var canvas = this.canvas;
       var rendered = this.app.draw(this.app.init);
       if (rendered._ === "App.Render.vox") {
-        var size = rendered.size;
-        var buff = rendered.buff;
+        var size = rendered.voxs.size;
+        var buff = rendered.voxs.buffer;
         //var size = 256;
         //var draw = (i) => {
           //var col = 0xFF0000FF;

@@ -144,7 +144,7 @@ T App<S: Type>
 // The App type render format
 T App.Render
 | App.Render.txt(text: String);
-| App.Render.vox(size: U32, buff: Buffer32);
+| App.Render.vox(voxs: VoxModel);
 
 // The App type event format
 T App.Event
@@ -161,8 +161,8 @@ Col32: Type
   U32
 
 // TODO 
-VoxModel: Type
-  Buffer32
+T VoxModel
+| VoxModel.new(size: U32, buffer: Buffer32);
 
 // Not represents a logical negation.
 Not(P: Type): Type
@@ -1480,23 +1480,29 @@ Col32.from_rgba(r: U32, g: U32, b: U32, a: U32): Col32
 
 // TODO 
 VoxModel.alloc_size(size: U32): VoxModel
-  Buffer32.alloc(U32.needed_depth(U32.mul(2u,size)))
+  VoxModel.new(size, Buffer32.alloc(U32.needed_depth(U32.mul(2u,size))))
 
 // TODO 
 VoxModel.get_pos(idx: U32, vox: VoxModel): U32
-  Buffer32.get(U32.mul(idx,2u), vox)
+  case vox:
+  | Buffer32.get(U32.mul(idx,2u), vox.buffer);
 
 // TODO 
 VoxModel.get_col(idx: U32, vox: VoxModel): U32
-  Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox)
+  case vox:
+  | Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox.buffer);
 
 // TODO 
 VoxModel.set_pos(idx: U32, pos: U32, vox: VoxModel): VoxModel
-  Buffer32.set(U32.mul(idx,2u), pos, vox)
+  case vox:
+  | let vox.buffer = Buffer32.set(U32.mul(idx,2u), pos, vox.buffer)
+    VoxModel.new(vox.size, vox.buffer);
 
 // TODO 
 VoxModel.set_col(idx: U32, col: U32, vox: VoxModel): VoxModel
-  Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, vox)
+  case vox:
+  | let vox.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, vox.buffer)
+    VoxModel.new(vox.size, vox.buffer);
 
 // TODO 
 VoxModel.parse_byte(idx: U32, voxdata: String): U32
@@ -1526,7 +1532,7 @@ App.demo.0: App(Pair(U32,U32))
     Pair.new<,>(U32.0, U32.0)
   def draw(state)
     get mouse_x mouse_y = state
-    App.Render.vox(256u)
+    App.Render.vox
     | use idx vox = U32.for<>(vox, 0u, 256u)
       let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,16u)),8u) // pixel x
       let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,16u)),8u) // pixel y
