@@ -379,20 +379,17 @@ class Term extends Component {
     }, [head, body]);
   }
   render() {
-    console.log("On render()...");
     const name = this.props.name;
     const defs = this.defs;
 
     if (!defs || !defs[name]) {
       return h("div", {}, "Loading...");
     } else {
-      console.log("Getting type...");
       var type = fm.synt.reduce(this.defs[name].type);
       // If this is an application...
       if ( type.ctor === "App"
         && type.func.ctor === "Ref"
         && type.func.name === "App") {
-        console.log("Rendering app...");
         return this.render_app(type);
       // If this is just a function...
       } else {
