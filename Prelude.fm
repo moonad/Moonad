@@ -1273,6 +1273,16 @@ F64.asin(a: F64): F64
 F64.atan(a: F64): F64
   F64.atan(a)
 
+// Tau constant
+F64.tau: F64
+  6.28318530718
+
+// Rotates a 2D vector around origin
+F64.rotate2d(x: F64, y: F64, a: F64): Pair(F64, F64)
+  let x2 = F64.sub(F64.mul(x, F64.cos(a)), F64.mul(y, F64.sin(a)))
+  let y2 = F64.sub(F64.mul(y, F64.cos(a)), F64.mul(x, F64.sin(a)))
+  Pair.new<,>(x2, y2)
+
 // TODO
 F64.ltn(a: F64, b: F64): Bool
   F64.ltn(a, b)
