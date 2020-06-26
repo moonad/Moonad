@@ -21,16 +21,16 @@ class Term extends Component {
     this.run_term = null;
   }
   async componentDidMount() {
-    this.poid = this.props.poid || (await front.moonad.api.get_orig({name: this.props.name}));
-    front.moonad.do_watch(this.poid);
     try {
+      this.poid = this.props.poid || (await front.moonad.api.get_orig({name: this.props.name}));
+      front.moonad.do_watch(this.poid);
       this.defs = await front.load_core_defs_of({
         name: this.props.name,
         code: this.props.code || null,
       });
       this.forceUpdate();
     } catch (e) {
-      console.log(e());
+      setTimeout(() => this.componentDidMount(), 500);
     }
   }
   async componentWillUnmount() {
@@ -40,6 +40,8 @@ class Term extends Component {
     for (var key in this.listeners) {
       document.body.removeEventListener(key, this.listeners[key]);
     };
+  }
+  load_defs() {
   }
   start_app(name) {
     var js_code = fm.tojs.compile(name, this.defs, true);
