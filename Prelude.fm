@@ -1250,6 +1250,30 @@ F64.pow(a: F64, b: F64): F64
   F64.pow(a, b)
 
 // TODO
+F64.cos(a: F64): F64
+  F64.cos(a)
+
+// TODO
+F64.sin(a: F64): F64
+  F64.sin(a)
+
+// TODO
+F64.tan(a: F64): F64
+  F64.tan(a)
+
+// TODO
+F64.acos(a: F64): F64
+  F64.acos(a)
+
+// TODO
+F64.asin(a: F64): F64
+  F64.asin(a)
+
+// TODO
+F64.atan(a: F64): F64
+  F64.atan(a)
+
+// TODO
 F64.ltn(a: F64, b: F64): Bool
   F64.ltn(a, b)
 
