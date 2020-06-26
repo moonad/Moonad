@@ -112,7 +112,6 @@ class Write extends Component {
     this.pb_width = poster_body_editor.offsetWidth;
     this.pb_height = poster_body_editor.offsetHeight;
     this.pb_scroll = poster_body_editor.scrollTop;
-    poster_body_drawer.scrollTop = this.pb_scroll;
     var render_key = [
       this.post_body,
       this.post_head,
@@ -124,7 +123,7 @@ class Write extends Component {
       String(window.LW),
     ].join("|");
     if (render_key !== this.render_key) {
-      //console.log("update", render_key);
+      poster_body_drawer.scrollTop = this.pb_scroll;
       this.render_key = render_key;
       this.forceUpdate();
     }

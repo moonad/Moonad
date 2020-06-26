@@ -162,7 +162,7 @@ class Term extends Component {
     this.intervals.app_elem = setInterval(() => {
       var canvas = this.canvas;
       var rendered = this.app.draw(this.app.init);
-      if (rendered._ === "App.Render.pix") {
+      if (rendered._ === "App.Render.vox") {
         var size = rendered.size;
         var buff = rendered.buff;
         //var size = 256;
@@ -224,7 +224,7 @@ class Term extends Component {
       case "App.Render.txt":
         app_el = rendered.text;
         break;
-      case "App.Render.pix":
+      case "App.Render.vox":
         app_el = h("span", {id:"app_insert_canvas"});
         break;
     }
