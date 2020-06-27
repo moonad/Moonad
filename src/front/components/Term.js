@@ -180,9 +180,9 @@ class Term extends Component {
         for (var i = 0; i < size; ++i) {
           var pos = buff[i*2+0];
           var col = buff[i*2+1];
-          var p_x = (pos >>> 20) & 0xFFF;
-          var p_y = (pos >>> 8) & 0xFFF;
-          var p_z = (pos >>> 0) & 0xFF;
+          var p_x = (pos >>> 0) & 0xFFF;
+          var p_y = (pos >>> 12) & 0xFFF;
+          var p_z = (pos >>> 24) & 0xFF;
           var idx = p_y * canvas.width + p_x;
           var dep = canvas.depth_u8[idx];
           if (p_z > dep) {
