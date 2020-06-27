@@ -1506,47 +1506,47 @@ Debug.log<A: Type>(s: String, x: Unit -> A): A
 // TODO 
 Pos32.from_xyz(x: U32, y: U32, z: U32): Pos32
   let pos = 0u
-  let pos = U32.or(pos, U32.shl(x, 20u))
-  let pos = U32.or(pos, U32.shl(y, 8u))
-  let pos = U32.or(pos, z)
+  let pos = U32.or(pos, x)
+  let pos = U32.or(pos, U32.shl(y, 12u))
+  let pos = U32.or(pos, U32.shl(z, 24u))
   pos
 
 // TODO 
 Pos32.get_x(pos: Pos32): U32
-  U32.shr(pos, 20u)
+  U32.and(pos, 2047u)
 
 // TODO 
 Pos32.get_y(pos: Pos32): U32
-  U32.and(U32.shr(pos, 8u), 2047u)
+  U32.and(U32.shr(pos, 12u), 2047u)
 
 // TODO 
 Pos32.get_z(pos: Pos32): U32
-  U32.and(pos, 255u)
+  U32.shr(pos, 24u)
 
 // TODO 
 Col32.from_rgba(r: U32, g: U32, b: U32, a: U32): Col32
   let col = 0u
-  let col = U32.or(col, U32.shl(r, 24u))
-  let col = U32.or(col, U32.shl(g, 16u))
-  let col = U32.or(col, U32.shl(b,  8u))
-  let col = U32.or(col, a)
+  let col = U32.or(col, r)
+  let col = U32.or(col, U32.shl(g, 8u))
+  let col = U32.or(col, U32.shl(b, 16u))
+  let col = U32.or(col, U32.shl(a, 24u))
   col
 
 // TODO 
 Col32.get_r(col: Col32): U32
-  U32.shr(col, 24u)
+  U32.and(col, 255u)
 
 // TODO 
 Col32.get_g(col: Col32): U32
-  U32.and(U32.shr(col, 16u), 255u)
-
-// TODO 
-Col32.get_b(col: Col32): U32
   U32.and(U32.shr(col, 8u), 255u)
 
 // TODO 
+Col32.get_b(col: Col32): U32
+  U32.and(U32.shr(col, 16u), 255u)
+
+// TODO 
 Col32.get_a(col: Col32): U32
-  U32.and(col, 255u)
+  U32.and(U32.shr(col, 24u), 255u)
 
 // TODO 
 VoxModel.alloc_size(size: U32): VoxModel
