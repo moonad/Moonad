@@ -1,0 +1,3 @@
+// Computes the length of the string as a U32.
+String.length32(xs: String): U32
+  String.length32.go(xs, U32.0)

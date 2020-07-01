@@ -1,0 +1,2 @@
+Parser.State.consumed(x: Parser.State, y: Parser.State): Bool
+  case x: | case y: | Nat.gtn(y.pos,x.pos);;

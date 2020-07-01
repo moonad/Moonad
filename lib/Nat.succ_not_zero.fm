@@ -1,0 +1,4 @@
+Nat.succ_not_zero(a: Nat): Not(Nat.succ(a) == 0)
+  (eq)
+  def P = (x) case x: | Empty; | Unit;
+  Equal.rewrite<Nat, Nat.succ(a), 0, P>(eq, Unit.new)

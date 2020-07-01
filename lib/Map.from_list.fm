@@ -1,0 +1,5 @@
+Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))) : Map(B)
+  case xs:
+  | Map.new<>;
+  | get k v = xs.head
+    Map.set<>(f(k),v,Map.from_list<,>(f,xs.tail));

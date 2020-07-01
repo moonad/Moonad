@@ -1,0 +1,10 @@
+// Proof that true != false
+Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
+  def P(b : Bool)
+    case b:
+    | Unit;
+    | Empty;
+  def p_true
+    Unit.new
+  (true_is_false)
+    Equal.rewrite<_,_,_,P>(true_is_false, p_true)

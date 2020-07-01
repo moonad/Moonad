@@ -1,0 +1,2 @@
+T ECDSA.QRS
+| ECDSA.QRS.new(p: ECDSA.Point, r: Nat, s: Nat);

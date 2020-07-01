@@ -1,0 +1,3 @@
+Arelin.Thing.get_nam(thi: Arelin.Thing): String
+  case thi: 
+  | thi.nam;

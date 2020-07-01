@@ -1,0 +1,7 @@
+Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
+  case map:
+  | Map.new<>;
+  | case key:
+    | Map.tie<>(Maybe.none<>,map.lft,map.rgt);
+    | Map.delete<>(key.pred,map.lft);
+    | Map.delete<>(key.pred,map.rgt);;

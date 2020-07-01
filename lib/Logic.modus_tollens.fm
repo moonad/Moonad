@@ -1,0 +1,3 @@
+// (P -> Q) ∧ ¬Q |- ¬P
+Logic.modus_tollens<P: Type, Q: Type>(implies: P -> Q, not_q: Not(Q)) : Not(P)
+  (x) not_q(implies(x))

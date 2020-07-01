@@ -1,0 +1,12 @@
+T Arelin.Game.Effect 
+| Arelin.Game.Effect.heal(lif: F64);
+| Arelin.Game.Effect.damage(dmg: F64);
+| Arelin.Game.Effect.repulse(mag: F64);
+| Arelin.Game.Effect.impulse(mag: F64, dir: F64.V3);
+| Arelin.Game.Effect.slow(dur: F64, val: F64);
+| Arelin.Game.Effect.haste(dur: F64, val: F64);
+| Arelin.Game.Effect.shield(dur: F64, val: F64);
+| Arelin.Game.Effect.silence(dur: F64);
+| Arelin.Game.Effect.root(dur: F64);
+| Arelin.Game.Effect.stun(dur: F64);
+| Arelin.Game.Effect.teleport_to(to_pos: F64.V3, all: F64); //1: everyone, 0: only team mates

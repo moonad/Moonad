@@ -1,0 +1,11 @@
+// auto-backtracks when erroring
+Parser.token<A: Type>(f: Char -> Maybe(A), es: List(Parser.Item)) : Parser(A)
+  (s1) get pos str errs = s1
+  case str:
+  | def e = Parser.Error.new(pos,Maybe.some<>(Parser.Item.eof),es)
+    Parser.Reply.err<>(s1,e);
+  | case f(str.head):
+    | def unx = Maybe.some<>(Parser.Item.tokens(String.pure(str.head)))
+      Parser.Reply.err<>(s1,Parser.Error.new(pos,unx,es));
+    | def s2 = Parser.State.make(Nat.succ(pos), str.tail, errs);
+      Parser.Reply.val<>(s2,self.value);;

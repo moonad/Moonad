@@ -1,0 +1,3 @@
+Arelin.Thing.get_act(thi: Arelin.Thing): Arelin.Game.ActionId
+  case thi: 
+  | thi.act;

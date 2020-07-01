@@ -1,0 +1,4 @@
+Module.Row(field: String, T: Type, m: Module) : Type
+  case Map.get<Export>(String.to_bits(field),m) as got:
+  | Empty;
+  | Equal(Type,T,Export.T(got.value));

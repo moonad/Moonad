@@ -1,0 +1,4 @@
+String.reverse.go(xs: String, res: String): String
+  case xs:
+  | res;
+  | String.reverse.go(xs.tail,String.cons(xs.head,res));

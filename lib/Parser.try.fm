@@ -1,0 +1,5 @@
+Parser.try<A: Type>(p: Parser(A)): Parser(A)
+  (s1)
+  case p(s1):
+  | Parser.Reply.val<>(self.state, self.value);
+  | Parser.Reply.err<>(s1,self.error);

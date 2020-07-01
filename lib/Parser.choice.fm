@@ -1,0 +1,4 @@
+Parser.choice<A: Type>(ps : List(Parser(A))) : Parser(A)
+  case ps:
+  | Parser.zero<>;
+  | Parser.plus<>(ps.head,Parser.choice<>(ps.tail));

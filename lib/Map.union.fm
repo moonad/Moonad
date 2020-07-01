@@ -1,0 +1,9 @@
+// combines two maps, preferring the left-hand map in case of duplicates entries
+Map.union<A: Type>(a: Map(A), b: Map(A)) : Map(A)
+  case a:
+  | b;
+  | case b:
+    | a;
+    | case a.val:
+      | Map.tie<>(b.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));
+      | Map.tie<>(a.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));;;

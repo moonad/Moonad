@@ -1,0 +1,8 @@
+List.subsequences.go<A: Type>(xs: List(A)): List(List(A))
+  case xs:
+  | List.nil<>;
+  | let f = ((ys,r) List.cons<>(ys,List.cons<>(List.cons<>(xs.head,ys),r)))
+        :: List(A) -> List(List(A)) -> List(List(A))
+    List.cons<>
+    | List.pure<>(xs.head);
+    | List.foldr<,>(List.nil<>,f,List.subsequences.go<>(xs.tail));;

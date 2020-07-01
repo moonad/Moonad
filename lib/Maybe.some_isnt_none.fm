@@ -1,0 +1,3 @@
+Maybe.some_isnt_none<A: Type>(x: A) : Not(Equal(Maybe(A),Maybe.some<A>(x),Maybe.none<A>))
+  def P = ((x) case x: | Empty; | Unit;) :: Maybe(A) -> Type
+  (e) Equal.rewrite<Maybe(A), Maybe.some<A>(x), Maybe.none<A>,P>(e, Unit.new)

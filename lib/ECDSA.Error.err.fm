@@ -1,0 +1,2 @@
+ECDSA.Error.err<A: Type>(err: ECDSA.ErrorTypes): ECDSA.Error(A)
+  Either.left<ECDSA.ErrorTypes, A>(err)

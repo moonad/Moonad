@@ -1,0 +1,5 @@
+// Concatenates two lists.
+List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
+  case as:
+  | bs;
+  | List.cons<>(as.head, List.concat<>(as.tail,bs));

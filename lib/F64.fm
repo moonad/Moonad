@@ -1,0 +1,3 @@
+// An IEEE-754 compliant 64-bit floating point.
+T F64
+| F64.new (a: Word(64));

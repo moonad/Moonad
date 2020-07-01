@@ -1,0 +1,13 @@
+ECDSA.get_QRS_RFC6979.aux(priv: Nat, k: U8_Vector(32), v: U8_Vector(32), h1n: Nat, i: Nat): ECDSA.Error(ECDSA.QRS)
+  // Step H3, repeat until 1 < T < n - 1
+  case Nat.ltn(i, 1000):
+  | let v = ECDSA.hmacSha256<32, 32>(k, v)
+    let T = U8_Vector.to_number<32>(v)
+    case ECDSA.QRS.from_k(T, h1n, priv) as m:
+    | let b0 = U8_Vector.fill(1, U8.parse_hex("0"))
+      let vec = U8_Vector.concat<1, 32>(b0, v)
+      let k = ECDSA.hmacSha256<32, 33>(k, vec)
+      let v = ECDSA.hmacSha256<32, 32>(k, v)
+      ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, Nat.succ(i));
+    | ECDSA.Error.ok<ECDSA.QRS>(m.value);;
+  | ECDSA.Error.err<ECDSA.QRS>(ECDSA.ErrorTypes.could_not_find_k);

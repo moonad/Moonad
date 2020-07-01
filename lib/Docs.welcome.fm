@@ -1,0 +1,5 @@
+Docs.welcome: IO(Unit)
+  do IO {
+    var name = IO.prompt("What is your name?");
+    IO.print(String.concat("Welcome, ", name));
+  }

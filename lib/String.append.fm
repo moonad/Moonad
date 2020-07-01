@@ -1,0 +1,5 @@
+// Appends character to the end of the string.
+String.append(as: String, a: Char): String
+  case as:
+  | String.pure(a);
+  | String.cons(as.head,String.append(as.tail, a));

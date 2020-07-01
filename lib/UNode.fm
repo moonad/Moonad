@@ -1,0 +1,3 @@
+T UNode
+| UNode.root(rank: Nat);
+| UNode.link(parent: Bits);

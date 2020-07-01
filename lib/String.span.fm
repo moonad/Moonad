@@ -1,0 +1,7 @@
+String.span(f: Char -> Bool, xs: String): Pair(String,String)
+  case xs:
+  | Pair.new<,>(String.nil,String.nil);
+  | case f(xs.head):
+    | get y z = String.span(f,xs.tail)
+      Pair.new<,>(String.cons(xs.head,y),z);
+    | Pair.new<,>(String.nil,xs);;

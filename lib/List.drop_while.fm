@@ -1,0 +1,7 @@
+// Remove elements while a condition is true
+List.drop_while<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  case xs:
+  | List.nil<>;
+  | case f(xs.head):
+    | List.drop_while<>(f,xs.tail);
+    | xs;;

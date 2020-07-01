@@ -1,0 +1,4 @@
+Nat.is_zero(n: Nat): Bool
+  case n:
+  | Bool.true;
+  | Bool.false;

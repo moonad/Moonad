@@ -1,0 +1,2 @@
+ECDSA.Jacobian.normalizeZ(p: ECDSA.Jacobian): ECDSA.Jacobian
+  ECDSA.Jacobian.from_point(ECDSA.Jacobian.to_point(p))

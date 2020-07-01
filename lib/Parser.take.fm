@@ -1,0 +1,11 @@
+Parser.take(lbl: String, n: Nat) : Parser(String)
+  (s1)
+  get pos str errs = s1
+  get took rest = String.split_at(n,str)
+  def len = String.length(took)
+  def s2 = Parser.State.make(Nat.add(pos,len),rest,errs)
+  case Nat.eql(len,n):
+  | Parser.Reply.val<>(s2,took);
+  | def l = List.pure<>(Parser.Item.label(lbl))
+    def e = Parser.Error.new(Nat.add(pos,len),Maybe.some<>(Parser.Item.eof),l);
+    Parser.Reply.err<>(s2,e);

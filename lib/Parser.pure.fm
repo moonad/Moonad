@@ -1,0 +1,2 @@
+Parser.pure<A: Type>(a: A): Parser(A)
+  (s1) Parser.Reply.val<>(s1,a)

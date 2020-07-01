@@ -1,0 +1,9 @@
+Int.new(x: Nat, y: Nat): Int
+  <P> (new)
+  case x:
+  | new(Nat.zero, y);
+  | case y:
+    | new(Nat.succ(x.pred), Nat.zero);
+    | Int.new(Nat.sub(x.pred, y.pred), Nat.sub(y.pred, x.pred))<P>(new);
+    : P(Int.new(Nat.succ(x.pred), y.self));;
+  : P(Int.new(x.self, y));

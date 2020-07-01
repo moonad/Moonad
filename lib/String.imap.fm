@@ -1,0 +1,5 @@
+// Map over a string with the index
+String.imap(f: Nat -> Char -> Char, xs: String): String
+  case xs:
+  | String.nil;
+  | String.cons(f(0,xs.head),String.imap((n) f(Nat.succ(n)),xs.tail));

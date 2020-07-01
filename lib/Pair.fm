@@ -1,0 +1,2 @@
+T Pair<A: Type, B: Type>
+| Pair.new(fst: A, snd: B);

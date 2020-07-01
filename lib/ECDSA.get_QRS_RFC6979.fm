@@ -1,0 +1,30 @@
+// Deterministic k generation as per RFC6979.
+// Generates k, and then calculates Q & Signature {r, s} based on it.
+// https://tools.ietf.org/html/rfc6979#section-3.1
+ECDSA.get_QRS_RFC6979(msgHash: String, priv: Nat): ECDSA.Error(ECDSA.QRS)
+  // Step A is ignored, since we already provide hash instead of msg
+  let num = Nat.parse_hex(msgHash)
+  let h1 = U8_Vector.from_nat(32, num)
+  let x = U8_Vector.from_nat(32, priv)
+  let h1n = U8_Vector.to_number<32>(h1)
+  // Step B
+  let v = U8_Vector.fill(32, U8.parse_hex("1"))
+  // Step C
+  let k = U8_Vector.fill(32, U8.parse_hex("0"))
+  let b0 = U8_Vector.fill(1, U8.parse_hex("0"))
+  let b1 = U8_Vector.fill(1, U8.parse_hex("1"))
+  // Step D
+  let vec = U8_Vector.concat<32, 32>(x, h1)
+  let vec = U8_Vector.concat<1, 64>(b0, vec)
+  let vec = U8_Vector.concat<32, 65>(v, vec)
+  let k = ECDSA.hmacSha256<32, 97>(k, vec)
+  // Step E
+  let v = ECDSA.hmacSha256<32, 32>(k, v)
+  // Step F
+  let vec = U8_Vector.concat<32, 32>(x, h1)
+  let vec = U8_Vector.concat<1, 64>(b1, vec)
+  let vec = U8_Vector.concat<32, 65>(v, vec)
+  let k = ECDSA.hmacSha256<32, 97>(k, vec)
+  // Step G
+  let v = ECDSA.hmacSha256<32, 32>(k, v)
+  ECDSA.get_QRS_RFC6979.aux(priv, k, v, h1n, 0)

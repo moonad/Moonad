@@ -1,0 +1,5 @@
+// An integer is a pair of nats quotiented by `(suc x, suc y) ~ (x, y)`
+Int: Type
+  int<P: Int -> Type> ->
+  (new: (x: Nat) -> (y: Nat) -> P(Int.new(x, y))) ->
+  P(int)

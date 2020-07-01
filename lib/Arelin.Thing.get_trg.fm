@@ -1,0 +1,3 @@
+Arelin.Thing.get_trg(thi: Arelin.Thing): F64.V3
+  case thi: 
+  | thi.trg;

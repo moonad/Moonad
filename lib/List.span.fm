@@ -1,0 +1,7 @@
+List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
+  case xs:
+  | Pair.new<,>(List.nil<>,List.nil<>);
+  | case f(xs.head):
+    | get y z = List.span<>(f,xs.tail)
+      Pair.new<,>(List.cons<>(xs.head,y),z);
+    | Pair.new<,>(List.nil<>,xs);;

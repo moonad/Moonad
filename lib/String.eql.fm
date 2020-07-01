@@ -1,0 +1,6 @@
+String.eql(a: String, b: String): Bool
+  case a:
+  | case b: | Bool.true; | Bool.false;;
+  | case b:
+    | Bool.false;
+    | Bool.and(U16.eql(a.head,b.head),String.eql(a.tail,b.tail));;

@@ -1,0 +1,2 @@
+Or.lft<A: Type,B: Type>(x: A): Or(A,B)
+  Either.left<_,_>(x)

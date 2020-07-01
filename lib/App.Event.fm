@@ -1,0 +1,4 @@
+T App.Event
+| App.Event.tick(date: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
+| App.Event.ukey(down: Bool, code: U16);
+| App.Event.post(date: U64, auth: String, name: String, head: String, body: String);

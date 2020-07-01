@@ -1,0 +1,2 @@
+ECDSA.Jacobian.base: ECDSA.Jacobian
+  ECDSA.Jacobian.new(ECDSA.CURVE.Gx, ECDSA.CURVE.Gy, 1)

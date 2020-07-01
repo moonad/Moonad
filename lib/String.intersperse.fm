@@ -1,0 +1,7 @@
+// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+String.intersperse(sep: Char, xs: String): String
+  case xs:
+  | String.nil;
+  | case xs.tail:
+    | String.pure(xs.head);
+    | String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)));;

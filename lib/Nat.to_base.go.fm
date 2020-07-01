@@ -1,0 +1,5 @@
+Nat.to_base.go(base: Nat, nat: Nat, res: List(Nat)): List(Nat) //loop//
+  get d m = Nat.div_mod(nat, base)
+  case d:
+  | List.cons<>(m,res);
+  | Nat.to_base.go(base,d,List.cons<>(m,res));

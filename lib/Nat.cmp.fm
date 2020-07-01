@@ -1,0 +1,9 @@
+// Compares two nats
+Nat.cmp(a: Nat, b: Nat): Cmp
+  case a:
+  | case b:
+    | Cmp.eql;
+    | Cmp.ltn;;
+  | case b:
+    | Cmp.gtn;
+    | Nat.cmp(a.pred, b.pred);;

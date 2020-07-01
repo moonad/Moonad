@@ -1,0 +1,5 @@
+Bits.reverse.tco(a: Bits, r: Bits): Bits
+  case a:
+  | r;
+  | Bits.reverse.tco(a.pred, Bits.0(r));
+  | Bits.reverse.tco(a.pred, Bits.1(r));

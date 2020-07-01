@@ -1,0 +1,2 @@
+Or.rgt<A: Type,B: Type>(x: B): Or(A,B)
+  Either.right<_,_>(x)

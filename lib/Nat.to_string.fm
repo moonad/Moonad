@@ -1,0 +1,4 @@
+Nat.to_string(n: Nat): String
+  case n:
+  | String.cons(Char.parse("z"), String.nil);
+  | String.cons(Char.parse("s"), Nat.to_string(n.pred));

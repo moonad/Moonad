@@ -1,0 +1,2 @@
+ECDSA.Jacobian.base.precomputes: List(ECDSA.Jacobian)
+  ECDSA.Jacobian.normalizeZ_batch(ECDSA.Jacobian.precompute_window(ECDSA.Jacobian.base, ECDSA.Jacobian.base.window_size))

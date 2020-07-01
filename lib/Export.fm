@@ -1,0 +1,2 @@
+T Export
+| Export.new(T: Type, value: T);

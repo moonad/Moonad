@@ -1,0 +1,7 @@
+Parser.eof: Parser(Unit)
+  (s1) get pos str errs = s1
+  case str:
+  | Parser.Reply.val<>(s1,Unit.new);
+  | def unx = Maybe.some<>(Parser.Item.tokens(String.pure(str.head)))
+    def err = Parser.Error.new(pos,unx,List.pure<>(Parser.Item.eof))
+    Parser.Reply.err<>(s1,err);

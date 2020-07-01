@@ -1,0 +1,4 @@
+//// Getters and setters
+Arelin.Thing.get_fun(thi: Arelin.Thing): Arelin.Game.TxFunction
+  case thi:
+  | thi.fun;

@@ -1,0 +1,11 @@
+// Get the all characters of a nonempty string except the last one
+String.init(xs: String, not_empty: String.not_empty(xs)) : String
+  case xs:
+  with ne : String.not_empty(xs.self) = not_empty;
+  | Empty.absurd<>(ne);
+  | case xs.tail:
+    with e : Equal(_, xs.tail.self,xs.tail) = Equal.to<String,xs.tail>;
+    | String.nil;
+    | def cne = String.cons_isnt_empty(xs.tail.head,xs.tail.tail)
+      def xne = Equal.rewrite<_,_,_,(x) String.not_empty(x)>(e,cne)
+      String.cons(xs.head,String.init(xs.tail,xne));;

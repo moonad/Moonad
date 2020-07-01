@@ -1,0 +1,3 @@
+Arelin.Thing.get_mid(thi: Arelin.Thing): Arelin.Game.ModelId
+  case thi: 
+  | thi.mid;

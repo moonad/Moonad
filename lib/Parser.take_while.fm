@@ -1,0 +1,6 @@
+Parser.take_while(f: Char -> Bool): Parser(String)
+  (s1)
+  get pos str errs = s1
+  get took rest = String.span(f,str)
+  def len = String.length(took)
+  Parser.Reply.val<>(Parser.State.make(Nat.add(pos,len),rest,errs),took)

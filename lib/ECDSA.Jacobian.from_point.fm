@@ -1,0 +1,3 @@
+ECDSA.Jacobian.from_point(p: ECDSA.Point): ECDSA.Jacobian
+  get p.x p.y = p
+  ECDSA.Jacobian.new(p.x, p.y, 1)

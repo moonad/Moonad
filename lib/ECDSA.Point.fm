@@ -1,0 +1,3 @@
+// ECDSA.Point works in default coordinates. Public keys are represented by points.
+T ECDSA.Point
+| ECDSA.Point.new(x: Nat, y: Nat);

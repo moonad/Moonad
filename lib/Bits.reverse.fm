@@ -1,0 +1,3 @@
+// Reverses a bistring.
+Bits.reverse(a: Bits): Bits
+  Bits.reverse.tco(a, Bits.nil)

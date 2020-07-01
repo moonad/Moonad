@@ -1,0 +1,3 @@
+ECDSA.Jacobian.negate(p: ECDSA.Jacobian): ECDSA.Jacobian
+  get p.x p.y p.z = p
+  ECDSA.Jacobian.new(p.x, ECDSA.negate(p.y), p.z)

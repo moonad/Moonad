@@ -1,0 +1,3 @@
+// The bind function of the list Monad.
+List.bind<A: Type,B: Type>(xs: List(A), f: A -> List(B)): List(B)
+  List.flatten<>(List.map<,>(f)(xs))

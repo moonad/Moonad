@@ -1,0 +1,30 @@
+Arelin.Thing.set_pos(thi: Arelin.Thing, new_pos: F64.V3) : Arelin.Thing
+  case thi:
+  | Arelin.Thing.new
+    | thi.fun;
+    | thi.pid;
+    | thi.mid;
+    | thi.act;
+    | thi.sid;
+    | thi.stt;
+    | thi.nam;
+    | thi.lit;
+    | thi.tik;
+    | new_pos;
+    | thi.mov;
+    | thi.bst;
+    | thi.pad;
+    | thi.dir;
+    | thi.trg;
+    | thi.vel;
+    | thi.box;
+    | thi.wei;
+    | thi.mhp;
+    | thi.dmg;
+    | thi.knk;
+    | thi.buf;
+    | thi.chi;
+    | thi.hit;
+    | thi.rst;
+    | thi.die;
+  ;

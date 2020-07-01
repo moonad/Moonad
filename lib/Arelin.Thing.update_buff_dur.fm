@@ -1,0 +1,55 @@
+Arelin.Thing.update_buff_dur(self: Arelin.Thing): Arelin.Thing
+  let self.buf = Arelin.Thing.get_buf(self)
+  let fn = ((buff) (acc) 
+    case buff:
+    | #shielded# 
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.shielded(F64.sub(buff.dur, F64.1), buff.val); 
+        | acc;
+      ;  
+    ;
+    | #slowed#   
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.slowed(F64.sub(buff.dur, F64.1), buff.val);
+        | acc;
+      ;
+    ; 
+    | #hasted#   
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.hasted(F64.sub(buff.dur, F64.1), buff.val);
+        | acc;
+      ;
+    ;
+    | #silenced# 
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.silenced(F64.sub(buff.dur, F64.1));
+        | acc;
+      ;
+    ;
+    | #rooted#   
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.rooted(F64.sub(buff.dur, F64.1));
+        | acc;
+      ;
+    ;
+    | #stunned# 
+      case F64.eql(buff.dur, F64.0):
+      | acc;
+      | List.cons<>
+        | Arelin.Game.Buff.stunned(F64.sub(buff.dur, F64.1));
+        | acc;
+      ;
+    ;
+  ) :: Arelin.Game.Buff -> List(Arelin.Game.Buff) -> List(Arelin.Game.Buff)
+  let new_buf = List.foldr<><>(List.nil<>, fn, self.buf)
+  Arelin.Thing.set_buf(self, new_buf)

@@ -1,0 +1,2 @@
+ECDSA.Point.base.mul(n: Nat): ECDSA.Point
+  ECDSA.Jacobian.to_point(ECDSA.Jacobian.base.mul(n))

@@ -1,0 +1,9 @@
+
+Arelin.Game.combine_mov_buffs(buff: Arelin.Game.Buff, i: F64): F64
+  case buff:
+  | #shielded# i;
+  | #slowed#   F64.mul(i)(buff.val);
+  | #hasted#   F64.mul(i)(buff.val);
+  | #silenced# i;
+  | #rooted#   F64.0;
+  | #stuned#   F64.0;

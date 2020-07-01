@@ -1,0 +1,2 @@
+Logic.composition<P: Type,Q: Type,R: Type>(f: P -> Q, g: P -> R, p: P): And(Q,R)
+  And.new<_,_>(f(p),g(p))

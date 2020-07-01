@@ -1,0 +1,10 @@
+ECDSA.Jacobian.equal(a: ECDSA.Jacobian, b: ECDSA.Jacobian): Bool
+  get a.x a.y a.z = a
+  get b.x b.y b.z = b
+  let a.z2 = ECDSA.mod(Nat.mul(a.z, a.z))
+  let a.z3 = ECDSA.mod(Nat.mul(a.z, a.z2))
+  let b.z2 = ECDSA.mod(Nat.mul(b.z, b.z))
+  let b.z3 = ECDSA.mod(Nat.mul(b.z, b.z2))
+  let eq1 = Nat.eql(ECDSA.mod(Nat.mul(a.x, b.z2)), ECDSA.mod(Nat.mul(b.x, a.z2)))
+  let eq2 = Nat.eql(ECDSA.mod(Nat.mul(a.y, b.z3)), ECDSA.mod(Nat.mul(b.y, a.z3)))
+  Bool.and(eq1, eq2)

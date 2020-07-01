@@ -1,0 +1,4 @@
+String.length.go(xs: String, n: Nat): Nat
+  case xs:
+  | n;
+  | String.length.go(xs.tail, Nat.succ(n));

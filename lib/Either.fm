@@ -1,0 +1,4 @@
+// A container for either a value of type A or a value of type B.
+T Either<A: Type, B: Type>
+| Either.left(value: A);
+| Either.right(value: B);

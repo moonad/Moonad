@@ -1,0 +1,4 @@
+T Arelin.Game.Hitbox 
+| Arelin.Game.Hitbox.nbox;
+| Arelin.Game.Hitbox.cbox(rad: F64);
+| Arelin.Game.Hitbox.pbox(pts: List(F64.V3));

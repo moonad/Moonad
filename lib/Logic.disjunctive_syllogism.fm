@@ -1,0 +1,5 @@
+// Modus tollendo ponens: ((P ∨ Q) ∧ ¬P) |- Q
+Logic.disjunctive_syllogism<P: Type, Q: Type>(c: Or(P,Q), not_p: Not(P)) : Q
+ c<() Q>
+ | (x) Empty.absurd<>(not_p(x));
+ | (x) x;

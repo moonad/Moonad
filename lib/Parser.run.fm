@@ -1,0 +1,2 @@
+Parser.run<A: Type>(p: Parser(A), s: String): Parser.Reply(A)
+  p(Parser.State.new(s))

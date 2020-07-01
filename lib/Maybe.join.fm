@@ -1,0 +1,4 @@
+Maybe.join<A: Type>(m: Maybe(Maybe(A))): Maybe(A)
+  case m:
+  | Maybe.none<A>;
+  | m.value;

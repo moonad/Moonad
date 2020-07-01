@@ -1,0 +1,7 @@
+ECDSA.Point.from_uncompressed_bytes(bytes: U8_Vector(65)): ECDSA.Error(ECDSA.Point)
+  get head tail = Vector.extract<U8, 64>(bytes)
+  get x y = Vector.split_at<U8, 64>(tail, 32)
+  let x = U8_Vector.to_number<32>(x)
+  let y = U8_Vector.to_number<32>(y)
+  let point = ECDSA.Point.new(x, y)
+  ECDSA.Point.valid_point(point)

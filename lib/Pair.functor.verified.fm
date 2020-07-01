@@ -1,0 +1,2 @@
+Pair.functor.verified<A: Type>: VerifiedFunctor(Pair(A), Pair.functor<A>)
+  VerifiedFunctor.new<Pair(A), Pair.functor<A>>(Pair.map.id<A>, Pair.map.comp<A>)

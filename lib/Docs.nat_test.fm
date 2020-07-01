@@ -1,0 +1,2 @@
+Docs.nat_test: Nat
+  Nat.add(1, 3)

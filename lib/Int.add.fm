@@ -1,0 +1,4 @@
+Int.add(a: Int, b: Int): Int
+  get a.x a.y = a
+  case b:
+  | Int.new(Nat.add(a.x, b.x), Nat.add(a.y, b.y));

@@ -1,0 +1,16 @@
+Arelin.Thing.map_stt_key(
+  self    : Arelin.Thing,
+  stt_key : Bits,
+  fn      : F64 -> F64
+  ) : Arelin.Thing
+  let stt = Arelin.Thing.get_stt(self)
+  let get_stt = Map.get<>(stt_key, stt)
+  case get_stt:
+  | #none# 
+    Arelin.Thing.set_stt
+    | self;
+    | Map.set<>(stt_key, F64.0, stt);;
+  | #some#
+    Arelin.Thing.set_stt 
+    | self;
+    | Map.set<>(stt_key, fn(get_stt.value), stt);;

@@ -1,0 +1,3 @@
+ECDSA.sign(msgHash: String, priv: Nat): ECDSA.Error(String)
+  use qrs = ECDSA.Error.bind<,>(ECDSA.get_QRS_RFC6979(msgHash, priv))
+  ECDSA.Error.ok<>(ECDSA.sign_qrs(priv, qrs))

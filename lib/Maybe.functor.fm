@@ -1,0 +1,3 @@
+// The functor instance for maybe
+Maybe.functor: Functor(Maybe)
+  Functor.new<Maybe>(Maybe.map)

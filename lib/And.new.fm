@@ -1,0 +1,2 @@
+And.new<A: Type,B: Type>(x: A,y:B) : And(A,B)
+  Pair.new<A,B>(x,y)

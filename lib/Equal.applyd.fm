@@ -1,0 +1,5 @@
+Equal.applyd<A: Type, B: A -> Type, a: A, b: A>(f: (x: A) -> B(x), e: Equal(A, a, b))
+  : Equal(B(a), f(a), Equal.rewrite<A,b,a,B>(Equal.mirror<A,a,b>(e))(f(b)))
+  case e:
+  | Equal.to<B(a)><f(a)>;
+  : Equal(B(a), f(a), Equal.rewrite<A,e.b,a,B>(Equal.mirror<A,a,e.b>(e.self),f(e.b)));

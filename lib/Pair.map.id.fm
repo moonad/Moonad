@@ -1,0 +1,4 @@
+Pair.map.id<A: Type, B: Type>(p: Pair(A, B)): Equal(Pair(A, B), Pair.map<A, B, B>(Function.id<B>, p), p)
+  case p:
+  | _;
+  : Equal(_, Pair.map<A,B,B>(Function.id<>, p.self), p.self);

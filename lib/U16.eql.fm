@@ -1,0 +1,5 @@
+// a == b
+U16.eql(a: U16, b: U16): Bool
+  get a_val = a
+  get b_val = b 
+  Word.eql<>(a_val, b_val)

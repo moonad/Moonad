@@ -1,0 +1,8 @@
+UFind.find(uf: UFind, path: Bits): <B: Type> -> (UFind -> Bits -> Nat -> B) -> B
+  <B> (k)
+  get node uf = Map.lookup<UNode>(path, UNode.root(Nat.zero), uf)
+  case node:
+  | k(uf, path, node.rank);
+  | get uf root rank = UFind.find(uf, node.parent)
+    let uf = Map.set<UNode>(path, UNode.link(root), uf)
+    k(uf, root, rank);

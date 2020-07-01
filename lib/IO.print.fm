@@ -1,0 +1,3 @@
+IO.print(text: String): IO(Unit)
+  use skip = IO.ask<Unit>("print", text)
+  IO.end<Unit>(Unit.new)

@@ -1,0 +1,3 @@
+// Proof that Maybe.functor conforms to the functor laws
+Maybe.functor.verified: VerifiedFunctor(Maybe, Maybe.functor)
+  VerifiedFunctor.new<Maybe, Maybe.functor>(Maybe.map.id, Maybe.map.comp)

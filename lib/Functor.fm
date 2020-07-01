@@ -1,0 +1,4 @@
+T Functor<F: Type -> Type>
+| Functor.new(
+  map: <A: Type, B: Type> -> (A -> B) -> F(A) -> F(B)
+  );

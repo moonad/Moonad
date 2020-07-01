@@ -1,0 +1,5 @@
+Word.nat_log2.go<size: Nat>(word: Word(size), c: Nat, n: Nat): Nat
+  case word:
+  | n;
+  | Word.nat_log2.go<word.size>(word.pred, Nat.succ(c), n);
+  | Word.nat_log2.go<word.size>(word.pred, Nat.succ(c), c);

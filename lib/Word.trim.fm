@@ -1,0 +1,9 @@
+// Converts a word to another size, removing bits or adding zeroes as needed.
+Word.trim<size: Nat>(new_size: Nat, word: Word(size)): Word(new_size)
+  case new_size:
+  | Word.nil;
+  | case word:
+    | Word.0<new_size.pred>(Word.trim<Nat.zero>(new_size.pred, Word.nil));
+    | Word.0<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));
+    | Word.1<new_size.pred>(Word.trim<word.size>(new_size.pred, word.pred));;
+  : Word(new_size.self);

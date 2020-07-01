@@ -1,0 +1,3 @@
+Arelin.Thing.get_pad(thi: Arelin.Thing): F64.V3
+  case thi: 
+  | thi.pad;

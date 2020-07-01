@@ -1,0 +1,28 @@
+Arelin.Thing.new_thing : Arelin.Thing
+  Arelin.Thing.new(
+    ((x) x) :: Arelin.Game.TxFunction, // fun
+    F64.0,                             // pid
+    F64.0,                             // mid 
+    F64.0,                             // act
+    F64.0,                             // sid 
+    Map.new<>,                         // stt
+    String.nil,                        // nam
+    List.nil<>,                        // lit
+    F64.0,                             // tik
+    F64.V3.new(F64.0,F64.0,F64.0),     // pos
+    F64.parse("8"),                    // mov
+    F64.1,                             // bst 
+    F64.V3.new(F64.0,F64.0,F64.0),     // pad
+    F64.V3.new(F64.0,F64._1,F64.0),    // dir
+    F64.V3.new(F64.0,F64.0,F64.0),     // trg
+    F64.V3.new(F64.0,F64.0,F64.0),     // vel
+    Arelin.Game.Hitbox.nbox,           // box
+    F64.1,                             // wei
+    F64.parse("24"),                   // mhp
+    F64.0,                             // dmg
+    F64.V3.new(F64.0,F64.0,F64.0),     // knk
+    List.nil<>,                        // buf
+    List.nil<>,                        // chi
+    List.nil<>,                        // hit
+    Bool.false,                        // rst
+    Bool.false)                        // die

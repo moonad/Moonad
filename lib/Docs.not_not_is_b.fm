@@ -1,0 +1,5 @@
+Docs.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b:
+  | Equal.to<Bool, Bool.true>;
+  | Equal.to<Bool, Bool.false>;
+  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);

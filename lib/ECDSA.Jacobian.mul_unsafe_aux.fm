@@ -1,0 +1,15 @@
+ECDSA.Jacobian.mul_unsafe_aux(
+  d: ECDSA.Jacobian,
+  k1p: ECDSA.Jacobian,
+  k2p: ECDSA.Jacobian,
+  k1: Nat,
+  k2: Nat)
+: Pair(ECDSA.Jacobian, ECDSA.Jacobian)
+  case Bool.or(Nat.gtn(k1, 0), Nat.gtn(k2, 0)):
+  | let k1p = Bool.if<>(Nat.odd(k1), ECDSA.Jacobian.add(k1p, d), k1p)
+    let k2p = Bool.if<>(Nat.odd(k2), ECDSA.Jacobian.add(k2p, d), k2p)
+    let d = ECDSA.Jacobian.double(d)
+    let k1 = Nat.div(k1, 2)
+    let k2 = Nat.div(k2, 2)
+    ECDSA.Jacobian.mul_unsafe_aux(d, k1p, k2p, k1, k2);
+  | Pair.new<ECDSA.Jacobian, ECDSA.Jacobian>(k1p, k2p);

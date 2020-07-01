@@ -1,0 +1,2 @@
+Logic.transposition<P: Type, Q: Type>(f: P -> Q, not_q: Not(Q)): Not(P)
+  (p) not_q(f(p))

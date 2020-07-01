@@ -1,0 +1,7 @@
+// Boolean negation, fusible
+Bool.notf(a: Bool): Bool
+  <P> (t) (f)
+  case a:
+  | f;
+  | t;
+  : P(Bool.notf(a.self));

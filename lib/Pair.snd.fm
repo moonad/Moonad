@@ -1,0 +1,3 @@
+Pair.snd<A: Type, B: Type>(pair: Pair(A)(B)): B
+  case pair:
+  | pair.snd;

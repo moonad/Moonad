@@ -1,0 +1,5 @@
+// Comparisons
+T Cmp
+| Cmp.ltn;
+| Cmp.eql;
+| Cmp.gtn;

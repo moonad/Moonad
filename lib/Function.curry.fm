@@ -1,0 +1,3 @@
+// Converts a function that receives a pair into a function of 2 arguments.
+Function.curry<A: Type, B: Type, C: Type>(f: Pair(A, B) -> C, x: A, y: B): C
+  f(Pair.new<A><B>(x, y))

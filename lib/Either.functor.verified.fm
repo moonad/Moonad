@@ -1,0 +1,2 @@
+Either.functor.verified<A: Type>: VerifiedFunctor(Either(A), Either.functor<A>)
+  VerifiedFunctor.new<Either(A), Either.functor<A>>(Either.map.id<A>, Either.map.comp<A>)

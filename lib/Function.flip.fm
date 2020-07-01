@@ -1,0 +1,3 @@
+// Flips the two first arguments of a function.
+Function.flip<A: Type, B: Type, C: Type>(f: A -> B -> C, y: B, x: A): C
+  f(x, y)

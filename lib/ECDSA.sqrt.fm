@@ -1,0 +1,2 @@
+ECDSA.sqrt(a: Nat): Nat
+  ECDSA.pow_mod(a, Nat.div(Nat.add(ECDSA.CURVE.P, 1), 4), ECDSA.CURVE.P)

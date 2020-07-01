@@ -1,0 +1,5 @@
+// A proposition that a string is not the empty string
+String.not_empty(xs: String) : Type
+  case xs:
+  | Empty;
+  | Unit;

@@ -1,0 +1,7 @@
+// Do all elements satisfy a condition?
+List.all<A: Type>(cond: A -> Bool, list: List(A)): Bool
+  case list:
+  | Bool.true;
+  | case cond(list.head):
+    | List.all<>(cond)(list.tail);
+    | Bool.false;;

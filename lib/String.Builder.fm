@@ -1,0 +1,3 @@
+// A lazy String constructor, useful for efficient concatenation
+String.Builder: Type
+  String -> String

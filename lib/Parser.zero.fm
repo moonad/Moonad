@@ -1,0 +1,3 @@
+Parser.zero<A: Type>: Parser(A)
+  (s1) get pos str errs = s1
+  Parser.Reply.err<>(s1,Parser.Error.new(pos,Maybe.none<>, List.nil<>))

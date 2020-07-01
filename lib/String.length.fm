@@ -1,0 +1,3 @@
+// Computes the length of the string.
+String.length(xs: String): Nat
+  String.length.go(xs, 0)

@@ -1,0 +1,8 @@
+Int.parse_hex(str: String): Int
+  case str:
+  | Int.0;
+  | case U16.eql(str.head, Char.parse("-")):
+    | let b = Nat.parse_hex(str.tail)
+      Int.new(0, b);
+    | let a = Nat.parse_hex(String.cons(str.head, str.tail))
+      Int.new(a, 0);;

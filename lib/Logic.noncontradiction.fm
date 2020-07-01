@@ -1,0 +1,4 @@
+// ¬(P ∧ ¬P)
+Logic.noncontradiction<P: Type>: Not(And(P,Not(P)))
+  (contra) contra<() _>
+  | (p) (not_p) not_p(p);

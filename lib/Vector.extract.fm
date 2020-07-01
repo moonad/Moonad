@@ -1,0 +1,5 @@
+Vector.extract<A: Type, n: Nat>(xs: Vector(A, Nat.succ(n))): Pair(A, Vector(A, n))
+  case xs:
+  | Unit.new;
+  | Pair.new<A, Vector(A, xs.size)>(xs.head, xs.tail);
+  : Bool.if<Type>(Nat.eql(0, xs.size), Unit, Pair(A, Vector(A, Nat.pred(xs.size))));

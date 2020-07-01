@@ -1,0 +1,4 @@
+Export.value(ex: Export): Export.T(ex)
+  case ex:
+  | ex.value;
+  : case ex.self: | ex.self.T;;

@@ -1,0 +1,3 @@
+// A lazy List constructor, useful for efficient concatenation
+List.Builder(A: Type): Type
+  List(A) -> List(A)

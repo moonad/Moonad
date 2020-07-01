@@ -1,0 +1,5 @@
+ECDSA.invertBatch(nums: List(Nat), modulo: Nat): List(Nat)
+  get acc p = ECDSA.invertBatch.aux1(nums, modulo, 1, List.nil<Nat>, List.nil<Nat>)
+  get scratch rest = p
+  let acc = ECDSA.invert(acc, modulo)
+  ECDSA.invertBatch.aux2(rest, modulo, acc, scratch, List.nil<Nat>)

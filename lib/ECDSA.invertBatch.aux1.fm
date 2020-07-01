@@ -1,0 +1,11 @@
+ECDSA.invertBatch.aux1(nums: List(Nat), modulo: Nat, acc: Nat, scratch: List(Nat), rest: List(Nat)): Pair(Nat, Pair(List(Nat), List(Nat)))
+  case nums:
+  | Pair.new<,>(acc, Pair.new<,>(scratch, rest));
+  | case Nat.eql(nums.head, 0):
+    | let scratch = List.cons<>(0, scratch)
+      let rest = List.cons<>(nums.head, rest)
+      ECDSA.invertBatch.aux1(nums.tail, modulo, acc, scratch, rest);
+    | let scratch = List.cons<>(acc, scratch)
+      let acc = Nat.mod(Nat.mul(acc, nums.head), modulo)
+      let rest = List.cons<>(nums.head, rest)
+      ECDSA.invertBatch.aux1(nums.tail, modulo, acc, scratch, rest);;

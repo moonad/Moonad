@@ -1,0 +1,29 @@
+T Arelin.Thing 
+| Arelin.Thing.new(
+  fun : Arelin.Game.TxFunction,   // transaction function
+  pid : Arelin.Game.PlayerId,     // number of playber controlling this
+  mid : Arelin.Game.ModelId,      // id of model to be rendered
+  act : Arelin.Game.ActionId,     // number of performing action
+  sid : Arelin.Game.SideId,       // player side
+  stt : Map(F64),                 // an arbitrary state
+  nam : String,                   // name of thing
+  lit : List(Arelin.Game.Light),  // list of lights to render
+  tik : F64,                      // ticks passed since last act change
+  pos : F64.V3,                   // in-game position
+  mov : F64,                      // movement speed
+  bst : F64,                      // movement speed multiplier 
+  pad : F64.V3,                   // analog pad direction (len = 0 to 1)
+  dir : F64.V3,                   // facing direction (len = 1)
+  trg : F64.V3,                   // targeted position
+  vel : F64.V3,                   // dash velocity vector
+  box : Arelin.Game.Hitbox,       // hitbox (space occupied)
+  wei : F64,                      // weight (affects friction)
+  mhp : F64,                      // max health points
+  dmg : F64,                      // damage taken
+  knk : F64.V3,                   // launch direction and intensity
+  buf : List(Arelin.Game.Buff),   // buffs and nerfs (status effects) applied
+  chi : List(Arelin.Thing),       // children to be created on next tick
+  hit : List(Arelin.Game.Hit),    // hits done by this 
+  rst : Bool,                     // should this reset to idle?
+  die : Bool                      // should this be removed? 
+  );

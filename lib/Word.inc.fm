@@ -1,0 +1,6 @@
+Word.inc<size: Nat>(word: Word(size)): Word(size)
+  case word:
+  | Word.nil;
+  | Word.1<word.size>(word.pred);
+  | Word.0<word.size>(Word.inc<word.size>(word.pred));
+  : Word(word.size);

@@ -1,0 +1,5 @@
+// Appends element to the end of the list.
+List.append<A: Type>(as: List(A), a: A): List(A)
+  case as:
+  | List.pure<>(a);
+  | List.cons<>(as.head,List.append<>(as.tail, a));

@@ -1,0 +1,2 @@
+And.snd<A: Type,B: Type>(x: And(A,B)) : B
+  Pair.snd<A,B>(x)

@@ -1,0 +1,2 @@
+Logic.exfalso(x: Empty,P: Type): P
+  Empty.absurd<>(x)

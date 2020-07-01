@@ -1,0 +1,5 @@
+// a >= b
+U32.gte(a: U32, b: U32): Bool
+  get a_val = a 
+  get b_val = b 
+  Word.gte<>(a_val, b_val)

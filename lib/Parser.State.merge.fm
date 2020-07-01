@@ -1,0 +1,6 @@
+Parser.State.merge(x: Parser.State, y: Parser.State): Parser.State
+  case x: | case y: |
+  case Nat.cmp(x.pos,y.pos):
+  | y;
+  | Parser.State.make(x.pos, x.str, List.concat<>(x.errs,y.errs));
+  | x;;;

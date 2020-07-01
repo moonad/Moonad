@@ -1,0 +1,3 @@
+// construct a new builder (it's just the identity function)
+List.Builder.new<A: Type> : List.Builder(A)
+  (x) x

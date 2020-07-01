@@ -1,0 +1,2 @@
+List.subsequences<A: Type>(xs: List(A)): List(List(A))
+  List.cons<>(List.nil<>,List.subsequences.go<>(xs))

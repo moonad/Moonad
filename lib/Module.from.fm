@@ -1,0 +1,2 @@
+Module.from(defs: List(Pair(String, Export))): Module
+  Map.from_list<,>(String.to_bits,defs)

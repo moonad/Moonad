@@ -1,0 +1,12 @@
+Vector.size_0_is_nil(vec: Vector(Nat, Nat.zero)): Equal(_, vec, Vector.nil<Nat>)
+  case vec:
+  with e : Equal(Nat, vec.size, Nat.zero) = Equal.to<Nat, Nat.zero>;
+  | def P0 = ((x) Vector(Nat, Nat.zero)) :: Nat -> Type
+    def x0 = Equal.rewrite<_,_,_, P0>(e, Vector.nil<Nat>)
+    Equal.to<Vector(Nat, Nat.zero), x0>;
+  | Empty.absurd<>(Nat.succ_isnt_zero<vec.size>(e));
+  : def P0 = ((x) Vector(Nat, x)) :: Nat -> Type
+    def P1 = ((x) Vector(Nat, Nat.zero)) :: Nat -> Type
+    let x0 = Equal.rewrite<_, vec.size, Nat.zero, P0>(e, vec.self)
+    let x1 = Equal.rewrite<_, vec.size, Nat.zero, P1>(e, Vector.nil<Nat>)
+    Equal(_, x0, x1);

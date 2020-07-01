@@ -1,0 +1,12 @@
+// Nat subtraction
+Nat.sub(n: Nat, m: Nat): Nat
+  case n:
+  | 0;
+  | case m:
+    | n;
+    | Nat.sub(n.pred, m.pred);;
+  // case m:
+  // | n;
+  // | case n:
+  //   | Nat.zero;
+  //   | Nat.sub(n.pred, m.pred);;

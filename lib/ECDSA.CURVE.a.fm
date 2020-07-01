@@ -1,0 +1,3 @@
+// Params: a, b
+ECDSA.CURVE.a: Nat
+  0

@@ -1,0 +1,8 @@
+Parser.Error.show(e: Parser.Error): String
+  case e:
+  | let unx = case e.unx: | "";
+      | String.flatten(["unexpected: ", Parser.Item.show(e.unx.value), ", "]);
+    let exp = List.show<>(Parser.Item.show, e.exp)
+    String.flatten(["Error at ", Nat.show(e.pos),", ", unx, "expected: ", exp]);
+  | let msgs = List.show<>((x) x, e.msgs)
+    String.flatten(["Error at ", Nat.show(e.pos),", ", msgs]);

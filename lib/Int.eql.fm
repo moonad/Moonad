@@ -1,0 +1,5 @@
+Int.eql(a: Int, b: Int): Bool
+  case Int.cmp(a, b):
+  | Bool.false;
+  | Bool.true;
+  | Bool.false;

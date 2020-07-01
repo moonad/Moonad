@@ -1,0 +1,8 @@
+T ECDSA.ErrorTypes
+| ECDSA.ErrorTypes.point_not_in_curve;
+| ECDSA.ErrorTypes.invalid_private_key;
+| ECDSA.ErrorTypes.invalid_public_key;
+| ECDSA.ErrorTypes.invalid_public_key_hex;
+| ECDSA.ErrorTypes.invalid_signature_hex;
+| ECDSA.ErrorTypes.invalid_k;
+| ECDSA.ErrorTypes.could_not_find_k;

@@ -1,0 +1,3 @@
+Arelin.Thing.get_buf(thi: Arelin.Thing): List(Arelin.Game.Buff)
+  case thi: 
+  | thi.buf;

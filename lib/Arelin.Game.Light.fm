@@ -1,0 +1,2 @@
+T Arelin.Game.Light
+| Arelin.Game.Light.new(pos: F64.V3, rad: F64, rng: F64, sub: F64.V3, add: F64.V3);

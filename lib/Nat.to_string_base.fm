@@ -1,0 +1,5 @@
+Nat.to_string_base(base: Nat, nat: Nat): String
+  List.foldr<Nat, String>
+  | String.nil;
+  | (n) (str) String.cons(Nat.show_digit(base,n), str);
+  | Nat.to_base(base, nat);

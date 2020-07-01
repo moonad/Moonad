@@ -1,0 +1,4 @@
+// Pair(A) functor
+// =================
+Pair.functor<A: Type>: Functor(Pair(A))
+  Functor.new<Pair(A)>(Pair.map<A>)

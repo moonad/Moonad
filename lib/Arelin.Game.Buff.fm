@@ -1,0 +1,7 @@
+T Arelin.Game.Buff
+| Arelin.Game.Buff.shielded(dur: F64, val: F64); // shields are hit before hp
+| Arelin.Game.Buff.slowed(dur: F64, val: F64);
+| Arelin.Game.Buff.hasted(dur: F64, val: F64);
+| Arelin.Game.Buff.silenced(dur: F64);
+| Arelin.Game.Buff.rooted(dur: F64);
+| Arelin.Game.Buff.stunned(dur: F64);

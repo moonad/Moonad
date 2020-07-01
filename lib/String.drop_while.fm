@@ -1,0 +1,7 @@
+// Remove characters while a condition is true
+String.drop_while(f: Char -> Bool, xs: String): String
+  case xs:
+  | String.nil;
+  | case f(xs.head):
+    | String.drop_while(f,xs.tail);
+    | xs;;

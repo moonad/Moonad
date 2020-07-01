@@ -1,0 +1,7 @@
+Arelin.Game.map_stage(
+  fn: Arelin.Game.TxFunction, 
+  gm: Arelin.Game
+  ) : Arelin.Game 
+  get stage = gm 
+  let new_stage = List.map<><>(fn)(stage)
+  Arelin.Game.new(new_stage)

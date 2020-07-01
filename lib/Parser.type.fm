@@ -1,0 +1,2 @@
+Parser.type(A: Type, r: Parser.Reply(A)) : Type
+  case r: | A; | Parser.Error;

@@ -1,0 +1,7 @@
+// Is any of the bools true?
+Bool.or(a: Bool, b: Bool): Bool
+  case a:
+  | Bool.true;
+  | case b:
+    | Bool.true;
+    | Bool.false;;

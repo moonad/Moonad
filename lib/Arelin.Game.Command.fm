@@ -1,0 +1,2 @@
+T Arelin.Game.Command
+| Arelin.Game.Command.new(pid: Arelin.Game.PlayerId, inp: Arelin.Game.Input);

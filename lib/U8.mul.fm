@@ -1,0 +1,4 @@
+U8.mul(a: U8, b: U8): U8
+  get a_val = a
+  get b_val = b 
+  U8.new(Word.mul<>(a_val, b_val))  

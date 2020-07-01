@@ -1,0 +1,6 @@
+List.take_while<A: Type>(f: A -> Bool, xs: List(A)) : List(A)
+  case xs:
+  | List.nil<>;
+  | case f(xs.head):
+    | List.cons<>(xs.head,List.take_while<>(f,xs.tail));
+    | List.nil<>;;

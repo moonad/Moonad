@@ -1,0 +1,14 @@
+Arelin.Thing.is_silenced(self: Arelin.Thing): Bool
+  let self.buf = Arelin.Thing.get_buf(self)
+  let is_silence_buff = ((buff) 
+    case buff:
+    | #shielded# Bool.false;
+    | #slowed#   Bool.false; 
+    | #hasted#   Bool.false;
+    | #silenced# Bool.true;
+    | #rooted#   Bool.false;
+    | #stunned#  Bool.true;
+  ) :: Arelin.Game.Buff -> Bool
+  case List.find<>(is_silence_buff, self.buf):
+  | #none# Bool.false;
+  | #some# Bool.true;

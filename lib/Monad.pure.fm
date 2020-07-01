@@ -1,0 +1,3 @@
+Monad.pure<M: Type -> Type>(m: Monad(M)): <A: Type> -> A -> M(A)
+  case m:
+  | m.pure;

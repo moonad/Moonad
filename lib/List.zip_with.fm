@@ -1,0 +1,8 @@
+// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
+List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List(A), bs: List(B))
+  : List(C)
+  case as:
+  | List.nil<>;
+  | case bs:
+    | List.nil<>;
+    | List.cons<>(f(as.head,bs.head),List.zip_with<,,>(f,as.tail,bs.tail));;

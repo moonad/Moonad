@@ -1,0 +1,10 @@
+ECDSA.Jacobian.wNAF(W: Nat, precomputes: List(ECDSA.Jacobian), n: Nat): Pair(ECDSA.Jacobian, ECDSA.Jacobian)
+  let windows = ECDSA.window(W)
+  let windowSize = Nat.pow(2, Nat.pred(W))
+  let maxNumber = Nat.pow(2, W)
+  // Create mask with W ones: 0b1111 for W=4 etc.
+  let mask = Nat.pred(Nat.pow(2, W))
+  // real and fake points
+  let p = ECDSA.Jacobian.0
+  let f = ECDSA.Jacobian.0
+  ECDSA.Jacobian.wNAF.aux(precomputes, p, f, n, W, 0, windows, windowSize, mask, maxNumber)

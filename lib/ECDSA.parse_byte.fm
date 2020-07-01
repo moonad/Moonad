@@ -1,0 +1,2 @@
+ECDSA.parse_byte(str: String): Nat
+  Nat.mul(2, Nat.parse_hex(str))

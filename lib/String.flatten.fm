@@ -1,0 +1,6 @@
+// Flattens a string of strings into a single string.
+String.flatten(xs: List(String)): String
+  case xs:
+  | String.nil;
+  | String.concat(xs.head, String.flatten(xs.tail));
+  : String;

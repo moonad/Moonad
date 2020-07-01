@@ -1,0 +1,3 @@
+// A string with only one character.
+String.pure(x : Char) : String
+  String.cons(x)(String.nil)

@@ -1,0 +1,2 @@
+Word.from_nat(size: Nat, n: Nat): Word(size)
+  Nat.apply<Word(size)>(n, Word.inc<size>, Word.zero(size))

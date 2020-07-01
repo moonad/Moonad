@@ -1,0 +1,6 @@
+// n > m
+Cmp.as_gtn(cmp: Cmp): Bool
+  case cmp:
+  | Bool.false;
+  | Bool.false;
+  | Bool.true;

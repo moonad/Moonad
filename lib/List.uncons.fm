@@ -1,0 +1,4 @@
+List.uncons<A: Type>(xs: List(A)): Maybe(Pair(A,List(A)))
+  case xs:
+  | Maybe.none<>;
+  | Maybe.some<>(Pair.new<,>(xs.head,xs.tail));

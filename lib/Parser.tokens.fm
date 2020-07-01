@@ -1,0 +1,15 @@
+// auto-backtracks when erroring
+Parser.tokens(match: String): Parser(String)
+  (s1) get pos str errs = s1
+  def len_m = String.length(match)
+  get took rest = String.split_at(len_m,str)
+  def len_t = String.length(took)
+  def s2 = Parser.State.make(Nat.add(pos,len_t),rest,errs)
+  def lbl = List.pure<>(Parser.Item.tokens(match));
+  case Nat.ltn(len_t,len_m):
+  | def unx = Maybe.some<>(Parser.Item.eof);
+    Parser.Reply.err<>(s1,Parser.Error.new(pos,unx,lbl));
+  | case String.eql(match,took):
+    | Parser.Reply.val<>(s2,took);
+    | def unx = Maybe.some<>(Parser.Item.tokens(took))
+      Parser.Reply.err<>(s1,Parser.Error.new(pos,unx,lbl));;

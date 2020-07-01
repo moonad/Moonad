@@ -1,0 +1,6 @@
+// Get the tail of a nonempty string
+String.tail(xs: String, not_empty: String.not_empty(xs)) : String
+  case xs:
+  with ne : String.not_empty(xs.self) = not_empty;
+  | Empty.absurd<>(ne);
+  | xs.tail;

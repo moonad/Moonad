@@ -1,0 +1,7 @@
+Nat.add_zero_theorem(n: Nat): Equal(Nat, Nat.add(n, Nat.zero), n)
+  case n:
+  | Equal.to<Nat, Nat.zero>;
+  | let e0 = Nat.add_zero_theorem(n.pred)
+    let e1 = Equal.apply<Nat, Nat, Nat.add(n.pred, Nat.zero), n.pred, Nat.succ>(e0)
+    e1;
+  : Equal(Nat, Nat.add(n.self, Nat.zero), n.self);

@@ -1,0 +1,3 @@
+// Function composition.
+Function.comp<A: Type, B: Type, C: Type>(g: B -> C, f: A -> B, x: A): C
+  g(f(x))

@@ -1,0 +1,17 @@
+ECDSA.Jacobian.mul_pre(scalar: Nat, w: Nat, precomputes: List(ECDSA.Jacobian)): ECDSA.Jacobian
+  ECDSA.Jacobian.mul_pre(scalar, w, precomputes)
+// ECDSA.Jacobian.mul_pre(scalar: Nat, w: Nat, precomputes: List(ECDSA.Jacobian)): ECDSA.Jacobian
+//   let n = Nat.mod(scalar, ECDSA.CURVE.n)
+//   get k1 k2 = ECDSA.split_scalar(n)
+//   get k1neg k1 = Int.toNat(k1)
+//   get k2neg k2 = Int.toNat(k2)
+//   get k1p f1p = ECDSA.Jacobian.wNAF(w, precomputes, k1)
+//   get k2p f2p = ECDSA.Jacobian.wNAF(w, precomputes, k2)
+//   let k1p = Bool.if<>(k1neg, ECDSA.Jacobian.negate(k1p), k1p)
+//   let k2p = Bool.if<>(k2neg, ECDSA.Jacobian.negate(k2p), k2p)
+//   let k2p = get k2p.x k2p.y k2p.z = k2p
+//     ECDSA.Jacobian.new(ECDSA.mod(Nat.mul(k2p.x, ECDSA.CURVE.beta)), k2p.y, k2p.z)
+//   let point = ECDSA.Jacobian.add(k1p, k2p)
+//   let fake  = ECDSA.Jacobian.add(f1p, f2p)
+//   get _ _ _ = fake // This is used to force the computation of the fake point, to achieve constant time
+//   ECDSA.Jacobian.normalizeZ(point)

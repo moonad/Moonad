@@ -1,0 +1,4 @@
+List.sum.go(xs: List(Nat), n: Nat) : Nat
+  case xs:
+  | Nat.zero;
+  | List.sum.go(xs.tail,Nat.add(xs.head,n));

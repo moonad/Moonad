@@ -1,0 +1,3 @@
+Arelin.Thing.get_knk(thi: Arelin.Thing): F64.V3
+  case thi: 
+  | thi.knk;

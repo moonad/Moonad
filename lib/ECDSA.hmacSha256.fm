@@ -1,0 +1,3 @@
+ECDSA.hmacSha256<klen: Nat, mlen: Nat>(key: U8_Vector(klen), msg: U8_Vector(mlen)): U8_Vector(32)
+  // TODO
+  ECDSA.hmacSha256<klen, mlen>(key, msg)

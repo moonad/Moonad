@@ -1,0 +1,3 @@
+Pair.fst<A: Type, B: Type>(pair: Pair(A)(B)): A
+  case pair:
+  | pair.fst;

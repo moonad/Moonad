@@ -1,0 +1,7 @@
+Nat.min(a: Nat): Nat -> Nat
+  case a:
+  | (b) 0;
+  | (b)
+    case b:
+    | 0;
+    | Nat.succ(Nat.min(a.pred, b.pred));;

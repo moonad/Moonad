@@ -1,0 +1,13 @@
+ECDSA.Jacobian.double(p: ECDSA.Jacobian): ECDSA.Jacobian
+  get p.x p.y p.z = p
+  let A = Nat.square(p.x)
+  let B = Nat.square(p.y)
+  let C = Nat.square(B)
+  let D = Nat.mul(2, ECDSA.sub(Nat.square(Nat.add(p.x, B)), Nat.add(A, C)))
+  let E = Nat.mul(3, A)
+  let F = Nat.square(E)
+  let F = Nat.square(E)
+  let x = ECDSA.sub(F, Nat.mul(2, D))
+  let y = ECDSA.sub(Nat.mul(E, ECDSA.sub(D, x)), Nat.mul(8, C))
+  let z = ECDSA.mod(Nat.mulVar(3, 2, p.y, p.z))
+  ECDSA.Jacobian.new(x, y, z)

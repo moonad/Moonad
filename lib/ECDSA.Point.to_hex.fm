@@ -1,0 +1,3 @@
+ECDSA.Point.to_hex(p: ECDSA.Point, compressed: Bool): String
+  def size = Bool.if<>(compressed, 33, 65)
+  U8_Vector.to_hex<size>(ECDSA.Point.to_bytes(p, compressed))

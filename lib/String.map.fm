@@ -1,0 +1,5 @@
+// Applies a function to all characters of the string.
+String.map(f: Char -> Char, as: String): String
+  case as:
+  | String.nil;
+  | String.cons(f(as.head),String.map(f,as.tail));

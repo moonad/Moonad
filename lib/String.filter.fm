@@ -1,0 +1,7 @@
+// Removes all characters that do not satisfy a condition.
+String.filter(f: Char -> Bool, xs: String): String
+  case xs:
+  | String.nil;
+  | case f(xs.head):
+    | String.cons(xs.head,String.filter(f, xs.tail));
+    | String.filter(f, xs.tail);;

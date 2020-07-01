@@ -1,0 +1,3 @@
+// (P -> Q) -> (¬Q -> ¬P)
+Logic.contrapositive<P:Type, Q: Type>(f: P -> Q) : Not(Q) -> Not(P)
+  (x) (p) x(f(p))

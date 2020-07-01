@@ -1,0 +1,6 @@
+// Converts a list to its non-inductive Church encoding
+List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
+  <P> (nil, cons)
+  case list:
+  | nil;
+  | cons(list.head, List.fold<A>(list.tail)<P>(nil, cons));

@@ -1,0 +1,5 @@
+Parser.decimal : Parser(Nat)
+  do Parser {
+    var ds  = Parser.many<>(Parser.decimal.digit);
+    return Nat.from_base(10,ds);
+  }

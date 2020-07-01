@@ -1,0 +1,4 @@
+Int.cmp(a: Int, b: Int): Cmp
+  get a.x a.y = a
+  case b:
+  | Nat.cmp(Nat.add(a.x, b.y), Nat.add(b.x, a.y));

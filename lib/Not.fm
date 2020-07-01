@@ -1,0 +1,3 @@
+// logical negation
+Not(P : Type) : Type
+  P -> Empty

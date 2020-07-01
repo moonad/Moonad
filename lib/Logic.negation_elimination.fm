@@ -1,0 +1,7 @@
+Logic.negation_elimination<P: Type>(
+  lem: Logic.ExcludedMiddle,
+  not_not_p: Not(Not(P))
+): P
+  lem<P><() _>
+  | (x) x;
+  | (x) Logic.exfalso(not_not_p(x),P);

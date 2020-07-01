@@ -1,0 +1,2 @@
+T Sigma (A: Type) (B: A -> Type)
+| Sigma.new(fst: A, snd: B(fst));

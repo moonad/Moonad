@@ -1,0 +1,3 @@
+Arelin.Thing.get_box(thi: Arelin.Thing): Arelin.Game.Hitbox
+  case thi: 
+  | thi.box;

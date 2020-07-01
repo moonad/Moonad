@@ -1,0 +1,3 @@
+Arelin.Thing.get_mov(thi: Arelin.Thing): F64
+  case thi: 
+  | thi.mov;

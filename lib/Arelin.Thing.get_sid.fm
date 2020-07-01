@@ -1,0 +1,3 @@
+Arelin.Thing.get_sid(thi: Arelin.Thing): Arelin.Game.SideId
+  case thi: 
+  | thi.sid;

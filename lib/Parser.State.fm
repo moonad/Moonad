@@ -1,0 +1,2 @@
+T Parser.State
+| Parser.State.make(pos:Nat, str: String, errs: List(Parser.Error));

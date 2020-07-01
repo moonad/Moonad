@@ -1,0 +1,7 @@
+// Removes the first elements of a list.
+List.drop<A: Type>(n: Nat, xs: List(A)):  List(A)
+  case n:
+  | xs;
+  | case xs:
+    | List.nil<>;
+    | List.drop<>(n.pred,xs.tail);;

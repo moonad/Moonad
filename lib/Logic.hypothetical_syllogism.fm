@@ -1,0 +1,6 @@
+Logic.hypothetical_syllogism<P: Type, Q: Type, R: Type>(
+  f: P -> Q,
+  g: Q -> R,
+  x: P
+) : R
+  g(f(x))

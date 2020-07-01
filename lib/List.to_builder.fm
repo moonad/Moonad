@@ -1,0 +1,3 @@
+// convert a list to a builder
+List.to_builder<A: Type>(list: List(A)) : List.Builder(A)
+  List.to_builder.go<>(list, List.Builder.new<>)

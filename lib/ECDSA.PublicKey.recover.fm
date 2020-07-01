@@ -1,0 +1,3 @@
+ECDSA.PublicKey.recover(msgHash: String, signature: ECDSA.SignResult, recovery: Nat): ECDSA.Error(String)
+  let point = ECDSA.Point.from.SignResult(msgHash, signature, recovery)
+  ECDSA.Error.map<,>((p) ECDSA.Point.to_hex(p, Bool.false), point)

@@ -1,0 +1,10 @@
+// !(P ∧ Q) => !P ∨ !Q
+Logic.And.forward<P: Type, Q: Type>(
+  lem : Logic.ExcludedMiddle,
+  not_pq: Not(And(P, Q))
+) : Or(Not(P), Not(Q))
+  lem<P><() _>
+  | (p) lem<Q><() _>
+    | (q) Logic.exfalso(not_pq(And.new<_,_>(p,q)), _);
+    | (q) Or.rgt<_,_>(q);;
+  | (p) Or.lft<_,_>(p);

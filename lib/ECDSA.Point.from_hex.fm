@@ -1,0 +1,11 @@
+ECDSA.Point.from_hex(str: String): ECDSA.Error(ECDSA.Point)
+  get len bytes = U8_Vector.from_hex(str)
+  case Nat.equal(33, len):
+  | case self.value as eq:
+    with bytes : U8_Vector(eq.b) = bytes;
+    | ECDSA.Point.from_compressed_bytes(bytes);;
+  | case Nat.equal(65, len):
+    | case self.value as eq:
+      with bytes : U8_Vector(eq.b) = bytes;
+      | ECDSA.Point.from_uncompressed_bytes(bytes);;
+    | ECDSA.Error.err<>(ECDSA.ErrorTypes.invalid_public_key_hex);;

@@ -1,0 +1,7 @@
+Parser.label<A: Type>(lbl: String, p: Parser(A)) : Parser(A)
+  (s1) case p(s1) as x:
+  | Parser.Reply.val<>(x.state,x.value);
+  | def exp = List.pure<>(Parser.Item.label(lbl))
+    case x.error as e:
+    | Parser.Reply.err<>(x.state,Parser.Error.new(e.pos,e.unx,exp));
+    | Parser.Reply.err<>(x.state,Parser.Error.new(e.pos,Maybe.none<>,exp));;

@@ -1,0 +1,4 @@
+U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
+  case bytes:
+  | res;
+  | U8_Vector.to_number.aux<bytes.size>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)));

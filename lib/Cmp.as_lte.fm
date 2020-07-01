@@ -1,0 +1,6 @@
+// n <= m
+Cmp.as_lte(cmp: Cmp): Bool
+  case cmp:
+  | Bool.true;
+  | Bool.true;
+  | Bool.false;

@@ -1,0 +1,11 @@
+List.map.comp<A: Type, B: Type, C: Type>(ls: List(A), g: (B -> C), h: (A -> B))
+  : Equal(List(C),
+          List.map<A, C>(Function.comp<A, B, C>(g, h), ls),
+          Function.comp<List(A), List(B), List(C)>(List.map<B, C>(g), List.map<A, B>(h))(ls))
+  case ls:
+  | Equal.to<_, List.map<,>(Function.comp<,,>(g, h), List.nil<>)>;
+  | let tail_eq = List.map.comp<,,>(ls.tail, g, h)
+    Equal.apply<_, _,
+                List.map<,>(Function.comp<,,>(g, h), ls.tail),
+                Function.comp<,,>(List.map<,>(g), List.map<,>(h), ls.tail), List.cons<>(Function.comp<,,>(g, h, ls.head))>(tail_eq);
+  : Equal(_, List.map<,>(Function.comp<,,>(g, h), ls.self), Function.comp<,,>(List.map<,>(g), List.map<,>(h))(ls.self));

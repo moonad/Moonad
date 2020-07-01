@@ -1,0 +1,7 @@
+
+// Resets to a given tick
+Arelin.Thing.reset(self: Arelin.Thing, at_tik: F64): Arelin.Thing
+  let curr_tik = Arelin.Thing.get_tik(self)
+  case F64.gtn(curr_tik, F64.sub(at_tik, F64.1)):
+  | #true#  Arelin.Thing.set_rst(self, Bool.true);
+  | #false# self;

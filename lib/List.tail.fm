@@ -1,0 +1,6 @@
+// Get the tail of a nonempty list
+List.tail<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : List(A)
+  case xs:
+  with ne : List.not_empty<A>(xs.self) = not_empty;
+  | Empty.absurd<>(ne);
+  | xs.tail;

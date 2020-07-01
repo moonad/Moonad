@@ -1,0 +1,4 @@
+Nat.double(n: Nat): Nat
+  case n:
+  | Nat.zero;
+  | Nat.succ(Nat.succ(Nat.double(n.pred)));

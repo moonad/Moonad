@@ -1,0 +1,4 @@
+String.to_bits(str: String): Bits
+  case str:
+  | Bits.nil;
+  | Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail));

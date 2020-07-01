@@ -1,0 +1,6 @@
+// n >= m
+Cmp.as_gte(cmp: Cmp): Bool
+  case cmp:
+  | Bool.false;
+  | Bool.true;
+  | Bool.true;

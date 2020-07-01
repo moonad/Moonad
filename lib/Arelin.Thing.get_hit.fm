@@ -1,0 +1,3 @@
+Arelin.Thing.get_hit(thi: Arelin.Thing): List(Arelin.Game.Hit)
+  case thi: 
+  | thi.hit; 

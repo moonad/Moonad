@@ -1,0 +1,14 @@
+// Blinks (teleports) to another position
+// - self: thing that will blink
+// - at_tik: number of the tik on which the blink happens
+// - to_pos: position where the thing will blink to
+Arelin.Thing.blink(
+  self: Arelin.Thing, 
+  at_tik: F64, 
+  to_pos: F64.V3
+  ) : Arelin.Thing
+  case Arelin.Thing.is_rooted(self):
+  | self;
+  | case F64.eql(at_tik, Arelin.Thing.get_tik(self)):
+    | Arelin.Thing.set_pos(self, to_pos);
+    | self;;

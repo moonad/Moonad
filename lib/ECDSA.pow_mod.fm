@@ -1,0 +1,2 @@
+ECDSA.pow_mod(a: Nat, b: Nat, modulo: Nat): Nat
+  ECDSA.pow_mod.aux(a, b, modulo, 1)

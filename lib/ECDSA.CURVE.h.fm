@@ -1,0 +1,3 @@
+// Cofactor
+ECDSA.CURVE.h: Nat
+  Nat.parse_hex("1")
