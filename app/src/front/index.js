@@ -1,5 +1,3 @@
-const version = "14";
-
 require("./IBMPlexMono-Medium.ttf");
 require("./fonts/IBMPlexMono-Regular.ttf");
 require("./fonts/IBMPlexMono-Light.ttf");
@@ -18,6 +16,7 @@ const Moonad = require("./components/Moonad.js");
 
 window.onload = () => render(h(Moonad), document.getElementById("main"));
 
+const version = require("./../../package.json").version;
 if (localStorage.getItem("version") !== version) {
   const pkey = localStorage.getItem("pkey");
   localStorage.clear();
