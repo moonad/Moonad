@@ -125,7 +125,6 @@ class Term extends Component {
               _: "App.Event.post",
               date: reply.date,
               auth: reply.auth,
-              head: reply.head,
               body: reply.body,
             });
             this.seen_replies++;

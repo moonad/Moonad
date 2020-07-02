@@ -1,17 +1,12 @@
-// Database entries:
-// - PostId.post // a Post
-// - PostId.cite // list of files that cite (directly reply to) this post
-// - EthAdr.name // name of an address
-// - UsrNam.addr // address of a name 
-// Post = {
-//   date: Word64,   // date it was posted
-//   cite: Word64,   // post it cites (directly replies to)
-//   auth: Word160,  // signature
-//   head: Word640,  // post title or commands in case of apps & games
-//   body: Bits,     // text and code
-// }
-// Post header is up to 1024 bits, 96 are unused.
-// Post titles hold up to 80 chars.
+// Types:
+// - type Post = {date: Number, cite: Poid, auth: Addr, body: String}
+// - type Poid = HexString(64)
+// - type Addr = HexString(160)
+// Database:
+// - PostId.post : Post
+// - PostId.cite : List(Poid)
+// - EthAdr.name : String
+// - UsrNam.addr : Addr
 
 // Uncomment to rebuild db
 var express = require("express");
@@ -67,76 +62,8 @@ async function startup() {
   }
 
   // Computes the size of posts
-  Size = fs.readdirSync("db").filter(x => x.slice(-5) === ".post").length;
+  Size = fs.readdirSync("data").filter(x => x.slice(-5) === ".post").length;
 
-  // Loads all files on /db
-  //var files = fs.readdirSync("db").sort((a,b) => a > b ? 1 : 0);
-
-  // Gets existing posts
-  //var posts = [];
-  //for (var file of files) {
-    //if (file.slice(-5) === ".post") {
-      //posts.push(lib.bytes_to_post(await db.get(file)));
-    //}
-  //}
-
-  // Removes static posts (the 6 automatic posts we make below)
-  //var posts = posts.slice(6);
-
-  // Clears up files
-  //for (var file of files) {
-    //var ext = file.slice(-5);
-    //if (ext === ".orig" || ext === ".cite" || ext === ".post") {
-      //fs.unlinkSync("db/"+file);
-    //}
-  //}
-
-  // Static post: Root
-  //await new_post({
-    //date: 0,
-    //cite: "0x0000000000000000",
-    //auth: "0x0000000000000000000000000000000000000000",
-    //head: "Moonad.org",
-    //body: "",
-  //});
-
-  // Static post: Hello, Moonad!
-  //await new_post({
-    //date: 0,
-    //cite: "0x0000000000000000",
-    //auth: "0x0000000000000000000000000000000000000000",
-    //head: "Hello, Moonad!",
-    //body: "Introduce yourself here and join us to make the world a better place!",
-  //});
-
-  // Static post: Playground
-  //await new_post({
-    //date: 0,
-    //cite: "0x0000000000000000",
-    //auth: "0x0000000000000000000000000000000000000000",
-    //head: "Playground",
-    //body: "Test your algorithms and proofs here.",
-  //});
-
-  // Projects
-  //await new_post({
-    //date: 0,
-    //cite: "0x0000000000000000",
-    //auth: "0x0000000000000000000000000000000000000000",
-    //head: "Projects",
-    //body: "Moonad projects developed with Formality.",
-  //});
-
-  // Makes non-static posts 
-  //for (var post of posts) {
-    //console.log("Making post:", post);
-    //try {
-      //await new_post(post);
-    //} catch (e) {
-      //console.log(e);
-      //process.exit();
-    //}
-  //}
   app.listen(80);
   console.log("Server open!");
 };
@@ -221,8 +148,8 @@ async function new_post(post) {
   } catch (e) {
     throw "Invalid signature.";
   }
-  var {cite, head, body} = post;
-  var post = {date, cite, auth, head, body};
+  var {cite, body} = post;
+  var post = {date, cite, auth, body};
 
   // Validates name
   if (auth !== "0x0000000000000000000000000000000000000000") {
@@ -238,13 +165,6 @@ async function new_post(post) {
   // Validates if cited file exists
   if (poid !== "0x0000000000000000" && !await db.get(post.cite+".post")) {
     throw "Cited post '"+post.cite+"' doesn't exist.";
-  }
-
-  // Validates post head
-  if (typeof post.head !== "string"
-    || post.head.length > 47
-    || post.head.indexOf("\n") !== -1) {
-    throw "Invalid post head.";
   }
 
   // Validates post body
@@ -421,10 +341,25 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Gets an expanded post
 app.post("/get_post", async (req, res) => {
   try {
     var post = expand_post(req.query.poid);
     res.send(lib.bytes_to_hex(lib.post_to_bytes(post)));
+  } catch (e) {
+    res.send(e.toString());
+  };
+});
+
+// Gets the reply count of a post
+app.post("/get_cite_count", async (req, res) => {
+  try {
+    var cite = db.get(req.query.poid+".cite");
+    if (cite) {
+      res.send(cite.length / 8);
+    } else {
+      res.send("- Couldn't find post.");
+    }
   } catch (e) {
     res.send(e.toString());
   };

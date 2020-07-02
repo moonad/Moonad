@@ -77,12 +77,13 @@ class Posts extends Component {
     body.push(h("div", {
       style: {
         "margin-top": "8px",
-        "margin-bottom": "10px",
+        "margin-bottom": "20px",
         "font-size": "16px",
         "display": "flex",
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
         "align-items": "flex-end",
+        "border-bottom": "1px dashed rgb(220,220,220)",
       },
     }, [
       h("span", {

@@ -3,7 +3,7 @@ var path = require("path");
 var DB = {};
 
 function key_path(file = "") {
-  return path.join(__dirname, "..", "..", "db", file).toLowerCase();
+  return path.join(__dirname, "..", "..", "data", file).toLowerCase();
 };
 
 // String -> Promise(Buffer)
@@ -71,12 +71,34 @@ module.exports = {
   exists,
 };
 
-//var lib = require("./../lib.js");
-//(async () => {
-  //console.log(await con("test4", Buffer.from(lib.string_to_bytes("zzz"))));
-  ////console.log(await con("test0", Buffer.from(lib.string_to_bytes("bb"))));
-  ////console.log(await con("test0", Buffer.from(lib.string_to_bytes("cc"))));
-  ////console.log(await con("test0", Buffer.from(lib.string_to_bytes("dd"))));
-  //console.log(lib.bytes_to_string(await get("test4")));
-  //console.log((await get("test4")));
-//})();
+//function bytes_to_post(buf) {
+  //return {
+    //date: lib.hex_to_uint48(lib.get_hex_from_bytes(0, 64, buf)),
+    //cite: lib.get_hex_from_bytes(64, 128, buf),
+    //auth: lib.get_hex_from_bytes(128, 288, buf),
+    //head: lib.hex_to_string(lib.get_hex_from_bytes(288, 928, buf)).replace(/\0/g,""),
+    //body: lib.hex_to_string(lib.get_hex_from_bytes(928, buf.length*8, buf)),
+  //};
+//};
+
+//var fs = require("fs");
+//var lib = require("./lib.js");
+//var files = fs.readdirSync("data");
+//for (var file of files) {
+  //switch (file.slice(-5)) {
+    //case ".post":
+      //var post = bytes_to_post(fs.readFileSync("data/"+file));
+      //post.body = "# " + post.head + "\n\n" + post.body;
+      //fs.writeFileSync("data/"+file, Buffer.from(lib.post_to_bytes(post)));
+      //break;
+    ////case ".cite":
+      ////var buff = fs.readFileSync("data/"+file);
+      ////var json = lib.hex_to_hex64s(lib.bytes_to_hex(buff));
+      ////break;
+    ////case ".addr":
+    ////case ".name":
+      ////var json = fs.readFileSync("data/"+file, "utf8");
+      ////break;
+  //}
+//};
+

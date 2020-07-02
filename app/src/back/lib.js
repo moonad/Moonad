@@ -107,8 +107,7 @@ function bytes_to_post(buf) {
     date: hex_to_uint48(get_hex_from_bytes(0, 64, buf)),
     cite: get_hex_from_bytes(64, 128, buf),
     auth: get_hex_from_bytes(128, 288, buf),
-    head: hex_to_string(get_hex_from_bytes(288, 928, buf)).replace(/\0/g,""),
-    body: hex_to_string(get_hex_from_bytes(928, buf.length*8, buf)),
+    body: hex_to_string(get_hex_from_bytes(288, buf.length*8, buf)),
   };
 };
 
@@ -125,7 +124,6 @@ function post_to_bytes(post) {
   put_hex_on_array(hex(64, uint48_to_hex(post.date)), arr);
   put_hex_on_array(post.cite, arr);
   put_hex_on_array(post.auth, arr);
-  put_hex_on_array(hex(640, string_to_hex(post.head)), arr);
   put_hex_on_array(string_to_hex(post.body), arr);
   return new Uint8Array(arr);
 };
@@ -173,7 +171,7 @@ function get_post_code(post) {
 };
 
 function get_post_msge(post) {
-  return post.cite + "\n" + post.head + "\n" + post.body;
+  return post.cite + "\n" +post.body;
 };
 
 function get_post_auth(post) {
@@ -294,6 +292,7 @@ module.exports = {
   get_file_auth,
   sign_file,
   split_hex_in_chunks,
+  get_hex_from_bytes,
   hex_to_hex64s,
   bytes_concat,
   DO_POST,

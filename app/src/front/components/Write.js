@@ -8,7 +8,6 @@ const Code = require("./Code.js");
 const Term = require("./Term.js");
 const consts = require("./consts.js");
 
-const default_post_head = "Your title.";
 const default_post_body = `Your words.
 
 +YourName.term: String
@@ -23,7 +22,6 @@ class Write extends Component {
   constructor(props) {
     super(props);
     this.cite = new URLSearchParams(window.location.search).get("cite") || "0x0000000000000000";
-    this.post_head = this.get_entry("post_head", default_post_head);
     this.post_body = this.get_entry("post_body", default_post_body);
     this.cleared = {};
     this.display_info = false;
@@ -114,7 +112,6 @@ class Write extends Component {
     this.pb_scroll = poster_body_editor.scrollTop;
     var render_key = [
       this.post_body,
-      this.post_head,
       String(this.play_term),
       String(this.pb_width),
       String(this.pb_height),
@@ -129,13 +126,13 @@ class Write extends Component {
     }
   }
 
-  async post({cite, head, body}) {
+  async post({cite, body}) {
     // Checks if citation is correct
     if (!front.moonad.lib.hex(64, cite)) {
       return alert("Incorrect cited post.");
     }
 
-    var blocks = front.moonad.lib.get_post_blocks({cite, head, body});
+    var blocks = front.moonad.lib.get_post_blocks({cite, body});
     var new_body = "";
     for (var block of blocks) {
       switch (block.ctor) {
@@ -157,9 +154,8 @@ class Write extends Component {
     }
 
     try {
-      await front.moonad.api.post({cite, head, body: new_body}, front.pkey);
+      await front.moonad.api.post({cite, body: new_body}, front.pkey);
       this.del_entry("post_body");
-      this.del_entry("post_head");
       window.history.back();
     } catch (e) {
       console.log("post err:",e);
@@ -238,28 +234,28 @@ class Write extends Component {
       "color": "rgb(105,105,105)",
     }
 
-    const poster_head = h("textarea", {
-      //contentEditable: true,
-      style: {
-        ... this.post_head === default_post_head ? def_input_text_style : input_text_style,
-        "vertical-align": "top",
-        "font-family": "IBMPlexMono-Light",
-        "font-size": "12px",
-        "outline": "none",
-        "width": "100%",
-        "height": "30px",
-        "margin": "0px",
-        "padding": "8px 10px 8px 10px",
-        "border": "0px solid black",
-        "border-bottom": "1px solid rgb(240,240,240)"
-      },
-      onClick: (e) => {
-        if (this.post_head === default_post_head) {
-          this.set_entry("post_head", "");
-        }
-      },
-      onInput: (e) => this.set_entry("post_head", e.target.value),
-    }, [this.post_head]);
+    //const poster_head = h("textarea", {
+      ////contentEditable: true,
+      //style: {
+        //... this.post_head === default_post_head ? def_input_text_style : input_text_style,
+        //"vertical-align": "top",
+        //"font-family": "IBMPlexMono-Light",
+        //"font-size": "12px",
+        //"outline": "none",
+        //"width": "100%",
+        //"height": "30px",
+        //"margin": "0px",
+        //"padding": "8px 10px 8px 10px",
+        //"border": "0px solid black",
+        //"border-bottom": "1px solid rgb(240,240,240)"
+      //},
+      //onClick: (e) => {
+        //if (this.post_head === default_post_head) {
+          //this.set_entry("post_head", "");
+        //}
+      //},
+      //onInput: (e) => this.set_entry("post_head", e.target.value),
+    //}, [this.post_head]);
 
     // POSTER BODY
     // ===========
@@ -382,15 +378,12 @@ class Write extends Component {
         },
         onClick: () => {
           var cite = this.cite;
-          if ( this.post_head === default_post_head
-            || this.post_body === default_post_body 
-            || this.post_head.trim() === ""
+          if ( this.post_body === default_post_body 
             || this.post_body.trim() === "") {
             alert("Write something first!");
           } else {
-            var head = this.post_head.replace(/\n/g,"");
             var body = this.post_body.replace(/\n{3,}/g, "\n\n");
-            this.post({cite, head, body});
+            this.post({cite, body});
           };
         },
       }, "Submit"),
@@ -407,7 +400,7 @@ class Write extends Component {
         "background": "white",//"rgb(246, 246, 246)",
         "width": "100%",
       }
-    }, [poster_head, poster_body_drawer, poster_body_editor]);
+    }, [poster_body_drawer, poster_body_editor]);
 
     const separator = h("div", {
       style: {

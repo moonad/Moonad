@@ -19,7 +19,7 @@ const Post = ({post, play, poid, expand, top}) => {
         window.location.href = "https://github.com/moonad/formality";
       },
     }, "Formality");
-    return h("div", {style: { "margin-top": "10px", "margin-bottom": "20px"}}, [
+    return h("div", {style: { "margin-top": "10px", "margin-bottom": "10px"}}, [
       h("h3", {style: { "color": "#003F63", }}, "Moonad: a p2p academic journal, or a social network for code?"),
       h("br"),
       h("div", {}, [
@@ -33,68 +33,45 @@ const Post = ({post, play, poid, expand, top}) => {
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {
-    // Post title
-    // ==========
-    
-    const title_back = h("h3", {
-        style: {
-          //"user-select": "none",
-          //"font-size": expand ? "16px" : "14px",
-          "display": "inline-block",
-          //"color": "rgb(41, 42, 44)",
-          "cursor": "pointer",
-          // "text-decoration": "underline",
-        },
-        onClick: () => front.set_route("/p/"+post.cite),
-      }, "↩");
+    // Post head
+    // =========
 
-    const title_head = h("p", {
-        style: {
-          "font-size": "15px",
-          //"user-select": "none",
-          //"font-size": expand ? "16px" : "14px",
-          "display": "inline-block",
-          "cursor": "pointer",
-          // "text-decoration": "underline",
-        },
-        onClick: () => {
-          if (poid === "0x0000000000000001") {
-            window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
-          } else {
-            front.set_route("/p/"+poid);
-          }
-        },
-      }, post.head);
-
-    const title = h("div", {
-      style: {
-        "margin-top": "10px", 
-        "color": "rgb(74, 74, 74)",
-        "font-family": "IBMPlexMono-Light",
-      }}, top ? [title_back," ",title_head] : title_head);
-
-    // Post author and date
-    // ====================
-
-    const author = h("div", {
+    const post_head = h("div", {
         style: {
           "font-family": "IBMPlexMono-Light",
-          "font-size": "8px",
-          //"font-style": "italic",
-          "color": "rgb(161, 162, 168)",
           "margin-top": "3px",
           "padding-bottom": "4px",
         },
-      }, [""
-        + " by " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
-        + " · " + front.format_date(post.date)
-        ]);
+      }, [
+        // Post author
+        h("span", {
+          style: {
+            "color": "rgb(0, 63, 99)",
+            "font-size": "12px",
+            "font-weight": "bold",
+          },
+        }, (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")),
+        // Separator
+        h("span", {
+          style: {
+            "font-size": "12px",
+            "color": "rgb(161, 162, 168)",
+          },
+        }, " · "),
+        // Post date
+        h("span", {
+          style: {
+            "font-size": "12px",
+            "color": "rgb(161, 162, 168)",
+          },
+        }, front.format_date(post.date)),
+      ]);
 
     // Post body or played term
     // ========================
 
     if (play) {
-      var post_body = h(Term, {
+      var body = h(Term, {
         poid,
         code: front.moonad.lib.get_post_code(post),
         name: play,
@@ -103,54 +80,99 @@ const Post = ({post, play, poid, expand, top}) => {
       var auth_addr = post.auth.toLowerCase();
       var auth_name = front.moonad.name[auth_addr];
       var blocks = front.moonad.lib.get_post_blocks(post);
-      var post_body = [];
+      var body = [];
       for (var block of blocks) {
         switch (block.ctor) {
           case "code":
-            post_body.push(Code({code: block.text, poid}));
+            body.push(Code({code: block.text, poid}));
             break;
           case "text":
             var text = block.text.replace(/^\n/,"");
-            var done = "";
-            var llen = 0;
-            for (var i = 0; i < text.length; ++i) {
-              if (text[i] === "\n") {
-                llen = 0;
-                done += "\n";
-              } else if (llen === 80) {
-                llen = 1;
-                done += "\n" + text[i];
+            var line = "";
+            for (var i = 0; i <= text.length; ++i) {
+              if (i === text.length || text[i] === "\n" || line.length === 80) {
+                var bold = false;
+                if (line.slice(0,2) === "# ") {
+                  bold = true;
+                  line = line.slice(2);
+                }
+                body.push(h("div", {
+                  style: {
+                    "font-size": bold ? "14px" : "12px",
+                    "font-weight": bold ? "bold" : "",
+                    "margin-bottom": line === "" ? "8px" : "0px",
+                    //"text-decoration": bold ? "underline" : "",
+                  }
+                }, line));
+                line = "";
               } else {
-                llen += 1;
-                done += text[i];
+                line += text[i];
               }
             };
-            post_body.push(done);
             break;
         }
       };
     }
 
-    const body = !expand ? null : h("pre", {
+    const post_body = !expand ? null : h("pre", {
         style: {
           "font-family": "IBMPlexMono-Light",
           "font-size": "12px",
           "padding": "5px 0px 5px 0px",
-          "color": "rgb(101,102,105)",
+          "color": "rgb(41,42,45)",
         }
-      }, [post_body]);
+      }, [body]);
 
-    const separator = h("div", {
+    // Post foot
+    // =========
+
+    const post_foot = h("div", {
+      style: {
+        "margin-top": "4px", 
+        "color": "rgb(161, 162, 168)",
+        "font-family": "IBMPlexMono-Light",
+        "font-size": "10px",
+      },
+    }, [
+      h("span", {
+        style: {
+          "cursor": "pointer",
+          "text-decoration": "underline",
+        },
+        onClick: () => {
+          if (poid === "0x0000000000000001") {
+            window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
+          } else {
+            front.set_route("/p/"+poid);
+          }
+        },
+      }, "123 replies"),
+      h("span", {}, " · "),
+      h("span", {
+        style: {
+          "cursor": "pointer",
+          "text-decoration": "underline",
+        },
+        onClick: () => {
+          front.set_route("/p/"+post.cite);
+        },
+      }, "parent"),
+    ]);
+
+    // Post separator
+    // ==============
+
+    const post_line = h("div", {
       style: { 
-        "border-bottom": "1px dashed rgb(240,240,240)",
-        "margin-top": "8px"
+        //"border-bottom": "1px dashed rgb(240,240,240)",
+        "margin-bottom": "20px",
       }}, "");
 
     return h("div", {
       style: {
         //"border-bottom": "1px solid rgb(240, 240, 240)",
         //"padding-bottom": "16px",
-      }}, [title, author, body, separator]);
+      }}, [post_head, post_body, post_foot, post_line]);
   }
 };
 
