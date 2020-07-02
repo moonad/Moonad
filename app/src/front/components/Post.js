@@ -8,6 +8,14 @@ const Code = require("./Code.js");
 const Term = require("./Term.js");
 
 const Post = ({post, play, poid, expand, top}) => {
+  function enter() {
+    if (poid === "0x0000000000000001") {
+      window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
+    } else {
+      front.set_route("/p/"+poid);
+    }
+  };
+
   post = post || front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
     const Formality = h("span", {
@@ -36,36 +44,36 @@ const Post = ({post, play, poid, expand, top}) => {
     // Post head
     // =========
 
-    const post_head = h("div", {
-        style: {
-          "font-family": "IBMPlexMono-Light",
-          "margin-top": "3px",
-          "padding-bottom": "4px",
-        },
-      }, [
-        // Post author
-        h("span", {
-          style: {
-            "color": "rgb(0, 63, 99)",
-            "font-size": "12px",
-            "font-weight": "bold",
-          },
-        }, (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")),
-        // Separator
-        h("span", {
-          style: {
-            "font-size": "12px",
-            "color": "rgb(161, 162, 168)",
-          },
-        }, " · "),
-        // Post date
-        h("span", {
-          style: {
-            "font-size": "12px",
-            "color": "rgb(161, 162, 168)",
-          },
-        }, front.format_date(post.date)),
-      ]);
+    //const post_head = h("div", {
+        //style: {
+          //"font-family": "IBMPlexMono-Light",
+          //"margin-top": "3px",
+          //"padding-bottom": "4px",
+        //},
+      //}, [
+        //// Post author
+        //h("span", {
+          //style: {
+            //"color": "rgb(0, 63, 99)",
+            //"font-size": "12px",
+            //"font-weight": "bold",
+          //},
+        //}, (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")),
+        //// Separator
+        //h("span", {
+          //style: {
+            //"font-size": "12px",
+            //"color": "rgb(161, 162, 168)",
+          //},
+        //}, " · "),
+        //// Post date
+        //h("span", {
+          //style: {
+            //"font-size": "12px",
+            //"color": "rgb(161, 162, 168)",
+          //},
+        //}, front.format_date(post.date)),
+      //]);
 
     // Post body or played term
     // ========================
@@ -101,8 +109,10 @@ const Post = ({post, play, poid, expand, top}) => {
                     "font-size": bold ? "14px" : "12px",
                     "font-weight": bold ? "bold" : "",
                     "margin-bottom": line === "" ? "8px" : "0px",
-                    //"text-decoration": bold ? "underline" : "",
-                  }
+                    "text-decoration": bold ? "underline" : "",
+                    "cursor": bold ? "pointer" : "",
+                  },
+                  onClick: () => enter(),
                 }, line));
                 line = "";
               } else {
@@ -134,20 +144,58 @@ const Post = ({post, play, poid, expand, top}) => {
         "font-size": "10px",
       },
     }, [
+
+      // Post author
+      h("span", {
+        style: {
+          "color": "rgb(0, 63, 99)",
+          "font-size": "12px",
+          "font-weight": "bold",
+        },
+      }, (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")),
+
+      // Separator
+      h("span", {
+        style: {
+          "font-size": "12px",
+          "color": "rgb(161, 162, 168)",
+        },
+      }, " · "),
+
+      // Post date
+      h("span", {
+        style: {
+          "font-size": "12px",
+          "color": "rgb(161, 162, 168)",
+        },
+      }, front.format_date(post.date)),
+
+      // Separator
+      h("span", {
+        style: {
+          "font-size": "12px",
+          "color": "rgb(161, 162, 168)",
+        },
+      }, " · "),
+
+      // Post replies
       h("span", {
         style: {
           "cursor": "pointer",
           "text-decoration": "underline",
         },
-        onClick: () => {
-          if (poid === "0x0000000000000001") {
-            window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
-          } else {
-            front.set_route("/p/"+poid);
-          }
-        },
+        onClick: () => enter(),
       }, "123 replies"),
-      h("span", {}, " · "),
+
+      // Separator
+      h("span", {
+        style: {
+          "font-size": "12px",
+          "color": "rgb(161, 162, 168)",
+        },
+      }, " · "),
+
+      // Post parent
       h("span", {
         style: {
           "cursor": "pointer",
@@ -157,6 +205,7 @@ const Post = ({post, play, poid, expand, top}) => {
           front.set_route("/p/"+post.cite);
         },
       }, "parent"),
+
     ]);
 
     // Post separator
@@ -164,7 +213,8 @@ const Post = ({post, play, poid, expand, top}) => {
 
     const post_line = h("div", {
       style: { 
-        //"border-bottom": "1px dashed rgb(240,240,240)",
+        "border-bottom": "1px dashed rgb(240,240,240)",
+        "margin-top": "10px",
         "margin-bottom": "20px",
       }}, "");
 
@@ -172,7 +222,7 @@ const Post = ({post, play, poid, expand, top}) => {
       style: {
         //"border-bottom": "1px solid rgb(240, 240, 240)",
         //"padding-bottom": "16px",
-      }}, [post_head, post_body, post_foot, post_line]);
+      }}, [post_body, post_foot, post_line]);
   }
 };
 
