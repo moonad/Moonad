@@ -8,7 +8,6 @@ const front = require("./../front.js");
 class Term extends Component {
   constructor(props) {
     super(props);
-    this.poid = null;
     this.defs = null;
     this.argm = [];
     this.app = null;
@@ -22,12 +21,12 @@ class Term extends Component {
   }
   async componentDidMount() {
     try {
-      this.poid = this.props.poid || (await front.moonad.api.get_orig({name: this.props.name}));
-      front.moonad.do_watch(this.poid);
       this.defs = await front.load_core_defs_of({
         name: this.props.name,
         code: this.props.code || null,
       });
+      // Refreshes
+      this.intervals.refresher = setInterval(() => this.forceUpdate(), 1000/2);
       this.forceUpdate();
     } catch (e) {
       setTimeout(() => this.componentDidMount(), 500);
@@ -115,22 +114,24 @@ class Term extends Component {
     // New post event
     this.seen_replies = 0;
     this.intervals.post = setInterval(() => {
-      var replies = front.moonad.cite[this.poid];
-      while (replies && this.seen_replies < replies.length) {
-        var reply = front.moonad.post[replies[this.seen_replies]];
-        if (!reply) {
-          break;
-        } else {
-          this.send_event({
-            _: "App.Event.post",
-            date: reply.date,
-            auth: reply.auth,
-            head: reply.head,
-            body: reply.body,
-          });
-          this.seen_replies++;
+      if (this.props.poid) {
+        var replies = front.moonad.cite[this.props.poid];
+        while (replies && this.seen_replies < replies.length) {
+          var reply = front.moonad.post[replies[this.seen_replies]];
+          if (!reply) {
+            break;
+          } else {
+            this.send_event({
+              _: "App.Event.post",
+              date: reply.date,
+              auth: reply.auth,
+              head: reply.head,
+              body: reply.body,
+            });
+            this.seen_replies++;
+          };
         };
-      };
+      }
     }, 1000 / 32);
 
     // Tick event
@@ -194,11 +195,6 @@ class Term extends Component {
         canvas.clear.size = 0;
       };
     }, 1000/32);
-
-    // Refreshes
-    this.intervals.refresher = setInterval(() => {
-      this.forceUpdate();
-    }, 1000 / 2);
   }
   send_event(app_event) {
     if (this.app) {
@@ -238,13 +234,13 @@ class Term extends Component {
 
     // Go back to origin post
     var go_back = null;
-    if (this.poid && this.poid !== "0x0000000000000000") {
+    if (this.props.poid && this.props.poid !== "0x0000000000000000") {
       go_back = h("div", {
         style: {
           "cursor": "pointer",
           "text-decoration": "underline",
         },
-        onClick: () => front.set_route("/p/"+this.poid),
+        onClick: () => front.set_route("/p/"+this.props.poid),
       }, "Go to origin post.");
     }
 
@@ -344,8 +340,8 @@ class Term extends Component {
         "cursor": "pointer",
       },
       onClick: () => {
-        if (this.poid) {
-          front.set_route("/p/"+this.poid);
+        if (this.props.poid) {
+          front.set_route("/p/"+this.props.poid);
         };
       },
     }, this.props.name);

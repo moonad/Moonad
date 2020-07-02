@@ -24,10 +24,11 @@ class Posts extends Component {
   }
   refresh() {
     var poid_key = this.props.poid;
+    var play_key = this.props.play;
     var post_key = front.moonad.post[this.props.poid] ? "has" : "nil";
     var cite_obj = front.moonad.cite[this.props.poid];
     var cite_key = cite_obj ? String(cite_obj.length) : "nil";
-    var render_key = poid_key+"|"+post_key+"|"+cite_key;
+    var render_key = poid_key+"|"+play_key+"|"+post_key+"|"+cite_key;
     if (this.render_key !== render_key) {
       this.render_key = render_key;
       this.forceUpdate();
@@ -35,6 +36,7 @@ class Posts extends Component {
   }
   render() {
     var poid = this.props.poid;
+    var play = this.props.play;
     var post = front.moonad.post[poid];
     var body = [];
 
@@ -65,6 +67,7 @@ class Posts extends Component {
     body.push(Post({
       top: true,
       poid,
+      play,
       expand: true,
       moonad: front.moonad,
       on_click_post: this.props.on_click_post

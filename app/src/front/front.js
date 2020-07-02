@@ -85,7 +85,7 @@ function get_paths() {
 function get_watched_poid() {
   var paths = get_paths(); 
   if (paths[0] === "p") {
-    return paths[1] || "0x0000000000000000";
+    return paths[1] && paths[1].split(".")[0] || "0x0000000000000000";
   } else {
     return null;
   };
@@ -97,6 +97,15 @@ function refresh_watched_poid() {
   if (watched_poid !== null && last_watched_poid !== watched_poid) {
     lib.moonad.do_watch(watched_poid);
     last_watched_poid = watched_poid;
+  };
+};
+
+function get_played_term() {
+  var paths = get_paths(); 
+  if (paths[0] === "p" && paths[1] && paths[1].indexOf(".") !== -1) {
+    return paths[1].split(".")[1];
+  } else {
+    return null;
   };
 };
 
@@ -189,6 +198,7 @@ lib.get_route = get_route;
 lib.set_route = set_route;
 lib.get_paths = get_paths;
 lib.get_watched_poid = get_watched_poid;
+lib.get_played_term = get_played_term;
 lib.refresh_watched_poid = refresh_watched_poid;
 lib.remove_colors = remove_colors;
 lib.load_core_defs_of = load_core_defs_of;

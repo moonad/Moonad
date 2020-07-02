@@ -5,8 +5,9 @@ const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 
 const Code = require("./Code.js");
+const Term = require("./Term.js");
 
-const Post = ({post, poid, expand, top}) => {
+const Post = ({post, play, poid, expand, top}) => {
   post = post || front.moonad.post[poid];
   if (poid === "0x0000000000000000") {
     const Formality = h("span", {
@@ -32,6 +33,9 @@ const Post = ({post, poid, expand, top}) => {
   } else if (poid === null || !post) {
     return h("div", {}, "[loading...]");
   } else {
+    // Post title
+    // ==========
+    
     const title_back = h("h3", {
         style: {
           //"user-select": "none",
@@ -53,7 +57,13 @@ const Post = ({post, poid, expand, top}) => {
           "cursor": "pointer",
           // "text-decoration": "underline",
         },
-        onClick: () => front.set_route("/p/"+poid),
+        onClick: () => {
+          if (poid === "0x0000000000000001") {
+            window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
+          } else {
+            front.set_route("/p/"+poid);
+          }
+        },
       }, post.head);
 
     const title = h("div", {
@@ -63,52 +73,8 @@ const Post = ({post, poid, expand, top}) => {
         "font-family": "IBMPlexMono-Light",
       }}, top ? [title_back," ",title_head] : title_head);
 
-    var auth_addr = post.auth.toLowerCase();
-    var auth_name = front.moonad.name[auth_addr];
-    var blocks = front.moonad.lib.get_post_blocks(post, front.moonad.name[auth_addr]);
-    var post_body = [];
-    for (var block of blocks) {
-      switch (block.ctor) {
-        case "code":
-          post_body.push(Code({code: block.text}));
-          break;
-        case "text":
-          var text = block.text.replace(/^\n/,"");
-          var done = "";
-          var llen = 0;
-          for (var i = 0; i < text.length; ++i) {
-            if (text[i] === "\n") {
-              llen = 0;
-              done += "\n";
-            } else if (llen === 80) {
-              llen = 1;
-              done += "\n" + text[i];
-            } else {
-              llen += 1;
-              done += text[i];
-            }
-          };
-          post_body.push(done);
-          break;
-      }
-    };
-
-    const separator = h("div", {
-      style: { 
-        "border-bottom": "1px dashed rgb(240,240,240)",
-        "margin-top": "8px"
-      }}, "");
-
-    const body = !expand ? null : h("pre", {
-        style: {
-          "font-family": "IBMPlexMono-Light",
-          "font-size": "12px",
-          "padding": "5px 0px 5px 0px",
-          "color": "rgb(101,102,105)",
-        }
-      }, [post_body]);
-  
-    const replies_aux = front.moonad.cite[poid] ? front.moonad.cite[poid].length : 0;
+    // Post author and date
+    // ====================
 
     const author = h("div", {
         style: {
@@ -123,6 +89,62 @@ const Post = ({post, poid, expand, top}) => {
         + " by " + (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")
         + " · " + front.format_date(post.date)
         ]);
+
+    // Post body or played term
+    // ========================
+
+    if (play) {
+      var post_body = h(Term, {
+        poid,
+        code: front.moonad.lib.get_post_code(post),
+        name: play,
+      });
+    } else {
+      var auth_addr = post.auth.toLowerCase();
+      var auth_name = front.moonad.name[auth_addr];
+      var blocks = front.moonad.lib.get_post_blocks(post);
+      var post_body = [];
+      for (var block of blocks) {
+        switch (block.ctor) {
+          case "code":
+            post_body.push(Code({code: block.text, poid}));
+            break;
+          case "text":
+            var text = block.text.replace(/^\n/,"");
+            var done = "";
+            var llen = 0;
+            for (var i = 0; i < text.length; ++i) {
+              if (text[i] === "\n") {
+                llen = 0;
+                done += "\n";
+              } else if (llen === 80) {
+                llen = 1;
+                done += "\n" + text[i];
+              } else {
+                llen += 1;
+                done += text[i];
+              }
+            };
+            post_body.push(done);
+            break;
+        }
+      };
+    }
+
+    const body = !expand ? null : h("pre", {
+        style: {
+          "font-family": "IBMPlexMono-Light",
+          "font-size": "12px",
+          "padding": "5px 0px 5px 0px",
+          "color": "rgb(101,102,105)",
+        }
+      }, [post_body]);
+
+    const separator = h("div", {
+      style: { 
+        "border-bottom": "1px dashed rgb(240,240,240)",
+        "margin-top": "8px"
+      }}, "");
 
     return h("div", {
       style: {

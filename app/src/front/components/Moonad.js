@@ -57,12 +57,9 @@ class Moonad extends Component {
         var body = h(Posts, {
           moonad: front.moonad,
           poid: front.get_watched_poid(),
+          play: front.get_played_term(),
         });
         break;
-      case "t":
-        var body = h(Term, {
-          name: paths[1]
-        });
     }
 
     return h("div", {

@@ -5,7 +5,7 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 
-const Code = ({code, style, plus}) => {
+const Code = ({poid, code, style, plus}) => {
   var elems = [];
   if (plus) {
     elems.push(h("span", {style: {"color": txt_col}}, "+"))
@@ -27,7 +27,7 @@ const Code = ({code, style, plus}) => {
       switch (tag.ctor) {
         case "def":
           color = def_col;
-          click = () => front.set_route("/t/"+tag.text);
+          click = () => { if (poid) { front.set_route("/p/"+poid+"."+tag.text); } };
           decor = "underline";
           cursr = "pointer";
           break;
@@ -54,7 +54,7 @@ const Code = ({code, style, plus}) => {
           break;
         case "ref":
           color = ref_col;
-          click = async () => front.set_route("/p/" + await front.moonad.api.get_orig({name: tag.text}));
+          click = async () => {}, // TODO: go to origin
           decor = "underline";
           cursr = "pointer";
           break;
