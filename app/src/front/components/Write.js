@@ -142,13 +142,14 @@ class Write extends Component {
         case "code":
           var code = block.text;
           try {
-            var fnam = front.moonad.lib.hex_to_string(await front.moonad.api.file({code}, front.pkey));
-            new_body += "{{{"+fnam+"}}}\n";
-            console.log("posted "+fnam+":\n"+code);
+            var fnam = await front.moonad.api.file({code}, front.pkey);
           } catch (e) {
-            console.log("error", e);
+            console.log(e);
             return alert(e);
           }
+          var fnam = front.moonad.lib.hex_to_string(fnam);
+          new_body += "{{{"+fnam+"}}}\n";
+          console.log("posted "+fnam+":\n"+code);
           break;
       }
     }
