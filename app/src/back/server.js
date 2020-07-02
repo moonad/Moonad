@@ -311,7 +311,7 @@ async function expand_post(poid) {
   if (got !== null) {
     var post = lib.bytes_to_post(got);
     var body = "";
-    for (var i = 1; i < post.body.length; ++i) {
+    for (var i = 0; i < post.body.length; ++i) {
       if (post.body.slice(i, i+3) === "{{{") {
         var fnam = "";
         i += 3;
