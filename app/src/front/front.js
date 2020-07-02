@@ -103,7 +103,7 @@ function refresh_watched_poid() {
 function get_played_term() {
   var paths = get_paths(); 
   if (paths[0] === "p" && paths[1] && paths[1].indexOf(".") !== -1) {
-    return paths[1].split(".")[1];
+    return paths[1].split(".").slice(1).join(".");
   } else {
     return null;
   };
