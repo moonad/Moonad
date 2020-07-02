@@ -101,8 +101,8 @@ async function new_file(file) {
 
   // Validates post body (namespace-check)
   for (var def_name in defs) {
-    if (!Mods[auth] && def !== name && def.slice(0,name.length+1) !== name+".") {
-      throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
+    if (!Mods[auth] && def_name !== name && def_name.slice(0,name.length+1) !== name+".") {
+      throw "Not allowed to define '"+def_name+"' outside of the '"+name+"' namespace.";
     }
     if (def_name !== fnam && def_name.slice(0,fnam.length+1) !== fnam+".") {
       throw "Definition '"+def_name+"' isn't on the '"+fnam+"' namespace.";
