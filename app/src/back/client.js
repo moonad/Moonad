@@ -23,6 +23,10 @@ module.exports = ({url = "http://moonad.org"}) => {
     return await query("post", lib.sign_post(post, pkey));
   };
 
+  async function file(file, pkey) {
+    return await query("file", lib.sign_file(file, pkey));
+  };
+
   async function register({name, addr}) {
     return await query("register", {name, addr});
   };
@@ -58,7 +62,7 @@ module.exports = ({url = "http://moonad.org"}) => {
   };
 
   async function get_post({poid}) {
-    return lib.hex_to_post(await get({key: poid+".post"}));
+    return lib.hex_to_post(await query("get_post", {poid: poid}));
   };
 
   function direct() {
@@ -74,6 +78,7 @@ module.exports = ({url = "http://moonad.org"}) => {
     self.api.request = request;
     self.api.query = query;
     self.api.post = post;
+    self.api.file = file;
     self.api.register = register;
     self.api.get = get;
     self.api.get_addr = get_addr;

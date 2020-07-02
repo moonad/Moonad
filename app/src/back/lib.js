@@ -187,6 +187,21 @@ function sign_post(post, pkey) {
   };
 };
 
+function get_file_msge(file) {
+  return file.code;
+};
+
+function get_file_auth(file) {
+  return sig.signerAddress(sig.keccak(get_file_msge(file)), file.sign).toLowerCase();
+};
+
+function sign_file(file, pkey) {
+  return {
+    ...file,
+    sign: file.sign || sig.signMessage(sig.keccak(get_file_msge(file)), pkey),
+  };
+};
+
 function get_term_refs(term, refs = {}) {
   function go(term) {
     switch (term.ctor) {
@@ -274,10 +289,13 @@ module.exports = {
   get_post_blocks,
   get_post_msge,
   get_post_auth,
+  sign_post,
+  get_file_msge,
+  get_file_auth,
+  sign_file,
   split_hex_in_chunks,
   hex_to_hex64s,
   bytes_concat,
-  sign_post,
   DO_POST,
   DO_WATCH,
   POST,

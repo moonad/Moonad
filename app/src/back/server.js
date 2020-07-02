@@ -142,6 +142,77 @@ async function startup() {
 };
 startup();
 
+async function new_file(file) {
+  // Parses defs, gets fnam
+  var defs = fm.lang.parse(file.code).defs;
+  var fnam = null;
+  for (var def_name in defs) {
+    if (!fnam || fnam.length > def_name) {
+      fnam = def_name;
+    }
+  }
+  var path = "./../lib/"+fnam+".fm";
+
+  // If already exists, return
+  if (fs.existsSync(path) && fs.readFileSync(path, "utf8") === file.code) {
+    return lib.string_to_hex(fnam);
+  }
+
+  // Validates signature
+  try {
+    var auth = lib.get_file_auth(file);
+  } catch (e) {
+    throw "Invalid signature.";
+  }
+
+  // Validates name
+  if (auth !== "0x0000000000000000000000000000000000000000") {
+    var name = await db.get(auth+".name");
+  } else {
+    var name = "ROOT";
+  }
+
+  // Validates post body (namespace-check)
+  for (var def_name in defs) {
+    if (!Mods[auth] && def !== name && def.slice(0,name.length+1) !== name+".") {
+      throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
+    }
+    if (def_name !== fnam && def_name.slice(0,fnam.length+1) !== fnam+".") {
+      throw "Definition '"+def_name+"' isn't on the '"+fnam+"' namespace.";
+    }
+    if (Defs[def]) {
+      throw "Redefinition of '"+def+"'.";
+    }
+  }
+  if (fs.existsSync(path)) {
+    throw "File '"+fnam+"' already exists.";
+  }
+
+  // Validates file body (type-check)
+  var all_defs = {...Defs, ...defs};
+  for (var def in defs) {
+    try {
+      var term = defs[def].term;
+      var type = defs[def].type;
+      var {term, type} = fm.synt.typesynth(def, all_defs, fm.lang.stringify);
+    } catch (e) {
+      throw fm.lang.stringify_err(e(), file.code);
+    }
+  }
+
+  // Writes file
+  fs.writeFileSync(path, file.code);
+
+  // Saves def
+  for (var def in defs) {
+    Defs[def] = defs[def];
+  }
+
+  // TODO: commit on git
+  
+  return lib.string_to_hex(fnam);
+};
+
 async function new_post(post) {
   var date = post.date || Date.now();
   var poid = lib.hex(64, "0x"+Size.toString(16));
@@ -185,30 +256,6 @@ async function new_post(post) {
   if (Lock[cite] && !Mods[auth]) {
     throw "Not authorized to reply to this thread.";
   };
-
-  // Validates post body (namespace-check)
-  //var code = lib.get_post_code(post, name);
-  //var defs = fm.lang.parse(code).defs;
-  //for (var def in defs) {
-    //if (!Mods[auth] && def.slice(0, name.length+1) !== name+"." && def !== name) {
-      //throw "Not allowed to define '"+def+"' outside of the '"+name+"' namespace.";
-    //}
-    //if (Defs[def]) {
-      //throw "Redefinition of '"+def+"'.";
-    //}
-  //};
-
-  // Validates post body (type-check)
-  //var all_defs = {...Defs, ...defs};
-  //for (var def in defs) {
-    //try {
-      //var term = defs[def].term;
-      //var type = defs[def].type;
-      //var {term, type} = fm.synt.typesynth(def, all_defs, fm.lang.stringify);
-    //} catch (e) {
-      //throw fm.lang.stringify_err(e(), code);
-    //}
-  //};
 
   // Saves it
   try {
@@ -258,6 +305,37 @@ async function register({name, addr}) {
     throw "Internal error.";
   };
 };
+
+async function expand_post(poid) {
+  var got = await db.get(poid+".post");
+  if (got !== null) {
+    var post = lib.bytes_to_post(got);
+    var body = "";
+    for (var i = 0; i < post.body.length; ++i) {
+      if (post.body.slice(i, i+3) === "{{{") {
+        var fnam = "";
+        i += 3;
+        while (i < post.body.length && post.body.slice(i,i+3) !== "}}}") {
+          fnam += post.body[i++];
+        }
+        i += 2;
+        fnam = fnam.replace(/\.\./g,"");
+        var path = "./../lib/"+fnam+".fm";
+        if (fs.existsSync(path)) {
+          var code = fs.readFileSync(path, "utf8");
+          body += "+"+code+(code[code.length-1]==="\n"?"":"\n");
+        } else {
+          body += "{{{"+fnam+"}}}";
+        }
+      } else {
+        body += post.body[i];
+      }
+    };
+    return {...post, body};
+  } else {
+    throw "Post not found: '"+req.query.poid+"'.";
+  }
+}
 
 // HTTP API
 // ========
@@ -319,6 +397,19 @@ app.post("/post", async (req, res) => {
   }
 });
 
+// Makes a file
+app.post("/file", async (req, res) => {
+  var file = req.query;
+  if (req.query && req.query.auth) {
+    delete req.query.auth;
+  }
+  try {
+    res.send(await new_file(file));
+  } catch (e) {
+    res.send(e.toString());
+  }
+});
+
 // Registers a name
 app.post("/register", async (req, res) => {
   var name = req.query.name;
@@ -330,6 +421,16 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.post("/get_post", async (req, res) => {
+  try {
+    var post = expand_post(req.query.poid);
+    res.send(lib.bytes_to_hex(lib.post_to_bytes(post)));
+  } catch (e) {
+    res.send(e.toString());
+  };
+});
+
+// Gets a db entry
 app.post("/get", async (req, res) => {
   try {
     var got = await db.get(req.query.key);
@@ -349,11 +450,12 @@ app.post("/get", async (req, res) => {
 // Poid -> Buff -> Buff
 async function serialize_post(poid, post) {
   if (post) {
+    var pbuf = lib.post_to_bytes(post);
     return lib.bytes_concat([
       [lib.POST],
       lib.hex_to_bytes(poid),
-      lib.uint32_to_bytes(post.length),
-      post,
+      lib.uint32_to_bytes(pbuf.length),
+      pbuf,
     ]);
   } else {
     return null;
@@ -407,9 +509,9 @@ app.ws('/', function(ws, req) {
     async function view_post(poid) {
       if (poid !== "0x0000000000000000" && !peer.has_post[poid]) {
         peer.has_post[poid] = true;
-        var post = await db.get(poid+".post");
+        var post = await expand_post(poid);
         if (post) {
-          var auth = lib.bytes_to_post(post).auth;
+          var auth = post.auth;
           var name = await db.get(auth+".name");
           var pbuf = await serialize_post(poid, post);
           bufs.push(pbuf);

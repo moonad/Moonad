@@ -1,0 +1,2 @@
+MaiaVictor.test4: Nat
+  Nat.add(5,6)

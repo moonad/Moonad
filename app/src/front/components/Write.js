@@ -135,8 +135,29 @@ class Write extends Component {
       return alert("Incorrect cited post.");
     }
 
+    var blocks = front.moonad.lib.get_post_blocks({cite, head, body});
+    var new_body = "";
+    for (var block of blocks) {
+      switch (block.ctor) {
+        case "text":
+          new_body += block.text;
+          break;
+        case "code":
+          var code = block.text;
+          try {
+            var fnam = front.moonad.lib.hex_to_string(await front.moonad.api.file({code}, front.pkey));
+            new_body += "{{{"+fnam+"}}}\n";
+            console.log("posted "+fnam+":\n"+code);
+          } catch (e) {
+            console.log("error", e);
+            return alert(e);
+          }
+          break;
+      }
+    }
+
     try {
-      await front.moonad.api.post({cite, head, body}, front.pkey);
+      await front.moonad.api.post({cite, head, body: new_body}, front.pkey);
       this.del_entry("post_body");
       this.del_entry("post_head");
       window.history.back();
