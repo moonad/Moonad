@@ -157,7 +157,6 @@ const Post = ({post, play, poid, expand, top}) => {
       // Separator
       h("span", {
         style: {
-          "font-size": "12px",
           "color": "rgb(161, 162, 168)",
         },
       }, " · "),
@@ -165,7 +164,6 @@ const Post = ({post, play, poid, expand, top}) => {
       // Post date
       h("span", {
         style: {
-          "font-size": "12px",
           "color": "rgb(161, 162, 168)",
         },
       }, front.format_date(post.date)),
@@ -173,7 +171,6 @@ const Post = ({post, play, poid, expand, top}) => {
       // Separator
       h("span", {
         style: {
-          "font-size": "12px",
           "color": "rgb(161, 162, 168)",
         },
       }, " · "),
@@ -190,7 +187,6 @@ const Post = ({post, play, poid, expand, top}) => {
       // Separator
       h("span", {
         style: {
-          "font-size": "12px",
           "color": "rgb(161, 162, 168)",
         },
       }, " · "),
