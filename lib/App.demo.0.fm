@@ -1,31 +1,22 @@
-// A demo application
+// A demo application that renders a square on the screen
 App.demo.0: App(Pair(U32,U32))
-  def u32
-    Nat.to_u32
+  let vox = VoxModel.alloc_size(256u)
   def init
     Pair.new<,>(U32.0, U32.0)
   def draw(state)
-    def size
-      u32(256)
-    def draw(i)
-      case state:
-      | let m_x = state.fst // mouse x
-        let m_y = state.snd // mouse y
-        let i_x = U32.mod(i, u32(16)) // square x
-        let i_y = U32.div(i, u32(16)) // square y
-        let p_x = U32.sub(U32.add(m_x, i_x), u32(8)) // pixel x
-        let p_y = U32.sub(U32.add(m_y, i_y), u32(8)) // pixel y
-        let p_z = u32(128) // pixel z
-        let pos = U32.0
-        let pos = U32.or(U32.mul(p_x, u32(1048576)), pos)
-        let pos = U32.or(U32.mul(p_y, u32(256)), pos)
-        let pos = U32.or(U32.mul(p_z, u32(1)), pos)
-        let col = u32(4278190335) // rgba(255,0,0,255)
-        Pair.new<,>(pos, col);
-    App.Render.pix(size, draw)
+    get mouse_x mouse_y = state
+    App.Render.vox
+    | use idx vox = U32.for<>(vox, 0u, 256u)
+      let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,16u)),8u) // pixel x
+      let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,16u)),8u) // pixel y
+      let pos = Pos32.from_xyz(p_x, p_y, 128u) // pixel pos (forms a square)
+      let col = Col32.from_rgba(255u, 0u, 0u, 255u) // pixel color (red)
+      let vox = VoxModel.set_pos(idx, pos, vox)
+      let vox = VoxModel.set_col(idx, col, vox)
+      vox;
   def when(event, state)
     case event:
-    | tick => event.mouse; // sets state to mouse pos
+    | tick => event.mouse;
     | ukey => state;
     | post => state;
   App.new<>(init, draw, when)

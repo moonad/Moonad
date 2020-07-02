@@ -1,0 +1,3 @@
+VoxModel.get_pos(idx: U32, vox: VoxModel): U32
+  case vox:
+  | Buffer32.get(U32.mul(idx,2u), vox.buffer);

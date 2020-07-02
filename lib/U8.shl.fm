@@ -1,3 +1,2 @@
-U8.shl(n: Nat, a: U8): U8
-  get a_val = a 
-  U8.new(Word.shift_left<>(n, a_val))
+U8.shl(n: U32, a: U8): U8
+  U8.shl(n, a)

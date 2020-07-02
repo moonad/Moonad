@@ -1,0 +1,2 @@
+Col32.get_a(col: Col32): U32
+  U32.and(U32.shr(col, 24u), 255u)

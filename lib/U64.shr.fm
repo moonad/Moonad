@@ -1,3 +1,2 @@
-U64.shr(n: Nat, a: U64): U64
-  get a_val = a 
-  U64.new(Word.shift_right<>(n, a_val))
+U64.shr(n: U64, a: U64): U64
+  U64.shr(n, a)
