@@ -64,14 +64,14 @@ class Posts extends Component {
       ] );
 
     // Main post
-    body.push(Post({
+    body.push(h(Post, {
       top: true,
       poid,
       play,
       expand: true,
       moonad: front.moonad,
       on_click_post: this.props.on_click_post
-    }));
+    }))
 
     // Reply 
     body.push(h("div", {
@@ -109,11 +109,14 @@ class Posts extends Component {
       for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
         var reply_poid = front.moonad.cite[poid][i];
         if (!hide[reply_poid]) {
-          body.push(Post({
-            poid: reply_poid,
-            expand: true,
-            moonad: front.moonad,
-          }));
+          body.push(
+            h(Post, {
+              top: false,
+              poid: reply_poid,
+              expand: true,
+              moonad: front.moonad,
+            })
+          );
         };
       };
     };

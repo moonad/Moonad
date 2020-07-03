@@ -31,6 +31,14 @@ module.exports = ({url = "http://moonad.org"}) => {
     return await query("register", {name, addr});
   };
 
+  async function vote({poid, pkey}) {
+    return await query("vote", {poid, sign: lib.sign_vote(poid, pkey)})
+  }
+
+  async function get_qtd_votes({poid}) {
+    return await query("get", {key: poid+".vote"}); // I'm using "get"
+  }
+
   async function get({key}) {
     return await query("get", {key});
   };
@@ -65,6 +73,10 @@ module.exports = ({url = "http://moonad.org"}) => {
     return lib.hex_to_post(await query("get_post", {poid: poid}));
   };
 
+  async function has_voted({poid, addr}) {
+   return await get({key: poid+"."+addr+".votd"});
+  }
+
   function direct() {
     var self = {};
     self.post = {}; // Map Poid Post
@@ -84,6 +96,7 @@ module.exports = ({url = "http://moonad.org"}) => {
     self.api.get_addr = get_addr;
     self.api.get_cite = get_cite;
     self.api.get_refs = get_refs;
+    self.api.vote = vote;
     self.api.get_orig = async function ({name}) {
       if (!self.orig[name]) {
         self.orig[name] = await get_orig({name});
@@ -108,6 +121,8 @@ module.exports = ({url = "http://moonad.org"}) => {
       };
       return self.post[poid];
     };
+    self.api.get_qtd_votes = get_qtd_votes;
+    self.api.has_voted = has_voted;
     self.lib = lib;
 
     self.do_watch = (poid) => {
@@ -190,7 +205,9 @@ module.exports = ({url = "http://moonad.org"}) => {
     get_refs,
     get_cite,
     get_post,
+    get_qtd_votes,
     direct,
+    vote
   };
 };
 //(async () => {
