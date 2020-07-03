@@ -34,16 +34,17 @@ class Post extends Component {
     this.forceUpdate();
   }
 
+  enter() {
+    console.log("Props: ", this.props);
+    if (this.props.poid === "0x0000000000000001") {
+      window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
+    } else {
+      front.set_route("/p/"+this.props.poid);
+    }
+  };
+
   render(){
     console.log("Qtd votes: ", this.qtd_votes);
-    function enter() {
-      if (this.props.poid === "0x0000000000000001") {
-        window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
-      } else {
-        front.set_route("/p/"+this.props.poid);
-      }
-    };
-  
     this.props.post = this.props.post || front.moonad.post[this.props.poid];
     if (this.props.poid === "0x0000000000000000") {
       const Formality = h("span", {
@@ -142,7 +143,7 @@ class Post extends Component {
                       //"text-decoration": bold ? "underline" : "",
                       "cursor": bold ? "pointer" : "",
                     },
-                    onClick: () => enter(),
+                    onClick: () => this.enter(),
                   }, line));
                   line = "";
                 } else {
@@ -180,7 +181,7 @@ class Post extends Component {
             "cursor": "pointer",
             "text-decoration": "underline",
           },
-          onClick: () => enter(),
+          onClick: () => this.enter(),
         }, "123 replies"),
   
         // Separator
