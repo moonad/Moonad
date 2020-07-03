@@ -44,22 +44,54 @@ var Lock = {
   "0x0000000000000001": 1,
 };
 
-// Initializes everything
-async function startup() {
+var LastMod = {};
+var FileDefs = {};
+
+function load_lib_files() {
+  // Checks removed files
+  for (var file in FileDefs) {
+    if (!fs.existsSync(file)) {
+      console.log("Removed "+file+"...");
+      for (var def in FileDefs[file]) {
+        console.log("- Deleting "+def+"...");
+        delete Defs[def];
+      }
+      delete FileDefs[file];
+      delete LastMod[file];
+    }
+  };
   // Loads Formality definitions
   var lib_files = fs.readdirSync("./../lib").filter(x => x.slice(-3) === ".fm");
+  var new_def_names = [];
   for (var lib_file of lib_files) {
-    console.log("Loading "+lib_file+"...");
-    var lib_code = fs.readFileSync("./../lib/"+lib_file, "utf8");
-    var new_defs = fm.lang.parse(lib_code).defs;
-    for (var def in new_defs) {
-      Defs[def] = new_defs[def];
+    var path = "./../lib/"+lib_file;
+    var last_mod = fs.statSync(path).mtime.getTime();
+    if (!LastMod[path] || LastMod[path] !== last_mod) {
+      console.log("Loading "+lib_file+"...");
+      var lib_code = fs.readFileSync(path, "utf8");
+      var new_defs = fm.lang.parse(lib_code).defs;
+      var all_defs = {...Defs, ...new_defs};
+      FileDefs[path] = FileDefs[path] || {};
+      LastMod[path] = last_mod;
+      for (var def in new_defs) {
+        Defs[def] = new_defs[def];
+        FileDefs[path][def] = 1;
+        new_def_names.push(def);
+      }
     }
   }
-  for (var def in Defs) {
-    console.log("Checking "+def+"...");
+  // Type checks
+  for (var def of new_def_names) {
+    console.log("- Checking "+def+"...");
     fm.synt.typesynth(def, Defs, fm.lang.stringify);
   }
+}
+
+// Initializes everything
+async function startup() {
+  // Loads files from /lib
+  load_lib_files();
+  setInterval(() => load_lib_files(), 1000);
 
   // Computes the size of posts
   Size = fs.readdirSync("data").filter(x => x.slice(-5) === ".post").length;
@@ -127,13 +159,9 @@ async function new_file(file) {
     }
   }
 
-  // Writes file
+  // Writes and loads file
   fs.writeFileSync(path, file.code);
-
-  // Saves def
-  for (var def in defs) {
-    Defs[def] = defs[def];
-  }
+  load_lib_files();
 
   // TODO: commit on git
   

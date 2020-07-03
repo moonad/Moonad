@@ -60,6 +60,12 @@ class Moonad extends Component {
           play: front.get_played_term(),
         });
         break;
+      case "r":
+        var body = h(Term, {
+          poid: "0x0000000000000000",
+          code: null,
+          name: front.get_paths()[1],
+        });
     }
 
     return h("div", {
