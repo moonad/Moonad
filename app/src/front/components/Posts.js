@@ -15,6 +15,7 @@ class Posts extends Component {
   constructor(props) {
     super(props);
     this.render_key = null;
+    this.refresher = null;
   }
   componentDidMount() {
     setInterval(() => this.refresh(), 1000 / 8);
@@ -83,7 +84,6 @@ class Posts extends Component {
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
         "align-items": "flex-end",
-        "border-bottom": "1px dashed rgb(220,220,220)",
       },
     }, [
       h("span", {

@@ -36,7 +36,7 @@ module.exports = ({url = "http://moonad.org"}) => {
   }
 
   async function get_qtd_votes({poid}) {
-    return await query("get", {key: poid+".vote"}); // I'm using "get"
+    return await query("get", {key: poid+".vote"});
   }
 
   async function get({key}) {

@@ -61,16 +61,11 @@ async function has_voted(poid) {
 
 async function get_qtd_votes(poid) {
   try {
-    var qtd =  await lib.moonad.api.get_qtd_votes({poid});
-    return Number(qtd) ? Number(qtd) : 0;
+    var qtd = await lib.moonad.api.get_qtd_votes({poid})
+    var qtd_num = lib.moonad.lib.bytes_to_uint32(lib.moonad.lib.hex_to_bytes(qtd));
+    return qtd_num;
   } catch(e) {
-    // TODO: server is sending an error as the responde (???)
-    if (Number(e)){
-      console.log("front.js get_qtd_votes for "+poid+": ", Number(e));
-      return Number(e);
-    } else {
-      return 0; // indicates that a key(vote) doesn't exist
-    }
+    return 0;
   }
 }
 

@@ -15,13 +15,19 @@ class Post extends Component {
     super(props);
     this.user_voted = false;
     this.qtd_votes = 0;
+    this.refresher = null;
   }
 
-  componentDidMount(){
-    this.user_has_voted();
+  componentDidMount() {
+    this.refresh();
+    this.refresher = setInterval(() => this.refresh(), 3000);
   }
 
-  async user_has_voted(){
+  componentWillUnmount() {
+    clearInterval(this.refresher);
+  }
+
+  async refresh(){
     this.user_voted = await front.has_voted(this.props.poid);
     this.qtd_votes  = await front.get_qtd_votes(this.props.poid);
     this.forceUpdate();
@@ -29,22 +35,19 @@ class Post extends Component {
 
   upvote(){
     front.upvote(this.props.poid); 
-    this.user_voted = true; 
-    this.qtd_votes += 1;
-    this.forceUpdate();
+    this.refresh();
   }
 
   enter() {
-    console.log("Props: ", this.props);
     if (this.props.poid === "0x0000000000000001") {
       window.open("https://github.com/moonad/Moonad/tree/master/lib", "_blank");
     } else {
       front.set_route("/p/"+this.props.poid);
+      this.refresh();
     }
   };
 
   render(){
-    console.log("Qtd votes: ", this.qtd_votes);
     this.props.post = this.props.post || front.moonad.post[this.props.poid];
     if (this.props.poid === "0x0000000000000000") {
       const Formality = h("span", {
@@ -199,6 +202,7 @@ class Post extends Component {
           },
           onClick: () => {
             front.set_route("/p/"+this.props.post.cite);
+            this.refresh();
           },
         }, "parent"),
   
@@ -220,15 +224,13 @@ class Post extends Component {
           "text-decoration": "underline",
           "cursor": "pointer",
           "width": "30px",
+          "min-width": "30px",
           "display": "flex",
           "flex-direction": "column",
           "color": "rgb(161, 162, 168)",
           "text-decoration": "none",
           "font-size": "10px",
-          // "align-content": "center",
           "align-items": "center",
-          // "justify-content": "center"
-          // "height": "16px"
       },
         onClick: () => this.upvote()
       }, [
@@ -236,7 +238,7 @@ class Post extends Component {
         style: {
           "width": "10px", 
           "height": "12px",
-          "margin-top": "14px",
+          "margin-top": "08px",
         },  src: this.user_voted ? upvote_on : upvote_off }),
         h("span", {style: {"margin-top": "5px"}}, this.qtd_votes ? this.qtd_votes : "0")
       ] );
@@ -254,11 +256,6 @@ class Post extends Component {
           "flex-direction": "row",
         }}, [upvote, post_container]);
 
-        //   this.props.post.cite === "0x0000000000000000" ? null : post_head,
-        //   post_body,
-        //   post_foot,
-        //   post_line,
-        // ]);
     }
 
   }

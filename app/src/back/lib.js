@@ -296,6 +296,7 @@ module.exports = {
   get_post_blocks,
   get_post_msge,
   get_post_auth,
+  get_vote_auth,
   sign_post,
   get_file_msge,
   get_file_auth,

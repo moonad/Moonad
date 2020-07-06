@@ -315,25 +315,6 @@ async function get_vote_auth(poid, sign) {
   }
 }
 
-async function get_votes(key) {
-  try {
-    var votes = await db.get(key);
-    if(votes){
-      // console.log("server.js votes: ", votes);
-      var num = lib.bytes_to_uint32(votes);
-      // console.log("Get votes num: ", num);
-      return num.toString();
-    } else {
-      return "0";
-    }
-  } catch (e) {
-    // console.log("\n\n GET VOTES ERROR");
-    // console.log(e);
-    throw "Not able to get quantity of votes.";
-  }
-}
-
-
 // HTTP API
 // ========
 
