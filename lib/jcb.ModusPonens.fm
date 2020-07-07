@@ -1,0 +1,2 @@
+jcb.ModusPonens(A: Type, B: Type, f: A -> B, x: A) : B
+ f(x)
