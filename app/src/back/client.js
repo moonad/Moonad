@@ -31,6 +31,10 @@ module.exports = ({url = "http://moonad.org"}) => {
     return await query("register", {name, addr});
   };
 
+  async function get_profile_info({name, addr}){
+    return await query("get_profile_info", {name, addr});
+  }
+
   async function get({key}) {
     return await query("get", {key});
   };
@@ -80,6 +84,7 @@ module.exports = ({url = "http://moonad.org"}) => {
     self.api.post = post;
     self.api.file = file;
     self.api.register = register;
+    self.api.get_profile_info = get_profile_info;
     self.api.get = get;
     self.api.get_addr = get_addr;
     self.api.get_cite = get_cite;

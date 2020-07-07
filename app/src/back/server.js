@@ -285,6 +285,25 @@ async function expand_post(poid) {
   }
 }
 
+async function get_profile_info(name, addr){
+  var info = {}
+  try{
+    if(name){
+      var addr_raw = await db.get(name+".addr");
+      info.addr = lib.bytes_to_hex(addr_raw);
+      info.name = name;
+    } else {
+      var name_raw = await db.get(addr+".name");
+      info.name = lib.bytes_to_string(name_raw);
+      info.addr = addr;
+    }
+    return info;
+  } catch(e) {
+    throw "Error while retriving user's info: "+e;
+  }
+}
+
+
 // HTTP API
 // ========
 
@@ -389,6 +408,24 @@ app.post("/get_cite_count", async (req, res) => {
       res.send("- Couldn't find post.");
     }
   } catch (e) {
+    res.send(e.toString());
+  };
+});
+
+app.post("/get_profile_info", async (req, res) => {
+  try {
+    var name = req.query.name;
+    var addr = req.query.addr;
+    var addr_name = db.get(addr+".name");
+    if (!addr_name) { // didn't found name
+      var name_addr = db.get(name+".addr");
+      if(!name_addr){ // didn't found addr
+        res.send("Couldn't find this user name or address.");
+      }
+    }
+    res.send(await get_profile_info(name, addr));
+  } catch (e) {
+    console.log("server/get_profile error: ", e);
     res.send(e.toString());
   };
 });

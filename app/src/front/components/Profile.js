@@ -8,18 +8,31 @@ class Profile extends Component {
   constructor(props) {
     super(props);
     this.render_key = null;
-    this.name = "test_user"; // TODO: get addr name
-    this.addr = "0xx00000";
+    this.name = "-"; // TODO: get addr name
+    this.addr = "-";
     this.posts = []; // TODO: get user's post
   }
 
+  componentDidMount(){
+    this.name = this.props.name;
+    this.addr = this.props.addr;
+    this.get_data();
+  }
+
+  async get_data(){
+    var res = await front.get_profile_info(this.name, this.addr);
+    if(res.name){
+      this.name = res.name;
+      this.addr = res.addr;
+    }
+  }
+
   render() {
-    var addr = "0x000000";
     var body = [];
 
     const addr_label = h("span", {
       style: { "font-family": "IBMPlexMono-Light", "font-size": "10px"}
-    }, addr);
+    }, this.addr);
 
     const name_label = h("span", {
       style: {

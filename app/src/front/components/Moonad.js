@@ -61,7 +61,12 @@ class Moonad extends Component {
           name: front.get_paths()[1],
         });
       case "u":
-        var body = h(Profile, {});
+        var is_addr = paths[1].startsWith("0x");
+        if(is_addr){
+          var body = h(Profile, {name: "", addr: paths[1]});
+        } else {
+          var body = h(Profile, {name: path[1], addr: ""});
+        }
     }
 
     return h("div", {
