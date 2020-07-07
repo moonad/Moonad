@@ -9,8 +9,8 @@ App.demo.0: App(Pair(U32,U32))
     | use idx vox = U32.for<>(vox, 0u, 256u)
       let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,16u)),8u) // pixel x
       let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,16u)),8u) // pixel y
-      let pos = Pos32.from_xyz(p_x, p_y, 128u) // pixel pos (forms a square)
-      let col = Col32.from_rgba(255u, 0u, 0u, 255u) // pixel color (red)
+      let pos = Pos32.new(p_x, p_y, 128u) // pixel pos (forms a square)
+      let col = Col32.new(255u, 0u, 0u, 255u) // pixel color (red)
       let vox = VoxModel.set_pos(idx, pos, vox)
       let vox = VoxModel.set_col(idx, col, vox)
       vox;
