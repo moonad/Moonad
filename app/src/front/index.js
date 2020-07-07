@@ -16,10 +16,13 @@ const Moonad = require("./components/Moonad.js");
 
 window.onload = () => render(h(Moonad), document.getElementById("main"));
 
-const version = require("./../../package.json").version;
+const version = "4";
 if (localStorage.getItem("version") !== version) {
   const pkey = localStorage.getItem("pkey");
   localStorage.clear();
   localStorage.setItem("version", version);
   localStorage.setItem("pkey", pkey);
 }
+
+// TODO: remove
+localStorage.removeItem(".fmc/Kaelin.demo.fmc");

@@ -1,0 +1,3 @@
+VoxModel.get_size(vox: VoxModel): U32
+  case vox:
+  | vox.size;
