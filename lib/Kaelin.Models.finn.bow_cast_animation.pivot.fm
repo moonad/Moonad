@@ -1,0 +1,2 @@
+Kaelin.Models.finn.bow_cast_animation.pivot: VoxModel
+  VoxModel.parse({"x": 61, "y": 61, "z": 0})

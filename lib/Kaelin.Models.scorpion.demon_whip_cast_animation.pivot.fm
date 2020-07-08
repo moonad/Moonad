@@ -1,0 +1,2 @@
+Kaelin.Models.scorpion.demon_whip_cast_animation.pivot: VoxModel
+  VoxModel.parse({"x": 62, "y": 82, "z": 0})

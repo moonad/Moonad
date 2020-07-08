@@ -1,0 +1,3 @@
+Kaelin.Models.link.young_link.pivot: VoxModel
+  VoxModel.parse({"x": 62, "y": 84, "z": 0}
+)

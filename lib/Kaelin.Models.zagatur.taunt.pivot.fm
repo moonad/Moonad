@@ -1,0 +1,2 @@
+Kaelin.Models.zagatur.taunt.pivot: VoxModel
+  VoxModel.parse({"x": 63, "y": 59, "z": 0})

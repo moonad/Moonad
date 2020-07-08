@@ -1,0 +1,2 @@
+Kaelin.Models.min.melting_cuts.pivot: VoxModel
+  VoxModel.parse({"x": 25, "y": 57, "z": 0})

@@ -1,0 +1,4 @@
+Kaelin.Models.kakashi.run.pivot: VoxModel
+  VoxModel.parse({"x": 19, "y": 15, "z": 0}
+
+)

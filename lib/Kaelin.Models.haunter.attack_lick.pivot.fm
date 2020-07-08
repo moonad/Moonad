@@ -1,0 +1,2 @@
+Kaelin.Models.haunter.attack_lick.pivot: VoxModel
+  VoxModel.parse({"x": 63, "y": 104, "z": 0})

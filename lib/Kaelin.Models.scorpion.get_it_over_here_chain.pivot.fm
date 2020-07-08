@@ -1,0 +1,2 @@
+Kaelin.Models.scorpion.get_it_over_here_chain.pivot: VoxModel
+  VoxModel.parse({"x": 61, "y": 126, "z": 0})

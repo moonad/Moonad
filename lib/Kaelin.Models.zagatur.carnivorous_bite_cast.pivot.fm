@@ -1,0 +1,2 @@
+Kaelin.Models.zagatur.carnivorous_bite_cast.pivot: VoxModel
+  VoxModel.parse({"x": 62, "y": 62, "z": 0})

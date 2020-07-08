@@ -1,0 +1,2 @@
+Kaelin.Models.xululu_child.tentacle_trap_effect.pivot: VoxModel
+  VoxModel.parse({"x": 75, "y": 66, "z": 0})

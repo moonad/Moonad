@@ -1,0 +1,2 @@
+Kaelin.Models.min.flame_slash_cast.pivot: VoxModel
+  VoxModel.parse({"x": 25, "y": 46, "z": 0})
