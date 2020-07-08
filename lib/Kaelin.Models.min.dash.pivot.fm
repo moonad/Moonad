@@ -1,2 +1,0 @@
-Kaelin.Models.min.dash.pivot: VoxModel
-  VoxModel.parse({"x": 18, "y": 29, "z": 0})

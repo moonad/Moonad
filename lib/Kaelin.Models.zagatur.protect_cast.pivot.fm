@@ -1,2 +1,0 @@
-Kaelin.Models.zagatur.protect_cast.pivot: VoxModel
-  VoxModel.parse({"x": 62, "y": 62, "z": 0})
