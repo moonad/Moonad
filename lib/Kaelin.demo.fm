@@ -8,8 +8,7 @@ Kaelin.draw(sprites: List(Kaelin.Sprite), screen: VoxModel): VoxModel
     get idx screen = state
     get sprite_pos sprite_ang sprite_vox = sprite
     let voxel_count = VoxModel.get_size(sprite_vox)
-    let screen =
-      use i screen = U32.for<>(screen, 0u, voxel_count)
+    for i : U32 = 0u .. voxel_count with screen:
       let pos = VoxModel.get_pos(i, sprite_vox)
       let p_x = Pos32.get_x(pos)
       let p_y = Pos32.get_y(pos)
