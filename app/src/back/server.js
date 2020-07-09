@@ -238,7 +238,7 @@ async function new_post(post) {
 };
 
 async function save_user_posts(addr, poid){
-  var submitted_post_file = addr+".subm"
+  var submitted_post_file = addr+".subm";
   try {
     var user_has_post = await db.get(submitted_post_file);
     if(!user_has_post){

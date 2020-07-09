@@ -59,7 +59,11 @@ const Post = ({post, play, poid, expand, top}) => {
           "color": "rgb(0, 63, 99)",
           "font-size": "12px",
           "font-weight": "bold",
+          "cursor": "pointer",
         },
+        onClick: () => {
+          front.set_route("/u/"+post.auth.toLowerCase());
+        }
       }, (front.moonad.name[post.auth.toLowerCase()] || post.auth || "someone")),
 
       // Separator

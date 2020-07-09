@@ -34,7 +34,6 @@ module.exports = ({url = "http://moonad.org"}) => {
   async function get_profile_info({addr}){
     var posts = [];
     var response_raw =
-    // console.log("from server: ", response_raw);
       await query("get_profile_info", {addr})
       .then(response => {
         console.log("I have a response: ", response)
