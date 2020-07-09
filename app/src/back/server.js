@@ -98,7 +98,7 @@ async function startup() {
   // Computes the size of posts
   Size = fs.readdirSync("data").filter(x => x.slice(-5) === ".post").length;
 
-  app.listen(80);
+  app.listen(8080);
   console.log("Server open!");
 };
 startup();
