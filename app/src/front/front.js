@@ -39,6 +39,37 @@ function format_date(date) {
 
 const pkey_to_addr = memoize(ethsig.addressFromKey);
 
+async function upvote(poid) {
+  try {
+    await lib.moonad.api.vote({poid, pkey: get_pkey()});
+  } catch(e) {
+    console.log("Upvote error:", e);
+    return null;
+  }
+}
+
+async function has_voted(poid) {
+  try {
+    const addr = get_addr();
+    var res = await lib.moonad.api.has_voted({poid, addr});
+    return res ? true : false;
+  } catch(e) {
+    // console.log("Error while checking if a user voted on post:", e);
+    return false; // indicates that a key(vote) doesn't exist
+  }
+}
+
+async function get_qtd_votes(poid) {
+  try {
+    var qtd = await lib.moonad.api.get_qtd_votes({poid})
+    var qtd_num = lib.moonad.lib.bytes_to_uint32(lib.moonad.lib.hex_to_bytes(qtd));
+    return qtd_num;
+  } catch(e) {
+    return 0;
+  }
+}
+
+
 // Login
 // =====
 
@@ -71,6 +102,14 @@ async function get_profile_info(addr){
 }
 
 
+async function get_qtd_replies(poid) {
+  try {
+    var res =  await lib.moonad.api.get_cite({poid});
+    return res.length;
+  } catch(e){
+    console.log("get qtd replies error:", e);
+  }
+}
 // Routing
 // =======
 
@@ -204,10 +243,14 @@ lib.set_route = set_route;
 lib.get_paths = get_paths;
 lib.get_watched_poid = get_watched_poid;
 lib.get_played_term = get_played_term;
+lib.get_qtd_replies = get_qtd_replies;
 lib.refresh_watched_poid = refresh_watched_poid;
 lib.remove_colors = remove_colors;
 lib.load_core_defs_of = load_core_defs_of;
 lib.check_block_code = check_block_code;
+lib.upvote = upvote;
+lib.has_voted = has_voted;
+lib.get_qtd_votes = get_qtd_votes;
 lib.get_profile_info = get_profile_info;
 
 module.exports = lib;
