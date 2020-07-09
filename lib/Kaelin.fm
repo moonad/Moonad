@@ -1,6 +1,39 @@
 T Kaelin.Sprite
 | Kaelin.Sprite.new(pos: Pos32, ang: U32, vox: VoxModel);
 
+Kaelin.renderer(model: VoxModel): App(U32)
+  get size buffer = model
+  let vox = VoxModel.alloc_size(size)
+  def init
+    0u
+  def draw(state)
+    App.Render.vox
+    | use idx vox = U32.for<>(vox, 0u, size)
+      let pos = VoxModel.get_pos(idx, model)
+      let p_x = Pos32.get_x(pos)
+      let p_y = Pos32.get_y(pos)
+      let p_z = Pos32.get_z(pos)
+      get p_x p_y = Kaelin.rotate2d(128u, 128u, p_x, p_y, state)
+      let p_x = U32.sub(p_x, U32.div(p_z, 2u))
+      let p_y = U32.sub(p_y, U32.div(p_z, 2u))
+      let pos = Pos32.new(p_x, p_y, p_z)
+      let vox = VoxModel.set_pos(idx, pos, vox)
+      let vox = VoxModel.set_col(idx, VoxModel.get_col(idx, model), vox)
+      vox;
+  def when(event, state)
+    case event:
+    | U32.add(state, 1u);
+    | state;
+    | state;
+  App.new<>(init, draw, when)
+
+Kaelin.rotate2d(cx: U32, cy: U32, x: U32, y: U32, a: U32): Pair(U32, U32)
+  let x = F64.sub(U32.to_f64(x), U32.to_f64(cx))
+  let y = F64.sub(U32.to_f64(y), U32.to_f64(cy))
+  let a = F64.mul(F64.div(U32.to_f64(a), 360.0), F64.tau)
+  get x y = F64.rotate2d(x, y, a)
+  Pair.new<,>(U32.add(F64.to_u32(x), cx), U32.add(F64.to_u32(y), cy))
+
 Kaelin.draw(sprites: List(Kaelin.Sprite), screen: VoxModel): VoxModel
   def nil
     Pair.new<,>(0u, screen)
@@ -13,7 +46,7 @@ Kaelin.draw(sprites: List(Kaelin.Sprite), screen: VoxModel): VoxModel
       let p_x = Pos32.get_x(pos)
       let p_y = Pos32.get_y(pos)
       let p_z = Pos32.get_z(pos)
-      get p_x p_y = Kaelin.demo.0.rotate2d(128u, 128u, p_x, p_y, sprite_ang)
+      get p_x p_y = Kaelin.rotate2d(128u, 128u, p_x, p_y, sprite_ang)
       let p_x = U32.add(U32.sub(p_x, U32.div(p_z, 2u)), Pos32.get_x(sprite_pos))
       let p_y = U32.add(U32.sub(p_y, U32.div(p_z, 2u)), Pos32.get_y(sprite_pos))
       let p_z = U32.add(p_z, Pos32.get_z(sprite_pos))
@@ -34,7 +67,7 @@ Kaelin.draw(sprites: List(Kaelin.Sprite), screen: VoxModel): VoxModel
   get idx screen = fold<Pair(U32,VoxModel)>(nil, cons)
   screen
   
-Kaelin.demo: App(U32)
+Kaelin: App(U32)
   let wall = Kaelin.Models.wall
   let chest = Kaelin.Models.chest
   let seat = Kaelin.Models.seat

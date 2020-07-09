@@ -1,5 +1,0 @@
-Arelin.Thing.get_stt_value_v3(self: Arelin.Thing): F64.V3
-  let x = Arelin.Thing.get_stt_value(self, Arelin.Constants.POS_X_KEY)
-  let y = Arelin.Thing.get_stt_value(self, Arelin.Constants.POS_Y_KEY)
-  // let z = Arelin.Thing.get_stt_value(self, Arelin.Constants.POS_Z_KEY)
-  F64.V3.new(x,y,F64.0) 

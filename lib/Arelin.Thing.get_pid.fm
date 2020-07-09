@@ -1,3 +1,0 @@
-Arelin.Thing.get_pid(thi: Arelin.Thing): Arelin.Game.PlayerId
-  case thi:
-  | thi.pid;

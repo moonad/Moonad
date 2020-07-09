@@ -1,2 +1,0 @@
-T Arelin.Game 
-| Arelin.Game.new(stage: List(Arelin.Thing));

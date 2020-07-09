@@ -1,9 +1,0 @@
-Arelin.Thing.set_stt_value_v3(self: Arelin.Thing, v3: F64.V3): Arelin.Thing
-  let self.stt = Arelin.Thing.get_stt(self)
-  case v3:
-  | let insert_x = Map.set<>(Arelin.Constants.POS_X_KEY, v3.x, self.stt)
-    let insert_y = Map.set<>(Arelin.Constants.POS_Y_KEY, v3.x, self.stt)
-    let self     = Arelin.Thing.set_stt(self, insert_x)
-    let self     = Arelin.Thing.set_stt(self, insert_y)
-    self 
-  ;

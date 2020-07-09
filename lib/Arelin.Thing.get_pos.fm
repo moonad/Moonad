@@ -1,3 +1,0 @@
-Arelin.Thing.get_pos(thi: Arelin.Thing): F64.V3
-  case thi: 
-  | thi.pos;

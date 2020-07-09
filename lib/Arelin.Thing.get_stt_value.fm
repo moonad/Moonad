@@ -1,6 +1,0 @@
-Arelin.Thing.get_stt_value(self: Arelin.Thing, stt_key: Bits): F64
-  let stt = Arelin.Thing.get_stt(self)
-  let get_stt = Map.get<>(stt_key, stt)
-  case get_stt:
-  | #none# F64.0;
-  | #some# get_stt.value;

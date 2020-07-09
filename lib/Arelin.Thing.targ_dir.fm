@@ -1,6 +1,0 @@
-// Returns the direction the thing is looking to
-Arelin.Thing.targ_dir(self: Arelin.Thing): F64.V3
-  let pos = Arelin.Thing.get_pos(self)
-  let trg = Arelin.Thing.get_trg(self)
-  let dir = Arelin.Thing.get_dir(self)
-  F64.V3.look_at(pos, trg, dir)

@@ -1,3 +1,0 @@
-Arelin.Thing.get_die(thi: Arelin.Thing): Bool
-  case thi: 
-  | thi.die;

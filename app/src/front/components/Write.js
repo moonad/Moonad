@@ -5,8 +5,7 @@ const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
 const e = require("cors");
 const Code = require("./Code.js");
-const Term = require("./Term.js");
-const consts = require("./consts.js");
+const Play = require("./Play.js");
 
 const default_post_body = `Your words.
 
@@ -351,7 +350,7 @@ class Write extends Component {
             onClick: () => { this.play_term = ""; },
           }, "Exit"),
         ]),
-        h(Term, {
+        h(Play, {
           poid: "0x0000000000000000",
           code: front.moonad.lib.get_post_code({body: this.post_body}),
           name: this.play_term,
@@ -424,7 +423,7 @@ class Write extends Component {
         "position": "relative",
         "display": "flex",
         "flex-direction": "row",
-        "height": "calc(100% - "+consts.top_height+"px)",
+        "height": "600px",
         //"box-shadow": "0px 0px 5px 0px rgba(207,205,207,1)",
       }
     }, [container_editable, separator, play || repl, submit]);

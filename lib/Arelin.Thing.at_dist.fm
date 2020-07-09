@@ -1,5 +1,0 @@
-// Returns the position at a given distance towards targ_dir
-Arelin.Thing.at_dist(self: Arelin.Thing, dist: F64): F64.V3
-  let dir = Arelin.Thing.get_dir(self)
-  let pos = Arelin.Thing.get_pos(self)
-  F64.V3.add(pos, F64.V3.scale(dist, dir))

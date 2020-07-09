@@ -102,86 +102,11 @@ function get_hex_from_bytes(idx, lim, buf) {
   return bytes;
 };
 
-function bytes_to_post(buf) {
-  return {
-    date: hex_to_uint48(get_hex_from_bytes(0, 64, buf)),
-    cite: get_hex_from_bytes(64, 128, buf),
-    auth: get_hex_from_bytes(128, 288, buf),
-    body: hex_to_string(get_hex_from_bytes(288, buf.length*8, buf)),
-  };
-};
-
 function put_hex_on_array(hex, arr) {
   for (var i = 0; i < (hex.length-2)/2; ++i) {
     var b0 = parseInt(hex[2+i*2+0],16);
     var b1 = parseInt(hex[2+i*2+1],16);
     arr.push((b0<<4)|b1);
-  };
-};
-
-function post_to_bytes(post) {
-  var arr = [];
-  put_hex_on_array(hex(64, uint48_to_hex(post.date)), arr);
-  put_hex_on_array(post.cite, arr);
-  put_hex_on_array(post.auth, arr);
-  put_hex_on_array(string_to_hex(post.body), arr);
-  return new Uint8Array(arr);
-};
-
-function hex_to_post(hex) {
-  return bytes_to_post(hex_to_bytes(hex));
-};
-
-function post_to_hex(post) {
-  return bytes_to_hex(post_to_bytes(post));
-};
-
-// ...
-function get_post_blocks(post) {
-  var blocks = [{ctor:"text", text:""}];
-  var inside_code = false;
-  for (var i = 0; i < post.body.length; ++i) {
-    var at_new_line = i === 0 || post.body[i-1] === "\n";
-    var at_code_init = at_new_line && post.body[i] === "+";
-    var at_code_stop = post.body[i] === "\n" && post.body[i+1] === "\n";
-    if (!inside_code && at_code_init) {
-      inside_code = true;
-      blocks.push({ctor:"code", text:""});
-    } else if (inside_code && at_code_stop) {
-      inside_code = false;
-      blocks.push({ctor:"text", text:""});
-    } else {
-      blocks[blocks.length - 1].text += post.body[i];
-    };
-  };
-  return blocks;
-};
-
-// Returns the code portions of a post
-function get_post_code(post) {
-  var blocks = get_post_blocks(post);
-  var code = "";
-  for (var block of blocks) {
-    if (block.ctor === "code") {
-      code += code.length > 0 ? "\n\n" : "";
-      code += block.text;
-    }
-  };
-  return code;
-};
-
-function get_post_msge(post) {
-  return post.cite + "\n" +post.body;
-};
-
-function get_post_auth(post) {
-  return sig.signerAddress(sig.keccak(get_post_msge(post)), post.sign).toLowerCase();
-};
-
-function sign_post(post, pkey) {
-  return {
-    ...post,
-    sign: post.sign || sig.signMessage(sig.keccak(get_post_msge(post)), pkey),
   };
 };
 
@@ -198,25 +123,6 @@ function sign_file(file, pkey) {
     ...file,
     sign: file.sign || sig.signMessage(sig.keccak(get_file_msge(file)), pkey),
   };
-};
-
-function get_term_refs(term, refs = {}) {
-  function go(term) {
-    switch (term.ctor) {
-      case "Var": break;
-      case "Ref": refs[term.name] = 1; break;
-      case "Typ": break;
-      case "All": go(term.bind); go(term.body(fm.synt.Var(""),fm.synt.Var(""))); break;
-      case "Lam": go(term.body(fm.synt.Var(""))); break;
-      case "App": go(term.func); go(term.argm); break;
-      case "Let": go(term.expr); go(term.body(fm.synt.Var(""))); break;
-      case "Ann": go(term.expr); go(term.type); break;
-      case "Loc": go(term.expr); break;
-      case "Hol": break;
-    };
-  };
-  go(term);
-  return refs;
 };
 
 function split_hex_in_chunks(len, hex) {
@@ -246,24 +152,6 @@ function bytes_concat(bytes) {
   return done;
 };
 
-// Net message codes
-const DO_POST = 66;
-const DO_WATCH = 67;
-const POST = 97;
-const CITE = 98;
-const NAME = 99;
-const ROOM = 100;
-
-//function old_bytes_to_post(buf) {
-  //var date = hex_to_uint48(get_hex_from_bytes(0, 64, buf));
-  //var cite = get_hex_from_bytes(64, 128, buf);
-  //var sign = get_hex_from_bytes(128, 648, buf);
-  //var head = hex_to_string(get_hex_from_bytes(648, 1024, buf)).replace(/\0/g,"");
-  //var body = hex_to_string(get_hex_from_bytes(1024, buf.length*8, buf));
-  //var auth = sig.signerAddress(sig.keccak(get_post_msge({cite,head,body})), sign).toLowerCase();
-  //return {date, cite, auth, head, body};
-//};
-
 module.exports = {
   hex,
   nam,
@@ -278,16 +166,6 @@ module.exports = {
   bytes_to_string,
   string_to_hex,
   hex_to_string,
-  bytes_to_post,
-  post_to_bytes,
-  hex_to_post,
-  post_to_hex,
-  get_term_refs,
-  get_post_code,
-  get_post_blocks,
-  get_post_msge,
-  get_post_auth,
-  sign_post,
   get_file_msge,
   get_file_auth,
   sign_file,
@@ -295,11 +173,4 @@ module.exports = {
   get_hex_from_bytes,
   hex_to_hex64s,
   bytes_concat,
-  DO_POST,
-  DO_WATCH,
-  POST,
-  CITE,
-  NAME,
-  ROOM,
-  //old_bytes_to_post,
 };

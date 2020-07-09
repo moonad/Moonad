@@ -1,3 +1,0 @@
-Arelin.Thing.get_bst(thi: Arelin.Thing): F64
-  case thi: 
-  | thi.bst;

@@ -1,9 +1,0 @@
-T Arelin.Game.Input
-| Arelin.Game.Input.sdir(dir: F64.V3); // stick direction
-| Arelin.Game.Input.key0(pos: F64.V3); // left down
-| Arelin.Game.Input.key1(pos: F64.V3); // middle down
-| Arelin.Game.Input.key2(pos: F64.V3); // right down
-| Arelin.Game.Input.key3(pos: F64.V3); // space down
-| Arelin.Game.Input.key4(pos: F64.V3); // extra down
-| Arelin.Game.Input.key5(pos: F64.V3); // shift down
-| Arelin.Game.Input.cmsg(txt: String); // chat message 

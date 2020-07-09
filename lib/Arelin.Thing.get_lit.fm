@@ -1,3 +1,0 @@
-Arelin.Thing.get_lit(thi: Arelin.Thing): List(Arelin.Game.Light)
-  case thi: 
-  | thi.lit;

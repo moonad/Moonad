@@ -1,2 +1,0 @@
-Arelin.Thing.move(self: Arelin.Thing, to_pos: F64.V3): Arelin.Thing
-  Arelin.Thing.set_pos(self, to_pos)

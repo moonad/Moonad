@@ -1,3 +1,0 @@
-Arelin.Thing.get_chi(thi: Arelin.Thing): List(Arelin.Thing)
-  case thi: 
-  | thi.chi;

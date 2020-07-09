@@ -1,3 +1,0 @@
-Arelin.Thing.get_stt(thi: Arelin.Thing): Map(F64)
-  case thi: 
-  | thi.stt;
