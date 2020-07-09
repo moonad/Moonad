@@ -21,12 +21,12 @@ class Post extends Component {
 
   componentDidMount() {
     this.refresh();
-    this.refresher = setInterval(() => this.refresh(), 3000);
+    // this.refresher = setInterval(() => this.refresh(), 3000);
   }
 
-  componentWillUnmount() {
-    clearInterval(this.refresher);
-  }
+  // componentWillUnmount() {
+  //   clearInterval(this.refresher);
+  // }
 
   async refresh(){
     this.user_voted = await front.has_voted(this.props.poid);
@@ -50,6 +50,7 @@ class Post extends Component {
   };
 
   render(){
+    this.refresh(); // TODO: improve this =(
     this.props.post = this.props.post || front.moonad.post[this.props.poid];
     if (this.props.poid === "0x0000000000000000") {
       const Formality = h("span", {
