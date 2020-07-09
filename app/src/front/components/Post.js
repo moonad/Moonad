@@ -246,13 +246,6 @@ class Post extends Component {
         },  src: this.user_voted ? upvote_on : upvote_off }),
         h("span", {style: {"margin-top": "5px"}}, this.qtd_votes ? this.qtd_votes : "0")
       ] );
-
-                }
-              };
-              break;
-          }
-        };
-      }
       
       const post_container = h("div", {style: {"width": "100%"}}, [
         this.props.post.cite === "0x0000000000000000" ? null : post_head, 
