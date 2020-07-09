@@ -97,6 +97,14 @@ async function login() {
   }
 };
 
+async function get_qtd_replies(poid) {
+  try {
+    var res =  await lib.moonad.api.get_cite({poid});
+    return res.length;
+  } catch(e){
+    console.log("get qtd replies error:", e);
+  }
+}
 // Routing
 // =======
 
@@ -230,6 +238,7 @@ lib.set_route = set_route;
 lib.get_paths = get_paths;
 lib.get_watched_poid = get_watched_poid;
 lib.get_played_term = get_played_term;
+lib.get_qtd_replies = get_qtd_replies;
 lib.refresh_watched_poid = refresh_watched_poid;
 lib.remove_colors = remove_colors;
 lib.load_core_defs_of = load_core_defs_of;

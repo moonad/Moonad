@@ -77,7 +77,7 @@ class Posts extends Component {
     // Reply 
     body.push(h("div", {
       style: {
-        "margin-top": "8px",
+        "margin-top": "20px",
         "margin-bottom": "20px",
         "font-size": "16px",
         "display": "flex",

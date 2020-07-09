@@ -16,6 +16,7 @@ class Post extends Component {
     this.user_voted = false;
     this.qtd_votes = 0;
     this.refresher = null;
+    this.qtd_replies = 0;
   }
 
   componentDidMount() {
@@ -30,6 +31,7 @@ class Post extends Component {
   async refresh(){
     this.user_voted = await front.has_voted(this.props.poid);
     this.qtd_votes  = await front.get_qtd_votes(this.props.poid);
+    this.qtd_replies = await front.get_qtd_replies(this.props.poid);
     this.forceUpdate();
   }
 
@@ -185,26 +187,28 @@ class Post extends Component {
             "text-decoration": "underline",
           },
           onClick: () => this.enter(),
-        }, "123 replies"),
-  
-        // Separator
-        h("span", {
-          style: {
-            "color": "rgb(161, 162, 168)",
-          },
-        }, " · "),
-  
-        // Post parent
-        h("span", {
-          style: {
-            "cursor": "pointer",
-            "text-decoration": "underline",
-          },
-          onClick: () => {
-            front.set_route("/p/"+this.props.post.cite);
-            this.refresh();
-          },
-        }, "parent"),
+        }, this.qtd_replies + (this.qtd_replies === 1 ? " reply" : " replies")),
+        
+        this.props.top ? [
+          // Separator
+          h("span", {
+            style: {
+              "color": "rgb(161, 162, 168)",
+            },
+          }, " · "),
+
+          // Post parent
+          h("span", {
+            style: {
+              "cursor": "pointer",
+              "text-decoration": "underline",
+            },
+            onClick: () => {
+              front.set_route("/p/"+this.props.post.cite);
+              this.refresh();
+            },
+          }, "parent") ]
+        : h("span")
   
       ]);
   
@@ -242,12 +246,19 @@ class Post extends Component {
         },  src: this.user_voted ? upvote_on : upvote_off }),
         h("span", {style: {"margin-top": "5px"}}, this.qtd_votes ? this.qtd_votes : "0")
       ] );
+
+                }
+              };
+              break;
+          }
+        };
+      }
       
       const post_container = h("div", {style: {"width": "100%"}}, [
         this.props.post.cite === "0x0000000000000000" ? null : post_head, 
         post_body,
         post_foot,
-        post_line,
+        this.props.top ? h("span") : post_line,
       ])
   
       return h("div", {
