@@ -94,10 +94,10 @@ class Post extends Component {
             "color": "rgb(0, 63, 99)",
             "font-size": "12px",
             "font-weight": "bold",
+            "cursor": "pointer",
           },
           onClick: () => {
-            front.set_route("/u/"+front.moonad.name[this.props.post.auth.toLowerCase()]);
-            this.refresh();
+            front.set_route("/u/"+this.props.post.auth.toLowerCase());
           }
         }, (front.moonad.name[this.props.post.auth.toLowerCase()] || this.props.auth_name || this.props.post.auth || "someone")),
   
