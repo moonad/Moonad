@@ -31,9 +31,37 @@ module.exports = ({url = "http://moonad.org"}) => {
     return await query("register", {name, addr});
   };
 
-  async function get_profile_info({name, addr}){
-    return await query("get_profile_info", {name, addr});
-  }
+  async function get_profile_info({addr}){
+    var posts = [];
+    var response_raw =
+    // console.log("from server: ", response_raw);
+      await query("get_profile_info", {addr})
+      .then(response => {
+        console.log("I have a response: ", response)
+        return response;
+      })
+      .catch(e => { // TODO: why is it rejecting?
+        console.log("Promisse rejection error: ", e); 
+        return e;
+      } );
+    try {
+      var response = JSON.parse(response_raw);
+      for(i in response.posts) {
+        try{
+          var poid = response.posts[i];
+          var post = await get_post({poid});
+          post["poid"] = poid;
+          posts.push(post);
+        } catch(e){
+          throw "Error when getting a post: ", e;
+        }
+      }
+      response.posts = posts;
+    } catch(e){
+      console.log("Error while parsing profile info response: ", e);
+    }
+    return response ? response : [];
+  } 
 
   async function get({key}) {
     return await query("get", {key});
@@ -66,7 +94,7 @@ module.exports = ({url = "http://moonad.org"}) => {
   };
 
   async function get_post({poid}) {
-    return lib.hex_to_post(await query("get_post", {poid: poid}));
+    return lib.hex_to_post(await query("get_post", {poid}));
   };
 
   function direct() {

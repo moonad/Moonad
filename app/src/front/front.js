@@ -66,19 +66,8 @@ async function login() {
   }
 };
 
-// TODO: the response is comming in the catch block. Idk why.
-async function get_profile_info(name, addr){
-  var response = 
-    await lib.moonad.api.get_profile_info({name, addr})
-    .then(response => {
-      console.log("I have a response: ", response)
-      return response;
-    })
-    .catch(e => {
-      console.log("Promisse rejection error: ", e); 
-      return e;
-    } );
-  return JSON.parse(response);
+async function get_profile_info(addr){
+  return await lib.moonad.api.get_profile_info({addr});
 }
 
 

@@ -3,14 +3,15 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
+const Post = require("./Post.js");
 
 class Profile extends Component {
   constructor(props) {
     super(props);
     this.render_key = null;
-    this.name = "-"; // TODO: get addr name
+    this.name = "-";
     this.addr = "-";
-    this.posts = []; // TODO: get user's post
+    this.posts = [];
   }
 
   componentDidMount(){
@@ -20,18 +21,22 @@ class Profile extends Component {
   }
 
   async get_data(){
-    var res = await front.get_profile_info(this.name, this.addr);
-    if(res.name){
+    var res = await front.get_profile_info(this.addr);
+    // console.log("get_data: ", res);
+    if(res.addr){
+      console.log()
       this.name = res.name;
       this.addr = res.addr;
+      this.posts = res.posts;
     }
+    this.forceUpdate();
   }
 
   render() {
     var body = [];
 
     const addr_label = h("span", {
-      style: { "font-family": "IBMPlexMono-Light", "font-size": "10px"}
+      style: { "font-family": "IBMPlexMono-Light", "font-size": "08px"}
     }, this.addr);
 
     const name_label = h("span", {
@@ -45,13 +50,14 @@ class Profile extends Component {
 
     const profileInfo = h("div", {
       style: {
-        "border": "1px solid rgb(187, 199, 207)",
+        // "border": "1px solid rgb(187, 199, 207)",
         "padding": "10px",
-        "width": "140px",
+        "width": "250px",
         "height": "50px",
-        "z-index": "3",
-        "margin-right": "-100px",
+        "z-index": "5",
+        // "margin-left": "610px",
         "margin-top": "20px",
+        // "margin-left": "80px",
         "display": "flex",
         "flex-direction": "column"
       }}, [
@@ -60,31 +66,45 @@ class Profile extends Component {
       ] );
 
     // Posts
-    for (let i = this.posts.length - 1; i >= 0; --i) {
-      body.push(Post({
-        poid: reply_poid,
-        expand: true,
-        moonad: front.moonad,
-      }));
-    };
+    if(this.posts.length === 0){
+      body.push(h("div", {}, "Nothing to show here."));
+    } else {
+      for (let i = this.posts.length - 1; i >= 0; --i) {
+        body.push(Post({
+          post: this.posts[i],
+          poid: this.posts[i].poid,
+          expand: true,
+          moonad: front.moonad,
+        }));
+      };
+    }
 
-    return h("div", {
+    const post_section = h("div", {
       style: {
         "min-height": "calc(100% - 43px)",
         "display": "flex",
-        "flex-flow": "row nowrap",
+        "flex-flow": "row",
         "justify-content": "center",
-        "margin-top": "5px"
+        "margin-top": "5px",
       },
     }, [
-      profileInfo,
       h("div", {
       style: {
         "background": "white",
         "padding": "2px 6px",
         "width": "586px",
+        // "position": "fixed"
       }
-    }, body)]);
+    }, body),
+    ]);
+
+    return h("div", {
+      style: {
+        "display": "flex", 
+        "flex-direction": "row", 
+        "justify-content": "space-evenly"
+      }
+    }, [post_section, profileInfo])
   }
 };
 
