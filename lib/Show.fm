@@ -1,2 +1,2 @@
-T Show             ~ (str: String)
-| msg(str: String) ~ (str);
+T Show                  ~ (str: String)
+| Show.msg(str: String) ~ (str);
