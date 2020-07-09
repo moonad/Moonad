@@ -67,7 +67,7 @@ class Profile extends Component {
 
     // Posts
     if(this.posts.length === 0){
-      body.push(h("p", {}, "Nothing to show here."));
+      body.push(h("p", {style:{"margin-top": "20px"}}, "Nothing to show here."));
       body.push(h("p", {}, "If you know this user posted, I'm sorry to have nothing to display."));
       body.push(h("p", {}, "This feature was added after a lot of posts were made =("));
     } else {
