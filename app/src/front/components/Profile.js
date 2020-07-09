@@ -71,10 +71,12 @@ class Profile extends Component {
       body.push(h("p", {}, "If you know this user posted, I'm sorry to have nothing to display."));
       body.push(h("p", {}, "This feature was added after a lot of posts were made =("));
     } else {
+      body.push(h("div", {style: {"margin-top": "20px"}}));
       for (let i = this.posts.length - 1; i >= 0; --i) {
-        body.push(Post({
+        body.push(h(Post, {
           post: this.posts[i],
           poid: this.posts[i].poid,
+          auth_name: this.posts[i].auth_name,
           expand: true,
           moonad: front.moonad,
         }));

@@ -95,7 +95,11 @@ class Post extends Component {
             "font-size": "12px",
             "font-weight": "bold",
           },
-        }, (front.moonad.name[this.props.post.auth.toLowerCase()] || this.props.post.auth || "someone")),
+          onClick: () => {
+            front.set_route("/u/"+front.moonad.name[this.props.post.auth.toLowerCase()]);
+            this.refresh();
+          }
+        }, (front.moonad.name[this.props.post.auth.toLowerCase()] || this.props.auth_name || this.props.post.auth || "someone")),
   
         // Separator
         h("span", {

@@ -57,7 +57,10 @@ module.exports = ({url = "http://moonad.org"}) => {
         try{
           var poid = response.posts[i];
           var post = await get_post({poid});
+          var auth_name = await get_name({addr});
           post["poid"] = poid;
+          post["auth_name"] = auth_name;
+          console.log("Post: ", post);
           posts.push(post);
         } catch(e){
           throw "Error when getting a post: ", e;
