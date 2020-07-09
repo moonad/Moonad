@@ -7,8 +7,8 @@ const front = require("./../front.js");
 const Code = require("./Code.js");
 const Term = require("./Term.js");
 
-// const upvote_off = "9e529d21d6c4a7727077eafbed81718a.png";
-// const upvote_on = "734f7ecbfadec8ff3fc5c7a122573df7.png";
+const upvote_off = "9e529d21d6c4a7727077eafbed81718a.png";
+const upvote_on = "734f7ecbfadec8ff3fc5c7a122573df7.png";
 
 class Post extends Component {
   constructor(props) {
@@ -29,16 +29,16 @@ class Post extends Component {
   }
 
   async refresh(){
-    // this.user_voted = await front.has_voted(this.props.poid);
-    // this.qtd_votes  = await front.get_qtd_votes(this.props.poid);
+    this.user_voted = await front.has_voted(this.props.poid);
+    this.qtd_votes  = await front.get_qtd_votes(this.props.poid);
     this.qtd_replies = await front.get_qtd_replies(this.props.poid);
     this.forceUpdate();
   }
 
-  // upvote(){
-  //   front.upvote(this.props.poid); 
-  //   this.refresh();
-  // }
+  upvote(){
+    front.upvote(this.props.poid); 
+    this.refresh();
+  }
 
   enter() {
     if (this.props.poid === "0x0000000000000001") {
@@ -223,29 +223,36 @@ class Post extends Component {
         }}, "");
 
       // Votes area
-      // const upvote = h("div", {
-      //   style: {
-      //     "text-decoration": "underline",
-      //     "cursor": "pointer",
-      //     "width": "30px",
-      //     "min-width": "30px",
-      //     "display": "flex",
-      //     "flex-direction": "column",
-      //     "color": "rgb(161, 162, 168)",
-      //     "text-decoration": "none",
-      //     "font-size": "10px",
-      //     "align-items": "center",
-      // },
-      //   onClick: () => this.upvote()
-      // }, [
-      //   h("img", { 
-      //   style: {
-      //     "width": "10px", 
-      //     "height": "12px",
-      //     "margin-top": "08px",
-      //   },  src: this.user_voted ? upvote_on : upvote_off }),
-      //   h("span", {style: {"margin-top": "5px"}}, this.qtd_votes ? this.qtd_votes : "0")
-      // ] );
+      const upvote = h("div", {
+        style: {
+          "text-decoration": "underline",
+          "cursor": "pointer",
+          "width": "30px",
+          "min-width": "30px",
+          "display": "flex",
+          "flex-direction": "column",
+          "color": "rgb(161, 162, 168)",
+          "text-decoration": "none",
+          "font-size": "10px",
+          "align-items": "center",
+      },
+        onClick: () => this.upvote()
+      }, [
+        h("img", { 
+        style: {
+          "width": "10px", 
+          "height": "12px",
+          "margin-top": "08px",
+        },  src: this.user_voted ? upvote_on : upvote_off }),
+        h("span", {style: {"margin-top": "5px"}}, this.qtd_votes ? this.qtd_votes : "0")
+      ] );
+
+                }
+              };
+              break;
+          }
+        };
+      }
       
       const post_container = h("div", {style: {"width": "100%"}}, [
         this.props.post.cite === "0x0000000000000000" ? null : post_head, 
@@ -258,7 +265,7 @@ class Post extends Component {
         style: {
           "display": "flex",
           "flex-direction": "row",
-        }}, [post_container]);
+        }}, [upvote, post_container]);
 
     }
 

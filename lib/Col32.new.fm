@@ -1,4 +1,4 @@
-Col32.from_rgba(r: U32, g: U32, b: U32, a: U32): Col32
+Col32.new(r: U32, g: U32, b: U32, a: U32): Col32
   let col = 0u
   let col = U32.or(col, r)
   let col = U32.or(col, U32.shl(g, 8u))
