@@ -200,6 +200,14 @@ function sign_file(file, pkey) {
   };
 };
 
+function sign_vote(poid, pkey){
+  return sig.signMessage(sig.keccak(poid), pkey);
+}
+
+function get_vote_auth(poid, sign){
+  return sig.signerAddress(sig.keccak(poid), sign);
+}
+
 function get_term_refs(term, refs = {}) {
   function go(term) {
     switch (term.ctor) {
@@ -282,11 +290,13 @@ module.exports = {
   post_to_bytes,
   hex_to_post,
   post_to_hex,
+  sign_vote,
   get_term_refs,
   get_post_code,
   get_post_blocks,
   get_post_msge,
   get_post_auth,
+  get_vote_auth,
   sign_post,
   get_file_msge,
   get_file_auth,

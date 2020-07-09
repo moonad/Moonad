@@ -7,6 +7,8 @@
 // - PostId.cite : List(Poid)
 // - EthAdr.name : String
 // - UsrNam.addr : Addr
+// - PostId.vote : Number
+// - PostId.Addr.votd : Addr
 
 // Uncomment to rebuild db
 var express = require("express");
@@ -285,6 +287,34 @@ async function expand_post(poid) {
   }
 }
 
+async function vote({poid, addr}) {
+  var vote_file = poid+".vote";
+  try {
+    var votes = await db.get(vote_file);
+    var count = votes ? lib.bytes_to_uint32(votes) + 1 : 1;
+    var addr_votd  = poid+"."+addr+".votd";
+    var vote_exist = await db.get(addr_votd);
+    if (!vote_exist || !votes) {
+      await db.set(vote_file , Buffer.from(lib.uint32_to_bytes(count)));
+      await db.set(addr_votd, Buffer.from(lib.hex_to_bytes(addr)));
+      return addr_votd;
+    }
+  } catch (e) {
+    console.log(e);
+    throw "Internal error while creating vote files.";
+  }
+  return poid;
+};
+
+async function get_vote_auth(poid, sign) {
+  try {
+    return lib.get_vote_auth(poid, sign);
+  } catch (e) {
+    console.log(e);
+    throw "Not able to get vote auth.";
+  }
+}
+
 // HTTP API
 // ========
 
@@ -405,6 +435,18 @@ app.post("/get", async (req, res) => {
   } catch (e) {
     res.send(e.toString());
   };
+});
+
+// Vote in a post
+app.post("/vote", async (req, res) => {
+  var poid = req.query.poid;
+  var sign = req.query.sign;
+  try {
+    var addr = await get_vote_auth(poid, sign);
+    res.send(await vote({poid, addr}));
+  } catch (e) {
+    res.send(e.toString());
+  }
 });
 
 // TCP API

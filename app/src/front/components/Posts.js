@@ -15,6 +15,7 @@ class Posts extends Component {
   constructor(props) {
     super(props);
     this.render_key = null;
+    this.refresher = null;
   }
   componentDidMount() {
     setInterval(() => this.refresh(), 1000 / 8);
@@ -64,14 +65,14 @@ class Posts extends Component {
       ] );
 
     // Main post
-    body.push(Post({
+    body.push(h(Post, {
       top: true,
       poid,
       play,
       expand: true,
       moonad: front.moonad,
       on_click_post: this.props.on_click_post
-    }));
+    }))
 
     // Reply 
     body.push(h("div", {
@@ -83,7 +84,6 @@ class Posts extends Component {
         "flex-flow": "row nowrap",
         "justify-content": "space-between",
         "align-items": "flex-end",
-        "border-bottom": "1px dashed rgb(220,220,220)",
       },
     }, [
       h("span", {
@@ -109,11 +109,14 @@ class Posts extends Component {
       for (let i = front.moonad.cite[poid].length - 1; i >= 0; --i) {
         var reply_poid = front.moonad.cite[poid][i];
         if (!hide[reply_poid]) {
-          body.push(Post({
-            poid: reply_poid,
-            expand: true,
-            moonad: front.moonad,
-          }));
+          body.push(
+            h(Post, {
+              top: false,
+              poid: reply_poid,
+              expand: true,
+              moonad: front.moonad,
+            })
+          );
         };
       };
     };
