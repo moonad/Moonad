@@ -4,7 +4,7 @@ var Peer = require("simple-peer");
 var lib = require("./lib.js");
 var WebSocket = require('isomorphic-ws')
 
-module.exports = ({url = "http://moonad.org"}) => {
+module.exports = ({url = "http://moonad.org:8080"}) => {
 
   async function request(method, query) {
     return await req(url+"/"+method, {method:"POST", query});
