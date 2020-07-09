@@ -32,12 +32,13 @@ class Post extends Component {
     this.user_voted = await front.has_voted(this.props.poid);
     this.qtd_votes  = await front.get_qtd_votes(this.props.poid);
     this.qtd_replies = await front.get_qtd_replies(this.props.poid);
-    this.forceUpdate();
+    // this.forceUpdate();
   }
 
   upvote(){
-    front.upvote(this.props.poid); 
+    front.upvote(this.props.poid);
     this.refresh();
+    this.forceUpdate();
   }
 
   enter() {
