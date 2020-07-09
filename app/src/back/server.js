@@ -21,7 +21,7 @@ var fm = require("formality-lang");
 var lib = require("./lib.js");
 
 function path_of(dirs) {
-  return path.join(__dirname, "..", "..", "..", ...dirs).toLowerCase();
+  return path.join(__dirname, "..", "..", "..", ...dirs);
 };
 
 // Globals
