@@ -6,6 +6,7 @@ const TopBar = require("./TopBar.js");
 const Write = require("./Write.js");
 const Posts = require("./Posts.js");
 const Term = require("./Term.js");
+const Profile = require("./Profile.js");
 
 class Moonad extends Component {
   constructor(props) {
@@ -37,13 +38,6 @@ class Moonad extends Component {
       on_click_link: (name) => {
         if (name === "posts") {
           front.set_route("/p");
-        } else if (name === "user") {
-          var msge = "Logged with Ethereum.\n"
-            + "- Address: "+front.addr+"\n"
-            + "- PrivKey: "+front.pkey+"\n"
-            + "Copy on the console.";
-          alert(msge);
-          console.log(msge);
         }
       },
     });
@@ -66,6 +60,13 @@ class Moonad extends Component {
           code: null,
           name: front.get_paths()[1],
         });
+      case "u":
+        var is_addr = paths[1].startsWith("0x");
+        if(is_addr){
+          var body = h(Profile, {name: "", addr: paths[1]});
+        } else {
+          var body = h(Profile, {name: path[1], addr: ""});
+        }
     }
 
     return h("div", {

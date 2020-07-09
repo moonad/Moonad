@@ -229,6 +229,8 @@ async function new_post(post) {
     //for (var def in defs) {
       //Defs[def] = defs[def];
     //}
+    
+    save_user_posts(auth, poid);
 
     return poid;
   } catch (e) {
@@ -236,6 +238,21 @@ async function new_post(post) {
     throw "Internal error.";
   }
 };
+
+async function save_user_posts(addr, poid){
+  var submitted_post_file = addr+".subm";
+  try {
+    var user_has_post = await db.get(submitted_post_file);
+    if(!user_has_post){
+      await db.set(submitted_post_file, Buffer.from(lib.hex_to_bytes(poid)));
+    } else {
+      await db.con(submitted_post_file, Buffer.from(lib.hex_to_bytes(poid)));
+    }
+    // return poid;
+  } catch(e){
+    console.log("Error while saving users' posts");
+  }
+}
 
 async function register({name, addr}) {
   if (lib.nam(name) === null) {
@@ -283,7 +300,7 @@ async function expand_post(poid) {
     };
     return {...post, body};
   } else {
-    throw "Post not found: '"+req.query.poid+"'.";
+    throw "Post not found: '"+poid+"'.";
   }
 }
 
@@ -314,6 +331,37 @@ async function get_vote_auth(poid, sign) {
     throw "Not able to get vote auth.";
   }
 }
+
+async function get_profile_info(addr){
+  var info = {}
+  try{
+    var name_raw = await db.get(addr+".name"); // buffer
+    info.name = lib.bytes_to_string(name_raw);
+    info.addr = addr;
+    // Check posts
+    var posts_raw = await db.get(addr+".subm");
+    var posts = get_poid_from_buffer(posts_raw);
+    info.posts = posts ? posts : [];
+    // TODO: create a similar function as "post_to_bytes" to compress
+    // the response in an hexadecimal
+    return JSON.stringify(info);
+  } catch(e) {
+    throw "Error while retriving user's info: "+e;
+  }
+}
+
+function get_poid_from_buffer(buff){
+  var result = [];
+  if (buff) {
+    var upto = buff.length / 8;
+    for (var i = 0; i < upto; ++i) {
+      var poid = lib.bytes_to_hex(buff.slice(i*8, (i+1)*8));
+      result.push(poid);
+    };
+  };
+  return result;
+}
+
 
 // HTTP API
 // ========
@@ -402,7 +450,7 @@ app.post("/register", async (req, res) => {
 // Gets an expanded post
 app.post("/get_post", async (req, res) => {
   try {
-    var post = expand_post(req.query.poid);
+    var post = await expand_post(req.query.poid);
     res.send(lib.bytes_to_hex(lib.post_to_bytes(post)));
   } catch (e) {
     res.send(e.toString());
@@ -419,6 +467,20 @@ app.post("/get_cite_count", async (req, res) => {
       res.send("- Couldn't find post.");
     }
   } catch (e) {
+    res.send(e.toString());
+  };
+});
+
+app.post("/get_profile_info", async (req, res) => {
+  try {
+    var addr = req.query.addr;
+    var addr_name = db.get(addr+".name");
+    if(!addr_name){ // didn't found addr
+      res.send("Couldn't find this user address.");
+    }
+    res.send(await get_profile_info(addr));
+  } catch (e) {
+    console.log("server/get_profile error: ", e);
     res.send(e.toString());
   };
 });

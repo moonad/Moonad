@@ -97,6 +97,11 @@ async function login() {
   }
 };
 
+async function get_profile_info(addr){
+  return await lib.moonad.api.get_profile_info({addr});
+}
+
+
 async function get_qtd_replies(poid) {
   try {
     var res =  await lib.moonad.api.get_cite({poid});
@@ -246,5 +251,6 @@ lib.check_block_code = check_block_code;
 lib.upvote = upvote;
 lib.has_voted = has_voted;
 lib.get_qtd_votes = get_qtd_votes;
+lib.get_profile_info = get_profile_info;
 
 module.exports = lib;

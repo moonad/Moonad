@@ -1,5 +1,6 @@
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
+const front = require("./../front.js");
 
 class User_info extends Component {
   
@@ -18,6 +19,17 @@ class User_info extends Component {
     return h("span", {
       style: { "font-family": "IBMPlexMono-Light",}},
       info );
+  }
+
+  set_item(title, onClick) {
+    return h("span", {
+      style: { 
+        "font-family": "IBMPlexMono-Light",
+        "cursor": "pointer",
+        "text-decoration": "underline"
+      },
+      onClick
+    }, title)
   }
 
   render() {
@@ -51,6 +63,20 @@ class User_info extends Component {
           this.show_pkey ? this.set_info(eth_pkey) : "•••••••••••••••••••••", 
           pkey_button
         ])
+    
+    const separator = h("div", {
+      style: {
+        "margin-top": "20px",
+        "border-bottom": "1px solid rgb(240,240,240)"
+    }})
+
+    const profile_section = h("div", {
+      style: { "margin-top": "15px" }}, 
+      this.set_item("Profile", 
+        () => {
+          front.set_route("/u/"+eth_address)
+        }
+      ));
 
     return h("div", {
       style: {
@@ -66,7 +92,9 @@ class User_info extends Component {
         "border": "solid 1px #D6D6D6"
       }}, [
         address_section,
-        pkey_section
+        pkey_section,
+        separator,
+        profile_section
       ]);
   }
 
