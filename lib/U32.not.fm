@@ -1,0 +1,3 @@
+U32.not(a: U32): U32
+  get a_val = U32.add(1u, a)
+  U32.new(Word.neg<32>(a_val))
