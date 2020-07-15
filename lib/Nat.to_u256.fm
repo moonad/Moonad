@@ -1,0 +1,2 @@
+Nat.to_u256(n: Nat): U256
+  Nat.apply<U256>(n,U256.inc, U256.0)
