@@ -1,16 +1,16 @@
 // A demo application that renders a square on the screen
 App.demo: App(Pair(U32,U32))
-  let vox = VoxModel.alloc_size(256u)
+  let vox = VoxModel.alloc_size(U.32(0d256))
   def init
     Pair.new<,>(U32.0, U32.0)
   def draw(state)
     get mouse_x mouse_y = state
     App.Render.vox
-    | use idx vox = U32.for<>(vox, 0u, 256u)
-      let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,16u)),8u) // pixel x
-      let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,16u)),8u) // pixel y
-      let pos = Pos32.new(p_x, p_y, 128u) // pixel pos (forms a square)
-      let col = Col32.new(255u, 0u, 0u, 255u) // pixel color (red)
+    | use idx vox = U32.for<>(vox, U.32(0d0), U.32(0d256))
+      let p_x = U32.sub(U32.add(mouse_x,U32.mod(idx,U.32(0d16))),U.32(0d8)) // pixel x
+      let p_y = U32.sub(U32.add(mouse_y,U32.div(idx,U.32(0d16))),U.32(0d8)) // pixel y
+      let pos = Pos32.new(p_x, p_y, U.32(0d128)) // pixel pos (forms a square)
+      let col = Col32.new(U.32(0d255), U.32(0d0), U.32(0d0), U.32(0d255)) // pixel color (red)
       let vox = VoxModel.set_pos(idx, pos, vox)
       let vox = VoxModel.set_col(idx, col, vox)
       vox;

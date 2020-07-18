@@ -1,2 +1,2 @@
 Col32.get_g(col: Col32): U32
-  U32.and(U32.shr(col, 8u), 255u)
+  U32.and(U32.shr(col, U.32(0d8)), U.32(0d255))

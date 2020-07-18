@@ -1,5 +1,5 @@
 // Extracts the unique value of an array of depth 0.
-Array.extract_tip<A: Type>(arr: Array(A,0)): A
+Array.extract_tip<A: Type>(arr: Array(A,0::Nat)): A
   case arr:
   | arr.value;
   | Unit.new;

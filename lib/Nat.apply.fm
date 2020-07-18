@@ -1,2 +1,2 @@
-Nat.apply: <A: Type> -> (n: Nat, f: A -> A, x: A) -> A
-  Nat.apply.go
+Nat.apply<A: Type>(n: Nat, f: A -> A, x: A): A
+  Nat.apply.go<A>(n,f,x)

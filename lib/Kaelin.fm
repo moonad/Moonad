@@ -5,24 +5,24 @@ Kaelin.renderer(model: VoxModel): App(U32)
   get size buffer = model
   let vox = VoxModel.alloc_size(size)
   def init
-    0u
+    U.32(0d0)
   def draw(state)
     App.Render.vox
-    | use idx vox = U32.for<>(vox, 0u, size)
+    | use idx vox = U32.for<>(vox, U.32(0d0), size)
       let pos = VoxModel.get_pos(idx, model)
       let p_x = Pos32.get_x(pos)
       let p_y = Pos32.get_y(pos)
       let p_z = Pos32.get_z(pos)
-      get p_x p_y = Kaelin.rotate2d(128u, 128u, p_x, p_y, state)
-      let p_x = U32.sub(p_x, U32.div(p_z, 2u))
-      let p_y = U32.sub(p_y, U32.div(p_z, 2u))
+      get p_x p_y = Kaelin.rotate2d(U.32(0d128), U.32(0d128), p_x, p_y, state)
+      let p_x = U32.sub(p_x, U32.div(p_z, U.32(0d2)))
+      let p_y = U32.sub(p_y, U32.div(p_z, U.32(0d2)))
       let pos = Pos32.new(p_x, p_y, p_z)
       let vox = VoxModel.set_pos(idx, pos, vox)
       let vox = VoxModel.set_col(idx, VoxModel.get_col(idx, model), vox)
       vox;
   def when(event, state)
     case event:
-    | U32.add(state, 1u);
+    | U32.add(state, U.32(0d1));
     | state;
     | state;
   App.new<>(init, draw, when)
@@ -36,19 +36,19 @@ Kaelin.rotate2d(cx: U32, cy: U32, x: U32, y: U32, a: U32): Pair(U32, U32)
 
 Kaelin.draw(sprites: List(Kaelin.Sprite), screen: VoxModel): VoxModel
   def nil
-    Pair.new<,>(0u, screen)
+    Pair.new<,>(U.32(0d0), screen)
   def cons(sprite, state)
     get idx screen = state
     get sprite_pos sprite_ang sprite_vox = sprite
     let voxel_count = VoxModel.get_size(sprite_vox)
-    for i : U32 = 0u .. voxel_count with screen:
+    for i : U32 = U.32(0d0) .. voxel_count with screen:
       let pos = VoxModel.get_pos(i, sprite_vox)
       let p_x = Pos32.get_x(pos)
       let p_y = Pos32.get_y(pos)
       let p_z = Pos32.get_z(pos)
-      get p_x p_y = Kaelin.rotate2d(128u, 128u, p_x, p_y, sprite_ang)
-      let p_x = U32.add(U32.sub(p_x, U32.div(p_z, 2u)), Pos32.get_x(sprite_pos))
-      let p_y = U32.add(U32.sub(p_y, U32.div(p_z, 2u)), Pos32.get_y(sprite_pos))
+      get p_x p_y = Kaelin.rotate2d(U.32(0d128), U.32(0d128), p_x, p_y, sprite_ang)
+      let p_x = U32.add(U32.sub(p_x, U32.div(p_z, U.32(0d2))), Pos32.get_x(sprite_pos))
+      let p_y = U32.add(U32.sub(p_y, U32.div(p_z, U.32(0d2))), Pos32.get_y(sprite_pos))
       let p_z = U32.add(p_z, Pos32.get_z(sprite_pos))
       let pos = Pos32.new(p_x, p_y, p_z)
       let screen
@@ -71,19 +71,19 @@ Kaelin: App(U32)
   let wall = Kaelin.Models.wall
   let chest = Kaelin.Models.chest
   let seat = Kaelin.Models.seat
-  let screen = VoxModel.alloc_size(524288u)
+  let screen = VoxModel.alloc_size(U.32(0d524288))
   def init
-    0u
+    U.32(0d0)
   def draw(state)
     let sprites = [
-      Kaelin.Sprite.new(Pos32.new(0u,0u,0u), state, wall),
-      Kaelin.Sprite.new(Pos32.new(32u,0u,0u), state, chest),
-      Kaelin.Sprite.new(Pos32.new(64u,0u,0u), state, seat),
+      Kaelin.Sprite.new(Pos32.new(U.32(0d0),U.32(0d0),U.32(0d0)), state, wall),
+      Kaelin.Sprite.new(Pos32.new(U.32(0d32),U.32(0d0),U.32(0d0)), state, chest),
+      Kaelin.Sprite.new(Pos32.new(U.32(0d64),U.32(0d0),U.32(0d0)), state, seat),
     ]
     App.Render.vox(Kaelin.draw(sprites, screen))
   def when(event, state)
     case event:
-    | U32.add(state, 1u);
+    | U32.add(state, U.32(0d1));
     | state;
     | state;
   App.new<>(init, draw, when)

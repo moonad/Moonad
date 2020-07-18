@@ -1,2 +1,2 @@
 VoxModel.alloc_size(size: U32): VoxModel
-  VoxModel.new(size, Buffer32.alloc(U32.needed_depth(U32.mul(2u,size))))
+  VoxModel.new(size, Buffer32.alloc(U32.needed_depth(U32.mul(U.32(0d2),size))))

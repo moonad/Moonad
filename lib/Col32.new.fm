@@ -1,7 +1,7 @@
 Col32.new(r: U32, g: U32, b: U32, a: U32): Col32
-  let col = 0u
+  let col = U.32(0d0)
   let col = U32.or(col, r)
-  let col = U32.or(col, U32.shl(g, 8u))
-  let col = U32.or(col, U32.shl(b, 16u))
-  let col = U32.or(col, U32.shl(a, 24u))
+  let col = U32.or(col, U32.shl(g, U.32(0d8)))
+  let col = U32.or(col, U32.shl(b, U.32(0d16)))
+  let col = U32.or(col, U32.shl(a, U.32(0d24)))
   col

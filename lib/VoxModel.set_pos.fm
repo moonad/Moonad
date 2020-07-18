@@ -1,4 +1,4 @@
 VoxModel.set_pos(idx: U32, pos: U32, vox: VoxModel): VoxModel
   case vox:
-  | let vox.buffer = Buffer32.set(U32.mul(idx,2u), pos, vox.buffer)
+  | let vox.buffer = Buffer32.set(U32.mul(idx,U.32(0d2)), pos, vox.buffer)
     VoxModel.new(vox.size, vox.buffer);
