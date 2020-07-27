@@ -30,6 +30,7 @@ jobs:
     - name: go to lib
       run: |
         cd lib
-        cd ../app/node_modules
+        ls
+        cd ..
         ls
 
