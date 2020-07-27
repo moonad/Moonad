@@ -27,4 +27,4 @@ jobs:
       run: |
         cd lib
         ls
-        node app/node_modules/formality-lang/bin/fm.js --github
+        fm --github
