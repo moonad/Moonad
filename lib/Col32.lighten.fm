@@ -1,4 +1,4 @@
-// Alpha is desconsidered
+// Alpha is disconsidered
 Col32.lighten(rgba: Col32, amount: U32): Col32
   // Get the U32 values
   let r = Col32.get_r(rgba)
