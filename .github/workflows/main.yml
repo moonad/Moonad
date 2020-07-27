@@ -28,6 +28,9 @@ jobs:
       run: |
         cd app
         npm i formality-lang
+        
+    - name: Check terms
+      run: |
         cd ../lib
         node ../app/node_modules/formality-lang/bin/fm.js --github
         
