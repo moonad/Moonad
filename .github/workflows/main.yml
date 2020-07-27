@@ -29,7 +29,6 @@ jobs:
         cd app
         npm i formality-lang
         cd ../lib
-        cd ../app/node_modules/formality-lang/bin
-        node fm.js --github
+        node ../app/node_modules/formality-lang/bin/fm.js --github
         
 
