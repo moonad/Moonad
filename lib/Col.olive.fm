@@ -1,0 +1,2 @@
+Col.olive : Col32
+  Col32.new(128u, 128u, 0u, 255u)

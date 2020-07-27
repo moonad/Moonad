@@ -1,0 +1,2 @@
+Col.silver : Col32
+  Col32.new(192u, 192u, 192u, 255u)
