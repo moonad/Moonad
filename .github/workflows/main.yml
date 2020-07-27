@@ -23,8 +23,10 @@ jobs:
     - name: Install formality-lang
       run: npm i formality-lang
   
-    - run: cd lib
-    - run: ls
+    - name: go to lib
+      run: |
+        cd lib
+        ls
 
     - name: Type check fm --github
       id: check_type_fm_github
