@@ -24,7 +24,8 @@ jobs:
       run: npm i formality-lang
   
     - run: cd lib
-      
+    - run: ls
+
     - name: Type check fm --github
       id: check_type_fm_github
       run: node ../app/node_modules/formality-lang/bin/fm.js --github
