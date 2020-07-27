@@ -1,2 +1,2 @@
-Col.teal : Col32
+Col32.teal : Col32
   Col32.new(0u, 128u, 128u, 255u)
