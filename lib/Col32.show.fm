@@ -4,7 +4,7 @@ Col32.show(rgba: Col32): String
   let g = Col32.get_g(rgba)
   let b = Col32.get_b(rgba)
   let a = Col32.get_a(rgba)
-  // Parse to Nat
+  // TODO: add U32.show
   let r_str = Nat.show(U32.to_nat(r))
   let g_str = Nat.show(U32.to_nat(g))
   let b_str = Nat.show(U32.to_nat(b))
