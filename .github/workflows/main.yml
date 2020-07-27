@@ -31,7 +31,8 @@ jobs:
         
     - name: Check terms
       run: |
-        cd ../lib
+        ls
+        cd lib
         node ../app/node_modules/formality-lang/bin/fm.js --github
         
 
