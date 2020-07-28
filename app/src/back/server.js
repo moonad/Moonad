@@ -195,8 +195,8 @@ app.get("*", async (req, res, next) => {
     res.set("Content-Type", "text/plain").send(code);
   } else if (req.url === "/github") {
     console.log("req.url: ", req.url);
-    // github_util.git_pull();
-    console.log("req: ", req);
+    github_util.git_pull();
+    // console.log("req: ", req);
   } else { 
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (file.length > 0 && fs.existsSync(path_of(["app", "docs", file]))) {
@@ -205,6 +205,12 @@ app.get("*", async (req, res, next) => {
       res.sendFile(path_of(["app", "docs", "index.html"]));
     }
   };
+});
+
+app.post("/github", async (req, res) => {
+  console.log("POST GITHUB");
+  github_util.git_pull();
+  res.send("- hey");
 });
 
 // Loads the file of a definition

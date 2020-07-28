@@ -1,7 +1,7 @@
 const { exec } = require("child_process");
 
 function git_pull() {
-  exec("git status", (error, stdout, stderr) => {
+  exec("git pull", (error, stdout, stderr) => {
     console.log("exec git pull");
     if (error) {
       console.log(`error: ${error.message}`);
