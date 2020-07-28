@@ -4,6 +4,7 @@ var Peer = require("simple-peer");
 var lib = require("./lib.js");
 var WebSocket = require('isomorphic-ws')
 
+// TODO: update to Digital Ocean 
 module.exports = ({url = "http://moonad.org"}) => {
 
   async function request(method, query) {

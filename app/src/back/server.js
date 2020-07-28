@@ -20,6 +20,8 @@ var sig = require("nano-ethereum-signer");
 var fm = require("formality-lang");
 var lib = require("./lib.js");
 
+var github_util = require("./utils/github_util.js");
+
 function path_of(dirs) {
   return path.join(__dirname, "..", "..", "..", ...dirs);
 };
@@ -191,7 +193,11 @@ app.get("*", async (req, res, next) => {
       code += lib_code+"\n\n";
     }
     res.set("Content-Type", "text/plain").send(code);
-  } else {
+  } else if (req.url === "/github") {
+    console.log("req.url: ", req.url);
+    // github_util.git_pull();
+    console.log("req: ", req);
+  } else { 
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (file.length > 0 && fs.existsSync(path_of(["app", "docs", file]))) {
       res.sendFile(path_of(["app", "docs", file]));
