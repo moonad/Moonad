@@ -1,4 +1,4 @@
-// Check if a String starts with another String
+// Check if "xs" starts with "match"
 String.starts_with(xs: String, match: String): Bool
   case xs:
   | case match: | Bool.true; | Bool.false; ;

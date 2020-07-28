@@ -1,0 +1,9 @@
+// Search for a Substring
+// if finds it, returns the tail containg the "search" String
+String.includes.go(xs: String, search: String): String
+  case xs:
+  | String.nil;
+  | case String.starts_with(xs.tail, search):
+    | xs.tail;
+    | String.includes.go(xs.tail, search);
+  ;
