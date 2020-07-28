@@ -1,4 +1,5 @@
-String.repeat(xs: String, qtd: Nat): String
-  case qtd: 
+// Repeats a String for "n" times
+String.repeat(xs: String, n: Nat): String
+  case n: 
   | String.nil;
-  | String.concat(xs, String.repeat(xs, qtd.pred));
+  | String.concat(xs, String.repeat(xs, n.pred));

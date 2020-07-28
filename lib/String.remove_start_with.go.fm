@@ -1,3 +1,4 @@
+// Removes "match" from the beginning of the String and returns the tail
 String.remove_start_with.go(xs: String, match: String): String
   case match:
   | xs;
