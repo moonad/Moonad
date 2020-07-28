@@ -210,7 +210,7 @@ app.get("*", async (req, res, next) => {
 app.post("/github", async (req, res) => {
   console.log("POST GITHUB");
   github_util.git_pull();
-  res.send("- hey");
+  res.send("Hi, there. What's up? I'm up..dated");
 });
 
 // Loads the file of a definition
