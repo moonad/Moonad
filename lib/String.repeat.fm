@@ -1,0 +1,4 @@
+String.repeat(xs: String, qtd: Nat): String
+  case qtd: 
+  | String.nil;
+  | String.concat(xs, String.repeat(xs, qtd.pred));

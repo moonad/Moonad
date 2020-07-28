@@ -1,0 +1,10 @@
+// Check if a String starts with another String
+String.starts_with(xs: String, match: String): Bool
+  case xs:
+  | case match: | Bool.true; | Bool.false; ;
+  | let reduced = String.starts_with.go(xs, match)
+    case String.eql(match, reduced):
+    | Bool.true;
+    | Bool.false;
+  ;
+ 
