@@ -19,6 +19,7 @@ var db = require("./database.js");
 var sig = require("nano-ethereum-signer");
 var fm = require("formality-lang");
 var lib = require("./lib.js");
+var {spawn} = require("child_process");
 
 function path_of(dirs) {
   return path.join(__dirname, "..", "..", "..", ...dirs);
@@ -193,10 +194,10 @@ app.get("*", async (req, res, next) => {
     res.set("Content-Type", "text/plain").send(code);
   } else {
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
-    if (file.length > 0 && fs.existsSync(path_of(["app", "docs", file]))) {
-      res.sendFile(path_of(["app", "docs", file]));
+    if (file.length > 0 && fs.existsSync(path_of(["sys", "docs", file]))) {
+      res.sendFile(path_of(["sys", "docs", file]));
     } else {
-      res.sendFile(path_of(["app", "docs", "index.html"]));
+      res.sendFile(path_of(["sys", "docs", "index.html"]));
     }
   };
 });
@@ -232,136 +233,17 @@ app.post("/save", async (req, res) => {
   }
 });
 
-//// TCP API
-//// =======
+// Logs server
+// ===========
 
-//// Poid -> Buff -> Buff
-//async function serialize_post(poid, post) {
-  //if (post) {
-    //var pbuf = lib.post_to_bytes(post);
-    //return lib.bytes_concat([
-      //[lib.POST],
-      //lib.hex_to_bytes(poid),
-      //lib.uint32_to_bytes(pbuf.length),
-      //pbuf,
-    //]);
-  //} else {
-    //return null;
-  //}
-//};
-
-//// Poid -> Buff -> Uint -> Uint -> Buff 
-//async function serialize_cite(poid, cite, from, upto) {
-  //if (cite && from*8 < cite.length && upto*8 <= cite.length) {
-    //var bytes = [
-      //[lib.CITE],
-      //lib.hex_to_bytes(poid),
-      //lib.uint32_to_bytes(from),
-      //lib.uint32_to_bytes(upto),
-    //];
-    //for (var i = from; i < upto; ++i) {
-      //bytes.push(cite.slice(i*8, i*8+8));
-    //};
-    //return lib.bytes_concat(bytes);
-  //} else {
-    //return null;
-  //}
-//};
-
-//// Addr -> Buff -> Buff
-//async function serialize_name(addr, name) {
-  //return lib.bytes_concat([
-    //[lib.NAME],
-    //lib.hex_to_bytes(addr),
-    //lib.uint32_to_bytes(name.length),
-    //name,
-  //]);
-//};
-
-//app.ws('/', function(ws, req) {
-  //var peer = {};
-  //peer.has_post = {}; // Map Poid Bool
-  //peer.len_cite = {}; // Map Poid Uint
-  //peer.has_name = {}; // Map Addr Bool
-  //peer.ws = ws;
-  //peer.ws.binaryType = "arraybuffer";
-  //peer.poid = "0x0000000000000000"
-  //Peer.push(peer);
-  //console.log("New connection. "+Peer.length+" online.");
-
-  //// Watches replies to the watched poid and sends to peer
-  //peer.refresher = setInterval(async function refresh() {
-    //var bufs = [];
-
-    //// Sends a post to peer
-    //async function view_post(poid) {
-      //if (poid !== "0x0000000000000000" && !peer.has_post[poid]) {
-        //peer.has_post[poid] = true;
-        //var post = await expand_post(poid);
-        //if (post) {
-          //var auth = post.auth;
-          //var name = await db.get(auth+".name");
-          //var pbuf = await serialize_post(poid, post);
-          //bufs.push(pbuf);
-          //if (name && !peer.has_name[auth]) {
-            //peer.has_name[auth] = true;
-            //var nbuf = await serialize_name(auth, name);
-            //bufs.push(nbuf);
-          //};
-        //};
-      //};
-    //};
-
-    //// Sends watched post
-    //await view_post(peer.poid);
-
-    //// Sends watched cites
-    //var cite = await db.get(peer.poid+".cite");
-    //if (cite) {
-      //var from = peer.len_cite[peer.poid]||0;
-      //var upto = cite.length / 8;
-      //if (from < upto) {
-        //peer.len_cite[peer.poid] = upto;
-        //for (var i = from; i < upto; ++i) {
-          //var cite_poid = lib.bytes_to_hex(cite.slice(i*8, (i+1)*8));
-          //await view_post(cite_poid);
-        //};
-        //var cbuf = await serialize_cite(peer.poid, cite, from, upto);
-        //bufs.push(cbuf);
-      //};
-    //};
-
-    //// Sends bufs
-    //if (bufs.length > 0) {
-      //peer.ws.send(Buffer.concat(bufs));
-    //};
-
-  //}, 100);
-
-  //ws.on("message", function(data) {
-    //var data = new Uint8Array(data);
-    //switch (data[0]) {
-      //// User makes a new post
-      //case lib.DO_POST:
-        //var post = lib.bytes_to_post(data.slice(1));
-        //new_post(post).then(()=>{}).catch((e)=>{console.log(e)});
-        //break;
-
-      //// Users requests to watch a poid
-      //case lib.DO_WATCH:
-        //var poid = lib.bytes_to_hex(data.slice(1, 9));
-        //peer.poid = poid;
-        //break;
-    //}
-  //});
-
-  //ws.on("close", function() {
-    //Peer = Peer.filter(x => x !== peer);
-    //clearTimeout(peer.refresher);
-    //console.log("Disconnection. "+Peer.length+" online.");
-  //});
-
-  //ws.on("error", function(err) {
-    //console.log(err);
-  //});
-//});
+console.log("Starting LOGS server...");
+const logs = spawn("node", [path.join(__dirname, "..", "logs", "server.js")]);
+logs.stdout.on("data", (data) => {
+  console.log("[LOGS]\n" + data);
+});
+logs.stderr.on("data", (data) => {
+  console.error("[LOGS]\n" + data);
+});
+logs.on("close", (code) => {
+  console.log("[LOGS]\n- EXIT (code: "+code+")");
+});

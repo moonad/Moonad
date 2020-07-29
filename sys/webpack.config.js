@@ -7,7 +7,7 @@ module.exports = {
   mode: 'production',
   optimization: {minimize: false},
   devtool: "source-map",
-  entry: './src/front/index.js',
+  entry: './src/app/index.js',
   module: {rules: [
     {
       test: /\.(woff|woff2|eot|ttf|otf|ico|png)$/,
@@ -25,7 +25,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/front/index.html', 
+      template: 'src/app/index.html', 
     }),
   ]
 };

@@ -11,19 +11,26 @@ class Play extends Component {
     this.defs = null;
     this.argm = [];
     this.app = null;
-    this.seen_replies = null;
     this.intervals = {};
     this.listeners = {};
     this.mouse_pos = {_:"Pair.new", fst: 0, snd: 0};
     this.app_elem = null;
     this.canvas = null;
     this.run_term = null;
+    this.load_log = "Loading...";
   }
   async componentDidMount() {
     try {
+      this.load_log = "";
       this.defs = await front.load_core_defs_of({
         name: this.props.name,
         code: this.props.code || null,
+        cache: false,
+        debug: false,
+        on_dependency: name => {
+          this.load_log = "Loading "+name+"...\n" + this.load_log;
+          this.forceUpdate();
+        }
       });
       // Refreshes
       this.intervals.refresher = setInterval(() => this.forceUpdate(), 1000/2);
@@ -40,13 +47,23 @@ class Play extends Component {
       document.body.removeEventListener(key, this.listeners[key]);
     };
   }
-  load_defs() {
-  }
   start_app(name) {
     var js_code = fm.tojs.compile(name, this.defs, true);
     console.log(js_code);
     this.app = eval(js_code);
     this.app = this.app[name];
+
+    // Init event
+    this.send_event({
+      _: "App.Event.init",
+      time: Date.now(),
+      screen: {
+        _: "Pair.new",
+        fst: this.app_elem ? this.app_elem.offsetWidth : 0,
+        snd: this.app_elem ? this.app_elem.offsetHeight : 0,
+      },
+      mouse: this.mouse_pos,
+    });
 
     // Canvas for image rendering
     this.canvas = document.createElement("canvas");
@@ -74,7 +91,8 @@ class Play extends Component {
     // Mouse down event
     this.listeners.mousedown = (e) => {
       this.send_event({
-        _: "App.Event.ukey",
+        _: "App.Event.xkey",
+        time: Date.now(),
         down: true,
         code: 0,
       });
@@ -84,7 +102,8 @@ class Play extends Component {
     // Mouse up event
     this.listeners.mouseup = (e) => {
       this.send_event({
-        _: "App.Event.ukey",
+        _: "App.Event.xkey",
+        time: Date.now(),
         up: false,
         code: 0,
       });
@@ -94,7 +113,8 @@ class Play extends Component {
     // Key down event
     this.listeners.keydown = (e) => {
       this.send_event({
-        _: "App.Event.ukey",
+        _: "App.Event.xkey",
+        time: Date.now(),
         down: true,
         code: e.keyCode,
       });
@@ -104,40 +124,19 @@ class Play extends Component {
     // Key up event
     this.listeners.keyup = (e) => {
       this.send_event({
-        _: "App.Event.ukey",
+        _: "App.Event.xkey",
+        time: Date.now(),
         down: false,
         code: e.keyCode,
       });
     };
     document.body.addEventListener("keyup", this.listeners.keyup);
 
-    // New post event
-    this.seen_replies = 0;
-    this.intervals.post = setInterval(() => {
-      if (this.props.poid) {
-        var replies = front.moonad.cite[this.props.poid];
-        while (replies && this.seen_replies < replies.length) {
-          var reply = front.moonad.post[replies[this.seen_replies]];
-          if (!reply) {
-            break;
-          } else {
-            this.send_event({
-              _: "App.Event.post",
-              date: reply.date,
-              auth: reply.auth,
-              body: reply.body,
-            });
-            this.seen_replies++;
-          };
-        };
-      }
-    }, 1000 / 32);
-
     // Tick event
     this.intervals.tick = setInterval(() => {
       this.send_event({
         _: "App.Event.tick",
-        date: Date.now(),
+        time: Date.now(),
         screen: {
           _:"Pair.new",
           fst: this.app_elem ? this.app_elem.offsetWidth : 0,
@@ -196,8 +195,38 @@ class Play extends Component {
     }, 1000/32);
   }
   send_event(app_event) {
+    if (app_event._ !== "App.Event.tick") {
+      console.log(JSON.stringify(app_event, null, 2));
+    }
     if (this.app) {
-      this.app.init = this.app.when(app_event)(this.app.init);
+      var actions = this.app.when(app_event)(this.app.init);
+      while (actions._ === "List.cons") {
+        var action = actions.head;
+        switch (action._) {
+          case "App.Action.state":
+            this.app.init = action.state;
+            break;
+          case "App.Action.print":
+            console.log(action.text);
+            break;
+          case "App.Action.post":
+            front.logs.send_post(action.room, action.data);
+            break;
+          case "App.Action.watch":
+            front.logs.watch_room(action.room);
+            front.logs.on_post(({room, time, addr, data}) => {
+              this.send_event({
+                _: "App.Event.post",
+                time: parseInt(time.slice(2), 16),
+                room: room,
+                auth: addr,
+                data: data,
+              });
+            });
+            break;
+        };
+        actions = actions.tail;
+      }
     };
   }
   render_app(type) {
@@ -371,7 +400,7 @@ class Play extends Component {
     const defs = this.defs;
 
     if (!defs || !defs[name]) {
-      return h("div", {}, "Loading...");
+      return h("pre", {}, this.load_log);
     } else {
       var type = fm.synt.reduce(this.defs[name].type);
       // If this is an application...
