@@ -20,8 +20,6 @@ var sig = require("nano-ethereum-signer");
 var fm = require("formality-lang");
 var lib = require("./lib.js");
 
-var github_util = require("./utils/github_util.js");
-
 function path_of(dirs) {
   return path.join(__dirname, "..", "..", "..", ...dirs);
 };
@@ -232,12 +230,6 @@ app.post("/save", async (req, res) => {
   } catch (e) {
     res.send("- " + e.toString());
   }
-});
-
-app.post("/github", async (req, res) => {
-  console.log("POST GITHUB");
-  github_util.git_pull();
-  res.send("Hi, there. What's up? I'm up...dated");
 });
 
 //// TCP API
