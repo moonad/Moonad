@@ -30,6 +30,7 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express-ws": "^4.0.0",
     "formality-lang": "^0.4.96",
     "fs-extra": "^9.0.0",
