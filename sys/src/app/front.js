@@ -1,5 +1,5 @@
 const fm = require("formality-lang");
-const moonad = require("./../back/client.js")({url:window.location.origin});
+const moonad = require("./../server/client.js")({url:window.location.origin});
 const ethsig = require("nano-ethereum-signer");
 const moment = require("moment");
 
@@ -40,6 +40,14 @@ function format_date(date) {
 }
 
 const pkey_to_addr = memoize(ethsig.addressFromKey);
+
+// Logs
+// ====
+
+const logs = require("./../logs/client.js")({
+  url: "ws://"+window.location.host+":7171",
+  key: "0x"+get_pkey(),
+});
 
 // Login
 // =====
@@ -90,7 +98,7 @@ function remove_colors(msg) {
   return msg.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,"");
 };
 
-async function load_core_defs_of({name, code}) {
+async function load_core_defs_of({name, code, on_dependency, cached}) {
   var defs = {
     _main_: {
       type: fm.synt.Hol("_Main_", fm.synt.Nil()),
@@ -103,8 +111,14 @@ async function load_core_defs_of({name, code}) {
       defs[def] = extra_defs[def];
     }
   }
+  fm.load.destroy_cache();
   for (var def in defs) {
-    await fm.load.load_and_typesynth(def, defs, fm.lang.stringify, true);
+    await fm.load.load_synth({
+      name: def,
+      defs,
+      on_dependency,
+      refresh_cache: false, // already destroyed
+    });
   }
   var core_defs = {};
   for (var def in defs) {
@@ -131,6 +145,7 @@ lib.addr = get_addr();
 // Periodically sends watched poid to server.
 //setInterval(refresh_watched_poid, 50);
 
+lib.logs = logs;
 lib.gen_pkey = gen_pkey;
 lib.get_pkey = get_pkey;
 lib.get_addr = get_addr;

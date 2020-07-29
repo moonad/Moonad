@@ -2,7 +2,7 @@ const fm = require("formality-lang");
 const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const front = require("./../front.js");
-const moonad = require("./../../back/client.js")({url:window.location.origin});
+const moonad = require("./../../server/client.js")({url:window.location.origin});
 const Link = require("./Link.js");
 
 class List extends Component {

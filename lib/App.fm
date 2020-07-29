@@ -2,4 +2,4 @@ T App<S: Type>
 | App.new(
   init: S,
   draw: S -> App.Render,
-  when: App.Event -> S -> S);
+  when: App.Event -> S -> List(App.Action(S)));

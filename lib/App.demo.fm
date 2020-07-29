@@ -16,7 +16,8 @@ App.demo: App(Pair(U32,U32))
       vox;
   def when(event, state)
     case event:
-    | tick => event.mouse;
-    | ukey => state;
-    | post => state;
+    | init => [];
+    | tick => [App.Action.state<>(event.mouse)];
+    | xkey => [];
+    | post => [];
   App.new<>(init, draw, when)
