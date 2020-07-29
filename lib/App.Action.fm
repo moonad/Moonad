@@ -1,0 +1,5 @@
+T App.Action<S: Type>
+| App.Action.state(state: S);
+| App.Action.print(text: String);
+| App.Action.post(room: String, data: String);
+| App.Action.watch(room: String);
