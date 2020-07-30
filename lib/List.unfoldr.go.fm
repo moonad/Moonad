@@ -1,0 +1,6 @@
+List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A, bs: List(B)): List(B)
+  let res = f(a)
+  case res:
+  | List.nil<B>;
+  | get fst snd = res.value 
+    List.unfoldr.go<A,B>(f, fst, List.cons<B>(snd, bs));
