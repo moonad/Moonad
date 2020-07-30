@@ -31,6 +31,6 @@ jobs:
       run: |
         ls
         cd lib
-        node ../app/node_modules/formality-lang/bin/fm.js --github
+        node ../node_modules/formality-lang/bin/fm.js --github
         
 
