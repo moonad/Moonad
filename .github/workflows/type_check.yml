@@ -25,9 +25,7 @@ jobs:
 
     # Install dependency
     - name: Install formality-lang
-      run: |
-        cd app
-        npm i formality-lang
+      run: npm i formality-lang
         
     - name: Check terms
       run: |
