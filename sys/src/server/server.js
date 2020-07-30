@@ -192,7 +192,7 @@ app.get("*", async (req, res, next) => {
       code += lib_code+"\n\n";
     }
     res.set("Content-Type", "text/plain").send(code);
-  } else {
+  } else { 
     var file = req.url.split("/").pop().replace(/[^0-9a-zA-Z_.]/g,"");
     if (file.length > 0 && fs.existsSync(path_of(["sys", "docs", file]))) {
       res.sendFile(path_of(["sys", "docs", file]));
