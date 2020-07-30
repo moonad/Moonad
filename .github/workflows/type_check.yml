@@ -25,14 +25,11 @@ jobs:
 
     # Install dependency
     - name: Install formality-lang
-      run: |
-        cd app
-        npm i formality-lang
+      run: npm i formality-lang
         
     - name: Check terms
       run: |
-        ls
         cd lib
-        node ../app/node_modules/formality-lang/bin/fm.js --github
+        node ../node_modules/formality-lang/bin/fm.js --github
         
 
