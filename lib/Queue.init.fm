@@ -1,0 +1,15 @@
+// removes last element
+Queue.init<A: Type>(q: Queue(A)): Maybe(Queue(A))
+  case q:
+  | case q.rear:
+    | case q.front:
+      | Maybe.none<Queue(A)>
+      ;
+      | let new_f  = List.drop<A>(1, q.front)
+        let new_sf = Nat.sub(q.size_front, 1)
+        let new_q  = Queue.balance<A>(new_f, new_sf, List.nil<A>, 0)
+        Maybe.some<Queue(A)>(new_q);;
+    | let new_r  = List.drop<A>(1, q.rear)
+      let new_sr = Nat.sub(q.size_rear, 1)
+      let new_q  = Queue.balance<A>(q.front, q.size_front, new_r, new_sr)
+      Maybe.some<Queue(A)>(new_q);;
