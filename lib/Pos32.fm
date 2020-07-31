@@ -1,2 +1,7 @@
+// A position represented using a U32, such that:
+// x = pos & 0x7FF          // 0 .. 4096
+// y = (pos >>> 12) & 0x7FF // 0 .. 4096
+// z = (pos >>> 24)         // 0 .. 256
+// The `x` and `y` values are 12-bit, and `z` is 8-bit.
 Pos32: Type
   U32

@@ -182,7 +182,6 @@ class Moonad extends Component {
   render() {
     var paths = front.get_paths();
     if (paths[0] === "play") {
-      console.log("playing...", paths);
       return h(Play, {
         name: paths[1],
       });

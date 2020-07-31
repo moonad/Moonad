@@ -1,8 +1,0 @@
-// Game engine
-
-// Sprites have a position, angle and Image3D (?)
-// TODO rename Image3D to Image3D
-T Game.Sprite
-| Game.Sprite.new(pos: Pos32, ang: U32, vox: Image3D);
-
-
