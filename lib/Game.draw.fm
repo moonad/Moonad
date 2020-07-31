@@ -1,36 +1,39 @@
-// Renders a sprite to a image
-Game.draw(sprites: List(Game.Sprite), screen: Image3D): Image3D
-  def nil
-    Pair.new<,>(0u, screen)
-  def cons(sprite, state)
-    get idx screen = state
-    get sprite_mid sprite_pos sprite_ang sprite_vox = sprite
-    let voxel_count = Image3D.get_size(sprite_vox)
-    for i : U32 = 0u .. voxel_count with screen:
-      let pos = Image3D.get_pos(i, sprite_vox)
-      let c_x = Pos32.get_x(sprite_mid)
-      let c_y = Pos32.get_y(sprite_mid)
-      let p_x = Pos32.get_x(pos)
-      let p_y = Pos32.get_y(pos)
-      let p_z = Pos32.get_z(pos)
-      get p_x p_y = Game.rotate2d(c_x, c_y, p_x, p_y, sprite_ang)
-      let p_x = U32.add(U32.sub(p_x, U32.div(p_z, 2u)), Pos32.get_x(sprite_pos))
-      let p_y = U32.add(U32.sub(p_y, U32.div(p_z, 2u)), Pos32.get_y(sprite_pos))
-      let p_z = U32.add(p_z, Pos32.get_z(sprite_pos))
-      let pos = Pos32.new(p_x, p_y, p_z)
-      let screen
-        = Image3D.set_pos
-        | U32.add(i,idx);
-        | pos;
-        | screen;
-      let screen
-        = Image3D.set_col
-        | U32.add(i,idx);
-        | Image3D.get_col(i,sprite_vox);
-        | screen;
-      screen
-    Pair.new<,>(U32.add(voxel_count, idx), screen)
-  let fold = List.fold<Game.Sprite>(sprites)
-  get idx screen = fold<Pair(U32,Image3D)>(nil, cons)
-  screen
-  
+// Renders a list of sprites to a image. Words by taking each sprite on the
+// list, transforming its voxels and pushing to the screen.
+Game.draw(sprites: List(Game.Sprite), scr: Image3D): Image3D
+  // Initial state (idx, scr)
+  def init
+    Pair.new<,>(0u, scr)
+  // For each sprite...
+  def next(sprite, state)
+    get idx scr = state
+    case sprite:
+    | // For each voxel...
+      let voxel_count = Image3D.get_size(sprite.img)
+      for i : U32 = 0u .. voxel_count with scr:
+        // Gets the sprite origin (mid) and position (pos)
+        let c_x = Pos32.get_x(sprite.mid)
+        let c_y = Pos32.get_y(sprite.mid)
+        let s_x = Pos32.get_x(sprite.pos)
+        let s_y = Pos32.get_y(sprite.pos)
+        // Gets the voxel position
+        let pos = Image3D.get_pos(i, sprite.img)
+        let v_x = Pos32.get_x(pos)
+        let v_y = Pos32.get_y(pos)
+        let v_z = Pos32.get_z(pos)
+        // Rotates the voxel by (ang) degrees
+        get v_x v_y = Game.rotate2d(c_x, c_y, v_x, v_y, sprite.ang)
+        // Transforms to Tibia perspective (cavalier projection)
+        let v_x = U32.add(U32.sub(v_x, U32.div(v_z, 2u)), s_x)
+        let v_y = U32.add(U32.sub(v_y, U32.div(v_z, 2u)), s_y)
+        let v_z = U32.add(v_z, Pos32.get_z(sprite.pos))
+        // Push the voxel to the scr (on the next idx)
+        let pos = Pos32.new(v_x, v_y, v_z)
+        let col = Image3D.get_col(i, sprite.img)
+        let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
+        let scr = Image3D.set_col(U32.add(i, idx), col, scr);
+        scr
+      // Returns new to-write idx and updated screen
+      Pair.new<,>(U32.add(voxel_count, idx), scr);
+  // Performs the algorithm above and returns the resulting image
+  Pair.snd<,>(List.fold<>(sprites)<>(init, next))
