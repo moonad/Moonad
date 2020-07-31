@@ -1,0 +1,2 @@
+T Image3D
+| Image3D.new(size: U32, buffer: Buffer32);

@@ -1,2 +1,0 @@
-T VoxModel
-| VoxModel.new(size: U32, buffer: Buffer32);
