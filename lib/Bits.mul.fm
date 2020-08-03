@@ -1,4 +1,4 @@
 // TODO
 // Multiplies two bitstrings.
-Bits.mul(a: bits, b: bits): Bits
-  Bits.mul
+Bits.mul(a: Bits, b: Bits): Bits
+  Bits.mul(a, b)

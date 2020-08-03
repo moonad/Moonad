@@ -1,4 +1,4 @@
 // TODO
 // Subtracts two Bitstrings.
-Bits.sub(a: bits, b: bits): Bits
-  Bits.sub
+Bits.sub(a: Bits, b: Bits): Bits
+  Bits.sub(a, b)

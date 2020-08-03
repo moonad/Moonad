@@ -1,4 +1,4 @@
 // TODO
 // Adds two bitstrings.
 Bits.add(a: Bits, b: Bits): Bits
-  Bits.add
+  Bits.add(a, b)
