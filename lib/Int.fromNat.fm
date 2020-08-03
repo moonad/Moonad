@@ -1,2 +1,0 @@
-Int.fromNat(n: Nat): Int
-  Int.new(n, 0)

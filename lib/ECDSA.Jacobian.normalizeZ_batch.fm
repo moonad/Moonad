@@ -1,2 +1,2 @@
 ECDSA.Jacobian.normalizeZ_batch(p: List(ECDSA.Jacobian)): List(ECDSA.Jacobian)
-  List.map<,>(ECDSA.Jacobian.from_point, ECDSA.Jacobian.to_pointBatch(p))
+  List.map<,>(ECDSA.Jacobian.from_point, ECDSA.Jacobian.to_point_batch(p))

@@ -9,5 +9,5 @@ ECDSA.Jacobian.double(p: ECDSA.Jacobian): ECDSA.Jacobian
   let F = Nat.square(E)
   let x = ECDSA.sub(F, Nat.mul(2, D))
   let y = ECDSA.sub(Nat.mul(E, ECDSA.sub(D, x)), Nat.mul(8, C))
-  let z = ECDSA.mod(Nat.mulVar(3, 2, p.y, p.z))
+  let z = ECDSA.mod(Nat.mul_var(3, 2, p.y, p.z))
   ECDSA.Jacobian.new(x, y, z)

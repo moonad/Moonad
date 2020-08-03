@@ -1,3 +1,3 @@
 // RHS of elliptic curve equation
 ECDSA.weierstrass(x: Nat): Nat
-  ECDSA.mod(Nat.add(Nat.add(Nat.mulVar(3, x, x, x), Nat.mul(ECDSA.CURVE.a, x)), ECDSA.CURVE.b))
+  ECDSA.mod(Nat.add(Nat.add(Nat.mul_var(3, x, x, x), Nat.mul(ECDSA.CURVE.a, x)), ECDSA.CURVE.b))

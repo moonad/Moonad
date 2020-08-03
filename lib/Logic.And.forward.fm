@@ -1,6 +1,6 @@
 // !(P ∧ Q) => !P ∨ !Q
 Logic.And.forward<P: Type, Q: Type>(
-  lem : Logic.ExcludedMiddle,
+  lem : Logic.excluded_middle,
   not_pq: Not(And(P, Q))
 ) : Or(Not(P), Not(Q))
   lem<P><() _>

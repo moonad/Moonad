@@ -1,0 +1,2 @@
+Logic.excluded_middle: Type
+  <P: Type> -> Or(P,Not(P))
