@@ -1,0 +1,3 @@
+CList.foldr<A: Type, B: Type>(b: B, f: A -> B -> B, cl: CList(A)): B
+  let list = CList.to_list<>(cl)
+  List.foldr<,>(b, f, list)

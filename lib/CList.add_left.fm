@@ -1,0 +1,6 @@
+// replaces the focus with the provided element, shifting
+// the previous focus to the left
+CList.add_left<A: Type>(a: A, cl: CList(A)): CList(A)
+  case cl:
+  | nil  => CList.singleton<>(a);
+  | ring => CList.ring<>(List.cons<>(cl.focus, cl.left), a, cl.right);

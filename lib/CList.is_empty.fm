@@ -1,0 +1,4 @@
+CList.is_empty<A: Type>(cl: CList(A)): Bool
+  case cl:
+  | nil  => Bool.true;
+  | ring => Bool.false;
