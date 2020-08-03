@@ -1,0 +1,7 @@
+// We don't bother to check the rear because 
+// if size_front == 0, size_rear == 0
+Queue.head<A: Type>(q: Queue(A)): Maybe(A)
+  case q:
+  | case q.front:
+    | Maybe.none<A>;
+    | Maybe.some<A>(q.front.head);;

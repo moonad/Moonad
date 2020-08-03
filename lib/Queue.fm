@@ -1,0 +1,6 @@
+// Queue implements a First-In-First-Out (FIFO) policy
+// Invariants:
+// - size_front >= size_rear
+// - size_front == 0 implies size_rear == 0
+T Queue<A: Type>
+| Queue.new(front: List(A), size_front: Nat, rear: List(A), size_rear: Nat);
