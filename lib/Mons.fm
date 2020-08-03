@@ -20,7 +20,7 @@ Mons.Map.set(pos: Pos32, tile: Mons.Tile, map: Mons.Map): Mons.Map
 
 // Retorna a imagem de um determinado tile
 Mons.tid_to_image3d(tid: U32): Image3D
-  Mons.placa // por enquanto só temos a plaquinha no código
+  Mons.assets.char_011 // por enquanto só temos a plaquinha no código
 
 // Um mapa de exemplo com 4 plaquinhas
 Mons.example_map: Map(Mons.Tile)
@@ -44,7 +44,7 @@ Mons.example_sprites: List(Game.Sprite)
       get pos tile = pair
       let tile_pos = Pos32.scale(Bits.to_u32(pos), 16u)
       let tile_ang = 0u
-      let tile_img = Mons.placa // TODO: change to the actual image
+      let tile_img = Mons.assets.char_011 // TODO: change to the actual image
       Game.Sprite.new(mid_pos, tile_pos, tile_ang, tile_img);
     | sprites;
   sprites
