@@ -1,0 +1,4 @@
+List.range.go(n: Nat, xs: List(Nat)): List(Nat)
+  case n:
+  | xs;
+  | List.range.go(n.pred, List.cons<>(n, xs));
