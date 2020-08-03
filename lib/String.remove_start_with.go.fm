@@ -1,0 +1,11 @@
+// Removes "match" from the beginning of the String and returns the tail
+String.remove_start_with.go(xs: String, match: String): String
+  case match:
+  | xs;
+  | case xs:
+    | String.nil; //xs < match
+    | case Char.eql(match.head, xs.head):
+      | String.remove_start_with.go(xs.tail, match.tail);
+      | xs.tail;
+    ;
+  ;

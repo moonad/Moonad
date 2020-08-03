@@ -1,0 +1,14 @@
+// Alpha is disconsidered
+// Approximate value due to U32 calculus
+Col32.lighten(rgba: Col32, amount: U32): Col32
+  let r = Col32.get_r(rgba)
+  let g = Col32.get_g(rgba)
+  let b = Col32.get_b(rgba)
+  let r_dif = U32.sub(255u, r)
+  let g_dif = U32.sub(255u, g)
+  let b_dif = U32.sub(255u, b)
+  let r_upd = U32.percent(amount, r_dif)
+  let g_upd = U32.percent(amount, g_dif)
+  let b_upd = U32.percent(amount, b_dif)
+  Col32.new(U32.add(r, r_upd), U32.add(g, g_upd), U32.add(b, b_upd), 255u)
+

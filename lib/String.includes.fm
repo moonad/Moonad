@@ -1,0 +1,8 @@
+// Check if "xs" includes "match"
+String.includes(xs: String, match: String): Bool
+  case String.starts_with(xs, match):
+  | Bool.true;
+  | case String.includes.go(xs, match):
+    | Bool.false;
+    | Bool.true;
+  ;

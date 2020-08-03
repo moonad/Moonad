@@ -1,0 +1,6 @@
+// Splits a String given a separator ("using")
+// Returns the list of substrings
+String.split(xs: String, using: String): List(String)
+  case xs:
+  | List.nil<>;
+  | String.split.go(xs, using, String.nil) ;

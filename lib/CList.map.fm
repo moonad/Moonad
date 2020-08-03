@@ -1,0 +1,8 @@
+CList.map<A: Type, B: Type>(f: A -> B, cl: CList(A)): CList(B)
+  case cl:
+  | nil  => CList.nil<>;
+  | ring => 
+      let left  = List.map<,>(f, cl.left)
+      let right = List.map<,>(f, cl.right)
+      let focus = f(cl.focus)
+      CList.ring<>(left, focus, right);
