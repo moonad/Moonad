@@ -1,0 +1,2 @@
+U32.percent(p: U32, t: U32): U32
+  U32.div(U32.mul(p, t), 100u)

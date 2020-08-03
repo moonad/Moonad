@@ -1,0 +1,9 @@
+// Alpha is disconsidered
+Col32.invert(rgba: Col32): Col32
+  let r = Col32.get_r(rgba)
+  let g = Col32.get_g(rgba)
+  let b = Col32.get_b(rgba)
+  let r_dif = U32.sub(255u, r)
+  let g_dif = U32.sub(255u, g)
+  let b_dif = U32.sub(255u, b)
+  Col32.new(r_dif, g_dif, b_dif, 225u)
