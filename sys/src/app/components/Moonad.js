@@ -180,25 +180,30 @@ class Moonad extends Component {
   }
 
   render() {
-    var blocks = [];
-
-    blocks.push(h("div", {
-      style: {"cursor": "pointer"},
-      onClick: () => this.exec(this.command),
-    }, "λ " + this.command));
-    for (var i = this.history.length - 1; i >= 0; --i) {
-      var command = this.history[i];
-      var head = h("div", {style: {"text-decoration": "underline"}}, command);
-      var body = h("div", {style: {"font-size": "14px"}}, this.show(command));
-      blocks.push(h("div", {key: i, style: {"margin": "6px 0px"}}, [head, body]));
+    var paths = front.get_paths();
+    if (paths[0] === "play") {
+      return h(Play, {
+        name: paths[1],
+      });
+    } else {
+      var blocks = [];
+      blocks.push(h("div", {
+        style: {"cursor": "pointer"},
+        onClick: () => this.exec(this.command),
+      }, "λ " + this.command));
+      for (var i = this.history.length - 1; i >= 0; --i) {
+        var command = this.history[i];
+        var head = h("div", {style: {"text-decoration": "underline"}}, command);
+        var body = h("div", {style: {"font-size": "14px"}}, this.show(command));
+        blocks.push(h("div", {key: i, style: {"margin": "6px 0px"}}, [head, body]));
+      }
+      return h("div", {
+        style: {
+          "padding": "6px",
+          "font-size": "16px",
+        },
+      }, [blocks]);
     }
-
-    return h("div", {
-      style: {
-        "padding": "6px",
-        "font-size": "16px",
-      },
-    }, [blocks]);
   }
 };
 

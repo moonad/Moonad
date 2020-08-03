@@ -1,0 +1,7 @@
+// Rotates a integer x, y position around the cx, cy center by a degrees
+Game.rotate2d(cx: U32, cy: U32, x: U32, y: U32, a: U32): Pair(U32, U32)
+  let x = F64.sub(U32.to_f64(x), U32.to_f64(cx))
+  let y = F64.sub(U32.to_f64(y), U32.to_f64(cy))
+  let a = F64.mul(F64.div(U32.to_f64(a), 360.0), F64.tau)
+  get x y = F64.rotate2d(x, y, a)
+  Pair.new<,>(U32.add(F64.to_u32(x), cx), U32.add(F64.to_u32(y), cy))
