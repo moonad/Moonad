@@ -1,0 +1,4 @@
+// TODO
+// Adds two positions
+Pos32.add(a: Pos32, b: Pos32): Pos32
+  Pos32.add(a, b)

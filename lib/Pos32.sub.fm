@@ -1,0 +1,4 @@
+// TODO
+// Subtracts two positions
+Pos32.sub(a: Pos32, b: Pos32): Pos32
+  Pos32.sub(a, b)

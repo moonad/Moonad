@@ -1,0 +1,4 @@
+// TODO
+// Converts a Pos32 to a F64.V3
+Pos32.to_v3(pos: Pos32): F64.V3
+  Pos32.to_v3(pos)
