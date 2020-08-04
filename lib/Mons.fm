@@ -33,8 +33,7 @@ T Mons.Dir
 T Mons.Object
 | Mons.Object.new(
   tid: U32,
-  dir: Mons.Dir,
-  img: List(Image3D)
+  dir: Mons.Dir
 );
 
 // A 2d map of game tiles
@@ -48,19 +47,44 @@ T Mons.Game
   map: Mons.Map // the game map
 );
 
+// Constants
+Mons.VOID: U32
+  0u
+
+Mons.HERO: U32
+  1u
+
+Mons.GRASS: U32
+  2u
+
+Mons.BUSH: U32
+  3u
+
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(0u, Mons.Dir.down, [Mons.placa])
+  Mons.Object.new(Mons.VOID, Mons.Dir.down)
+
+// Sets an object direction
+Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
+  case obj:
+  | Mons.Object.new(obj.tid, dir);
 
 // Returns the image of a tile
 Mons.Object.get_images(obj: Mons.Object): List(Image3D)
   let tid = case obj: | obj.tid;
-  if U32.eql(tid, 0u) then // grass
+  let dir = case obj: | obj.dir;
+  if U32.eql(tid, Mons.VOID) then
+    []
+  else if U32.eql(tid, Mons.HERO) then
+    case dir:
+    | right => [Mons.assets.char_000];
+    | up    => [Mons.assets.char_003];
+    | left  => [Mons.assets.char_006];
+    | down  => [Mons.assets.char_009];
+  else if U32.eql(tid, Mons.GRASS) then
     [Mons.assets.tile_grass]
-  else if U32.eql(tid, 1u) then // bush
+  else if U32.eql(tid, Mons.BUSH) then
     [Mons.assets.bush_0, Mons.assets.bush_1]
-  else if U32.eql(tid, 2u) then // hero
-    [Mons.assets.char_000]
   else
     []
 
@@ -101,31 +125,30 @@ Mons.Game.get_hero_pos(game: Mons.Game): Pos32
   case game:
   | game.pos;
 
-// Swaps two positions on the game's map
-Mons.Game.map_swap(a: Pos32, b: Pos32, game: Mons.Game): Mons.Game
-  case game:
-  | let map = game.map
-    get map obj = Mons.Map.pop(a, map)
-    let map = Mons.Map.push(b, obj, map)
-    Mons.Game.new(game.pos, map);
-
 // Sets the hero position
 Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
   case game:
   | Mons.Game.new(pos, game.map);
 
 // Moves the hero to a given direction
-Mons.Game.move_hero(dir: Maybe(Mons.Dir), game: Mons.Game): Mons.Game
-  let old_hero_pos = Mons.Game.get_hero_pos(game)
-  let new_hero_pos = case dir:
-    | old_hero_pos;
-    | case dir.value:
-      | Pos32.add(old_hero_pos, Pos32.new(1u, 0u, 0u));
-      | Pos32.sub(old_hero_pos, Pos32.new(0u, 1u, 0u));
-      | Pos32.sub(old_hero_pos, Pos32.new(1u, 0u, 0u));
-      | Pos32.add(old_hero_pos, Pos32.new(0u, 1u, 0u));;
-  let game = Mons.Game.map_swap(old_hero_pos, new_hero_pos, game)
-  let game = Mons.Game.set_hero_pos(new_hero_pos, game)
+Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
+  let old_pos
+    = Mons.Game.get_hero_pos(game)
+  let new_pos
+    = case dir:
+    | Pos32.add(old_pos, Pos32.new(1u, 0u, 0u));
+    | Pos32.sub(old_pos, Pos32.new(0u, 1u, 0u));
+    | Pos32.sub(old_pos, Pos32.new(1u, 0u, 0u));
+    | Pos32.add(old_pos, Pos32.new(0u, 1u, 0u));
+  let game
+    = case game:
+    | let map = game.map
+      get map obj = Mons.Map.pop(old_pos, map)
+      let obj = Mons.Object.set_dir(obj, dir)
+      let map = Mons.Map.push(new_pos, obj, map)
+      Mons.Game.new(game.pos, map);
+  let game
+    = Mons.Game.set_hero_pos(new_pos, game)
   game
 
 // Converts the game map to a list of sprites (to be rendered)
@@ -204,9 +227,9 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
 
 // An example map
 Mons.example_map: Mons.Map
-  let grass = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.tile_grass])
-  let hero = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.char_000])
-  let bush = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.bush_0, Mons.assets.bush_1])
+  let grass = Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+  let hero = Mons.Object.new(Mons.HERO, Mons.Dir.down)
+  let bush = Mons.Object.new(Mons.BUSH, Mons.Dir.down)
   let map = Mons.Map.new
   let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
     grass,
@@ -268,7 +291,10 @@ Mons: App(Mons.Game)
       App.Action.print<>(Bits.to_string(U16.to_bits(event.code))),
       if event.down then
         let move_dir = Mons.key_to_dir(event.code)
-        let new_game = Mons.Game.move_hero(move_dir, game)
+        let new_game
+          = case move_dir:
+          | game;
+          | Mons.Game.move_hero(move_dir.value, game);
         App.Action.state<>(new_game)
       else
         App.Action.state<>(game)
