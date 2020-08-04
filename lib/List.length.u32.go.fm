@@ -1,0 +1,5 @@
+// Computes the length of the list.
+List.length.u32.go<A: Type>(xs: List(A), n: U32): U32
+  case xs:
+  | n;
+  | List.length.u32.go<A>(xs.tail, U32.add(1u, n));
