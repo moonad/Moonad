@@ -1,0 +1,12 @@
+// A generic container for values of a given type
+// using sized balanced binary trees
+// left  contains elements which are smaller than val
+// right contains elements which are greater than val 
+// 
+// Implementation based on 
+// "Implementing Sets Efficiently in a Functional Language"
+// by Stephen Adams
+//
+T GSet <A: Type>
+| GSet.tip;
+| GSet.bin(size: Nat, val: A, left: GSet(A), right: GSet(A));
