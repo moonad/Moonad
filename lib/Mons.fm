@@ -5,9 +5,9 @@
 
 // Exemplo de stack:
 // [
-//   [(GRASS, z=8)],
-//   [(BUSH_BACK, z=16), (BUSH_FRONT, z=48)]
-//   [(HERO, z=32), (BUSH_ANIM, z=64)]
+//   [(GRASS, z=1)],
+//   [(BUSH_BACK, z=2), (BUSH_FRONT, z=16)]
+//   [(HERO, z=4..28), (BUSH_ANIM, z=30)]
 // ]
 
 // bush_back.png (16x16, a parte de trás do arbusto)
@@ -33,6 +33,7 @@ T Mons.Dir
 T Mons.Object
 | Mons.Object.new(
   tid: U32,
+  dir: Mons.Dir,
   img: List(Image3D)
 );
 
@@ -49,12 +50,19 @@ T Mons.Game
 
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(0u, [Mons.placa])
+  Mons.Object.new(0u, Mons.Dir.down, [Mons.placa])
 
 // Returns the image of a tile
-Mons.Object.get_images(tile: Mons.Object): List(Image3D)
-  case tile:
-  | tile.img;
+Mons.Object.get_images(obj: Mons.Object): List(Image3D)
+  let tid = case obj: | obj.tid;
+  if U32.eql(tid, 0u) then // grass
+    [Mons.assets.tile_grass]
+  else if U32.eql(tid, 1u) then // bush
+    [Mons.assets.bush_0, Mons.assets.bush_1]
+  else if U32.eql(tid, 2u) then // hero
+    [Mons.assets.char_000]
+  else
+    []
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -166,6 +174,8 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
         // The map has w=65536, h=65536 (in pixels)
         //let o_x = 128u
         //let o_y = 128u
+        let s_w = 256u
+        let s_h = 256u
         // Gets the sprite position (pos)
         let s_x = U32.sub(U32.add(128u, sprite.x), 32768u)
         let s_y = U32.sub(U32.add(128u, sprite.y), 32768u)
@@ -175,12 +185,9 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
         let c_y = 128u
         // Gets the voxel position
         let xyz = Image3D.get_pos(i, sprite.img)
-        let v_x = U32.sub(U32.add(s_x,Pos32.get_x(xyz)),c_x)
-        let v_y = U32.sub(U32.add(s_y,Pos32.get_y(xyz)),c_y)
-        let v_z = U32.add(s_z, Pos32.get_z(xyz))
         let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x), 128u)
         let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y), 128u)
-        let v_z = 1u // ignored for now
+        let v_z = Pos32.get_z(xyz) // ignored for now
         // Push the voxel to the scr (on the next idx)
         let pos = Pos32.new(v_x, v_y, v_z)
         let col = Image3D.get_col(i, sprite.img)
@@ -197,21 +204,25 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
 
 // An example map
 Mons.example_map: Mons.Map
-  let tile_grass = Mons.Object.new(0u, [Mons.assets.tile_grass])
-  let tile_hero = Mons.Object.new(0u, [Mons.assets.char_000])
+  let grass = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.tile_grass])
+  let hero = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.char_000])
+  let bush = Mons.Object.new(0u, Mons.Dir.down, [Mons.assets.bush_0, Mons.assets.bush_1])
   let map = Mons.Map.new
-  let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
-    tile_hero,
-    tile_grass,
+  let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
+    grass,
+    bush,
   ], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
+    hero,
+    grass,
+  ], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [grass], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [grass], map)
   map
 
 // An example game
