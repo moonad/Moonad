@@ -1,0 +1,2 @@
+String.chunks_of(len: Nat, xs: String): List(String)
+  String.chunks_of.go(len, xs, len, String.nil)
