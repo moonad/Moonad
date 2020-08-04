@@ -169,7 +169,7 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
         // Gets the sprite position (pos)
         let s_x = U32.sub(U32.add(128u, sprite.x), 32768u)
         let s_y = U32.sub(U32.add(128u, sprite.y), 32768u)
-        let s_z = 0u
+        let s_z = sprite.z
         // The sprite center is at x=128, y=128
         let c_x = 128u
         let c_y = 128u
@@ -180,7 +180,7 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
         let v_z = U32.add(s_z, Pos32.get_z(xyz))
         let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x), 128u)
         let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y), 128u)
-        let v_z = 1u
+        let v_z = 1u // ignored for now
         // Push the voxel to the scr (on the next idx)
         let pos = Pos32.new(v_x, v_y, v_z)
         let col = Image3D.get_col(i, sprite.img)
