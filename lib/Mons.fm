@@ -5,23 +5,29 @@
 
 // Exemplo de stack:
 // [
-//   [(GRASS, z=0)],
-//   [(BUSH_BACK, z=1), (BUSH_FRONT, z=3)]
-//   [(HERO, z=2), (BUSH_ANIM, z=4)]
+//   [(GRASS, z=8)],
+//   [(BUSH_BACK, z=16), (BUSH_FRONT, z=48)]
+//   [(HERO, z=32), (BUSH_ANIM, z=64)]
 // ]
-// png -> buffer 
 
 // bush_back.png (16x16, a parte de trás do arbusto)
 // bush_front.png (16x16, a parte de frente do arbusto)
 // bush_anim_000.png (uns 3 frames, 16x16, a animação no arbusto)
-
 // pedir pra maisa: adicionar Z nos voxels das imagens
-
-Mons.minus.1: U32
-  4095u
 
 Mons.placa: Image3D
   Image3D.parse("")
+
+// A Mons sprite
+T Mons.Sprite
+| Mons.Sprite.new(x: U32, y: U32, z: U32, img: Image3D);
+
+// A direction
+T Mons.Dir
+| Mons.Dir.right;
+| Mons.Dir.up;
+| Mons.Dir.left;
+| Mons.Dir.down;
 
 // A game object
 T Mons.Object
@@ -58,6 +64,12 @@ Mons.Map.new: Mons.Map
 Mons.Map.set(pos: Pos32, objs: List(Mons.Object), map: Mons.Map): Mons.Map
   Map.set<>(U32.to_bits(pos), objs, map)
 
+// Gets the tile stored on a position on the map
+Mons.Map.get(pos: Pos32, map: Mons.Map): List(Mons.Object)
+  case Map.get<>(U32.to_bits(pos), map) as got:
+  | [Mons.Object.void];
+  | got.value;
+
 // Retorna a imagem de um determinado tile
 Mons.tid_to_image3d(tid: U32): Image3D
   Mons.assets.char_011 // por enquanto só temos a plaquinha no código
@@ -69,12 +81,12 @@ Mons.Map.push(pos: Pos32, obj: Mons.Object, map: Mons.Map): Mons.Map
   Mons.Map.set(pos, objs, map)
 
 // Pops an object from the top of a tile
-Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Object, Mons.Map)
+Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
   let objs = Mons.Map.get(pos, map)
   case objs:
-  | Pair.new<,>(Mons.Object.void, map);
+  | Pair.new<,>(map, Mons.Object.void);
   | let map = Mons.Map.set(pos, objs.tail, map)
-    Pair.new<,>(objs.head, map);
+    Pair.new<,>(map, objs.head);
 
 // Gets the hero position
 Mons.Game.get_hero_pos(game: Mons.Game): Pos32
@@ -85,10 +97,8 @@ Mons.Game.get_hero_pos(game: Mons.Game): Pos32
 Mons.Game.map_swap(a: Pos32, b: Pos32, game: Mons.Game): Mons.Game
   case game:
   | let map = game.map
-    let t_a = Mons.Map.get(a, map)
-    let t_b = Mons.Map.get(b, map)
-    let map = Mons.Map.set(a, t_b, map)
-    let map = Mons.Map.set(b, t_a, map)
+    get map obj = Mons.Map.pop(a, map)
+    let map = Mons.Map.push(b, obj, map)
     Mons.Game.new(game.pos, map);
 
 // Sets the hero position
@@ -97,9 +107,15 @@ Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
   | Mons.Game.new(pos, game.map);
 
 // Moves the hero to a given direction
-Mons.Game.move_hero(dir: Pos32, game: Mons.Game): Mons.Game
+Mons.Game.move_hero(dir: Maybe(Mons.Dir), game: Mons.Game): Mons.Game
   let old_hero_pos = Mons.Game.get_hero_pos(game)
-  let new_hero_pos = Pos32.add(old_hero_pos, dir)
+  let new_hero_pos = case dir:
+    | old_hero_pos;
+    | case dir.value:
+      | Pos32.add(old_hero_pos, Pos32.new(1u, 0u, 0u));
+      | Pos32.sub(old_hero_pos, Pos32.new(0u, 1u, 0u));
+      | Pos32.sub(old_hero_pos, Pos32.new(1u, 0u, 0u));
+      | Pos32.add(old_hero_pos, Pos32.new(0u, 1u, 0u));;
   let game = Mons.Game.map_swap(old_hero_pos, new_hero_pos, game)
   let game = Mons.Game.set_hero_pos(new_hero_pos, game)
   game
@@ -107,29 +123,74 @@ Mons.Game.move_hero(dir: Pos32, game: Mons.Game): Mons.Game
 // Converts the game map to a list of sprites (to be rendered)
 // TODO: improve this code's aesthetics (less identing?)
 // TODO: why Formality can't infer the Pair(_,_)?
-Mons.render_map(map: Mons.Map): List(Game.Sprite)
-  let mid_pos = Pos32.new(128u,128u,0u)
+Mons.render_map(map: Mons.Map): List(Mons.Sprite)
   let sprites
     = List.map<_,_>
     | (tile: Pair(_,_))
       get pos objs = tile
       List.map<_,_>
       | (obj)
-        let obj_pos = Pos32.scale(Bits.to_u32(pos), 16u)
-        let obj_ang = 0u
+        let obj_xyz = Bits.to_u32(pos)
         List.map<_,_>
-        | (img) Game.Sprite.new(mid_pos, obj_pos, obj_ang, img);
+        | (img)
+          Mons.Sprite.new
+          | U32.mul(Pos32.get_x(obj_xyz), 16u);
+          | U32.mul(Pos32.get_y(obj_xyz), 16u);
+          | Pos32.get_z(obj_xyz);
+          | img;;
         | Mons.Object.get_images(obj);;
-      | objs;;
+      | List.reverse<>(objs);;
     | Map.to_list<List(Mons.Object)>(map);
   let sprites = List.flatten<>(sprites)
   let sprites = List.flatten<>(sprites)
   sprites
 
 // Converts the game state to a list of sprites (to be rendered)
-Mons.render_game(game: Mons.Game): List(Game.Sprite)
+Mons.render_game(game: Mons.Game): List(Mons.Sprite)
   case game:
   | Mons.render_map(game.map);
+
+// Draws the game to screen
+Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
+  // Initial state (idx, scr)
+  def init
+    Pair.new<,>(0u, scr)
+  // For each sprite...
+  def next(sprite, state)
+    get idx scr = state
+    case sprite:
+    | // For each voxel...
+      let voxel_count = Image3D.get_size(sprite.img)
+      for i : U32 = 0u .. voxel_count with scr:
+        // The screen has w=512, h=512
+        // The map has w=65536, h=65536 (in pixels)
+        //let o_x = 128u
+        //let o_y = 128u
+        // Gets the sprite position (pos)
+        let s_x = U32.sub(U32.add(128u, sprite.x), 32768u)
+        let s_y = U32.sub(U32.add(128u, sprite.y), 32768u)
+        let s_z = 0u
+        // The sprite center is at x=128, y=128
+        let c_x = 128u
+        let c_y = 128u
+        // Gets the voxel position
+        let xyz = Image3D.get_pos(i, sprite.img)
+        let v_x = U32.sub(U32.add(s_x,Pos32.get_x(xyz)),c_x)
+        let v_y = U32.sub(U32.add(s_y,Pos32.get_y(xyz)),c_y)
+        let v_z = U32.add(s_z, Pos32.get_z(xyz))
+        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x), 128u)
+        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y), 128u)
+        let v_z = 1u
+        // Push the voxel to the scr (on the next idx)
+        let pos = Pos32.new(v_x, v_y, v_z)
+        let col = Image3D.get_col(i, sprite.img)
+        let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
+        let scr = Image3D.set_col(U32.add(i, idx), col, scr);
+        scr
+      // Returns new to-write idx and updated screen
+      Pair.new<,>(U32.add(voxel_count, idx), scr);
+  // Performs the algorithm above and returns the resulting image
+  Pair.snd<,>(List.fold<>(sprites)<>(init, next))
 
 // Examples
 // ========
@@ -137,25 +198,28 @@ Mons.render_game(game: Mons.Game): List(Game.Sprite)
 // An example map
 Mons.example_map: Mons.Map
   let tile_grass = Mons.Object.new(0u, [Mons.assets.tile_grass])
-  let tile_chest = Mons.Object.new(0u, [Mons.assets.tile_chest])
+  let tile_hero = Mons.Object.new(0u, [Mons.assets.char_000])
   let map = Mons.Map.new
-  let map = Mons.Map.set(Pos32.new(0u, 0u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(1u, 0u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2u, 0u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(0u, 1u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(1u, 1u, 0u), [tile_chest], map)
-  let map = Mons.Map.set(Pos32.new(2u, 1u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(0u, 2u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(1u, 2u, 0u), [tile_grass], map)
-  let map = Mons.Map.set(Pos32.new(2u, 2u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
+    tile_hero,
+    tile_grass,
+  ], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [tile_grass], map)
+  let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [tile_grass], map)
   map
 
 // An example game
 Mons.example_game: Mons.Game
-  Mons.Game.new(Pos32.new(1u, 1u, 0u), Mons.example_map)
+  Mons.Game.new(Pos32.new(2048u, 2048u, 0u), Mons.example_map)
 
 // Example sprites
-Mons.example_sprites: List(Game.Sprite)
+Mons.example_sprites: List(Mons.Sprite)
   Mons.render_game(Mons.example_game)
 
 // Converts a keyboard key to a direction:
@@ -164,20 +228,19 @@ Mons.example_sprites: List(Game.Sprite)
 // W = [ 0, -1,  0]
 // S = [ 0,  1,  0]
 // * = [ 0,  0,  0]
-Mons.key_to_dir(key_code: U16): Pos32
+Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
   if U16.eql(key_code, 'A') then
-    Pos32.new(Mons.minus.1, 0u, 0u)
+    Maybe.some<>(Mons.Dir.left)
   else if U16.eql(key_code, 'D') then
-    Pos32.new(1u, 0u, 0u)
+    Maybe.some<>(Mons.Dir.right)
   else if U16.eql(key_code, 'W') then
-    Pos32.new(0u, Mons.minus.1, 0u)
+    Maybe.some<>(Mons.Dir.up)
   else if U16.eql(key_code, 'S') then
-    Pos32.new(0u, 1u, 0u)
+    Maybe.some<>(Mons.Dir.down)
   else
-    Pos32.new(0u, 0u, 0u)
+    Maybe.none<>
 
 Mons: App(Mons.Game)
-  let mid_pos = Pos32.new(128u,128u,0u)
   let wall = Kaelin.Models.wall
   let chest = Kaelin.Models.chest
   let seat = Kaelin.Models.seat
@@ -185,7 +248,7 @@ Mons: App(Mons.Game)
   def init
     Mons.example_game
   def draw(game)
-    App.Render.vox(Game.draw(Mons.render_game(game), screen))
+    App.Render.vox(Mons.draw(Mons.render_game(game), screen))
   def when(event, game)
     case event:
     | init => [];
