@@ -1,5 +1,5 @@
 // Ensures a Bool is true
-Bool.is_true(b: Bool): Type
+Bool.IsTrue(b: Bool): Type
   case b:
   | Unit;
   | Empty;
