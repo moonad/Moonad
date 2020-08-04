@@ -5,7 +5,7 @@ List.chunks_of.go<A: Type>(
   chunk : List(A)  // current chunk
 ) : List(List(A))
   case list:
-  | List.cons<>(chunk, List.nil<>);
+  | List.cons<>(List.reverse<>(chunk), List.nil<>);
   | case need:
     | let head = List.reverse<>(chunk)
       let tail = List.chunks_of.go<>(len, list, len, List.nil<>)

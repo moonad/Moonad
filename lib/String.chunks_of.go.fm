@@ -5,7 +5,7 @@ String.chunks_of.go(
   chunk : String  // current chunk
 ) : List(String)
   case str:
-  | List.cons<>(chunk, List.nil<>);
+  | List.cons<>(String.reverse(chunk), List.nil<>);
   | case need:
     | let head = String.reverse(chunk)
       let tail = String.chunks_of.go(len, str, len, String.nil)
