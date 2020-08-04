@@ -1,5 +1,5 @@
 Logic.negation_elimination<P: Type>(
-  lem: Logic.excluded_middle,
+  lem: Logic.ExcludedMiddle,
   not_not_p: Not(Not(P))
 ): P
   lem<P><() _>
