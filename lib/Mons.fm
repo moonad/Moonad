@@ -60,6 +60,9 @@ Mons.GRASS: U32
 Mons.BUSH: U32
   3u
 
+Mons.PLANT_0: U32
+  4u
+
 // The void tile
 Mons.Object.void: Mons.Object
   Mons.Object.new(Mons.VOID, Mons.Dir.down)
@@ -77,14 +80,16 @@ Mons.Object.get_images(obj: Mons.Object): List(Image3D)
     []
   else if U32.eql(tid, Mons.HERO) then
     case dir:
-    | right => [Mons.assets.char_000];
-    | up    => [Mons.assets.char_003];
-    | left  => [Mons.assets.char_006];
-    | down  => [Mons.assets.char_009];
+    | right => [Mons.Assets.boy_r_0];
+    | up    => [Mons.Assets.boy_u_0];
+    | left  => [Mons.Assets.boy_l_0];
+    | down  => [Mons.Assets.boy_d_0];
   else if U32.eql(tid, Mons.GRASS) then
-    [Mons.assets.tile_grass]
+    [Mons.Assets.grass_1]
   else if U32.eql(tid, Mons.BUSH) then
-    [Mons.assets.bush_0, Mons.assets.bush_1]
+    [Mons.Assets.bush_0, Mons.Assets.bush_1]
+  else if (U32.eql(tid, Mons.PLANT_0)) then
+    [Mons.Assets.home_decor_plant_0]
   else
     []
 
@@ -102,10 +107,6 @@ Mons.Map.get(pos: Pos32, map: Mons.Map): List(Mons.Object)
   | [Mons.Object.void];
   | got.value;
 
-// Retorna a imagem de um determinado tile
-Mons.tid_to_image3d(tid: U32): Image3D
-  Mons.assets.char_011 // por enquanto só temos a plaquinha no código
-
 // Pushes an object to the top of a tile
 Mons.Map.push(pos: Pos32, obj: Mons.Object, map: Mons.Map): Mons.Map
   let objs = Mons.Map.get(pos, map)
@@ -119,6 +120,49 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
   | Pair.new<,>(map, Mons.Object.void);
   | let map = Mons.Map.set(pos, objs.tail, map)
     Pair.new<,>(map, objs.head);
+
+// Converts a tile code (ex: ".g") into a list of obs
+Mons.Map.tile_of(code: String): List(Mons.Object)
+  if String.eql(code, ".g") then
+    [Mons.Object.new(Mons.GRASS, Mons.Dir.down)]
+  else if String.eql(code, "bg") then
+    [
+      Mons.Object.new(Mons.BUSH, Mons.Dir.down),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+    ]
+  else if String.eql(code, "hg") then
+    [
+      Mons.Object.new(Mons.HERO, Mons.Dir.down),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+    ]
+  else if String.eql(code, "pg") then
+    [
+      Mons.Object.new(Mons.PLANT_0, Mons.Dir.down),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+    ]
+  else
+    []
+
+// Converts a string map source to an actual map
+Mons.Map.load(code: String): Mons.Map
+  let code = String.slice(1, Nat.pred(String.length(code)), code)
+  let rows = String.split(code, "\n")
+  let rows = List.map<,>(String.chunks_of(2), rows)
+  let mapw = List.length.u32<>(rows)
+  let maph = List.length.u32<>(List.head_with_default<>([], rows))
+  let objs = List.map<,>(List.map<,>(Mons.Map.tile_of), rows)
+  let objs = List.flatten<>(objs)
+  List.ifoldr.u32<,>
+  | Mons.Map.new;
+  | (i, objs, map)
+    let o_x = U32.sub(2048u, U32.div(mapw, 2u))
+    let o_y = U32.sub(2048u, U32.div(maph, 2u))
+    let p_x = U32.add(U32.mod(i, mapw), o_x)
+    let p_y = U32.add(U32.div(i, maph), o_y)
+    let p_z = 0u
+    let pos = Pos32.new(p_x, p_y, p_z)
+    Mons.Map.set(pos, objs, map);
+  | objs;
 
 // Gets the hero position
 Mons.Game.get_hero_pos(game: Mons.Game): Pos32
@@ -182,7 +226,7 @@ Mons.render_game(game: Mons.Game): List(Mons.Sprite)
   | Mons.render_map(game.map);
 
 // Draws the game to screen
-Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
+Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
   // Initial state (idx, scr)
   def init
     Pair.new<,>(0u, scr)
@@ -193,26 +237,33 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
     | // For each voxel...
       let voxel_count = Image3D.get_size(sprite.img)
       for i : U32 = 0u .. voxel_count with scr:
-        // The screen has w=512, h=512
-        // The map has w=65536, h=65536 (in pixels)
-        //let o_x = 128u
-        //let o_y = 128u
-        let s_w = 256u
-        let s_h = 256u
-        // Gets the sprite position (pos)
-        let s_x = U32.sub(U32.add(128u, sprite.x), 32768u)
-        let s_y = U32.sub(U32.add(128u, sprite.y), 32768u)
+        // The game screen is 256x256 pixels
+        let s_w = 128u
+        let s_h = 128u
+        // The origin global position (centered on hero)
+        let o_x = U32.add(U32.mul(Pos32.get_x(cam), 16u), 8u)
+        let o_y = U32.add(U32.mul(Pos32.get_y(cam), 16u), 8u)
+        // Gets the sprite global position
+        let s_x = sprite.x
+        let s_y = sprite.y
         let s_z = sprite.z
-        // The sprite center is at x=128, y=128
-        let c_x = 128u
-        let c_y = 128u
-        // Gets the voxel position
+        // Gets the voxel global position (its cpos on img is x=128, y=128)
         let xyz = Image3D.get_pos(i, sprite.img)
-        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x), 128u)
-        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y), 128u)
-        let v_z = Pos32.get_z(xyz) // ignored for now
+        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),128u)
+        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),128u)
+        let v_z = Pos32.get_z(xyz)
+        // Temporary: if voxel is out of screen, make it invisible
+        let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+        let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+        let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+        let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+        let ok  = List.and([ok0, ok1, ok2, ok3])
+        // Computes the voxel position on the final canvas
+        let c_x = U32.sub(U32.add(v_x, 128u), o_x)
+        let c_y = U32.sub(U32.add(v_y, 128u), o_y)
+        let c_z = if ok then v_z else 0u
         // Push the voxel to the scr (on the next idx)
-        let pos = Pos32.new(v_x, v_y, v_z)
+        let pos = Pos32.new(c_x, c_y, c_z)
         let col = Image3D.get_col(i, sprite.img)
         let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
         let scr = Image3D.set_col(U32.add(i, idx), col, scr);
@@ -226,27 +277,30 @@ Mons.draw(sprites: List(Mons.Sprite), scr: Image3D): Image3D
 // ========
 
 // An example map
+//Mons.example_map: Mons.Map
+  //let grass = Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+  //let hero = Mons.Object.new(Mons.HERO, Mons.Dir.down)
+  //let bush = Mons.Object.new(Mons.BUSH, Mons.Dir.down)
+  //let map = Mons.Map.new
+  //let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
+    //grass,
+    //bush,
+  //], map)
+  //let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
+    //hero,
+    //grass,
+  //], map)
+  //let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [grass], map)
+  //let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [grass], map)
+  //map
+
 Mons.example_map: Mons.Map
-  let grass = Mons.Object.new(Mons.GRASS, Mons.Dir.down)
-  let hero = Mons.Object.new(Mons.HERO, Mons.Dir.down)
-  let bush = Mons.Object.new(Mons.BUSH, Mons.Dir.down)
-  let map = Mons.Map.new
-  let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
-    grass,
-    bush,
-  ], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
-    hero,
-    grass,
-  ], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [grass], map)
-  let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [grass], map)
-  map
+  Mons.Map.load(Mons.map_source)
 
 // An example game
 Mons.example_game: Mons.Game
@@ -282,7 +336,8 @@ Mons: App(Mons.Game)
   def init
     Mons.example_game
   def draw(game)
-    App.Render.vox(Mons.draw(Mons.render_game(game), screen))
+    let cam_pos = case game: | game.pos;
+    App.Render.vox(Mons.draw(Mons.render_game(game), cam_pos, screen))
   def when(event, game)
     case event:
     | init => [];
