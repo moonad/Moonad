@@ -85,7 +85,7 @@ Mons.Object.get_images(obj: Mons.Object): List(Image3D)
     | left  => [Mons.Assets.boy_l_0];
     | down  => [Mons.Assets.boy_d_0];
   else if U32.eql(tid, Mons.GRASS) then
-    [Mons.Assets.grass_1]
+    [Mons.Assets.grass_0]
   else if U32.eql(tid, Mons.BUSH) then
     [Mons.Assets.bush_0, Mons.Assets.bush_1]
   else if (U32.eql(tid, Mons.PLANT_0)) then
@@ -195,35 +195,37 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
     = Mons.Game.set_hero_pos(new_pos, game)
   game
 
-// Converts the game map to a list of sprites (to be rendered)
-// TODO: improve this code's aesthetics (less identing?)
-// TODO: why Formality can't infer the Pair(_,_)?
-Mons.render_map(map: Mons.Map): List(Mons.Sprite)
-  let sprites
-    = List.map<_,_>
-    | (tile: Pair(_,_))
-      get pos objs = tile
-      List.map<_,_>
-      | (obj)
-        let obj_xyz = Bits.to_u32(pos)
-        List.map<_,_>
-        | (img)
-          Mons.Sprite.new
-          | U32.mul(Pos32.get_x(obj_xyz), 16u);
-          | U32.mul(Pos32.get_y(obj_xyz), 16u);
-          | Pos32.get_z(obj_xyz);
-          | img;;
-        | Mons.Object.get_images(obj);;
-      | List.reverse<>(objs);;
-    | Map.to_list<List(Mons.Object)>(map);
-  let sprites = List.flatten<>(sprites)
-  let sprites = List.flatten<>(sprites)
-  sprites
-
-// Converts the game state to a list of sprites (to be rendered)
-Mons.render_game(game: Mons.Game): List(Mons.Sprite)
+// Converts the game state to a list of sprites to be rendered
+Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
   case game:
-  | Mons.render_map(game.map);
+  | let sprites = List.nil<>
+    let c_x = Pos32.get_x(game.pos)
+    let c_y = Pos32.get_y(game.pos)
+    let c_z = Pos32.get_z(game.pos)
+    for x : U32 = 0u .. 17u with sprites:
+      for y : U32 = 0u .. 17u with sprites:
+        let t_x = U32.add(U32.sub(c_x, 8u), x)
+        let t_y = U32.add(U32.sub(c_y, 8u), y)
+        let t_z = c_z
+        let pos = Pos32.new(t_x, t_y, t_z)
+        let got = Map.get<>(U32.to_bits(pos), game.map)
+        case got:
+        | sprites;
+        | List.foldl<,>
+          | sprites;
+          | (sprites, obj)
+            List.foldl<,>
+            | sprites;
+            | (sprites, img)
+              let s_x = U32.mul(t_x, 16u)
+              let s_y = U32.mul(t_y, 16u)
+              let s_z = t_z
+              let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
+              List.cons<>(spr, sprites);
+            | Mons.Object.get_images(obj);;
+          | got.value;;
+      sprites
+    sprites;
 
 // Draws the game to screen
 Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
@@ -241,8 +243,8 @@ Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
         let s_w = 128u
         let s_h = 128u
         // The origin global position (centered on hero)
-        let o_x = U32.add(U32.mul(Pos32.get_x(cam), 16u), 8u)
-        let o_y = U32.add(U32.mul(Pos32.get_y(cam), 16u), 8u)
+        let o_x = U32.mul(Pos32.get_x(cam), 16u)
+        let o_y = U32.mul(Pos32.get_y(cam), 16u)
         // Gets the sprite global position
         let s_x = sprite.x
         let s_y = sprite.y
@@ -257,11 +259,12 @@ Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
         let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
         let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
         let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-        let ok  = List.and([ok0, ok1, ok2, ok3])
+        //let ok  = List.and([ok0, ok1, ok2, ok3])
+        let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
         // Computes the voxel position on the final canvas
         let c_x = U32.sub(U32.add(v_x, 128u), o_x)
         let c_y = U32.sub(U32.add(v_y, 128u), o_y)
-        let c_z = if ok then v_z else 0u
+        let c_z = Bool.if<>(ok, v_z, 0u)
         // Push the voxel to the scr (on the next idx)
         let pos = Pos32.new(c_x, c_y, c_z)
         let col = Image3D.get_col(i, sprite.img)
@@ -271,7 +274,8 @@ Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
       // Returns new to-write idx and updated screen
       Pair.new<,>(U32.add(voxel_count, idx), scr);
   // Performs the algorithm above and returns the resulting image
-  Pair.snd<,>(List.fold<>(sprites)<>(init, next))
+  get idx scr = List.fold<>(sprites)<>(init, next)
+  Image3D.set(idx, 0u, 0u, scr) // null-terminated voxel sequence
 
 // Examples
 // ========
@@ -306,10 +310,6 @@ Mons.example_map: Mons.Map
 Mons.example_game: Mons.Game
   Mons.Game.new(Pos32.new(2048u, 2048u, 0u), Mons.example_map)
 
-// Example sprites
-Mons.example_sprites: List(Mons.Sprite)
-  Mons.render_game(Mons.example_game)
-
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
 // D = [ 1,  0,  0]
@@ -337,7 +337,7 @@ Mons: App(Mons.Game)
     Mons.example_game
   def draw(game)
     let cam_pos = case game: | game.pos;
-    App.Render.vox(Mons.draw(Mons.render_game(game), cam_pos, screen))
+    App.Render.vox(Mons.draw(Mons.game_sprites(game), cam_pos, screen))
   def when(event, game)
     case event:
     | init => [];

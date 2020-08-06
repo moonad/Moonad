@@ -160,7 +160,7 @@ class Play extends Component {
     }, 1000/32);
 
     // Pix renderer
-    this.intervals.app_elem = setInterval(() => {
+    const do_render = () => {
       var canvas = this.canvas;
       var rendered = this.app.draw(this.app.init);
       if (rendered._ === "App.Render.vox") {
@@ -170,15 +170,19 @@ class Play extends Component {
         for (var i = 0; i < size; ++i) {
           var pos = buff[i*2+0];
           var col = buff[i*2+1];
-          var p_x = (pos >>> 0) & 0xFFF;
-          var p_y = (pos >>> 12) & 0xFFF;
-          var p_z = (pos >>> 24) & 0xFF;
-          var idx = p_y * canvas.width + p_x;
-          var dep = canvas.depth_u8[idx];
-          if (p_z > dep) {
-            canvas.image_u32[idx] = col;
-            canvas.depth_u8[idx] = p_z;
-            canvas.clear.data[canvas.clear.size++] = idx;
+          if (pos !== 0 || col !== 0) {
+            var p_x = (pos >>> 0) & 0xFFF;
+            var p_y = (pos >>> 12) & 0xFFF;
+            var p_z = (pos >>> 24) & 0xFF;
+            var idx = p_y * canvas.width + p_x;
+            var dep = canvas.depth_u8[idx];
+            if (p_z > dep) {
+              canvas.image_u32[idx] = col;
+              canvas.depth_u8[idx] = p_z;
+              canvas.clear.data[canvas.clear.size++] = idx;
+            }
+          } else {
+            break;
           }
         };
         // Renders buffers to canvas
@@ -192,7 +196,19 @@ class Play extends Component {
         }
         canvas.clear.size = 0;
       };
-    }, 1000/32);
+    }
+    this.intervals.app_elem = setInterval(do_render, 1000/32);
+
+    // Benchmarks
+    window.mark = () => {
+      var start = Date.now();
+      var calls = 0;
+      while (Date.now() - start < 1000) {
+        do_render();
+        calls++;
+      }
+      console.log("Calls:", calls);
+    };
   }
   send_event(app_event) {
     if (app_event._ !== "App.Event.tick") {
