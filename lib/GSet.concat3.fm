@@ -28,16 +28,16 @@ GSet.concat3<A: Type>(
     // "facing" the smaller tree that is small enough to balance 
     // with the smaller tree 
     | bin => 
-      let right_is_heavier = Nat.ltn(Nat.mul(GSet.w, left.size),  right.size)
-      let left_is_heavier  = Nat.ltn(Nat.mul(GSet.w, right.size), left.size)
+      let right_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, left.size),  right.size)
+      let left_is_too_heavy  = Nat.ltn(Nat.mul(GSet.w, right.size), left.size)
 
-      if right_is_heavier then 
+      if right_is_too_heavy then 
         let new_val   = right.val 
         let new_left  = GSet.concat3<>(cmp, val, left, right.left)
         let new_right = right.right 
         GSet.balance<>(new_val, new_left, new_right)
 
-      else if left_is_heavier then 
+      else if left_is_too_heavy then 
         let new_val   = left.val 
         let new_left  = left.left 
         let new_right = GSet.concat3<>(cmp, val, left.right, right)
