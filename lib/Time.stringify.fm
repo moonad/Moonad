@@ -1,0 +1,9 @@
+T Time.stringify
+| Time.stringify.new(
+    days: String, 
+    hours: String, 
+    minutes: String,
+    seconds: String,
+    milliseconds: String, 
+    microseconds: String,
+    nanoseconds: String);

@@ -1,0 +1,62 @@
+Time.ex.parse: Time
+  Time.parse_ms(1337000001l)
+
+Time.ex.show_seconds: String
+  let time = Time.show(Time.ex.parse)
+  case time:
+  | time.seconds;
+
+Time.ex.show_hours_min: String
+  let time = Time.show(Time.ex.parse)
+  case time:
+  | String.concat(time.minutes, String.concat(" ", time.seconds));
+
+// Examples from https://github.com/sindresorhus/parse-ms#usage
+// Time.ex.test_days: Bool
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.days, 15l);
+//   res
+
+// Time.ex.test_hours: Type
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.hours, 11l);
+//   Bool.IsTrue(Bool.false)
+
+// Time.ex.test_minutes: Bool.IsTrue
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.minutes, 23l);
+//   same(res)
+
+// Time.ex.test_seconds: Bool.IsTrue
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.seconds, 20l);
+//   same(res)
+
+// Time.ex.test_miliseconds: Bool.IsTrue
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.miliseconds, 1l);
+//   same(res)
+
+// Time.ex.test_microseconds: Bool.IsTrue
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.microseconds, 0l);
+//   same(res)
+
+// Time.ex.test_nanoseconds: Bool.IsTrue
+//   let time = Time.ex.parse
+//   let res = 
+//     case time:
+//     | U64.eql(time.nanoseconds, 0l);
+//   same(res)

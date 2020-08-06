@@ -1,0 +1,11 @@
+Time.show(t: Time): Time.stringify
+  case t:
+  | let days  = String.concat(Nat.show(U64.to_nat(t.days)), "d")
+    let hours = String.concat(Nat.show(U64.to_nat(t.hours)), "h")
+    let mins  = String.concat(Nat.show(U64.to_nat(t.minutes)), "m")
+    let secs  = String.concat(Nat.show(U64.to_nat(t.seconds)), "s")
+    let mili  = String.concat(Nat.show(U64.to_nat(t.milliseconds)), "ms")
+    let micro = String.concat(Nat.show(U64.to_nat(t.microseconds)), "µs")
+    let nano  = String.concat(Nat.show(U64.to_nat(t.nanoseconds)), "ns")
+    Time.stringify.new(days, hours, mins, secs, mili, micro, nano)
+  ;

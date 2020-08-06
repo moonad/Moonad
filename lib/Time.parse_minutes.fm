@@ -1,0 +1,2 @@
+Time.parse_minutes(ms: U64): U64 
+  U64.mod(U64.div(ms, 60000l), 60l)
