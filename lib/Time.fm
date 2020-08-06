@@ -1,0 +1,9 @@
+T Time
+| Time.new(
+    days: U64, 
+    hours: U64, 
+    minutes: U64,
+    seconds: U64,
+    milliseconds: U64, 
+    microseconds: U64,
+    nanoseconds: U64);
