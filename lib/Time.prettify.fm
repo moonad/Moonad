@@ -1,0 +1,48 @@
+Time.prettify(t: Time, verbose: Bool): String
+  let time_list = Time.time_to_list(t)
+  case t:
+  | let str = ""
+    let str = 
+      case U64.gtn(t.nanoseconds, 0l):
+      | let nano = String.concat(Time.show.nanoseconds(t.nanoseconds, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+
+    let str = 
+      case U64.gtn(t.microseconds, 0l):
+      | let nano = String.concat(Time.show.microseconds(t.microseconds, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+    
+    let str = 
+      case U64.gtn(t.milliseconds, 0l):
+      | let nano = String.concat(Time.show.milliseconds(t.milliseconds, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+
+    let str = 
+      case U64.gtn(t.seconds, 0l):
+      | let nano = String.concat(Time.show.seconds(t.seconds, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+    
+    let str = 
+      case U64.gtn(t.minutes, 0l):
+      | let nano = String.concat(Time.show.minutes(t.minutes, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+    
+    let str = 
+      case U64.gtn(t.hours, 0l):
+      | let nano = String.concat(Time.show.hours(t.hours, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+    
+    let str = 
+      case U64.gtn(t.days, 0l):
+      | let nano = String.concat(Time.show.days(t.days, verbose), " ")
+        String.concat(nano, str); 
+      | str;
+
+    str
+  ;

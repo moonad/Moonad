@@ -1,0 +1,11 @@
+Time.time_to_list(t: Time): List(U64)
+  case t:
+  | let nano = List.cons<>(t.nanoseconds, List.nil<>)
+    let micro = List.cons<>(t.microseconds, nano)
+    let milliseconds = List.cons<>(t.milliseconds, micro)
+    let seconds = List.cons<>(t.seconds, milliseconds)
+    let minutes = List.cons<>(t.minutes, seconds)
+    let hours = List.cons<>(t.hours, minutes)
+    let days = List.cons<>(t.days, hours)
+    days
+  ;
