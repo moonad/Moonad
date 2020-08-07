@@ -32,8 +32,10 @@ T Mons.Dir
 // A game object
 T Mons.Object
 | Mons.Object.new(
-  tid: U32,
-  dir: Mons.Dir
+  tid: U32,      // object id, represent its kind
+  //pos: Pos32,    // object position on the tile set
+  dir: Mons.Dir, // direction the object is facing
+  wlk: U32       // number of walk frames to animate
 );
 
 // A 2d map of game tiles
@@ -65,33 +67,65 @@ Mons.PLANT_0: U32
 
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(Mons.VOID, Mons.Dir.down)
+  Mons.Object.new(Mons.VOID, Mons.Dir.down, 0u)
 
-// Sets an object direction
+// Gets an object's direction
+Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
+  case obj:
+  | obj.dir;
+
+// Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
   case obj:
-  | Mons.Object.new(obj.tid, dir);
+  | Mons.Object.new(obj.tid, dir, obj.wlk);
+
+// Gets an object's walk animation frames
+Mons.Object.get_wlk(obj: Mons.Object): U32
+  case obj:
+  | obj.wlk;
+
+// Sets an object's walk animation frames
+Mons.Object.set_wlk(obj: Mons.Object, wlk: U32): Mons.Object
+  case obj:
+  | Mons.Object.new(obj.tid, obj.dir, wlk);
 
 // Returns the image of a tile
-Mons.Object.get_images(obj: Mons.Object): List(Image3D)
-  let tid = case obj: | obj.tid;
-  let dir = case obj: | obj.dir;
-  if U32.eql(tid, Mons.VOID) then
-    []
-  else if U32.eql(tid, Mons.HERO) then
-    case dir:
-    | right => [Mons.Assets.boy_r_0];
-    | up    => [Mons.Assets.boy_u_0];
-    | left  => [Mons.Assets.boy_l_0];
-    | down  => [Mons.Assets.boy_d_0];
-  else if U32.eql(tid, Mons.GRASS) then
-    [Mons.Assets.grass_0]
-  else if U32.eql(tid, Mons.BUSH) then
-    [Mons.Assets.bush_0, Mons.Assets.bush_1]
-  else if (U32.eql(tid, Mons.PLANT_0)) then
-    [Mons.Assets.home_decor_plant_0]
-  else
-    []
+Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
+  case obj:
+  | if U32.eql(obj.tid, Mons.VOID) then
+      []
+    else if U32.eql(obj.tid, Mons.HERO) then
+      //0 = parado
+      //1 = pe direito pra frente
+      //2 = pe esquerdo pra frente
+      //let wlk_num = 
+      if U32.eql(obj.wlk, 0u) then
+        case obj.dir:
+        | right => [Mons.Assets.boy_r_0];
+        | up    => [Mons.Assets.boy_u_0];
+        | left  => [Mons.Assets.boy_l_0];
+        | down  => [Mons.Assets.boy_d_0];
+      else
+        if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
+          case obj.dir:
+          | right => [Mons.Assets.boy_r_1];
+          | up    => [Mons.Assets.boy_u_1];
+          | left  => [Mons.Assets.boy_l_1];
+          | down  => [Mons.Assets.boy_d_1];
+        else
+          case obj.dir:
+          | right => [Mons.Assets.boy_r_2];
+          | up    => [Mons.Assets.boy_u_2];
+          | left  => [Mons.Assets.boy_l_2];
+          | down  => [Mons.Assets.boy_d_2];
+    else if U32.eql(obj.tid, Mons.GRASS) then
+      [Mons.Assets.grass_0]
+    else if U32.eql(obj.tid, Mons.BUSH) then
+      [Mons.Assets.bush_0, Mons.Assets.bush_1]
+    else if (U32.eql(obj.tid, Mons.PLANT_0)) then
+      [Mons.Assets.home_decor_plant_0]
+    else
+      [];
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -124,21 +158,21 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.tile_of(code: String): List(Mons.Object)
   if String.eql(code, ".g") then
-    [Mons.Object.new(Mons.GRASS, Mons.Dir.down)]
+    [Mons.Object.new(Mons.GRASS, Mons.Dir.down, 0u)]
   else if String.eql(code, "bg") then
     [
-      Mons.Object.new(Mons.BUSH, Mons.Dir.down),
-      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+      Mons.Object.new(Mons.BUSH, Mons.Dir.down, 0u),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down, 0u)
     ]
   else if String.eql(code, "hg") then
     [
-      Mons.Object.new(Mons.HERO, Mons.Dir.down),
-      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+      Mons.Object.new(Mons.HERO, Mons.Dir.down, 0u),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down, 0u)
     ]
   else if String.eql(code, "pg") then
     [
-      Mons.Object.new(Mons.PLANT_0, Mons.Dir.down),
-      Mons.Object.new(Mons.GRASS, Mons.Dir.down)
+      Mons.Object.new(Mons.PLANT_0, Mons.Dir.down, 0u),
+      Mons.Object.new(Mons.GRASS, Mons.Dir.down, 0u)
     ]
   else
     []
@@ -188,12 +222,37 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
     = case game:
     | let map = game.map
       get map obj = Mons.Map.pop(old_pos, map)
-      let obj = Mons.Object.set_dir(obj, dir)
-      let map = Mons.Map.push(new_pos, obj, map)
-      Mons.Game.new(game.pos, map);
-  let game
-    = Mons.Game.set_hero_pos(new_pos, game)
+      let wlk = Mons.Object.get_wlk(obj)
+      if U32.eql(wlk, 0u) then
+        let obj = Mons.Object.set_dir(obj, dir)
+        let obj = Mons.Object.set_wlk(obj, 16u)
+        let map = Mons.Map.push(new_pos, obj, map)
+        Mons.Game.new(new_pos, map)
+      else
+        let map = Mons.Map.push(old_pos, obj, map)
+        Mons.Game.new(old_pos, map);
   game
+
+// Given a tile (x, y) and an object, returns its global (x, y) positions
+Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
+  case obj:
+  | let wlk = Mons.Object.get_wlk(obj)
+    let dir = Mons.Object.get_dir(obj)
+    let g_x = U32.mul(t_x, 16u)
+    let g_y = U32.mul(t_y, 16u)
+    let g_x
+      = case dir:
+      | right => U32.sub(g_x, wlk);
+      | up    => g_x;
+      | left  => U32.add(g_x, wlk);
+      | down  => g_x;
+    let g_y
+      = case dir:
+      | right => g_y;
+      | up    => U32.add(g_y, wlk);
+      | left  => g_y;
+      | down  => U32.sub(g_y, wlk);
+    Pair.new<,>(g_x, g_y);
 
 // Converts the game state to a list of sprites to be rendered
 Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
@@ -202,10 +261,10 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
     let c_x = Pos32.get_x(game.pos)
     let c_y = Pos32.get_y(game.pos)
     let c_z = Pos32.get_z(game.pos)
-    for x : U32 = 0u .. 17u with sprites:
-      for y : U32 = 0u .. 17u with sprites:
-        let t_x = U32.add(U32.sub(c_x, 8u), x)
-        let t_y = U32.add(U32.sub(c_y, 8u), y)
+    for x : U32 = 0u .. 19u with sprites:
+      for y : U32 = 0u .. 19u with sprites:
+        let t_x = U32.add(U32.sub(c_x, 9u), x)
+        let t_y = U32.add(U32.sub(c_y, 9u), y)
         let t_z = c_z
         let pos = Pos32.new(t_x, t_y, t_z)
         let got = Map.get<>(U32.to_bits(pos), game.map)
@@ -214,21 +273,30 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         | List.foldl<,>
           | sprites;
           | (sprites, obj)
+            // TODO: for some reason, using a `case obj` here causes the
+            // function not to type check anymore. Investigate why.
             List.foldl<,>
             | sprites;
             | (sprites, img)
-              let s_x = U32.mul(t_x, 16u)
-              let s_y = U32.mul(t_y, 16u)
+              let wlk = Mons.Object.get_wlk(obj)
+              let dir = Mons.Object.get_dir(obj)
+              get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
               let s_z = t_z
               let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
-              List.cons<>(spr, sprites);
-            | Mons.Object.get_images(obj);;
+              List.cons<>(spr, sprites)
+            ;
+            | Mons.Object.get_images(t_x, t_y, obj);;
           | got.value;;
       sprites
     sprites;
 
 // Draws the game to screen
-Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
+Mons.draw(
+  sprites  : List(Mons.Sprite),
+  hero_pos : Pos32,
+  hero_obj : Mons.Object,
+  scr      : Image3D
+): Image3D
   // Initial state (idx, scr)
   def init
     Pair.new<,>(0u, scr)
@@ -243,8 +311,11 @@ Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
         let s_w = 128u
         let s_h = 128u
         // The origin global position (centered on hero)
-        let o_x = U32.mul(Pos32.get_x(cam), 16u)
-        let o_y = U32.mul(Pos32.get_y(cam), 16u)
+        let h_x = Pos32.get_x(hero_pos)
+        let h_y = Pos32.get_y(hero_pos)
+        //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
+        //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
+        get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
         // Gets the sprite global position
         let s_x = sprite.x
         let s_y = sprite.y
@@ -276,6 +347,30 @@ Mons.draw(sprites: List(Mons.Sprite), cam: Pos32, scr: Image3D): Image3D
   // Performs the algorithm above and returns the resulting image
   get idx scr = List.fold<>(sprites)<>(init, next)
   Image3D.set(idx, 0u, 0u, scr) // null-terminated voxel sequence
+
+// For each tick, updates an object
+Mons.Object.tick(obj: Mons.Object): Mons.Object
+  case obj:
+  | let tid = obj.tid
+    let dir = obj.dir
+    let wlk =
+      if U32.gtn(obj.wlk, 0u) then
+        U32.sub(obj.wlk, 1u)
+      else
+        obj.wlk
+    Mons.Object.new(tid, dir, wlk);
+
+// For each tick, updates the game state
+Mons.Game.tick(game: Mons.Game): Mons.Game
+  case game:
+  | let pos = game.pos
+    let map = 
+      def with_tile(objs)
+        def with_obj(obj)
+          Mons.Object.tick(obj)
+        List.map<,>(with_obj, objs)
+      Map.map<,>(with_tile, game.map)
+    Mons.Game.new(pos, map);
 
 // Examples
 // ========
@@ -328,6 +423,7 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
   else
     Maybe.none<>
 
+// The entire game as an App
 Mons: App(Mons.Game)
   let wall = Kaelin.Models.wall
   let chest = Kaelin.Models.chest
@@ -336,12 +432,22 @@ Mons: App(Mons.Game)
   def init
     Mons.example_game
   def draw(game)
-    let cam_pos = case game: | game.pos;
-    App.Render.vox(Mons.draw(Mons.game_sprites(game), cam_pos, screen))
+    case game:
+    | let hero_pos = game.pos;
+      let hero_obj = List.head_with_default<>
+        | Mons.Object.void;
+        | Mons.Map.get(hero_pos, game.map);
+      App.Render.vox(Mons.draw(
+        Mons.game_sprites(game),
+        hero_pos,
+        hero_obj,
+        screen));
   def when(event, game)
     case event:
     | init => [];
-    | tick => [];
+    | tick => [
+      App.Action.state<>(Mons.Game.tick(game))
+    ];
     | xkey => [
       App.Action.print<>(Bits.to_string(U16.to_bits(event.code))),
       if event.down then
