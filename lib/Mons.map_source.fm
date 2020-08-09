@@ -10,29 +10,19 @@ Mons.map_source: String
 //"
 
 "
-bgbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.gbgbg
-bg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.gbg
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.gbg.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.gbgbgbg.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.gbg.ghg.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.gpg.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.gbgbgbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.gbg.gbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.gbgbgbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.gbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.gbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g
-bg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.gbg
-bgbg.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.g.gbgbg
+bgbg.g.g.gbgbgbg.g.g.gbgbg
+bg.g.g.g.g.g.g.g.g.g.g.gbg
+.g.g.g.g.g.g.g.g.g.g.g.g.g
+.g.g.g.g.g.g.g.g.g.g.g.g.g
+.g.g.g.gbg.g.g.g.g.g.g.g.g
+.g.g.gbgbgbg.g.g.g.g.g.g.g
+.g.g.g.gbg.ghg.g.g.g.g.g.g
+.g.g.g.g.g.g.g.g.g.g.g.g.g
+.g.g.g.g.g.g.g.gpg.g.g.g.g
+.g.g.g.g.g.g.g.g.g.g.g.g.g
+.g.g.g.g.g.g.g.g.g.g.g.g.g
+bg.g.g.g.g.g.g.g.g.g.g.gbg
+bgbg.g.g.g.g.g.g.g.g.gbgbg
 "
 
 
