@@ -6,6 +6,11 @@ Time.ex.show_seconds: String
   case time:
   | time.seconds;
 
+// Time.ex.show_secs: The(_, Bool.true)
+//   let time = Time.show(Time.ex.parse, Bool.false)
+//   case time: 
+//   | The.value<>(String.eql(time.seconds, "20s"));
+  
 Time.ex.show_hours_min: String
   let time = Time.show(Time.ex.parse, Bool.false)
   case time:
@@ -24,7 +29,6 @@ Time.ex.prettify_1: Bool
   let res = Time.prettify(Time.ex.parse, Bool.false)
   String.eql(res, "15d 11h 23m 20s 1ms ")
 
-// Examples from https://github.com/sindresorhus/parse-ms#usage
 // TODO: add proof that returns Bool.true
 Time.ex.test_days: Bool
   let time = Time.ex.parse
@@ -34,50 +38,9 @@ Time.ex.test_days: Bool
 Time.ex.prettify: String
   Time.prettify(Time.parse_ms(144000000l), Bool.true)
 
+// TODO: do not check. idk why...
 // Time.ex: Bool
 //   Bool.and(Time.ex.test_days, Bool.false)
 
 // Time.ex.test: Time.ex.test_days == Bool.true
 //   _
-
-// Time.ex.test_hours: Type
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.hours, 11l);
-//   Bool.IsTrue(Bool.false)
-
-// Time.ex.test_minutes: Bool.IsTrue
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.minutes, 23l);
-//   same(res)
-
-// Time.ex.test_seconds: Bool.IsTrue
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.seconds, 20l);
-//   same(res)
-
-// Time.ex.test_miliseconds: Bool.IsTrue
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.miliseconds, 1l);
-//   same(res)
-
-// Time.ex.test_microseconds: Bool.IsTrue
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.microseconds, 0l);
-//   same(res)
-
-// Time.ex.test_nanoseconds: Bool.IsTrue
-//   let time = Time.ex.parse
-//   let res = 
-//     case time:
-//     | U64.eql(time.nanoseconds, 0l);
-//   same(res)
