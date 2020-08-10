@@ -1,4 +1,3 @@
-// TODO
 // The dot product of two positions
 // Returns (ax * bx + ay * by + az * bz)
 Pos32.dot(a: Pos32, b: Pos32): U32
