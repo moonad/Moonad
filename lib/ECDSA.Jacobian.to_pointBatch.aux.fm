@@ -1,7 +1,0 @@
-ECDSA.Jacobian.to_pointBatch.aux(ps: List(ECDSA.Jacobian), inverts: List(Nat)): List(ECDSA.Point)
-  case ps:
-  | List.nil<>;
-  | case inverts:
-    | List.nil<>; // should not happen
-    | let point = ECDSA.Jacobian.to_point.aux(ps.head, inverts.head)
-      List.cons<>(point, ECDSA.Jacobian.to_pointBatch.aux(ps.tail, inverts.tail));;
