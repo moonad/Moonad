@@ -1,5 +1,4 @@
-Word.drop: <size: Nat> -> (n: Nat) -> Word(Nat.add(n)(size)) -> Word(size)
-  <size> (n) (word)
+Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n)(size))): Word(size)
   n<(n) Word(Nat.add(n)(size)) -> Word(size)>
   | (word) word;
   | (n.pred) (word)

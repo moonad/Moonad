@@ -1,5 +1,17 @@
-Word.neg.aux: <size: Nat> -> Word(size) -> Bool -> Word(size)
-  <size> (word) (inc)
+// Word.neg.aux<size: Nat>(word: Word(size), inc: Bool): Word(size)
+//   case word:
+//   | Word.nil;
+//   |
+//     case inc:
+//     | Word.0<size>(Word.neg.aux<size>(word.pred, Bool.true));
+//     | Word.1<size>(Word.neg.aux<size>(pred, Bool.false));;
+//   |
+//     inc<() Word(Nat.succ(size))>
+//     | Word.1<size>(Word.neg.aux<size>(word.pred, Bool.false));
+//     | Word.0<size>(Word.neg.aux<size>(word.pred, Bool.false));;
+
+
+Word.neg.aux<size: Nat>(word: Word(size), inc: Bool): Word(size)
   word<(size) () Word(size)>
   | Word.nil;
   | <size> (pred)

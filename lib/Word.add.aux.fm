@@ -1,6 +1,5 @@
 // TODO: improve
-Word.add.aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
-  <size> (a) (b) (c)
+Word.add.aux<size: Nat>(a: Word(size), b: Word(size), c: Bool): Word(size)
   ( a<(a.size) () Word(a.size) -> Word(a.size)>
   | (b) Word.nil;
   | <a.size> (a.pred) (b)

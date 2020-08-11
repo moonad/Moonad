@@ -1,10 +1,5 @@
-Word.concat
-  : <a_size: Nat> ->
-    <b_size: Nat> ->
-    Word(a_size) ->
-    Word(b_size) ->
-    Word(Nat.add(a_size)(b_size))
-  <a_size> <b_size> (a) (b)
+Word.concat<a_size: Nat, b_size: Nat>(a: Word(a_size), b: Word(b_size))
+  : Word(Nat.add(a_size)(b_size))
   a<(a_size) () Word(Nat.add(a_size)(b_size))>
   | b;
   | <a.size> (a.pred)

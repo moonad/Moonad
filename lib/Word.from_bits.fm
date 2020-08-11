@@ -1,5 +1,4 @@
-Word.from_bits: (size: Nat) -> Bits -> Word(size)
-  (size) (bits)
+Word.from_bits(size: Nat, bits: Bits): Word(size)
   size<(size) Word(size)>
   | Word.nil;
   | (size.pred)
@@ -7,3 +6,12 @@ Word.from_bits: (size: Nat) -> Bits -> Word(size)
     | Word.0<size.pred>(Word.from_bits(size.pred)(Bits.nil));
     | (bits.pred) Word.0<size.pred>(Word.from_bits(size.pred)(bits.pred));
     | (bits.pred) Word.1<size.pred>(Word.from_bits(size.pred)(bits.pred));;
+
+
+// Word.from_bits(size: Nat, bits: Bits): Word(size)
+//   case size:
+//   | Word.nil;
+//   | case bits:
+//     | Word.0<size.pred>(Word.from_bits(size.pred, Bits.nil));
+//     | Word.0<size.pred>(Word.from_bits(size.pred, bits.pred));
+//     | Word.1<size.pred>(Word.from_bits(size.pred, bits.pred));;
