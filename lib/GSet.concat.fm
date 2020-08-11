@@ -14,17 +14,22 @@ GSet.concat<A: Type>(set_a: GSet(A), set_b: GSet(A)): GSet(A)
       let a_is_too_heavy = Nat.ltn(Nat.mul(GSet.w, set_b.size), set_b.size)
 
       if b_is_too_heavy then 
-        let new_left = GSet.concat<>(set_a, set_b.left)
-        GSet.balance<>(set_b.val, new_left, set_b.right)
+        let new_val   = set_b.val 
+        let new_left  = GSet.concat<>(set_a, set_b.left)
+        let new_right = set_b.right  
+        GSet.balance<>(new_val, new_left, new_right)
 
       else if a_is_too_heavy then 
+        let new_val   = set_a.val 
+        let new_left  = set_a.left 
         let new_right = GSet.concat<>(set_a.right, set_b)
-        GSet.balance<>(set_a.val, set_a.left, new_right)
+        GSet.balance<>(new_val, new_left, new_right)
 
       else 
         let min_b     = GSet.min<>(set_b)
         let new_val   = Maybe.extract<>(min_b, set_b.val) //we know b isn't empty
+        let new_left  = set_a
         let new_right = GSet.delete_min<>(set_b)
-        GSet.balance<>(new_val, set_a, new_right)
+        GSet.balance<>(new_val, new_left, new_right)
     ;
   ;
