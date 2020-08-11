@@ -1,10 +1,20 @@
 Word.concat<a_size: Nat, b_size: Nat>(a: Word(a_size), b: Word(b_size))
-  : Word(Nat.add(a_size)(b_size))
-  a<(a_size) () Word(Nat.add(a_size)(b_size))>
+  : Word(Nat.add(a_size, b_size))
+  a<(a_size) () Word(Nat.add(a_size, b_size))>
   | b;
   | <a.size> (a.pred)
-    let rest = Word.concat<a.size><b_size>(a.pred)(b)
-    Word.0<Nat.add(a.size)(b_size)>(rest);
+    let rest = Word.concat<a.size, b_size>(a.pred, b)
+    Word.0<Nat.add(a.size, b_size)>(rest);
   | <a.size> (a.pred)
-    let rest = Word.concat<a.size><b_size>(a.pred)(b)
-    Word.1<Nat.add(a.size)(b_size)>(rest);
+    let rest = Word.concat<a.size, b_size>(a.pred, b)
+    Word.1<Nat.add(a.size, b_size)>(rest);
+
+// Word.concat<a_size: Nat, b_size: Nat>(a: Word(a_size), b: Word(b_size))
+//   : Word(Nat.add(a_size, b_size))
+//   case a:
+//   | b;
+//   | let rest = Word.concat<a.size, b_size>(a.pred, b)
+//     Word.0<Nat.add(a.size, b_size)>(rest);
+//   | let rest = Word.concat<a.size, b_size>(a.pred, b)
+//     Word.1<Nat.add(a.size, b_size)>(rest);
+//   : Word(Nat.add(a_size, b_size));

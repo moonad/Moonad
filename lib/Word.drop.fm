@@ -1,7 +1,16 @@
-Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n)(size))): Word(size)
-  n<(n) Word(Nat.add(n)(size)) -> Word(size)>
+Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n, size))): Word(size)
+  n<(n) Word(Nat.add(n, size)) -> Word(size)>
   | (word) word;
   | (n.pred) (word)
-    let word.pred = Word.pred<Nat.add(n.pred)(size)>(word)
-    Word.drop<size>(n.pred)(word.pred);
+    let word.pred = Word.pred<Nat.add(n.pred, size)>(word)
+    Word.drop<size>(n.pred, word.pred);
   | word;
+
+// Word.drop<size: Nat>(n: Nat, word: Word(Nat.add(n, size))): Word(size)
+//   case n:
+//   with e : Word(Nat.add(n, size)) = Word(size);
+//   | word;
+//   | let word.pred = Word.pred<Nat.add(n.pred, size)>(word)
+//     Word.drop<size>(n.pred, word.pred);
+//   | word;
+//   : Word(size);
