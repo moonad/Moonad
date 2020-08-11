@@ -1,0 +1,15 @@
+Mons.font: Type
+  Map(Image3D)
+
+// Creates a Map of [{key: Char, value: Image3D}]
+Mons.font.map: Mons.font
+  let map = Map.new<Image3D>
+  let map_img = Mons.font.set_img(80s, Mons.Char.80, map) // add P
+  map_img
+
+// Adds an Image3D to a char on the map
+Mons.font.set_img(char: Char, img: Image3D, map: Mons.font): Mons.font
+  Map.set<>(U16.to_bits(char), img, map)
+
+Mons.font.get_img(char: Char, map: Mons.font): Image3D
+  
