@@ -1,0 +1,5 @@
+Bits.to_nat(b: Bits): Nat
+  case b:
+  | 0;
+  | Nat.mul(2, Bits.to_nat(b.pred));
+  | Nat.succ(Nat.mul(2, Bits.to_nat(b.pred)));

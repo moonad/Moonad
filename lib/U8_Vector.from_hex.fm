@@ -2,10 +2,10 @@ U8_Vector.from_hex(hex: String): Sigma(Nat, U8_Vector)
   case hex:
   | Sigma.new<Nat,U8_Vector>(0, Vector.nil<U8>);
   | case hex.tail:
-    | let b = ECDSA.parse_byte(String.consVar(1, hex.head))
+    | let b = ECDSA.parse_byte(String.cons_var(1, hex.head))
       let vec = Vector.ext<U8,0>(U8.from_nat(b), Vector.nil<U8>)
       Sigma.new<Nat, U8_Vector>(1, vec);
-    | let b = ECDSA.parse_byte(String.consVar(2, hex.head, hex.tail.head))
+    | let b = ECDSA.parse_byte(String.cons_var(2, hex.head, hex.tail.head))
       get len vec = U8_Vector.from_hex(hex.tail.tail)
       let vec = Vector.ext<U8,len>(U8.from_nat(b), vec)
       Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec);;

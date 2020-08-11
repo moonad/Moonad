@@ -1,10 +1,38 @@
 // Check if "xs" starts with "match"
 String.starts_with(xs: String, match: String): Bool
-  case xs:
-  | case match: | Bool.true; | Bool.false; ;
-  | let reduced = String.starts_with.go(xs, match)
-    case String.eql(match, reduced):
-    | Bool.true;
-    | Bool.false;
+  case match:
+  | nil => Bool.true;
+  | cons => case xs:
+    | nil => Bool.false;
+    | cons => case Char.eql(match.head, xs.head):
+      | true => String.starts_with(xs.tail, match.tail);
+      | false => Bool.false;
+    ;
   ;
  
+String.starts_with.test.0: The(_, Bool.true)
+  The.value<>(String.starts_with("x", ""))
+
+String.starts_with.test.1: The(_, Bool.false)
+  The.value<>(String.starts_with("", "x"))
+
+String.starts_with.test.2: The(_, Bool.true)
+  The.value<>(String.starts_with("x", "x"))
+
+String.starts_with.test.3: The(_, Bool.true)
+  The.value<>(String.starts_with("xy", "x"))
+
+String.starts_with.test.4: The(_, Bool.false)
+  The.value<>(String.starts_with("x", "xy"))
+
+String.starts_with.test.5: The(_, Bool.true)
+  The.value<>(String.starts_with("xy", "xy"))
+
+String.starts_with.test.6: The(_, Bool.true)
+  The.value<>(String.starts_with("xyz", "xy"))
+
+String.starts_with.test.7: The(_, Bool.false)
+  The.value<>(String.starts_with("xy", "xyz"))
+
+String.starts_with.test.8: The(_, Bool.false)
+  The.value<>(String.starts_with("xy!", "xyz"))

@@ -470,9 +470,6 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
 
 // The entire game as an App
 Mons: App(Mons.Game)
-  let wall = Kaelin.Models.wall
-  let chest = Kaelin.Models.chest
-  let seat = Kaelin.Models.seat
   let screen = Image3D.alloc_size(524288u)
   def init
     Mons.example_game
