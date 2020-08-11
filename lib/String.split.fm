@@ -2,5 +2,51 @@
 // Returns the list of substrings
 String.split(xs: String, using: String): List(String)
   case xs:
-  | List.nil<>;
-  | String.split.go(xs, using, String.nil) ;
+  | nil => [String.nil];
+  | cons => case String.starts_with(xs, using):
+    | true => case using:
+      | nil => List.cons<String>(String.cons(xs.head, String.nil), String.split(xs.tail, using));
+      | cons => List.cons<String>("", String.split(String.drop(String.length(using), xs), using));
+      ;
+    | false =>
+      case String.split(xs.tail, using) as split:
+      | nil => List.nil<>;  // FIXME: mark this impossible
+      | cons => List.cons<>(String.cons(xs.head, split.head),  split.tail);
+      ;
+    ;
+
+String.split.test.0 : The(_, [""])
+  The.value<>(String.split("", ""))
+
+String.split.test.1 : The(_, [""])
+  The.value<>(String.split("", "xyz"))
+
+String.split.test.2 : The(_, ["", "c"])
+  The.value<>(String.split("abc", "ab"))
+
+String.split.test.3 : The(_, ["a", "b", "c", ""])
+  The.value<>(String.split("abc", ""))
+
+String.split.test.4 : The(_, ["a", "c"])
+ The.value<>(String.split("abc", "b"))
+
+String.split.test.4.1 : The(_, ["", "c"])
+ The.value<>(String.split("bc", "b"))
+
+String.split.test.5 : The(_, ["a", ""])
+  The.value<>(String.split("abc", "bc"))
+
+String.split.test.6 : The(_, ["", ""])
+  The.value<>(String.split("abc", "abc"))
+
+String.split.test.7 : The(_, ["", "", ""])
+  The.value<>(String.split("abcabc", "abc"))
+
+String.split.example8.1 : _
+  String.split("abcxabcy", "abc")
+ 
+String.split.test.8 : The(_, ["", "x", "y"])
+   The.value<>(String.split.example8.1)
+
+String.split.test.9 : _
+  (String.split("fooxbar", "x"))
