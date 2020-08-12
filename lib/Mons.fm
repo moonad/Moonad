@@ -61,6 +61,14 @@ Mons.GRASS   : U32 2u
 Mons.BUSH    : U32 3u
 Mons.PLANT_0 : U32 4u
 
+// Sprites are centered at 128x128
+Mons.vox_mid: Pos32
+  Pos32.new(128u, 128u, 0u) 
+
+// The game screen is 256x256 pixels
+Mons.scr_mid: Pos32
+  Pos32.new(128u, 128u, 0u)
+
 // The void tile
 Mons.Object.void: Mons.Object
   Mons.Object.new(0u, Mons.VOID, Maybe.none<>, Mons.Dir.down, 0u, 0u)
@@ -327,13 +335,28 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
               let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
               List.cons<>(spr, sprs);;
 
-// Draws an ASCII text to a position using 
-//Mons.draw.text(pos: Pos32, txt: String, scr: Image3D): Image3D
+// Draws an ASCII char to a position using 
+Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
+  case Mons.font.get_img(chr, Mons.font.map) as got:
+  | scr;
+  | let img = got.value
+    let img_len = Image3D.get_length(img)
+    let scr = for i : U32 = 0u .. img_len:
+      let vox_pos = Image3D.get_pos(i, img)
+      let pos = Pos32.sub(Pos32.add(chr_pos, vox_pos), Mons.vox_mid)
+      let col = Image3D.get_col(i, img)
+      Image3D.push(pos, col, scr)
+    scr;
 
+// Draws an ASCII text to a position using 
+Mons.draw.text(txt: String, chr_pos: Pos32, scr: Image3D): Image3D
+  for pair in List.indices.u32<>(String.to_list(txt)) with scr:
+    get i chr = pair
+    let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
+    Mons.draw.char(chr, Pos32.add(chr_pos, add_pos), scr)
+    
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
-  let scr_mid = Pos32.new(128u, 128u, 0u) // The game screen is 256x256 pixels
-  let vox_mid = Pos32.new(128u, 128u, 0u) // Sprites are centered at 128x128
   open game:
   let hero_pos = game.pos
   let hero_obj = Mons.Map.get_top(hero_pos, game.map)
@@ -348,8 +371,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       open spr:
       let len = Image3D.get_length(spr.img)
       for i : U32 = 0u .. len with scr:
-        let s_w = Pos32.get_x(scr_mid)
-        let s_h = Pos32.get_y(scr_mid)
+        let s_w = Pos32.get_x(Mons.scr_mid)
+        let s_h = Pos32.get_y(Mons.scr_mid)
         // The origin global position (centered on hero)
         let h_x = Pos32.get_x(hero_pos)
         let h_y = Pos32.get_y(hero_pos)
@@ -381,29 +404,11 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let col = Image3D.get_col(i, spr.img) // final pixel col
         Image3D.push(pos, col, scr); // pushes to scr
   // When hero is in a battle, draws battle mode
-  | //src_mid = 200x200
-    //img_pos = 16x16
-    //vox_mid = 128x128
-    //vox_pos = 129x128
-    // Renders the A letter
-    let img = Mons.Char.65
-    let img_len = 40u
-    let scr = for i : U32 = 0u .. img_len:
-      let img_pos = Pos32.new(16u, 16u, 0u)
-      let vox_pos = Image3D.get_pos(i, img)
-      let pos = Pos32.sub(Pos32.add(img_pos, vox_pos), vox_mid)
-      let col = Image3D.get_col(i, img)
-      Image3D.push(pos, col, scr)
-    // Renders the B letter
-    let img = Mons.Char.66
-    let img_len = Image3D.get_length(img)
-    let scr = for i : U32 = 0u .. img_len:
-      let img_pos = Pos32.new(22u, 16u, 0u)
-      let vox_pos = Image3D.get_pos(i, img)
-      let pos = Pos32.sub(Pos32.add(img_pos, vox_pos), vox_mid)
-      let col = Image3D.get_col(i, img)
-      Image3D.push(pos, col, scr)
-    scr;
+  | let scr = Mons.draw.text("CRONI", Pos32.new(16u,16u,0u), scr)
+    let scr = Mons.draw.text("Lv: 99", Pos32.new(16u,26u,0u), scr)
+    let scr = Mons.draw.text("CAPIVARA", Pos32.new(200u,230u,0u), scr)
+    let scr = Mons.draw.text("Lv: 30", Pos32.new(200u,240u,0u), scr)
+    scr ;
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
