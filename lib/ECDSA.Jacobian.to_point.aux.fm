@@ -2,5 +2,5 @@ ECDSA.Jacobian.to_point.aux(p: ECDSA.Jacobian, invz: Nat): ECDSA.Point
   get p.x p.y p.z = p
   let invz2 = Nat.square(invz)
   let x = ECDSA.mod(Nat.mul(p.x, invz2))
-  let y = ECDSA.mod(Nat.mulVar(3, p.y, invz2, invz))
+  let y = ECDSA.mod(Nat.mul_var(3, p.y, invz2, invz))
   ECDSA.Point.new(x, y)

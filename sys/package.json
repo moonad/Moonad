@@ -32,7 +32,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express-ws": "^4.0.0",
-    "formality-lang": "^0.4.105",
+    "formality-lang": "^0.4.116",
     "fs-extra": "^9.0.0",
     "isomorphic-ws": "^4.0.1",
     "moment": "^2.26.0",

@@ -61,97 +61,105 @@ Mons.GRASS   : U32 2u
 Mons.BUSH    : U32 3u
 Mons.PLANT_0 : U32 4u
 
+// Sprites are centered at 128x128
+Mons.vox_mid: Pos32
+  Pos32.new(128u, 128u, 0u) 
+
+// The game screen is 256x256 pixels
+Mons.scr_mid: Pos32
+  Pos32.new(128u, 128u, 0u)
+
 // The void tile
 Mons.Object.void: Mons.Object
   Mons.Object.new(0u, Mons.VOID, Maybe.none<>, Mons.Dir.down, 0u, 0u)
 
 // Gets an object's unique id
 Mons.Object.get_uid(obj: Mons.Object): U32
-  case obj:
-  | obj.uid;
+  open obj:
+  obj.uid
 
 // Sets an object's unique id
 Mons.Object.set_uid(obj: Mons.Object, uid: U32): Mons.Object
-  case obj:
-  | Mons.Object.new(uid, obj.tid, obj.btl, obj.dir, obj.wlk, obj.chp);
+  open obj:
+  Mons.Object.new(uid, obj.tid, obj.btl, obj.dir, obj.wlk, obj.chp)
 
 // Gets an object's battle
 Mons.Object.get_btl(obj: Mons.Object): Maybe(U32)
-  case obj:
-  | obj.btl;
+  open obj:
+  obj.btl
 
 // Sets an object's battle
 Mons.Object.set_btl(obj: Mons.Object, btl: Maybe(U32)): Mons.Object
-  case obj:
-  | Mons.Object.new(obj.uid, obj.tid, btl, obj.dir, obj.wlk, obj.chp);
+  open obj:
+  Mons.Object.new(obj.uid, obj.tid, btl, obj.dir, obj.wlk, obj.chp)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
-  case obj:
-  | obj.dir;
+  open obj:
+  obj.dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  case obj:
-  | Mons.Object.new(obj.uid, obj.tid, obj.btl, dir, obj.wlk, obj.chp);
+  open obj:
+  Mons.Object.new(obj.uid, obj.tid, obj.btl, dir, obj.wlk, obj.chp)
 
 // Gets an object's walk animation frames
 Mons.Object.get_wlk(obj: Mons.Object): U32
-  case obj:
-  | obj.wlk;
+  open obj:
+  obj.wlk
 
 // Sets an object's walk animation frames
 Mons.Object.set_wlk(obj: Mons.Object, wlk: U32): Mons.Object
-  case obj:
-  | Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp);
+  open obj:
+  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp)
 
 // Gets an object's current HP
 Mons.Object.get_chp(obj: Mons.Object): U32
-  case obj:
-  | obj.chp;
+  open obj:
+  obj.chp
 
 // Sets an object's current HP
 Mons.Object.set_chp(obj: Mons.Object, chp: U32): Mons.Object
-  case obj:
-  | Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, obj.wlk, chp);
+  open obj:
+  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, obj.wlk, chp)
 
 // Returns the image of a tile
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
-  case obj:
-  | if U32.eql(obj.tid, Mons.VOID) then
-      []
-    else if U32.eql(obj.tid, Mons.HERO) then
-      //0 = parado
-      //1 = pe direito pra frente
-      //2 = pe esquerdo pra frente
-      //let wlk_num = 
-      if U32.eql(obj.wlk, 0u) then
-        case obj.dir:
-        | right => [Mons.Assets.boy_r_0];
-        | up    => [Mons.Assets.boy_u_0];
-        | left  => [Mons.Assets.boy_l_0];
-        | down  => [Mons.Assets.boy_d_0];
-      else
-        if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
-          case obj.dir:
-          | right => [Mons.Assets.boy_r_1];
-          | up    => [Mons.Assets.boy_u_1];
-          | left  => [Mons.Assets.boy_l_1];
-          | down  => [Mons.Assets.boy_d_1];
-        else
-          case obj.dir:
-          | right => [Mons.Assets.boy_r_2];
-          | up    => [Mons.Assets.boy_u_2];
-          | left  => [Mons.Assets.boy_l_2];
-          | down  => [Mons.Assets.boy_d_2];
-    else if U32.eql(obj.tid, Mons.GRASS) then
-      [Mons.Assets.grass_0]
-    else if U32.eql(obj.tid, Mons.BUSH) then
-      [Mons.Assets.bush_0, Mons.Assets.bush_1]
-    else if (U32.eql(obj.tid, Mons.PLANT_0)) then
-      [Mons.Assets.home_decor_plant_0]
+  open obj:
+  if U32.eql(obj.tid, Mons.VOID) then
+    []
+  else if U32.eql(obj.tid, Mons.HERO) then
+    //0 = parado
+    //1 = pe direito pra frente
+    //2 = pe esquerdo pra frente
+    //let wlk_num = 
+    if U32.eql(obj.wlk, 0u) then
+      case obj.dir:
+      | right => [Mons.Assets.boy_r_0];
+      | up    => [Mons.Assets.boy_u_0];
+      | left  => [Mons.Assets.boy_l_0];
+      | down  => [Mons.Assets.boy_d_0];
     else
-      [];
+      if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
+        case obj.dir:
+        | right => [Mons.Assets.boy_r_1];
+        | up    => [Mons.Assets.boy_u_1];
+        | left  => [Mons.Assets.boy_l_1];
+        | down  => [Mons.Assets.boy_d_1];
+      else
+        case obj.dir:
+        | right => [Mons.Assets.boy_r_2];
+        | up    => [Mons.Assets.boy_u_2];
+        | left  => [Mons.Assets.boy_l_2];
+        | down  => [Mons.Assets.boy_d_2];
+  else if U32.eql(obj.tid, Mons.GRASS) then
+    [Mons.Assets.grass_0]
+  else if U32.eql(obj.tid, Mons.BUSH) then
+    [Mons.Assets.bush_0, Mons.Assets.bush_1]
+  else if (U32.eql(obj.tid, Mons.PLANT_0)) then
+    [Mons.Assets.home_decor_plant_0]
+  else
+    []
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -238,13 +246,13 @@ Mons.Map.load(code: String): Mons.Map
 
 // Gets the hero position
 Mons.Game.get_hero_pos(game: Mons.Game): Pos32
-  case game:
-  | game.pos;
+  open game:
+  game.pos
 
 // Sets the hero position
 Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
-  case game:
-  | Mons.Game.new(pos, game.map);
+  open game:
+  Mons.Game.new(pos, game.map)
 
 // Moves the hero to a given direction
 Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
@@ -256,29 +264,28 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
     | Pos32.sub(old_pos, Pos32.new(0u, 1u, 0u));
     | Pos32.sub(old_pos, Pos32.new(1u, 0u, 0u));
     | Pos32.add(old_pos, Pos32.new(0u, 1u, 0u));
-  let game
-    = case game:
-    | let map = game.map
-      get map obj = Mons.Map.pop(old_pos, map)
-      let wlk = Mons.Object.get_wlk(obj)
-      let trg = Mons.Map.get_top(new_pos, map)
-      case trg:
-      | let is_walking = U32.gtn(wlk, 0u)
-        let is_blocked = U32.eql(trg.tid, Mons.PLANT_0)
-        if Bool.or(is_walking, is_blocked) then
-          let map = Mons.Map.push(old_pos, obj, map)
-          Mons.Game.new(old_pos, map)
-        else
-          let obj = Mons.Object.set_dir(obj, dir)
-          let obj = Mons.Object.set_wlk(obj, 16u)
-          let obj =
-            if U32.eql(trg.tid, Mons.BUSH) then
-              Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
-            else
-              obj
-          let map = Mons.Map.push(new_pos, obj, map)
-          Mons.Game.new(new_pos, map);;
-  game
+  open game:
+  let map = game.map
+  get map obj = Mons.Map.pop(old_pos, map)
+  let wlk = Mons.Object.get_wlk(obj)
+  let trg = Mons.Map.get_top(new_pos, map)
+  open trg:
+  let is_walking = U32.gtn(wlk, 0u)
+  let is_blocked = U32.eql(trg.tid, Mons.PLANT_0)
+  if Bool.or(is_walking, is_blocked) then
+    let map = Mons.Map.push(old_pos, obj, map)
+    Mons.Game.new(old_pos, map)
+  else
+    let obj = Mons.Object.set_dir(obj, dir)
+    let obj = Mons.Object.set_wlk(obj, 16u)
+    let obj =
+      if U32.eql(trg.tid, Mons.BUSH) then
+        //Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
+        obj
+      else
+        obj
+    let map = Mons.Map.push(new_pos, obj, map)
+    Mons.Game.new(new_pos, map)
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions
 Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
@@ -302,120 +309,128 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
     Pair.new<,>(g_x, g_y);
 
 // Converts the game state to a list of sprites to be rendered
+// TODO: for some reason, using a `case obj` here causes the
+// function not to type check anymore. Investigate why.
 Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
   case game:
-  | let sprites = List.nil<>
+  | let sprs = []
     let c_x = Pos32.get_x(game.pos)
     let c_y = Pos32.get_y(game.pos)
     let c_z = Pos32.get_z(game.pos)
-    for x : U32 = 0u .. 19u with sprites:
-      for y : U32 = 0u .. 19u with sprites:
+    for x : U32 = 0u .. 19u with sprs:
+      for y : U32 = 0u .. 19u with sprs:
         let t_x = U32.add(U32.sub(c_x, 9u), x)
         let t_y = U32.add(U32.sub(c_y, 9u), y)
         let t_z = c_z
         let pos = Pos32.new(t_x, t_y, t_z)
         let got = Map.get<>(U32.to_bits(pos), game.map)
         case got:
-        | sprites;
-        | List.foldl<,>
-          | sprites;
-          | (sprites, obj)
-            // TODO: for some reason, using a `case obj` here causes the
-            // function not to type check anymore. Investigate why.
-            List.foldl<,>
-            | sprites;
-            | (sprites, img)
+        | sprs;
+        | for obj in got.value with sprs:
+            for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
               let wlk = Mons.Object.get_wlk(obj)
               let dir = Mons.Object.get_dir(obj)
               get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
               let s_z = t_z
               let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
-              List.cons<>(spr, sprites)
-            ;
-            | Mons.Object.get_images(t_x, t_y, obj);;
-          | got.value;;
-      sprites
-    sprites;
+              List.cons<>(spr, sprs);;
 
+// Draws an ASCII char to a position using 
+Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
+  case Mons.font.get_img(chr, Mons.font.map) as got:
+  | scr;
+  | let img = got.value
+    let img_len = Image3D.get_length(img)
+    let scr = for i : U32 = 0u .. img_len:
+      let vox_pos = Image3D.get_pos(i, img)
+      let pos = Pos32.sub(Pos32.add(chr_pos, vox_pos), Mons.vox_mid)
+      let col = Image3D.get_col(i, img)
+      Image3D.push(pos, col, scr)
+    scr;
+
+// Draws an ASCII text to a position using 
+Mons.draw.text(txt: String, chr_pos: Pos32, scr: Image3D): Image3D
+  for pair in List.indices.u32<>(String.to_list(txt)) with scr:
+    get i chr = pair
+    let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
+    Mons.draw.char(chr, Pos32.add(chr_pos, add_pos), scr)
+    
 // Draws the game to screen
-Mons.draw(
-  sprites  : List(Mons.Sprite),
-  hero_pos : Pos32,
-  hero_obj : Mons.Object,
-  scr      : Image3D
-): Image3D
-  // Initial state (idx, scr)
-  def init
-    Pair.new<,>(0u, scr)
-  // For each sprite...
-  def next(sprite, state)
-    get idx scr = state
-    case sprite:
-    | // For each voxel...
-      let voxel_count = Image3D.get_size(sprite.img)
-      for i : U32 = 0u .. voxel_count with scr:
-        // The game screen is 256x256 pixels
-        let s_w = 128u
-        let s_h = 128u
+Mons.draw(game: Mons.Game, scr: Image3D): Image3D
+  open game:
+  let hero_pos = game.pos
+  let hero_obj = Mons.Map.get_top(hero_pos, game.map)
+  let hero_btl = Mons.Object.get_btl(hero_obj)
+  let scr = Image3D.clear(scr)
+  case hero_btl:
+  // When hero isn't battling, draws the map mode
+  | // For each sprite around the hero...
+    let sprs = Mons.game_sprites(game)
+    for spr in sprs with scr:
+      // For each pixel of the sprite...
+      open spr:
+      let len = Image3D.get_length(spr.img)
+      for i : U32 = 0u .. len with scr:
+        let s_w = Pos32.get_x(Mons.scr_mid)
+        let s_h = Pos32.get_y(Mons.scr_mid)
         // The origin global position (centered on hero)
         let h_x = Pos32.get_x(hero_pos)
         let h_y = Pos32.get_y(hero_pos)
         //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
         //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
         get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-        // Gets the sprite global position
-        let s_x = sprite.x
-        let s_y = sprite.y
-        let s_z = sprite.z
-        // Gets the voxel global position (its cpos on img is x=128, y=128)
-        let xyz = Image3D.get_pos(i, sprite.img)
+        // Gets the spr global position
+        let s_x = spr.x
+        let s_y = spr.y
+        let s_z = spr.z
+        // Gets the pixel global position (its cpos on img is x=128, y=128)
+        let xyz = Image3D.get_pos(i, spr.img)
         let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),128u)
         let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),128u)
         let v_z = Pos32.get_z(xyz)
-        // Temporary: if voxel is out of screen, make it invisible
+        // Temporary: if pixel is out of screen, make it invisible
         let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
         let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
         let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
         let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
         //let ok  = List.and([ok0, ok1, ok2, ok3])
         let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-        // Computes the voxel position on the final canvas
+        // Computes the pixel position on the final canvas
         let c_x = U32.sub(U32.add(v_x, 128u), o_x)
         let c_y = U32.sub(U32.add(v_y, 128u), o_y)
         let c_z = Bool.if<>(ok, v_z, 0u)
-        // Push the voxel to the scr (on the next idx)
-        let pos = Pos32.new(c_x, c_y, c_z)
-        let col = Image3D.get_col(i, sprite.img)
-        let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
-        let scr = Image3D.set_col(U32.add(i, idx), col, scr);
-        scr
-      // Returns new to-write idx and updated screen
-      Pair.new<,>(U32.add(voxel_count, idx), scr);
-  // Performs the algorithm above and returns the resulting image
-  get idx scr = List.fold<>(sprites)<>(init, next)
-  Image3D.set(idx, 0u, 0u, scr) // null-terminated voxel sequence
+        // Pushes the pixel to the scr
+        let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+        let col = Image3D.get_col(i, spr.img) // final pixel col
+        Image3D.push(pos, col, scr); // pushes to scr
+  // When hero is in a battle, draws battle mode
+  | let scr = Mons.draw.text("CRONI", Pos32.new(16u,16u,0u), scr)
+    let scr = Mons.draw.text("Lv: 99", Pos32.new(16u,26u,0u), scr)
+    let scr = Mons.draw.text("CAPIVARA", Pos32.new(200u,230u,0u), scr)
+    let scr = Mons.draw.text("Lv: 30", Pos32.new(200u,240u,0u), scr)
+    scr ;
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
-  case obj:
-  | let wlk =
-      if U32.gtn(obj.wlk, 0u) then
-        U32.sub(obj.wlk, 2u)
-      else
-        obj.wlk
-    Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp);
+  open obj:
+  let wlk =
+    if U32.gtn(obj.wlk, 0u) then
+      U32.sub(obj.wlk, 2u)
+    else
+      obj.wlk
+  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp)
 
 // For each tick, updates the game state
 Mons.Game.tick(game: Mons.Game): Mons.Game
-  case game:
-  | let pos = game.pos
-    let map = 
-      def with_tile(objs)
-        def with_obj(obj)
-          Mons.Object.tick(obj)
-        List.map<,>(with_obj, objs)
-      Map.map<,>(with_tile, game.map)
-    Mons.Game.new(pos, map);
+  open game:
+  let pos = game.pos
+  let map = 
+    def with_tile(objs)
+      def with_obj(obj)
+        Mons.Object.tick(obj)
+      List.map<,>(with_obj, objs)
+    Map.map<,>(with_tile, game.map)
+  Mons.Game.new(pos, map)
 
 // Examples
 // ========
@@ -470,34 +485,24 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
 
 // The entire game as an App
 Mons: App(Mons.Game)
-  let wall = Kaelin.Models.wall
-  let chest = Kaelin.Models.chest
-  let seat = Kaelin.Models.seat
-  let screen = Image3D.alloc_size(524288u)
+  let screen = Image3D.alloc_capacity(524288u)
   def init
     Mons.example_game
   def draw(game)
-    case game:
-    | let hero_pos = game.pos
-      let hero_obj = Mons.Map.get_top(hero_pos, game.map)
-      App.Render.vox(Mons.draw(
-        Mons.game_sprites(game),
-        hero_pos,
-        hero_obj,
-        screen));
+    App.Render.vox(Mons.draw(game, screen))
   def when(event, game)
     case event:
     | init => [
     ];
     | tick => [
       App.Action.state<>(Mons.Game.tick(game)),
-      case game:
-      | let hero_pos = game.pos
-        let hero_obj = Mons.Map.get_top(hero_pos, game.map)
-        case hero_obj:
-        | case hero_obj.btl:
-          | App.Action.print<>("Not battling.");
-          | App.Action.print<>(U32.to_string(hero_obj.btl.value));;;
+      open game:
+      let hero_pos = game.pos
+      let hero_obj = Mons.Map.get_top(hero_pos, game.map)
+      case hero_obj:
+      | case hero_obj.btl:
+        | App.Action.print<>("Not battling.");
+        | App.Action.print<>(U32.to_string(hero_obj.btl.value));;
     ];
     | xkey => [
       if event.down then
