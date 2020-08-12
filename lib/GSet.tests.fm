@@ -1,0 +1,172 @@
+// Test.the_test: The(ResultType, result_value)
+//   The.value<ResultType>(computation)
+
+// if the input is ordered, `from_list` followed by `to_list` 
+// matches the input
+GSet.tests.1 : The(List(Nat), [1,2,3,4,5])
+  The.value<>(GSet.to_list<>(GSet.from_list<>(Nat.cmp, [1,2,3,4,5])))
+
+// if the input is not ordered, `from_list` followed by `to_list`
+// orders the input
+GSet.tests.2 : The(List(Nat), [1,2,3,4,5])
+  def xs = [4,3,5,2,1]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)
+
+// `to_list` on a set made from the empty list returns an empty list  
+GSet.tests.3 : The(List(Nat), [])
+  def xs = []
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)
+
+// `null` is true for a set made from the empty list
+GSet.tests.4 : The(Bool, Bool.true)
+  def xs = []
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.null<>(xs)
+  The.value<>(xs)
+
+// `member` returns `false` for elements not in the set
+GSet.tests.5 : The(Bool, Bool.false)
+  def xs = [1,2,3,5]
+  def x  = 4 
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def r  = GSet.member<>(Nat.cmp, x, xs)
+  The.value<>(r)
+
+// `member`returns `true`for elements in the set
+GSet.tests.6 : The(Bool, Bool.true)
+  def xs = [1,2,3,5]
+  def x  = 3 
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def r  = GSet.member<>(Nat.cmp, x, xs)
+  The.value<>(r)
+
+// `delete` removes the specified element from the set
+GSet.tests.7 : The(List(Nat), [1,3,4,5])
+  def xs = [1,2,3,4,5]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.delete<>(Nat.cmp, 2, xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)
+
+// `delete` does not change the set when the specified
+// element is not present in the set
+GSet.tests.8 : The(List(Nat), [1,2,3,4,5])
+  def xs = [1,2,3,4,5]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.delete<>(Nat.cmp, 6, xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)
+
+// `delete_min` removes the minimum element in the set
+GSet.tests.9 : The(List(Nat), [2,3])
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.delete_min<>(xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)
+
+// `map` applies the provided function to all elements
+// in the set 
+GSet.tests.10 : The(List(Nat), [2,3,4])
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def xs = GSet.map<,>(Nat.add(1), xs)
+  def xs = GSet.to_list<>(xs)
+  The.value<>(xs)  
+
+GSet.tests.11 : The(Nat, 6)
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def r  = GSet.foldr<,>(Nat.add, 0, xs)
+  The.value<>(r)
+
+// `intersection` returns a set whose elements are 
+// common in both sets
+GSet.tests.12 : The(List(Nat), [2])
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def ys = [2,4,5]
+  def ys = GSet.from_list<>(Nat.cmp, ys)
+  def r  = GSet.intersection<>(Nat.cmp, xs, ys)
+  def r  = GSet.to_list<>(r)
+  The.value<>(r)
+
+// `union`  
+GSet.tests.13 : The(List(Nat), [1,2,3,4,5,6])
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def ys = [4,5,6]
+  def ys = GSet.from_list<>(Nat.cmp, ys)
+  def r  = GSet.union<>(Nat.cmp, xs, ys)
+  def r  = GSet.to_list<>(r)
+  The.value<>(r) 
+
+// `union` does not repeat elements
+GSet.tests.14 : The(List(Nat), [1,2,3,4,5])
+  def xs = [1,2,3]
+  def xs = GSet.from_list<>(Nat.cmp, xs)
+  def ys = [3,4,5]
+  def ys = GSet.from_list<>(Nat.cmp, ys)
+  def r  = GSet.union<>(Nat.cmp, xs, ys)
+  def r  = GSet.to_list<>(r)
+  The.value<>(r) 
+
+// `difference` returns a set with elements which are
+// present in the first set, but not in the second
+GSet.tests.15 : The(List(Nat), [1,2,3])
+  def xs = GSet.from_list<>(Nat.cmp, [1,2,3,4,5])
+  def ys = GSet.from_list<>(Nat.cmp, [4,5,6])
+  def d  = GSet.difference<>(Nat.cmp, xs, ys)
+  def d  = GSet.to_list<>(d)
+  The.value<>(d)
+
+// balance
+GSet.tests.16 : IO(Unit) 
+  let set = 
+    GSet.bin<>
+    | 7;
+    | 1;
+    | GSet.tip<>;
+    | GSet.bin<>
+      | 6;
+      | 2;
+      | GSet.tip<>;
+      | GSet.bin<>
+        | 5;
+        | 3;
+        | GSet.tip<>;
+        | GSet.bin<>
+          | 4;
+          | 4;
+          | GSet.tip<>;
+          | GSet.bin<>
+            | 3;
+            | 5;
+            | GSet.tip<>;
+            | GSet.bin<>
+              | 2;
+              | 6;
+              | GSet.tip<>;
+              | GSet.bin<>
+                | 1;
+                | 7;
+                | GSet.tip<>;
+                | GSet.tip<>;
+              ;
+            ;
+          ;
+        ; 
+      ;
+    ;
+
+  case set:
+  | tip => IO.print("it's not empty...");
+  | bin => 
+    let after = GSet.balance<>(set.val, set.left, set.right)
+    IO.print(Bool.show(GSet.is_balanced<>(after)))
+  ;
+  
