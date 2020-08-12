@@ -80,7 +80,7 @@ class Play extends Component {
     this.canvas.image_u32 = new Uint32Array(this.canvas.image_buf);
     this.canvas.depth_buf = new ArrayBuffer(this.canvas.image_u32.length);
     this.canvas.depth_u8 = new Uint8Array(this.canvas.depth_buf);
-    this.canvas.clear = {size:0, data:new Uint32Array(256*256*32)};
+    this.canvas.clear = {length:0, data:new Uint32Array(256*256*32)};
 
     // Mouse movement
     this.listeners.mousemove = (e) => {
@@ -164,37 +164,34 @@ class Play extends Component {
       var canvas = this.canvas;
       var rendered = this.app.draw(this.app.init);
       if (rendered._ === "App.Render.vox") {
-        var size = rendered.voxs.size;
-        var buff = rendered.voxs.buffer;
+        var length = rendered.voxs.length;
+        let capacity = rendered.voxs.capacity;
+        var buffer = rendered.voxs.buffer;
         // Renders pixels to buffers
-        for (var i = 0; i < size; ++i) {
-          var pos = buff[i*2+0];
-          var col = buff[i*2+1];
-          if (pos !== 0 || col !== 0) {
-            var p_x = (pos >>> 0) & 0xFFF;
-            var p_y = (pos >>> 12) & 0xFFF;
-            var p_z = (pos >>> 24) & 0xFF;
-            var idx = p_y * canvas.width + p_x;
-            var dep = canvas.depth_u8[idx];
-            if (p_z > dep) {
-              canvas.image_u32[idx] = col;
-              canvas.depth_u8[idx] = p_z;
-              canvas.clear.data[canvas.clear.size++] = idx;
-            }
-          } else {
-            break;
+        for (var i = 0; i < length; ++i) {
+          var pos = buffer[i*2+0];
+          var col = buffer[i*2+1];
+          var p_x = (pos >>> 0) & 0xFFF;
+          var p_y = (pos >>> 12) & 0xFFF;
+          var p_z = (pos >>> 24) & 0xFF;
+          var idx = p_y * canvas.width + p_x;
+          var dep = canvas.depth_u8[idx];
+          if (p_z > dep) {
+            canvas.image_u32[idx] = col;
+            canvas.depth_u8[idx] = p_z;
+            canvas.clear.data[canvas.clear.length++] = idx;
           }
         };
         // Renders buffers to canvas
         canvas.image_data.data.set(canvas.image_u8);
         canvas.context.putImageData(canvas.image_data, 0, 0);
         // Erases pixels from buffers
-        for (var i = 0; i < canvas.clear.size; ++i) {
+        for (var i = 0; i < canvas.clear.length; ++i) {
           var idx = canvas.clear.data[i];
           canvas.image_u32[idx] = 0;
           canvas.depth_u8[idx] = 0;
         }
-        canvas.clear.size = 0;
+        canvas.clear.length = 0;
       };
     }
     this.intervals.app_elem = setInterval(do_render, 1000/32);

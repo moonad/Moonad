@@ -2,4 +2,4 @@
 Image3D.set_pos(idx: U32, pos: U32, img: Image3D): Image3D
   case img:
   | let img.buffer = Buffer32.set(U32.mul(idx,2u), pos, img.buffer)
-    Image3D.new(img.size, img.buffer);
+    Image3D.new(img.length, img.capacity, img.buffer);

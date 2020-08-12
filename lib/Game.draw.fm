@@ -9,8 +9,8 @@ Game.draw(sprites: List(Game.Sprite), scr: Image3D): Image3D
     get idx scr = state
     case sprite:
     | // For each voxel...
-      let voxel_count = Image3D.get_size(sprite.img)
-      for i : U32 = 0u .. voxel_count with scr:
+      let len = Image3D.get_length(sprite.img)
+      let scr = for i : U32 = 0u .. len:
         // Gets the sprite origin (mid) and position (pos)
         let c_x = Pos32.get_x(sprite.mid)
         let c_y = Pos32.get_y(sprite.mid)
@@ -34,6 +34,6 @@ Game.draw(sprites: List(Game.Sprite), scr: Image3D): Image3D
         let scr = Image3D.set_col(U32.add(i, idx), col, scr);
         scr
       // Returns new to-write idx and updated screen
-      Pair.new<,>(U32.add(voxel_count, idx), scr);
+      Pair.new<,>(U32.add(len, idx), scr);
   // Performs the algorithm above and returns the resulting image
   Pair.snd<,>(List.fold<>(sprites)<>(init, next))
