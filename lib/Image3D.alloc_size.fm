@@ -1,2 +1,0 @@
-Image3D.alloc_size(size: U32): Image3D
-  Image3D.new(size, Buffer32.alloc(U32.needed_depth(U32.mul(2u,size))))

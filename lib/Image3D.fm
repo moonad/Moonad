@@ -8,4 +8,4 @@
 // buffer[5] = voxel2.col
 // And so on. Positions and colors are `U32`, interpreted as `Pos32` / `Col32`.
 T Image3D
-| Image3D.new(size: U32, buffer: Buffer32);
+| Image3D.new(length: U32, capacity: U32, buffer: Buffer32);

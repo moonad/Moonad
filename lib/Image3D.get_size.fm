@@ -1,3 +1,0 @@
-Image3D.get_size(vox: Image3D): U32
-  case vox:
-  | vox.size;

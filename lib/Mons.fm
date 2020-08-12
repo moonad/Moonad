@@ -273,7 +273,8 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
           let obj = Mons.Object.set_wlk(obj, 16u)
           let obj =
             if U32.eql(trg.tid, Mons.BUSH) then
-              Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
+              obj
+              //Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
             else
               obj
           let map = Mons.Map.push(new_pos, obj, map)
@@ -302,14 +303,16 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
     Pair.new<,>(g_x, g_y);
 
 // Converts the game state to a list of sprites to be rendered
+// TODO: for some reason, using a `case obj` here causes the
+// function not to type check anymore. Investigate why.
 Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
   case game:
   | let sprites = List.nil<>
     let c_x = Pos32.get_x(game.pos)
     let c_y = Pos32.get_y(game.pos)
     let c_z = Pos32.get_z(game.pos)
-    for x : U32 = 0u .. 19u with sprites:
-      for y : U32 = 0u .. 19u with sprites:
+    let sprites = for x : U32 = 0u .. 19u:
+      let sprites = for y : U32 = 0u .. 19u:
         let t_x = U32.add(U32.sub(c_x, 9u), x)
         let t_y = U32.add(U32.sub(c_y, 9u), y)
         let t_z = c_z
@@ -317,83 +320,111 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let got = Map.get<>(U32.to_bits(pos), game.map)
         case got:
         | sprites;
-        | List.foldl<,>
-          | sprites;
-          | (sprites, obj)
-            // TODO: for some reason, using a `case obj` here causes the
-            // function not to type check anymore. Investigate why.
-            List.foldl<,>
-            | sprites;
-            | (sprites, img)
+        | for obj in got.value with sprites:
+            for img in Mons.Object.get_images(t_x, t_y, obj) with sprites:
               let wlk = Mons.Object.get_wlk(obj)
               let dir = Mons.Object.get_dir(obj)
               get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
               let s_z = t_z
               let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
-              List.cons<>(spr, sprites)
-            ;
-            | Mons.Object.get_images(t_x, t_y, obj);;
-          | got.value;;
+              List.cons<>(spr, sprites);
       sprites
     sprites;
 
+// Draws an ASCII text to a position using 
+//Mons.draw.text(pos: Pos32, txt: String, scr: Image3D): Image3D
+
 // Draws the game to screen
-Mons.draw(
-  sprites  : List(Mons.Sprite),
-  hero_pos : Pos32,
-  hero_obj : Mons.Object,
-  scr      : Image3D
-): Image3D
-  // Initial state (idx, scr)
-  def init
-    Pair.new<,>(0u, scr)
-  // For each sprite...
-  def next(sprite, state)
-    get idx scr = state
-    case sprite:
-    | // For each voxel...
-      let voxel_count = Image3D.get_size(sprite.img)
-      for i : U32 = 0u .. voxel_count with scr:
-        // The game screen is 256x256 pixels
-        let s_w = 128u
-        let s_h = 128u
-        // The origin global position (centered on hero)
-        let h_x = Pos32.get_x(hero_pos)
-        let h_y = Pos32.get_y(hero_pos)
-        //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
-        //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
-        get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-        // Gets the sprite global position
-        let s_x = sprite.x
-        let s_y = sprite.y
-        let s_z = sprite.z
-        // Gets the voxel global position (its cpos on img is x=128, y=128)
-        let xyz = Image3D.get_pos(i, sprite.img)
-        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),128u)
-        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),128u)
-        let v_z = Pos32.get_z(xyz)
-        // Temporary: if voxel is out of screen, make it invisible
-        let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-        let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-        let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-        let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-        //let ok  = List.and([ok0, ok1, ok2, ok3])
-        let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-        // Computes the voxel position on the final canvas
-        let c_x = U32.sub(U32.add(v_x, 128u), o_x)
-        let c_y = U32.sub(U32.add(v_y, 128u), o_y)
-        let c_z = Bool.if<>(ok, v_z, 0u)
-        // Push the voxel to the scr (on the next idx)
-        let pos = Pos32.new(c_x, c_y, c_z)
-        let col = Image3D.get_col(i, sprite.img)
-        let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
-        let scr = Image3D.set_col(U32.add(i, idx), col, scr);
-        scr
-      // Returns new to-write idx and updated screen
-      Pair.new<,>(U32.add(voxel_count, idx), scr);
-  // Performs the algorithm above and returns the resulting image
-  get idx scr = List.fold<>(sprites)<>(init, next)
-  Image3D.set(idx, 0u, 0u, scr) // null-terminated voxel sequence
+Mons.draw(game: Mons.Game, scr: Image3D): Image3D
+  let scr_mid = Pos32.new(128u, 128u, 0u) // The game screen is 256x256 pixels
+  let vox_mid = Pos32.new(128u, 128u, 0u) // Sprites are centered at 128x128
+  case game:
+  | let hero_pos = game.pos
+    let hero_obj = Mons.Map.get_top(hero_pos, game.map)
+    let hero_btl = Mons.Object.get_btl(hero_obj)
+    case hero_btl:
+    // When hero isn't battling, draws the map mode
+    | // For each sprite around the hero...
+      let sprs = Mons.game_sprites(game)
+      def with_spr(spr, scr)
+        case spr:
+        | // For each pixel of the sprite...
+          let len = Image3D.get_length(spr.img)
+          let scr = for i : U32 = 0u .. len:
+            let s_w = Pos32.get_x(scr_mid)
+            let s_h = Pos32.get_y(scr_mid)
+            // The origin global position (centered on hero)
+            let h_x = Pos32.get_x(hero_pos)
+            let h_y = Pos32.get_y(hero_pos)
+            //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
+            //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
+            get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
+            // Gets the spr global position
+            let s_x = spr.x
+            let s_y = spr.y
+            let s_z = spr.z
+            // Gets the pixel global position (its cpos on img is x=128, y=128)
+            let xyz = Image3D.get_pos(i, spr.img)
+            let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),128u)
+            let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),128u)
+            let v_z = Pos32.get_z(xyz)
+            // Temporary: if pixel is out of screen, make it invisible
+            let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+            let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+            let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+            let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+            //let ok  = List.and([ok0, ok1, ok2, ok3])
+            let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+            // Computes the pixel position on the final canvas
+            let c_x = U32.sub(U32.add(v_x, 128u), o_x)
+            let c_y = U32.sub(U32.add(v_y, 128u), o_y)
+            let c_z = Bool.if<>(ok, v_z, 0u)
+            // Pushes the pixel to the scr
+            let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+            let col = Image3D.get_col(i, spr.img) // final pixel col
+            let scr = Image3D.push(pos, col, scr) // pushes to scr
+            scr
+          scr;
+      // Clear the screen and renders all sprites
+      List.fold<>(sprs)<>(Image3D.clear(scr), with_spr);
+    // When hero is in a battle, draws battle mode
+    | //src_mid = 200x200
+      //img_pos = 16x16
+      //vox_mid = 128x128
+      //vox_pos = 129x128
+      
+      // Renders the A letter
+      let img = Mons.Char.65
+      let img_len = 40u
+      let scr = for i : U32 = 0u .. img_len:
+        let img_pos = Pos32.new(16u, 16u, 0u)
+        let vox_pos = Image3D.get_pos(i, img)
+        let pos = Pos32.sub(Pos32.add(img_pos, vox_pos), vox_mid)
+        let col = Image3D.get_col(i, img)
+        Image3D.push(pos, col, scr)
+
+      // Renders the B letter
+      let img = Mons.Char.66
+      let img_len = Image3D.get_length(img)
+      let scr = for i : U32 = 0u .. img_len:
+        let img_pos = Pos32.new(22u, 16u, 0u)
+        let vox_pos = Image3D.get_pos(i, img)
+        let pos = Pos32.sub(Pos32.add(img_pos, vox_pos), vox_mid)
+        let col = Image3D.get_col(i, img)
+        Image3D.push(pos, col, scr)
+
+      scr
+    ;
+  ;
+
+//var scr = [{}, {}, {}, {}, ...]; // 500 espaços
+//scr[0].pos = {x: 10, y: 10, z: 10};
+//scr[0].col = {r: 255, g: 0, b: 0};
+//scr[1].pos = {x: 50, y: 50, z: 10};
+//scr[1].col = {r: 0, g: 0, b: 255};
+//scr[2].pos = {x: 30, y: 30, z: 10};
+//scr[2].col = {r: 0, g: 255, b: 0};
+
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
@@ -470,18 +501,11 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
 
 // The entire game as an App
 Mons: App(Mons.Game)
-  let screen = Image3D.alloc_size(524288u)
+  let screen = Image3D.alloc_capacity(524288u)
   def init
     Mons.example_game
   def draw(game)
-    case game:
-    | let hero_pos = game.pos
-      let hero_obj = Mons.Map.get_top(hero_pos, game.map)
-      App.Render.vox(Mons.draw(
-        Mons.game_sprites(game),
-        hero_pos,
-        hero_obj,
-        screen));
+    App.Render.vox(Mons.draw(game, screen))
   def when(event, game)
     case event:
     | init => [
