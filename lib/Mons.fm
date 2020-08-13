@@ -357,7 +357,7 @@ Mons.Object.blocked: List(U32)
     Mons.WATER_RD,
     Mons.WATER_RU]
 
-// not blocking tiles with water + grass, only blocks water
+// FIXME: not blocking tiles with water + grass, only blocks water
 Mons.Object.is_blocked(trg.tid: U32): Bool
   case List.find<U32>((tid) U32.eql(trg.tid, tid), Mons.Object.blocked):
   | Bool.false;
