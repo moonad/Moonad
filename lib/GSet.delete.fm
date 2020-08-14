@@ -1,0 +1,54 @@
+// Removes an element from a set, using a user-provided comparison 
+// function, balancing the resulting tree in case such element is found
+GSet.delete<A: Type>(cmp: A -> A -> Cmp, a: A, set: GSet(A)): GSet(A)
+  case set:
+  | tip => set;
+  | bin => 
+    case cmp(a, set.val):
+    // if `a` is smaller than the current root 
+    // we should look for it in the left subtree
+    | ltn => 
+      let new_left = GSet.delete<>(cmp, a, set.left)
+      GSet.balance<>(set.val, new_left, set.right)
+    ;
+    // when the element is at the root of the current subtree
+    // things are a little trickier: we need to get the minimum
+    // value of the right subtree and then balance the tree composed
+    // of this minimum value we just found, the left subtree and 
+    // the right subtree without that minimum element
+    | eql => 
+      case set.right:
+      | tip => 
+        case set.left:
+        // if both subtrees are empty and we deleted the root, we 
+        // return an empty set 
+        | tip => GSet.tip<>;
+        // if the right subtree is empty, the left is not and
+        // we've just deleted the root, all we have left is the 
+        // left tree         
+        | bin => set.left;
+      ;
+      | bin => 
+        case set.left:
+        // conversely, if left is empty and right is not, we 
+        // return the right subtree
+        | tip => set.right;
+        // when none of the subtrees are empty, then we need to
+        // find the smallest value of the right subtree and delete it
+        | bin =>
+          let min_val = GSet.min<>(set.right)
+          // this is a hack, we know it can never be `none` because the 
+          // tree is not empty
+          let min_val = Maybe.extract<>(min_val, a)
+          let new_right = GSet.delete<>(cmp, min_val, set.right)
+          GSet.balance<>(min_val, set.left, new_right)  
+        ;
+      ;
+    ;
+    // if `a`is greater than the current root 
+    // we look for it in the right subtree 
+    | gtn => 
+      let new_right = GSet.delete<>(cmp, a, set.right)
+      GSet.balance<>(set.val, set.left, new_right)
+    ;
+  ;
