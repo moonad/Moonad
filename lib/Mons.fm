@@ -462,13 +462,22 @@ Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
       Image3D.push(pos, col, scr)
     scr;
 
-// Draws an ASCII text to a position using 
+// Draws an ASCII text to a position
 Mons.draw.text(txt: String, chr_pos: Pos32, scr: Image3D): Image3D
   for pair in List.indices.u32<>(String.to_list(txt)) with scr:
     get i chr = pair
     let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
     Mons.draw.char(chr, Pos32.add(chr_pos, add_pos), scr)
-    
+
+// Draws a sprite to a position
+Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
+  let len = Image3D.get_length(img)
+  for i : U32 = 0u .. len with scr:
+    let pix_pos = Image3D.get_pos(i, img)
+    let pix_col = Image3D.get_col(i, img)
+    let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), Mons.vox_mid)
+    Image3D.push(pix_pos, pix_col, scr)
+
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
@@ -525,6 +534,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let scr = Mons.draw.text("Lv: 99", Pos32.new(16u,26u,0u), scr)
     let scr = Mons.draw.text("CAPIVARA", Pos32.new(200u,230u,0u), scr)
     let scr = Mons.draw.text("Lv: 30", Pos32.new(200u,240u,0u), scr)
+    let src = Mons.draw.image(Mons.Assets.fight_beholder_d_0, Pos32.new(128u,128u,0u), scr)
     scr ;
 
 // For each tick, updates an object
