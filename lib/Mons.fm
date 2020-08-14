@@ -352,8 +352,8 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.VOID           => Bool.false;
   | Mons.HERO           => Bool.false;
   | Mons.GRASS          => Bool.false;
-  | Mons.BUSH           => Bool.false;
-  | Mons.PLANT_0        => Bool.true;
+  | Mons.BUSH           => Bool.true;
+  | Mons.PLANT_0        => Bool.false;
   | Mons.ELV_TERRAIN_00 => Bool.false;
   | Mons.ELV_TERRAIN_01 => Bool.false;
   | Mons.ELV_TERRAIN_02 => Bool.false;
@@ -391,6 +391,7 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
   else
     let obj = Mons.Object.set_dir(obj, dir)
     let obj = Mons.Object.set_wlk(obj, 16u)
+    let obj = Mons.Object.set_btl(obj, Maybe.none<>)
     let obj =
       if Mons.Kind.battles(trg.kin) then
         Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
@@ -473,7 +474,10 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
   let hero_pos = game.pos
   let hero_obj = Mons.Map.get_top(hero_pos, game.map)
-  let hero_btl = Mons.Object.get_btl(hero_obj)
+  let hero_btl =
+    if U32.gtn(Mons.Object.get_wlk(hero_obj), 0u)
+    then Maybe.none<>
+    else Mons.Object.get_btl(hero_obj)
   let scr = Image3D.clear(scr)
   case hero_btl:
   // When hero isn't battling, draws the map mode
