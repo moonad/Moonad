@@ -66,15 +66,15 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_00;
 | Mons.ELV_TERRAIN_01;
 | Mons.ELV_TERRAIN_02;
-| Mons.WATER_M;
-| Mons.WATER_R;
-| Mons.WATER_U;
-| Mons.WATER_L;
-| Mons.WATER_D;
-| Mons.WATER_RU;
-| Mons.WATER_LU;
-| Mons.WATER_LD;
-| Mons.WATER_RD;
+| Mons.OCEAN_M;
+| Mons.OCEAN_R;
+| Mons.OCEAN_U;
+| Mons.OCEAN_L;
+| Mons.OCEAN_D;
+| Mons.OCEAN_RU;
+| Mons.OCEAN_LU;
+| Mons.OCEAN_LD;
+| Mons.OCEAN_RD;
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -173,15 +173,15 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.ELV_TERRAIN_00 => [Mons.Assets.dark_grass_elevated_00];
   | Mons.ELV_TERRAIN_01 => [Mons.Assets.dark_grass_elevated_01];
   | Mons.ELV_TERRAIN_02 => [Mons.Assets.dark_grass_elevated_02];
-  | Mons.WATER_M => [Mons.Assets.water_m];
-  | Mons.WATER_R => [Mons.Assets.water_r];
-  | Mons.WATER_U => [Mons.Assets.water_u];
-  | Mons.WATER_L => [Mons.Assets.water_l];
-  | Mons.WATER_D => [Mons.Assets.water_d];
-  | Mons.WATER_RU => [Mons.Assets.water_ru];
-  | Mons.WATER_LU => [Mons.Assets.water_lu];
-  | Mons.WATER_LD => [Mons.Assets.water_ld];
-  | Mons.WATER_RD => [Mons.Assets.water_rd];
+  | Mons.OCEAN_M => [Mons.Assets.ocean_m];
+  | Mons.OCEAN_R => [Mons.Assets.ocean_r];
+  | Mons.OCEAN_U => [Mons.Assets.ocean_u];
+  | Mons.OCEAN_L => [Mons.Assets.ocean_l];
+  | Mons.OCEAN_D => [Mons.Assets.ocean_d];
+  | Mons.OCEAN_RU => [Mons.Assets.ocean_ru];
+  | Mons.OCEAN_LU => [Mons.Assets.ocean_lu];
+  | Mons.OCEAN_LD => [Mons.Assets.ocean_ld];
+  | Mons.OCEAN_RD => [Mons.Assets.ocean_rd];
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -244,44 +244,44 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
 
   else if String.eql(code, "w0") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_LU),
+      Mons.Map.tile_of_one(Mons.OCEAN_LU),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w1") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_U),
+      Mons.Map.tile_of_one(Mons.OCEAN_U),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "wm") then
-    [Mons.Map.tile_of_one(Mons.WATER_M)]
+    [Mons.Map.tile_of_one(Mons.OCEAN_M)]
   else if String.eql(code, "w2") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_RU),
+      Mons.Map.tile_of_one(Mons.OCEAN_RU),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w3") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_L),
+      Mons.Map.tile_of_one(Mons.OCEAN_L),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w4") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_R),
+      Mons.Map.tile_of_one(Mons.OCEAN_R),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w5") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_LD),
+      Mons.Map.tile_of_one(Mons.OCEAN_LD),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w6") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_D),
+      Mons.Map.tile_of_one(Mons.OCEAN_D),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else if String.eql(code, "w7") then
     [
-      Mons.Map.tile_of_one(Mons.WATER_RD),
+      Mons.Map.tile_of_one(Mons.OCEAN_RD),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
   else
@@ -339,15 +339,15 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.ELV_TERRAIN_00 => Bool.false;
   | Mons.ELV_TERRAIN_01 => Bool.false;
   | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.WATER_L        => Bool.true;
-  | Mons.WATER_D        => Bool.true;
-  | Mons.WATER_M        => Bool.true;
-  | Mons.WATER_R        => Bool.true;
-  | Mons.WATER_U        => Bool.true;
-  | Mons.WATER_LD       => Bool.true;
-  | Mons.WATER_LU       => Bool.true;
-  | Mons.WATER_RD       => Bool.true;
-  | Mons.WATER_RU       => Bool.true;
+  | Mons.OCEAN_L        => Bool.true;
+  | Mons.OCEAN_D        => Bool.true;
+  | Mons.OCEAN_M        => Bool.true;
+  | Mons.OCEAN_R        => Bool.true;
+  | Mons.OCEAN_U        => Bool.true;
+  | Mons.OCEAN_LD       => Bool.true;
+  | Mons.OCEAN_LU       => Bool.true;
+  | Mons.OCEAN_RD       => Bool.true;
+  | Mons.OCEAN_RU       => Bool.true;
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
   case kin:
@@ -359,15 +359,15 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.ELV_TERRAIN_00 => Bool.false;
   | Mons.ELV_TERRAIN_01 => Bool.false;
   | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.WATER_L        => Bool.false;
-  | Mons.WATER_D        => Bool.false;
-  | Mons.WATER_M        => Bool.false;
-  | Mons.WATER_R        => Bool.false;
-  | Mons.WATER_U        => Bool.false;
-  | Mons.WATER_LD       => Bool.false;
-  | Mons.WATER_LU       => Bool.false;
-  | Mons.WATER_RD       => Bool.false;
-  | Mons.WATER_RU       => Bool.false;
+  | Mons.OCEAN_L        => Bool.false;
+  | Mons.OCEAN_D        => Bool.false;
+  | Mons.OCEAN_M        => Bool.false;
+  | Mons.OCEAN_R        => Bool.false;
+  | Mons.OCEAN_U        => Bool.false;
+  | Mons.OCEAN_LD       => Bool.false;
+  | Mons.OCEAN_LU       => Bool.false;
+  | Mons.OCEAN_RD       => Bool.false;
+  | Mons.OCEAN_RU       => Bool.false;
 
 // Moves the hero to a given direction
 Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
@@ -532,15 +532,26 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let col = Image3D.get_col(i, spr.img) // final pixel col
         Image3D.push(pos, col, scr); // pushes to scr
   // When hero is in a battle, draws battle mode
-  | let scr = Mons.draw.text("CRONI", Pos32.new(20u,22u,0u), scr)
-    let scr = Mons.draw.text("Lv: 99", Pos32.new(20u,32u,0u), scr)
-    let scr = Mons.draw.text("CAPIVARA", Pos32.new(140u,80u,0u), scr)
-    let scr = Mons.draw.text("Lv: 30", Pos32.new(140u,90u,0u), scr)
-    let scr = Mons.draw.text("WHAT SHOULD", Pos32.new(16u,120u,0u), scr)
-    let scr = Mons.draw.text("CRONI DO?", Pos32.new(16u,136u,0u), scr)
-    let src = Mons.draw.image(Mons.Assets.fight_beholder_d_0, Pos32.new(180u,60u,0u), scr)
-    let src = Mons.draw.image(Mons.Assets.fight_beholder_u_0, Pos32.new(50u,100u,0u), scr)
+  // | let scr = Mons.draw.text("CRONI", Pos32.new(20u,22u,0u), scr)
+  //   let scr = Mons.draw.text("Lv: 99", Pos32.new(20u,32u,0u), scr)
+
+    | let scr = Mons.draw.text("CAPIVARA", Pos32.new(25u,25u,0u), scr)
+    let scr = Mons.draw.text("30", Pos32.new(100u,25u,0u), scr)
+
+    let scr = Mons.draw.text("Croni", Pos32.new(130u,100u,0u), scr)
+    let scr = Mons.draw.text("Lv: 99", Pos32.new(130u,110u,0u), scr)
+    let scr = Mons.draw.text("WHAT SHOULD", Pos32.new(16u,140u,0u), scr)
+    let scr = Mons.draw.text("CRONI DO?", Pos32.new(16u,156u,0u), scr)
+
+    let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(128u,128u,0u), scr)
+    let src = Mons.draw.image(Mons.Assets.battle_bath_d, Mons.battle_alingment_up, scr)
+    let src = Mons.draw.image(Mons.Assets.battle_croni_u, Pos32.new(50u,88u,0u), scr)
+    
     scr;
+
+Mons.battle_alingment_up: Pos32
+  //256 - 85 = 171
+  Pos32.new(188u,111u,0u) // x: 128 + 60, y: 128 + 17
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
