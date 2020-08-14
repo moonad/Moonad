@@ -36,7 +36,7 @@ T Mons.Dir
 T Mons.Object
 | Mons.Object.new(
   uid: U32,        // unique id for this object
-  tid: U32,        // thing id, represent its kind
+  kin: Mons.Kind,  // represent the type of the object
   btl: Maybe(U32), // unique id of the object this battles against
   dir: Mons.Dir,   // direction the object is facing
   wlk: U32,        // number of walk frames to animate
@@ -54,24 +54,25 @@ T Mons.Game
   map: Mons.Map // the game map
 );
 
-// THING ID (TID)
-Mons.VOID    : U32 0u
-Mons.HERO    : U32 1u
-Mons.GRASS   : U32 2u
-Mons.BUSH    : U32 3u
-Mons.PLANT_0 : U32 4u
-Mons.ELV_TERRAIN_00 : U32 5u
-Mons.ELV_TERRAIN_01 : U32 6u
-Mons.ELV_TERRAIN_02 : U32 7u
-Mons.WATER_L : U32 8u
-Mons.WATER_D : U32 9u
-Mons.WATER_M : U32 10u
-Mons.WATER_R : U32 11u
-Mons.WATER_U : U32 12u
-Mons.WATER_LD : U32 13u
-Mons.WATER_LU : U32 14u
-Mons.WATER_RD : U32 15u
-Mons.WATER_RU : U32 16u
+// THING ID (kin)
+T Mons.Kind
+| Mons.VOID;
+| Mons.HERO;
+| Mons.GRASS;
+| Mons.BUSH;
+| Mons.PLANT_0;
+| Mons.ELV_TERRAIN_00;
+| Mons.ELV_TERRAIN_01;
+| Mons.ELV_TERRAIN_02;
+| Mons.WATER_M;
+| Mons.WATER_R;
+| Mons.WATER_U;
+| Mons.WATER_L;
+| Mons.WATER_D;
+| Mons.WATER_RU;
+| Mons.WATER_LU;
+| Mons.WATER_LD;
+| Mons.WATER_RD;
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -93,7 +94,7 @@ Mons.Object.get_uid(obj: Mons.Object): U32
 // Sets an object's unique id
 Mons.Object.set_uid(obj: Mons.Object, uid: U32): Mons.Object
   open obj:
-  Mons.Object.new(uid, obj.tid, obj.btl, obj.dir, obj.wlk, obj.chp)
+  Mons.Object.new(uid, obj.kin, obj.btl, obj.dir, obj.wlk, obj.chp)
 
 // Gets an object's battle
 Mons.Object.get_btl(obj: Mons.Object): Maybe(U32)
@@ -103,7 +104,7 @@ Mons.Object.get_btl(obj: Mons.Object): Maybe(U32)
 // Sets an object's battle
 Mons.Object.set_btl(obj: Mons.Object, btl: Maybe(U32)): Mons.Object
   open obj:
-  Mons.Object.new(obj.uid, obj.tid, btl, obj.dir, obj.wlk, obj.chp)
+  Mons.Object.new(obj.uid, obj.kin, btl, obj.dir, obj.wlk, obj.chp)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -113,7 +114,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
   open obj:
-  Mons.Object.new(obj.uid, obj.tid, obj.btl, dir, obj.wlk, obj.chp)
+  Mons.Object.new(obj.uid, obj.kin, obj.btl, dir, obj.wlk, obj.chp)
 
 // Gets an object's walk animation frames
 Mons.Object.get_wlk(obj: Mons.Object): U32
@@ -123,7 +124,7 @@ Mons.Object.get_wlk(obj: Mons.Object): U32
 // Sets an object's walk animation frames
 Mons.Object.set_wlk(obj: Mons.Object, wlk: U32): Mons.Object
   open obj:
-  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp)
+  Mons.Object.new(obj.uid, obj.kin, obj.btl, obj.dir, wlk, obj.chp)
 
 // Gets an object's current HP
 Mons.Object.get_chp(obj: Mons.Object): U32
@@ -133,14 +134,14 @@ Mons.Object.get_chp(obj: Mons.Object): U32
 // Sets an object's current HP
 Mons.Object.set_chp(obj: Mons.Object, chp: U32): Mons.Object
   open obj:
-  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, obj.wlk, chp)
+  Mons.Object.new(obj.uid, obj.kin, obj.btl, obj.dir, obj.wlk, chp)
 
 // Returns the image of a tile
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   open obj:
-  if U32.eql(obj.tid, Mons.VOID) then
-    []
-  else if U32.eql(obj.tid, Mons.HERO) then
+  case obj.kin:
+  | Mons.VOID => [];
+  | Mons.HERO => 
     //0 = parado
     //1 = pe direito pra frente
     //2 = pe esquerdo pra frente
@@ -163,39 +164,22 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
         | right => [Mons.Assets.boy_r_2];
         | up    => [Mons.Assets.boy_u_2];
         | left  => [Mons.Assets.boy_l_2];
-        | down  => [Mons.Assets.boy_d_2];
-  else if U32.eql(obj.tid, Mons.GRASS) then
-    [Mons.Assets.dark_grass_0]
-  else if U32.eql(obj.tid, Mons.BUSH) then
-    [Mons.Assets.bush_0, Mons.Assets.bush_1]
-  else if (U32.eql(obj.tid, Mons.PLANT_0)) then
-    [Mons.Assets.home_decor_plant_0]
-  else if (U32.eql(obj.tid, Mons.ELV_TERRAIN_00)) then
-    [Mons.Assets.dark_grass_elevated_00]
-  else if (U32.eql(obj.tid, Mons.ELV_TERRAIN_01)) then
-    [Mons.Assets.dark_grass_elevated_01]
-  else if (U32.eql(obj.tid, Mons.ELV_TERRAIN_02)) then
-    [Mons.Assets.dark_grass_elevated_02]
-  else if (U32.eql(obj.tid, Mons.WATER_D)) then
-    [Mons.Assets.water_d]
-  else if (U32.eql(obj.tid, Mons.WATER_L)) then
-    [Mons.Assets.water_l]
-  else if (U32.eql(obj.tid, Mons.WATER_M)) then
-    [Mons.Assets.water_m]
-  else if (U32.eql(obj.tid, Mons.WATER_R)) then
-    [Mons.Assets.water_r]
-  else if (U32.eql(obj.tid, Mons.WATER_U)) then
-    [Mons.Assets.water_u]
-  else if (U32.eql(obj.tid, Mons.WATER_LD)) then
-    [Mons.Assets.water_ld]
-  else if (U32.eql(obj.tid, Mons.WATER_LU)) then
-    [Mons.Assets.water_lu]
-  else if (U32.eql(obj.tid, Mons.WATER_RU)) then
-    [Mons.Assets.water_ru]
-  else if (U32.eql(obj.tid, Mons.WATER_RD)) then
-    [Mons.Assets.water_rd]
-  else
-    []
+        | down  => [Mons.Assets.boy_d_2];;
+  | Mons.GRASS => [Mons.Assets.dark_grass_0];
+  | Mons.BUSH => [Mons.Assets.bush_0, Mons.Assets.bush_1];
+  | Mons.PLANT_0 => [Mons.Assets.home_decor_plant_0];
+  | Mons.ELV_TERRAIN_00 => [Mons.Assets.dark_grass_elevated_00];
+  | Mons.ELV_TERRAIN_01 => [Mons.Assets.dark_grass_elevated_01];
+  | Mons.ELV_TERRAIN_02 => [Mons.Assets.dark_grass_elevated_02];
+  | Mons.WATER_M => [Mons.Assets.water_m];
+  | Mons.WATER_R => [Mons.Assets.water_r];
+  | Mons.WATER_U => [Mons.Assets.water_u];
+  | Mons.WATER_L => [Mons.Assets.water_l];
+  | Mons.WATER_D => [Mons.Assets.water_d];
+  | Mons.WATER_RU => [Mons.Assets.water_ru];
+  | Mons.WATER_LU => [Mons.Assets.water_lu];
+  | Mons.WATER_LD => [Mons.Assets.water_ld];
+  | Mons.WATER_RD => [Mons.Assets.water_rd];
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -301,8 +285,8 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
   else
     []
 
-Mons.Map.tile_of_one(tile_TID: U32): Mons.Object
-  Mons.Object.new(0u, tile_TID, Maybe.none<>, Mons.Dir.down, 0u, 0u)
+Mons.Map.tile_of_one(tile_kin: Mons.Kind): Mons.Object
+  Mons.Object.new(0u, tile_kin, Maybe.none<>, Mons.Dir.down, 0u, 0u)
 
 // Converts a string map source to an actual map
 Mons.Map.load(code: String): Mons.Map
@@ -343,24 +327,45 @@ Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   Mons.Game.new(pos, game.map)
 
-Mons.Object.blocked: List(U32)
-  [
-    Mons.PLANT_0, 
-    Mons.WATER_L,
-    Mons.WATER_D,
-    Mons.WATER_M,
-    Mons.WATER_R,
-    Mons.WATER_U,
-    Mons.WATER_LD,
-    Mons.WATER_LU,
-    Mons.WATER_RD,
-    Mons.WATER_RU,
-  ]
+Mons.Kind.blocks(kin: Mons.Kind): Bool
+  case kin:
+  | Mons.VOID           => Bool.false;
+  | Mons.HERO           => Bool.false;
+  | Mons.GRASS          => Bool.false;
+  | Mons.BUSH           => Bool.false;
+  | Mons.PLANT_0        => Bool.true;
+  | Mons.ELV_TERRAIN_00 => Bool.false;
+  | Mons.ELV_TERRAIN_01 => Bool.false;
+  | Mons.ELV_TERRAIN_02 => Bool.false;
+  | Mons.WATER_L        => Bool.true;
+  | Mons.WATER_D        => Bool.true;
+  | Mons.WATER_M        => Bool.true;
+  | Mons.WATER_R        => Bool.true;
+  | Mons.WATER_U        => Bool.true;
+  | Mons.WATER_LD       => Bool.true;
+  | Mons.WATER_LU       => Bool.true;
+  | Mons.WATER_RD       => Bool.true;
+  | Mons.WATER_RU       => Bool.true;
 
-Mons.Object.is_blocked(trg.tid: U32): Bool
-  case List.find<U32>((tid) U32.eql(trg.tid, tid), Mons.Object.blocked):
-  | Bool.false;
-  | Bool.true;
+Mons.Kind.battles(kin: Mons.Kind): Bool
+  case kin:
+  | Mons.VOID           => Bool.false;
+  | Mons.HERO           => Bool.false;
+  | Mons.GRASS          => Bool.false;
+  | Mons.BUSH           => Bool.false;
+  | Mons.PLANT_0        => Bool.true;
+  | Mons.ELV_TERRAIN_00 => Bool.false;
+  | Mons.ELV_TERRAIN_01 => Bool.false;
+  | Mons.ELV_TERRAIN_02 => Bool.false;
+  | Mons.WATER_L        => Bool.false;
+  | Mons.WATER_D        => Bool.false;
+  | Mons.WATER_M        => Bool.false;
+  | Mons.WATER_R        => Bool.false;
+  | Mons.WATER_U        => Bool.false;
+  | Mons.WATER_LD       => Bool.false;
+  | Mons.WATER_LU       => Bool.false;
+  | Mons.WATER_RD       => Bool.false;
+  | Mons.WATER_RU       => Bool.false;
 
 // Moves the hero to a given direction
 Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
@@ -379,7 +384,7 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
   let trg = Mons.Map.get_top(new_pos, map)
   open trg:
   let is_walking = U32.gtn(wlk, 0u)
-  let is_blocked = Mons.Object.is_blocked(trg.tid)
+  let is_blocked = Mons.Kind.blocks(trg.kin)
   if Bool.or(is_walking, is_blocked) then
     let map = Mons.Map.push(old_pos, obj, map)
     Mons.Game.new(old_pos, map)
@@ -387,9 +392,9 @@ Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
     let obj = Mons.Object.set_dir(obj, dir)
     let obj = Mons.Object.set_wlk(obj, 16u)
     let obj =
-      if U32.eql(trg.tid, Mons.BUSH) then
-        //Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
-        obj
+      if Mons.Kind.battles(trg.kin) then
+        Mons.Object.set_btl(obj, Maybe.some<>(trg.uid))
+        //obj
       else
         obj
     let map = Mons.Map.push(new_pos, obj, map)
@@ -526,7 +531,7 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
       U32.sub(obj.wlk, 2u)
     else
       obj.wlk
-  Mons.Object.new(obj.uid, obj.tid, obj.btl, obj.dir, wlk, obj.chp)
+  Mons.Object.new(obj.uid, obj.kin, obj.btl, obj.dir, wlk, obj.chp)
 
 // For each tick, updates the game state
 Mons.Game.tick(game: Mons.Game): Mons.Game
