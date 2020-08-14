@@ -1,6 +1,8 @@
 // TODO: adicionar uma lista de objetos "tickaveis" pra que não seja necessário
 // chamar o tick em todos os objetos do mapa a todo frame, por performance
 
+// GBA position: divide OpenEMU by 2.575
+
 // enter_animation: quando você entra em um tile
 // - grass walk animation
 // - grass jump animation
@@ -80,7 +82,7 @@ Mons.vox_mid: Pos32
 
 // The game screen is 256x256 pixels
 Mons.scr_mid: Pos32
-  Pos32.new(128u, 128u, 0u)
+  Pos32.new(120u, 80u, 0u)
 
 // The void tile
 Mons.Object.void: Mons.Object
@@ -511,8 +513,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let s_z = spr.z
         // Gets the pixel global position (its cpos on img is x=128, y=128)
         let xyz = Image3D.get_pos(i, spr.img)
-        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),128u)
-        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),128u)
+        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
         let v_z = Pos32.get_z(xyz)
         // Temporary: if pixel is out of screen, make it invisible
         let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
@@ -522,20 +524,23 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         //let ok  = List.and([ok0, ok1, ok2, ok3])
         let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
         // Computes the pixel position on the final canvas
-        let c_x = U32.sub(U32.add(v_x, 128u), o_x)
-        let c_y = U32.sub(U32.add(v_y, 128u), o_y)
+        let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+        let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
         let c_z = Bool.if<>(ok, v_z, 0u)
         // Pushes the pixel to the scr
         let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
         let col = Image3D.get_col(i, spr.img) // final pixel col
         Image3D.push(pos, col, scr); // pushes to scr
   // When hero is in a battle, draws battle mode
-  | let scr = Mons.draw.text("CRONI", Pos32.new(16u,16u,0u), scr)
-    let scr = Mons.draw.text("Lv: 99", Pos32.new(16u,26u,0u), scr)
-    let scr = Mons.draw.text("CAPIVARA", Pos32.new(200u,230u,0u), scr)
-    let scr = Mons.draw.text("Lv: 30", Pos32.new(200u,240u,0u), scr)
-    let src = Mons.draw.image(Mons.Assets.fight_beholder_d_0, Pos32.new(128u,128u,0u), scr)
-    scr ;
+  | let scr = Mons.draw.text("CRONI", Pos32.new(20u,22u,0u), scr)
+    let scr = Mons.draw.text("Lv: 99", Pos32.new(20u,32u,0u), scr)
+    let scr = Mons.draw.text("CAPIVARA", Pos32.new(140u,80u,0u), scr)
+    let scr = Mons.draw.text("Lv: 30", Pos32.new(140u,90u,0u), scr)
+    let scr = Mons.draw.text("WHAT SHOULD", Pos32.new(16u,120u,0u), scr)
+    let scr = Mons.draw.text("CRONI DO?", Pos32.new(16u,136u,0u), scr)
+    let src = Mons.draw.image(Mons.Assets.fight_beholder_d_0, Pos32.new(180u,60u,0u), scr)
+    let src = Mons.draw.image(Mons.Assets.fight_beholder_u_0, Pos32.new(50u,100u,0u), scr)
+    scr;
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
@@ -620,6 +625,9 @@ Mons: App(Mons.Game)
   def when(event, game)
     case event:
     | init => [
+      let width = U32.mul(Pos32.get_x(Mons.scr_mid), 2u)
+      let height = U32.mul(Pos32.get_y(Mons.scr_mid), 2u)
+      App.Action.resize<>(width, height)
     ];
     | tick => [
       App.Action.state<>(Mons.Game.tick(game)),

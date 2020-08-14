@@ -47,11 +47,32 @@ class Play extends Component {
       document.body.removeEventListener(key, this.listeners[key]);
     };
   }
+  init_canvas(width, height) {
+    console.log("INIT CANVAS", width, height);
+    this.canvas = document.createElement("canvas");
+    this.canvas.style["image-rendering"] = "pixelated";
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.canvas.style.width = width+"px";
+    this.canvas.style.height = height+"px";
+    this.canvas.clear = {length:0, data:new Uint32Array(width*height*32)};
+    this.canvas.style.border = "1px dashed gray";
+    this.canvas.context = this.canvas.getContext("2d");
+    this.canvas.image_data = this.canvas.context.getImageData(0, 0, this.canvas.width, this.canvas.height)
+    this.canvas.image_buf = new ArrayBuffer(this.canvas.image_data.data.length);
+    this.canvas.image_u8 = new Uint8ClampedArray(this.canvas.image_buf);
+    this.canvas.image_u32 = new Uint32Array(this.canvas.image_buf);
+    this.canvas.depth_buf = new ArrayBuffer(this.canvas.image_u32.length);
+    this.canvas.depth_u8 = new Uint8Array(this.canvas.depth_buf);
+  }
   start_app(name) {
     var js_code = fm.tojs.compile(name, this.defs, true);
     console.log(js_code);
     this.app = eval(js_code);
     this.app = this.app[name];
+
+    // Canvas for image rendering
+    this.init_canvas(256, 256);
 
     // Init event
     this.send_event({
@@ -64,23 +85,6 @@ class Play extends Component {
       },
       mouse: this.mouse_pos,
     });
-
-    // Canvas for image rendering
-    this.canvas = document.createElement("canvas");
-    this.canvas.style["image-rendering"] = "pixelated";
-    this.canvas.width = 256;
-    this.canvas.height = 256;
-    this.canvas.style.width = "256px";
-    this.canvas.style.height = "256px";
-    this.canvas.style.border = "1px dashed gray";
-    this.canvas.context = this.canvas.getContext("2d");
-    this.canvas.image_data = this.canvas.context.getImageData(0, 0, this.canvas.width, this.canvas.height)
-    this.canvas.image_buf = new ArrayBuffer(this.canvas.image_data.data.length);
-    this.canvas.image_u8 = new Uint8ClampedArray(this.canvas.image_buf);
-    this.canvas.image_u32 = new Uint32Array(this.canvas.image_buf);
-    this.canvas.depth_buf = new ArrayBuffer(this.canvas.image_u32.length);
-    this.canvas.depth_u8 = new Uint8Array(this.canvas.depth_buf);
-    this.canvas.clear = {length:0, data:new Uint32Array(256*256*32)};
 
     // Mouse movement
     this.listeners.mousemove = (e) => {
@@ -153,7 +157,7 @@ class Play extends Component {
       };
       // Inserts canvas when it is needed
       if ( this.app_elem.firstChild
-        && this.app_elem.firstChild.id === "app_insert_canvas") {
+        && this.app_elem.firstChild !== this.canvas) {
         this.app_elem.innerHTML = "";
         this.app_elem.appendChild(this.canvas);
       }
@@ -237,6 +241,9 @@ class Play extends Component {
               });
             });
             break;
+          case "App.Action.resize":
+            this.init_canvas(action.width, action.height);
+            break;
         };
         actions = actions.tail;
       }
@@ -260,7 +267,7 @@ class Play extends Component {
         app_ins = rendered.text;
         break;
       case "App.Render.vox":
-        app_ins = h("span", {id:"app_insert_canvas"});
+        app_ins = h("span");
         break;
     }
 
