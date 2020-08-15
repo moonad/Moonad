@@ -532,26 +532,42 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let col = Image3D.get_col(i, spr.img) // final pixel col
         Image3D.push(pos, col, scr); // pushes to scr
   // When hero is in a battle, draws battle mode
-  // | let scr = Mons.draw.text("CRONI", Pos32.new(20u,22u,0u), scr)
-  //   let scr = Mons.draw.text("Lv: 99", Pos32.new(20u,32u,0u), scr)
+    | let scr = Mons.battle_show_adversary_info("CAPIVARA", "30", 100u, scr)
+      let scr = Mons.battle_show_mons_info("Croni", "Lv: 99", 100u, scr)
+      let scr = Mons.battle_show_text("WHAT SHOULD",0u, scr)
+      let scr = Mons.battle_show_text("CRONI DO?", 1u, scr)
 
-    | let scr = Mons.draw.text("CAPIVARA", Pos32.new(25u,25u,0u), scr)
-    let scr = Mons.draw.text("30", Pos32.new(100u,25u,0u), scr)
+      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(128u,128u,0u), scr)
+      let src = Mons.battle_show_adversary(Mons.Assets.battle_bath_d, scr)
+      let src = Mons.battle_show_mons(Mons.Assets.battle_croni_u, scr)
+      
+      scr;
 
-    let scr = Mons.draw.text("Croni", Pos32.new(130u,100u,0u), scr)
-    let scr = Mons.draw.text("Lv: 99", Pos32.new(130u,110u,0u), scr)
-    let scr = Mons.draw.text("WHAT SHOULD", Pos32.new(16u,140u,0u), scr)
-    let scr = Mons.draw.text("CRONI DO?", Pos32.new(16u,156u,0u), scr)
+// Show text
+// ---------
+// Show a battle text in the bottom of the screen
+Mons.battle_show_text(text: String, row_num: U32, scr: Image3D): Image3D
+  let base = 135u
+  let aux = U32.mul(row_num, 16u)
+  let pos = Pos32.new(16u,U32.add(base, aux),0u)
+  Mons.draw.text(text, pos, scr)
 
-    let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(128u,128u,0u), scr)
-    let src = Mons.draw.image(Mons.Assets.battle_bath_d, Mons.battle_alingment_up, scr)
-    let src = Mons.draw.image(Mons.Assets.battle_croni_u, Pos32.new(50u,88u,0u), scr)
-    
-    scr;
+Mons.battle_show_adversary_info(name: String, lvl: String, hp: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.text(name, Pos32.new(25u,27u,0u), scr)
+  Mons.draw.text(lvl, Pos32.new(100u,27u,0u), scr)
+  
+Mons.battle_show_mons_info(name: String, lvl: String, hp: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.text(name, Pos32.new(130u,100u,0u), scr)
+  Mons.draw.text(lvl, Pos32.new(130u,110u,0u), scr)
 
-Mons.battle_alingment_up: Pos32
-  //256 - 85 = 171
-  Pos32.new(188u,111u,0u) // x: 128 + 60, y: 128 + 17
+// Show images of Mons
+// TODO: calculate where the Mon will be positioned based on its image size?
+Mons.battle_show_adversary(sprite: Image3D, scr: Image3D): Image3D
+  Mons.draw.image(sprite, Pos32.new(188u,45u,0u), scr) 
+
+Mons.battle_show_mons(sprite: Image3D, scr: Image3D): Image3D
+  Mons.draw.image(sprite, Pos32.new(80u,88u,0u), scr) 
+
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
