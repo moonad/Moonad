@@ -75,6 +75,11 @@ T Mons.Kind
 | Mons.OCEAN_LU;
 | Mons.OCEAN_LD;
 | Mons.OCEAN_RD;
+| Mons.TREE_0_00;
+| Mons.TREE_0_01;
+| Mons.TENT_00;
+| Mons.TENT_01;
+| Mons.TENT_02;
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -182,6 +187,12 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.OCEAN_LU => [Mons.Assets.ocean_lu];
   | Mons.OCEAN_LD => [Mons.Assets.ocean_ld];
   | Mons.OCEAN_RD => [Mons.Assets.ocean_rd];
+  | Mons.TREE_0_00 => [Mons.Assets.tree_0_00];
+  | Mons.TREE_0_01 => [Mons.Assets.tree_0_01];
+  | Mons.TENT => [Mons.Assets.tent_00];
+  | Mons.TENT => [Mons.Assets.tent_01];
+  | Mons.TENT => [Mons.Assets.tent_02];
+  
 
 // An empty map
 Mons.Map.new: Mons.Map
@@ -284,6 +295,28 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.OCEAN_RD),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
+  else if String.eql(code, "T0") then
+    [
+      Mons.Map.tile_of_one(Mons.TREE_0_00),
+      Mons.Map.tile_of_one(Mons.GRASS),
+    ]
+  else if String.eql(code, "T1") then
+    [
+      Mons.Map.tile_of_one(Mons.TREE_0_01),
+      Mons.Map.tile_of_one(Mons.GRASS),
+    ]
+  else if String.eql(code, "/0") then
+    [
+      Mons.Map.tile_of_one(Mons.TENT_00),
+      Mons.Map.tile_of_one(Mons.GRASS),
+    ]
+  else if String.eql(code, "/1") then
+    [ Mons.Map.tile_of_one(Mons.TENT_01) ]
+  else if String.eql(code, "/2") then
+    [
+      Mons.Map.tile_of_one(Mons.TENT_02),
+      Mons.Map.tile_of_one(Mons.GRASS),
+    ]
   else
     []
 
@@ -348,6 +381,11 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.OCEAN_LU       => Bool.true;
   | Mons.OCEAN_RD       => Bool.true;
   | Mons.OCEAN_RU       => Bool.true;
+  | Mons.TREE_0_00      => Bool.false;
+  | Mons.TREE_0_01      => Bool.false;
+  | Mons.TENT           => Bool.false;
+  | Mons.TENT           => Bool.false;
+  | Mons.TENT           => Bool.false;
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
   case kin:
@@ -368,6 +406,12 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.OCEAN_LU       => Bool.false;
   | Mons.OCEAN_RD       => Bool.false;
   | Mons.OCEAN_RU       => Bool.false;
+  | Mons.TREE_0_00      => Bool.false;
+  | Mons.TREE_0_01      => Bool.false;
+  | Mons.TENT           => Bool.false;
+  | Mons.TENT           => Bool.false;
+  | Mons.TENT           => Bool.false;
+
 
 // Moves the hero to a given direction
 Mons.Game.move_hero(dir: Mons.Dir, game: Mons.Game): Mons.Game
