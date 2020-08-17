@@ -1,35 +1,29 @@
-// TODO: improve
-Word.add.aux: <size: Nat> -> Word(size) -> Word(size) -> Bool -> Word(size)
-  <size> (a) (b) (c)
-  ( a<(a.size) () Word(a.size) -> Word(a.size)>
-  | (b) Word.nil;
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(Nat.pred(b.size)) -> Word(b.size)>
-    | (a.pred)
-      Word.nil;
-    | <b.size> (b.pred) (a.pred)
-      c<() Unit -> Word(Nat.succ(b.size))>
-      | () Word.1<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.false));  // a=0 b=0 c=0
-      | () Word.0<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.false));
+Word.add.aux<size: Nat>(a: Word(size), b: Word(size), c: Bool): Word(size)
+  case a:
+  with b: Word(a.size) = b;
+  | Word.nil;
+  | case b:
+    with a.pred: Word(Nat.pred(b.size)) = a.pred;
+    | Word.nil;
+    | case c:
+      | Word.1<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.false)); // a=0 b=0 c=0
+      | Word.0<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.false));
       | Unit.new;; // a=0 b=0 c=1
-    | <b.size> (b.pred) (a.pred)
-      c<() Unit -> Word(Nat.succ(b.size))>
-      | () Word.0<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.true));   // a=0 b=1 c=0
-      | () Word.1<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.false));  // a=0 b=1 c=1
-      | Unit.new;
-    ;)(a.pred);
-  | <a.size> (a.pred) (b)
-    ( b<(b.size) () Word(Nat.pred(b.size)) -> Word(b.size)>
-    | (a.pred) Word.nil;
-    | <b.size> (b.pred) (a.pred)
-      c<() Unit -> Word(Nat.succ(b.size))>
-      | () Word.0<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.true));   // a=1 b=0 c=0
-      | () Word.1<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.false));
+    | case c:
+      | Word.0<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.true)); // a=0 b=1 c=0
+      | Word.1<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.false)); // a=0 b=1 c=1
+      | Unit.new;;
+    : Word(b.size);;
+  | case b:
+    with a.pred: Word(Nat.pred(b.size)) = a.pred;
+    | Word.nil;
+    | case c:
+      | Word.0<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.true)); // a=1 b=0 c=0
+      | Word.1<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.false));
       | Unit.new;; // a=1 b=0 c=1
-    | <b.size> (b.pred) (a.pred)
-      c<() Unit -> Word(Nat.succ(b.size))>
-      | () Word.1<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.true));   // a=1 b=1 c=0
-      | () Word.0<b.size>(Word.add.aux<b.size>(a.pred)(b.pred)(Bool.true));   // a=1 b=1 c=1
-      | Unit.new;
-    ;)(a.pred)
-  ;)(b)
+    | case c:
+      | Word.1<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.true));   // a=1 b=1 c=0
+      | Word.0<b.size>(Word.add.aux<b.size>(a.pred, b.pred, Bool.true));   // a=1 b=1 c=1
+      | Unit.new;;
+    : Word(b.size);;
+  : Word(a.size);
