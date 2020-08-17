@@ -1,3 +1,0 @@
-// z_index: 4, will scale on y
-Mons.Assets.fight_espectronus_u_3: Image3D
-  Image3D.parse("")
