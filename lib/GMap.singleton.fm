@@ -1,0 +1,7 @@
+// creates a map from a single pair of key and value
+// note that the key type `K` *must* be able to implement
+// a function with the signature: 
+//         cmp: K -> K -> Cmp 
+// which is used in many map-related operations
+GMap.singleton<K: Type, V: Type>(key: K, val: V): GMap(K,V)
+  GMap.bin<K,V>(1, key, val, GMap.tip<,>, GMap.tip<,>)

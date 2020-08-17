@@ -1,0 +1,17 @@
+// A generic map from keys of type `K` to values of type `V`
+// which under the hood is a size balanced binary tree
+// note that because of this structure, the key type `K` 
+// *must* be able to implement a function with the signature
+//      cmp: K -> K -> Cmp 
+// which is used in many of the map-related operations
+//
+// Implementation based on 
+// "Implementing Sets Efficiently in a Functional Language"
+// by Stephen Adams and Haskell's `containers` package
+//
+// left contains elements whose keys are smaller than the 
+// current node's key, while right contains elements whose keys 
+// are greater 
+T GMap <K: Type, V: Type>
+| GMap.tip;
+| GMap.bin(size: Nat, key: K, val: V, left: GMap(K,V), right: GMap(K,V));
