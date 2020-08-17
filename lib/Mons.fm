@@ -581,7 +581,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       let scr = Mons.battle_show_text("WHAT SHOULD",0u, scr)
       let scr = Mons.battle_show_text("CRONI DO?", 1u, scr)
 
-      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(128u,128u,0u), scr)
+      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
       let src = Mons.battle_show_adversary(Mons.Assets.battle_bath_d, scr)
       let src = Mons.battle_show_mons(Mons.Assets.battle_croni_u, scr)
       
@@ -591,26 +591,26 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 // ---------
 // Show a battle text in the bottom of the screen
 Mons.battle_show_text(text: String, row_num: U32, scr: Image3D): Image3D
-  let base = 135u
+  let base = 125u
   let aux = U32.mul(row_num, 16u)
   let pos = Pos32.new(16u,U32.add(base, aux),0u)
   Mons.draw.text(text, pos, scr)
 
 Mons.battle_show_adversary_info(name: String, lvl: String, hp: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.text(name, Pos32.new(25u,27u,0u), scr)
-  Mons.draw.text(lvl, Pos32.new(100u,27u,0u), scr)
+  let scr = Mons.draw.text(name, Pos32.new(25u,26u,0u), scr)
+  Mons.draw.text(lvl, Pos32.new(92u,26u,0u), scr)
   
 Mons.battle_show_mons_info(name: String, lvl: String, hp: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.text(name, Pos32.new(130u,100u,0u), scr)
-  Mons.draw.text(lvl, Pos32.new(130u,110u,0u), scr)
+  let scr = Mons.draw.text(name, Pos32.new(130u,90u,0u), scr)
+  Mons.draw.text(lvl, Pos32.new(130u,100u,0u), scr)
 
 // Show images of Mons
 // TODO: calculate where the Mon will be positioned based on its image size?
 Mons.battle_show_adversary(sprite: Image3D, scr: Image3D): Image3D
-  Mons.draw.image(sprite, Pos32.new(188u,45u,0u), scr) 
+  Mons.draw.image(sprite, Pos32.new(180u,40u,0u), scr) 
 
 Mons.battle_show_mons(sprite: Image3D, scr: Image3D): Image3D
-  Mons.draw.image(sprite, Pos32.new(80u,88u,0u), scr) 
+  Mons.draw.image(sprite, Pos32.new(75u,80u,0u), scr) 
 
 
 // For each tick, updates an object
