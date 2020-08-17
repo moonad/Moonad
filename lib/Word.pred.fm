@@ -1,6 +1,6 @@
-Word.pred: <size: Nat> -> Word(Nat.succ(size)) -> Word(size)
-  <size> (word)
-  word<(size) () Word(Nat.pred(size))>
+Word.pred<size: Nat>(word: Word(Nat.succ(size))): Word(size)
+  case word:
   | Word.nil;
-  | <word.size> (word.pred) word.pred;
-  | <word.size> (word.pred) word.pred;
+  | word.pred;
+  | word.pred;
+  : Word(Nat.pred(word.size));
