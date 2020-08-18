@@ -657,10 +657,10 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
     let c_x = Pos32.get_x(game.pos)
     let c_y = Pos32.get_y(game.pos)
     let c_z = Pos32.get_z(game.pos)
-    for x : U32 = 0u .. 19u with sprs:
-      for y : U32 = 0u .. 19u with sprs:
-        let t_x = U32.add(U32.sub(c_x, 9u), x)
-        let t_y = U32.add(U32.sub(c_y, 9u), y)
+    for x : U32 = 0u .. 17u with sprs:
+      for y : U32 = 0u .. 13u with sprs:
+        let t_x = U32.add(U32.sub(c_x, 8u), x)
+        let t_y = U32.add(U32.sub(c_y, 6u), y)
         let t_z = c_z
         let pos = Pos32.new(t_x, t_y, t_z)
         let got = Map.get<>(U32.to_bits(pos), game.map)
