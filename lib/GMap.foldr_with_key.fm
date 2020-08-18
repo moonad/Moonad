@@ -1,0 +1,16 @@
+// like GMap.foldr but with access to both values and keys
+GMap.foldr_with_key<K: Type, V: Type, Z: Type>(f: K -> V -> Z -> Z, z: Z, map: GMap(K,V)): Z 
+  GMap.foldr_with_key.go<K,V,Z>(f, z, map)
+
+
+GMap.foldr_with_key.go<K: Type, V: Type, Z: Type>(
+  f   : K -> V -> Z -> Z, 
+  z   : Z,
+  map : GMap(K,V) 
+) : Z 
+  case map:
+  | tip => z;
+  | bin => 
+    let right_folded = GMap.foldr_with_key.go<K,V,Z>(f, z, map.right) 
+    let new_z        = f(map.key, map.val, right_folded)
+    GMap.foldr_with_key.go<K,V,Z>(f, new_z, map.left); 
