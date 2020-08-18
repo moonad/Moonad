@@ -46,10 +46,10 @@ T Mons.Action
 // A game object
 T Mons.Object
 | Mons.Object.new(
-  kin: Mons.Kind,   // represent the type of the object
-  dir: Mons.Dir,    // direction the object is facing
-  wlk: U32,         // number of walk frames to animate
-  dmg: U32          // object's current health points
+  kin: Mons.Kind, // represent the type of the object
+  dir: Mons.Dir,  // direction the object is facing
+  wlk: U32,       // number of walk frames to animate
+  dmg: U32        // object's current health points
 );
 
 // A 2d map of game tiles
@@ -728,7 +728,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let objs
           = case got:
           | [Mons.Object.void];
-          | got.value;
+          | List.reverse<>(got.value);
         for obj in objs with sprs:
           for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
             let wlk = Mons.Object.get_wlk(obj)
