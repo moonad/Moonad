@@ -90,6 +90,7 @@ T Mons.Kind
 | Mons.BIG_TREE_00;
 | Mons.BIG_TREE_01;
 | Mons.ROCK_PATH_C;
+| Mons.ROCK_PATH_M;
 | Mons.BATH;
 | Mons.BEHOLDER;
 | Mons.CRONI;
@@ -104,6 +105,10 @@ T Mons.Kind
 | Mons.HOUSE_0_01;
 | Mons.HOUSE_0_02;
 | Mons.HOUSE_0_03;
+| Mons.CASTLE_00;
+| Mons.CASTLE_01;
+| Mons.CASTLE_02;
+| Mons.CASTLE_03;
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -203,6 +208,7 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.BIG_TREE_00 => [Mons.Assets.bigtree0_00];
   | Mons.BIG_TREE_01 => [Mons.Assets.bigtree0_01];
   | Mons.ROCK_PATH_C => [Mons.Assets.rock_path_0_c];
+  | Mons.ROCK_PATH_M => [Mons.Assets.rock_path_0_m];
   | Mons.BATH => [Mons.Assets.mons_bath_d_0];
   | Mons.BEHOLDER => [Mons.Assets.mons_beholder_d_0];
   | Mons.CRONI => [Mons.Assets.mons_croni_d_0];
@@ -217,6 +223,10 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.HOUSE_0_01 => [Mons.Assets.brown_house0_01];
   | Mons.HOUSE_0_02 => [Mons.Assets.brown_house0_02];
   | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_03];
+  | Mons.CASTLE_00 => [Mons.Assets.brown_castle_00];
+  | Mons.CASTLE_01 => [Mons.Assets.brown_castle_01];
+  | Mons.CASTLE_02 => [Mons.Assets.brown_castle_02];
+  | Mons.CASTLE_03 => [Mons.Assets.brown_castle_03];
 
   
 // An empty map
@@ -361,11 +371,13 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.BIG_TREE_01),
       Mons.Map.tile_of_one(Mons.GRASS)
     ]
-  else if String.eql(code, ".p") then
+  else if String.eql(code, "G0") then
     [ 
       Mons.Map.tile_of_one(Mons.ROCK_PATH_C),
       Mons.Map.tile_of_one(Mons.GRASS)
     ]
+  else if String.eql(code, "G1") then
+    [ Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "30") then
     [ 
       Mons.Map.tile_of_one(Mons.BATH),
@@ -417,21 +429,25 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.GRASS)
     ]
   else if String.eql(code, "K0") then
-    [ 
-      Mons.Map.tile_of_one(Mons.HOUSE_0_00)
-    ]
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_00) ]
   else if String.eql(code, "K1") then
-    [ 
-      Mons.Map.tile_of_one(Mons.HOUSE_0_01)
-    ]
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_01) ]
   else if String.eql(code, "K2") then
-    [ 
-      Mons.Map.tile_of_one(Mons.HOUSE_0_02)
-    ]
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_02) ]
   else if String.eql(code, "K3") then
-    [ 
-      Mons.Map.tile_of_one(Mons.HOUSE_0_03)
-    ]
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_03) ]
+  else if String.eql(code, "C0") then
+    [ Mons.Map.tile_of_one(Mons.CASTLE_00)
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C1") then
+    [ Mons.Map.tile_of_one(Mons.CASTLE_01)
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C2") then
+    [ Mons.Map.tile_of_one(Mons.CASTLE_02),
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C3") then
+    [ Mons.Map.tile_of_one(Mons.CASTLE_03),
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else
     []
 
@@ -515,6 +531,7 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | BIG_TREE_00         => Bool.true;
   | BIG_TREE_01         => Bool.true;
   | ROCK_PATH_C         => Bool.false;
+  | ROCK_PATH_M         => Bool.false;
   | Mons.BATH           => Bool.false;
   | Mons.BEHOLDER       => Bool.false;
   | Mons.CRONI          => Bool.false;
@@ -529,6 +546,10 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.HOUSE_0_01     => Bool.true;
   | Mons.HOUSE_0_02     => Bool.true;
   | Mons.HOUSE_0_03     => Bool.true;
+  | Mons.CASTLE_00     => Bool.true;
+  | Mons.CASTLE_01     => Bool.true;
+  | Mons.CASTLE_02     => Bool.true;
+  | Mons.CASTLE_03     => Bool.true;
 
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
@@ -558,6 +579,7 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | BIG_TREE_00         => Bool.false;
   | BIG_TREE_01         => Bool.false;
   | ROCK_PATH_C         => Bool.false;
+  | ROCK_PATH_M         => Bool.false;
   | Mons.BATH           => Bool.true;
   | Mons.BEHOLDER       => Bool.true;
   | Mons.CRONI          => Bool.true;
@@ -572,6 +594,10 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.HOUSE_0_01     => Bool.false;
   | Mons.HOUSE_0_02     => Bool.false;
   | Mons.HOUSE_0_03     => Bool.false;
+  | Mons.CASTLE_00      => Bool.false;
+  | Mons.CASTLE_01      => Bool.false;
+  | Mons.CASTLE_02      => Bool.false;
+  | Mons.CASTLE_03      => Bool.false;
 
 Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   case kin:
@@ -600,6 +626,7 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.BIG_TREE_00    => Mons.Assets.battle_croni_u;
   | Mons.BIG_TREE_01    => Mons.Assets.battle_croni_u;
   | Mons.ROCK_PATH_C    => Mons.Assets.battle_croni_u;
+  | Mons.ROCK_PATH_M    => Mons.Assets.battle_croni_u;
   | Mons.BATH           => case up: |Mons.Assets.battle_bath_u; |Mons.Assets.battle_bath_d;;
   | Mons.BEHOLDER       => case up: |Mons.Assets.battle_beholder_u; |Mons.Assets.battle_beholder_d;;
   | Mons.CRONI          => case up: |Mons.Assets.battle_croni_u; |Mons.Assets.battle_croni_d;;
@@ -614,6 +641,10 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.HOUSE_0_01     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_02     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_03     => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_00      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_01      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_02      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_03      => Mons.Assets.battle_croni_u;
 
 Mons.Kind.get_name(kin: Mons.Kind): String
   case kin:
@@ -642,6 +673,7 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | BIG_TREE_00         => "";
   | BIG_TREE_01         => "";
   | ROCK_PATH_C         => "";
+  | ROCK_PATH_M         => "";
   | Mons.CAPIVARA       => "BATH";
   | Mons.BEHOLDER       => "BEHOLDER";
   | Mons.CRONI          => "CRONI";
@@ -652,6 +684,15 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.LAMURIA        => "LAMURIA";
   | Mons.RAFIRE         => "RAFIRE";
   | Mons.VARGOULI       => "VARGOULI";
+  | Mons.HOUSE_0_00     => "";
+  | Mons.HOUSE_0_01     => "";
+  | Mons.HOUSE_0_02     => "";
+  | Mons.HOUSE_0_03     => "";
+  | Mons.CASTLE_00      => "";
+  | Mons.CASTLE_01      => "";
+  | Mons.CASTLE_02      => "";
+  | Mons.CASTLE_03      => "";
+
 
 // Moves the hero to a given direction
 Mons.Game.walk(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Mons.Game
