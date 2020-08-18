@@ -1,0 +1,14 @@
+// Possibly returns the minimum key of the map
+// Since we're working with a balanced tree we only need
+// to check the the left subtree, if it's empty, the 
+// minimum key is the root, because all elements to the 
+// right are greater than it. If it's not, recurse until 
+// the leftmost element is found
+GMap.min<K: Type, V: Type>(map: GMap(K,V)): Maybe(K)
+  case map:
+  | tip => Maybe.none<K>;
+  | bin => 
+    case map.left:
+    | tip => Maybe.some<K>(map.key);
+    | bin => GMap.min<K,V>(map.left);;
+
