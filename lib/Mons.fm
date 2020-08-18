@@ -563,6 +563,44 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.RAFIRE         => case up: |Mons.Assets.battle_rafire_u; |Mons.Assets.battle_rafire_d;;
   | Mons.VARGOULI       => case up: |Mons.Assets.battle_vargouli_u; |Mons.Assets.battle_vargouli_d;;
 
+Mons.Kind.get_name(kin: Mons.Kind): String
+  case kin:
+  | Mons.VOID           => "";
+  | Mons.HERO           => "";
+  | Mons.GRASS          => "";
+  | Mons.BUSH           => "";
+  | Mons.PLANT_0        => "";
+  | Mons.ELV_TERRAIN_00 => "";
+  | Mons.ELV_TERRAIN_01 => "";
+  | Mons.ELV_TERRAIN_02 => "";
+  | Mons.OCEAN_L        => "";
+  | Mons.OCEAN_D        => "";
+  | Mons.OCEAN_M        => "";
+  | Mons.OCEAN_R        => "";
+  | Mons.OCEAN_U        => "";
+  | Mons.OCEAN_LD       => "";
+  | Mons.OCEAN_LU       => "";
+  | Mons.OCEAN_RD       => "";
+  | Mons.OCEAN_RU       => "";
+  | Mons.TREE_0_00      => "";
+  | Mons.TREE_0_01      => "";
+  | Mons.TENT           => "";
+  | Mons.TENT           => "";
+  | Mons.TENT           => "";
+  | BIG_TREE_00         => "";
+  | BIG_TREE_01         => "";
+  | ROCK_PATH_C         => "";
+  | Mons.CAPIVARA       => "BATH";
+  | Mons.BEHOLDER       => "BEHOLDER";
+  | Mons.CRONI          => "CRONI";
+  | Mons.ELLIOT         => "ELLIOT";
+  | Mons.ESPECTRONUS    => "ESPECTRONUS";
+  | Mons.GAKI           => "GAKI";
+  | Mons.GORR           => "GORR";
+  | Mons.LAMURIA        => "LAMURIA";
+  | Mons.RAFIRE         => "RAFIRE";
+  | Mons.VARGOULI       => "VARGOULI";
+
 // Moves the hero to a given direction
 Mons.Game.walk(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Mons.Game
   let old_pos = pos
@@ -716,8 +754,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let adve_chp = U32.sub(32u, adve_obj.dmg)
   let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
   let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-  let hero_txt = String.flatten(["CRONI: ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten(["BATH: " , U32.to_string(adve_chp), " HP"])
+  let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
+  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ",U32.to_string(adve_chp), " HP"])
   //let hero_btl =
     //if U32.gtn(Mons.Object.get_wlk(hero_obj), 0u)
     //then Maybe.none<>
