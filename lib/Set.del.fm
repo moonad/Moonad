@@ -1,0 +1,2 @@
+Set.del<A: Type>(key: Bits, set: Set): Set
+  Map.delete<Unit>(key, set)
