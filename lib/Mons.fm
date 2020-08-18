@@ -641,7 +641,7 @@ Mons.Game.cmd(pos: Pos32, key: Char, game: Mons.Game): Mons.Game
       // TODO: make a proper get_battle(tile_pos) function
       let hero_obj = Mons.Map.get(hero_pos, game.map)
       let adve_obj = Mons.Map.get(adve_pos, game.map)
-      let adve_obj = Mons.Object.hit(adve_obj, 1u)
+      let adve_obj = Mons.Object.hit(adve_obj, 4u)
       Mons.Game.set_map(Mons.Map.set(adve_pos, adve_obj, game.map), game)
     else
       game;
@@ -755,11 +755,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
   let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
   let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ",U32.to_string(adve_chp), " HP"])
-  //let hero_btl =
-    //if U32.gtn(Mons.Object.get_wlk(hero_obj), 0u)
-    //then Maybe.none<>
-    //else Mons.Object.get_btl(hero_obj)
+  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
   let scr = Image3D.clear(scr)
   // When hero is in a battle, draw it...
   let is_standing = U32.eql(Mons.Object.get_wlk(hero_obj),0u)
@@ -833,7 +829,12 @@ Mons.Game.tick(game: Mons.Game): Mons.Game
     def with_tile(objs)
       def with_obj(obj)
         Mons.Object.tick(obj)
-      List.map<,>(with_obj, objs)
+      def keep_obj(obj)
+        open obj:
+        U32.ltn(obj.dmg, 32u)
+      let objs = List.map<_,Mons.Object>(with_obj, objs)
+      let objs = List.filter<Mons.Object>(keep_obj, objs)
+      objs
     Map.map<,>(with_tile, game.map)
   Mons.Game.new(pos, map)
 
