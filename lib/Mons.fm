@@ -151,7 +151,7 @@ Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   open obj:
   case obj.kin:
-  | Mons.VOID => [];
+  | Mons.VOID => [Mons.Assets.ocean_m];
   | Mons.HERO => 
     //0 = parado
     //1 = pe direito pra frente
@@ -414,25 +414,39 @@ Mons.Map.tile_of_one(tile_kin: Mons.Kind): Mons.Object
   Mons.Object.new(tile_kin, Mons.Dir.down, 0u, 0u)
 
 // Converts a string map source to an actual map
-Mons.Map.load(code: String): Mons.Map
-  let code = String.slice(1, Nat.pred(String.length(code)), code)
-  let rows = String.split(code, "\n")
-  let rows = List.map<,>(String.chunks_of(2), rows)
-  let mapw = List.length.u32<>(rows)
-  let maph = List.length.u32<>(List.head_with_default<>([], rows))
-  let objs = List.map<,>(List.map<,>(Mons.Map.tile_of), rows)
-  let objs = List.flatten<>(objs)
-  List.ifoldr.u32<,>
+Mons.Map.load(code: List(String)): Mons.Map
+  let size = List.length.u32<>(code) // NOTE: assumes width == height
+  List.ifor.u32<>(code)<>
   | Mons.Map.new;
-  | (i, objs, map)
-    let o_x = U32.sub(2048u, U32.div(mapw, 2u))
-    let o_y = U32.sub(2048u, U32.div(maph, 2u))
-    let p_x = U32.add(U32.mod(i, mapw), o_x)
-    let p_y = U32.add(U32.div(i, maph), o_y)
-    let p_z = 0u
-    let pos = Pos32.new(p_x, p_y, p_z)
-    Mons.Map.set_list(pos, objs, map);
-  | objs;
+  | (j, row, map)
+    for i : U32 = 0u .. size with map:
+      let t_x = U32.add(U32.sub(2048u, U32.div(size, 2u)), i)
+      let t_y = U32.add(U32.sub(2048u, U32.div(size, 2u)), j)
+      let t_z = 0u
+      let pos = Pos32.new(t_x, t_y, t_z)
+      let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
+      let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
+      let sli = String.slice(ini, end, row) // slice with tile code
+      Mons.Map.set_list(pos, Mons.Map.tile_of(sli), map);
+
+  //let code = String.slice(1, Nat.pred(String.length(code)), code)
+  //let rows = String.split(code, "\n")
+  //let rows = List.map<,>(String.chunks_of(2), rows)
+  //let mapw = List.length.u32<>(rows)
+  //let maph = List.length.u32<>(List.head_with_default<>([], rows))
+  //let objs = List.map<,>(List.map<,>(Mons.Map.tile_of), rows)
+  //let objs = List.flatten<>(objs)
+  //List.ifoldr.u32<,>
+  //| Mons.Map.new;
+  //| (i, objs, map)
+    //let o_x = U32.sub(2048u, U32.div(mapw, 2u))
+    //let o_y = U32.sub(2048u, U32.div(maph, 2u))
+    //let p_x = U32.add(U32.mod(i, mapw), o_x)
+    //let p_y = U32.add(U32.div(i, maph), o_y)
+    //let p_z = 0u
+    //let pos = Pos32.new(p_x, p_y, p_z)
+    //Mons.Map.set_list(pos, objs, map);
+  //| objs;
 
 // Gets the hero position
 Mons.Game.get_hero_pos(game: Mons.Game): Pos32
@@ -686,6 +700,15 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
       | down  => U32.sub(g_y, wlk);
     Pair.new<,>(g_x, g_y);
 
+//Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
+  //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
+    //let wlk = Mons.Object.get_wlk(obj)
+    //let dir = Mons.Object.get_dir(obj)
+    //get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
+    //let s_z = t_z
+    //let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
+    //List.cons<>(spr, sprs)
+
 // Converts the game state to a list of sprites to be rendered
 // TODO: for some reason, using a `case obj` here causes the
 // function not to type check anymore. Investigate why.
@@ -702,16 +725,18 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let t_z = c_z
         let pos = Pos32.new(t_x, t_y, t_z)
         let got = Map.get<>(U32.to_bits(pos), game.map)
-        case got:
-        | sprs;
-        | for obj in List.reverse<>(got.value) with sprs:
-            for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
-              let wlk = Mons.Object.get_wlk(obj)
-              let dir = Mons.Object.get_dir(obj)
-              get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
-              let s_z = t_z
-              let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
-              List.cons<>(spr, sprs);;
+        let objs
+          = case got:
+          | [Mons.Object.void];
+          | got.value;
+        for obj in objs with sprs:
+          for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
+            let wlk = Mons.Object.get_wlk(obj)
+            let dir = Mons.Object.get_dir(obj)
+            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
+            let s_z = t_z
+            let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
+            List.cons<>(spr, sprs);
 
 // Draws an ASCII char to a position using 
 Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
