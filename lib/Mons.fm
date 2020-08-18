@@ -525,6 +525,44 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.RAFIRE         => Bool.true;
   | Mons.VARGOULI       => Bool.true;
 
+Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
+  case kin:
+  | Mons.VOID           => Mons.Assets.battle_croni_u;
+  | Mons.HERO           => Mons.Assets.battle_croni_u;
+  | Mons.GRASS          => Mons.Assets.battle_croni_u;
+  | Mons.BUSH           => Mons.Assets.battle_croni_u;
+  | Mons.PLANT_0        => Mons.Assets.battle_croni_u;
+  | Mons.ELV_TERRAIN_00 => Mons.Assets.battle_croni_u;
+  | Mons.ELV_TERRAIN_01 => Mons.Assets.battle_croni_u;
+  | Mons.ELV_TERRAIN_02 => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_L        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_D        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_M        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_R        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_U        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_LD       => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_LU       => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_RD       => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN_RU       => Mons.Assets.battle_croni_u;
+  | Mons.TREE_0_00      => Mons.Assets.battle_croni_u;
+  | Mons.TREE_0_01      => Mons.Assets.battle_croni_u;
+  | Mons.TENT           => Mons.Assets.battle_croni_u;
+  | Mons.TENT           => Mons.Assets.battle_croni_u;
+  | Mons.TENT           => Mons.Assets.battle_croni_u;
+  | BIG_TREE_00         => Mons.Assets.battle_croni_u;
+  | BIG_TREE_01         => Mons.Assets.battle_croni_u;
+  | ROCK_PATH_C         => Mons.Assets.battle_croni_u;
+  | Mons.CAPIVARA       => case up: |Mons.Assets.battle_bath_u; |Mons.Assets.battle_bath_d;;
+  | Mons.BEHOLDER       => case up: |Mons.Assets.battle_beholder_u; |Mons.Assets.battle_beholder_d;;
+  | Mons.CRONI          => case up: |Mons.Assets.battle_croni_u; |Mons.Assets.battle_croni_d;;
+  | Mons.ELLIOT         => case up: |Mons.Assets.battle_elliot_u; |Mons.Assets.battle_elliot_d;;
+  | Mons.ESPECTRONUS    => case up: |Mons.Assets.battle_espectronus_u; |Mons.Assets.battle_espectronus_d;;
+  | Mons.GAKI           => case up: |Mons.Assets.battle_gaki_u; |Mons.Assets.battle_gaki_d;;
+  | Mons.GORR           => case up: |Mons.Assets.battle_gorr_u; |Mons.Assets.battle_gorr_d;;
+  | Mons.LAMURIA        => case up: |Mons.Assets.battle_lamuria_u; |Mons.Assets.battle_lamuria_d;;
+  | Mons.RAFIRE         => case up: |Mons.Assets.battle_rafire_u; |Mons.Assets.battle_rafire_d;;
+  | Mons.VARGOULI       => case up: |Mons.Assets.battle_vargouli_u; |Mons.Assets.battle_vargouli_d;;
+
 // Moves the hero to a given direction
 Mons.Game.walk(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Mons.Game
   let old_pos = pos
@@ -676,8 +714,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open adve_obj:
   let hero_chp = U32.sub(32u, hero_obj.dmg)
   let adve_chp = U32.sub(32u, adve_obj.dmg)
-  let hero_kin = hero_obj.kin // TODO: use this to draw the correct image
-  let adve_kin = adve_obj.kin // TODO: use this to draw the correct image
+  let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
+  let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
   let hero_txt = String.flatten(["CRONI: ", U32.to_string(hero_chp), " HP"])
   let adve_txt = String.flatten(["BATH: " , U32.to_string(adve_chp), " HP"])
   //let hero_btl =
@@ -694,8 +732,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
     let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
     let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-    let scr = Mons.draw.image(Mons.Assets.battle_croni_u, Pos32.new(75u,80u,0u), scr) 
-    let scr = Mons.draw.image(Mons.Assets.battle_bath_d, Pos32.new(180u,40u,0u), scr)
+    let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
+    let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
     scr
   // When hero isn't battling, draw map...
   else 
