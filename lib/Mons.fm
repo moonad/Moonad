@@ -80,6 +80,20 @@ T Mons.Kind
 | Mons.TENT_00;
 | Mons.TENT_01;
 | Mons.TENT_02;
+| Mons.BIG_TREE_00;
+| Mons.BIG_TREE_01;
+| Mons.ROCK_PATH_C;
+| Mons.CAPIVARA;
+| Mons.BEHOLDER;
+| Mons.CRONI;
+| Mons.ELLIOT;
+| Mons.ESPECTRONUS;
+| Mons.GAKI;
+| Mons.GORR;
+| Mons.LAMURIA;
+| Mons.RAFIRE;
+| Mons.VARGOULI;
+
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -192,8 +206,22 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.TENT => [Mons.Assets.tent_00];
   | Mons.TENT => [Mons.Assets.tent_01];
   | Mons.TENT => [Mons.Assets.tent_02];
+  | Mons.BIG_TREE_00 => [Mons.Assets.bigtree0_00];
+  | Mons.BIG_TREE_01 => [Mons.Assets.bigtree0_01];
+  | Mons.ROCK_PATH_C => [Mons.Assets.rock_path_0_c];
+  | Mons.CAPIVARA => [Mons.Assets.mons_bath_d_0];
+  | Mons.BEHOLDER => [Mons.Assets.mons_beholder_d_0];
+  | Mons.CRONI => [Mons.Assets.mons_croni_d_0];
+  | Mons.ELLIOT => [Mons.Assets.mons_elliot_d_0];
+  | Mons.ESPECTRONUS => [Mons.Assets.mons_espectronus_d_0];
+  | Mons.GAKI => [Mons.Assets.mons_gaki_d_0];
+  | Mons.GORR => [Mons.Assets.mons_gorr_d_0];
+  | Mons.LAMURIA => [Mons.Assets.mons_lamuria_d_0];
+  | Mons.RAFIRE => [Mons.Assets.mons_rafire_d_0]; 
+  | Mons.VARGOULI => [Mons.Assets.mons_vargouli_d_0];
   
-
+  
+  
 // An empty map
 Mons.Map.new: Mons.Map
   Map.new<>
@@ -317,6 +345,71 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.TENT_02),
       Mons.Map.tile_of_one(Mons.GRASS),
     ]
+  else if String.eql(code, "B0") then
+    [ 
+      Mons.Map.tile_of_one(Mons.BIG_TREE_00),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "B1") then
+    [ 
+      Mons.Map.tile_of_one(Mons.BIG_TREE_01),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, ".p") then
+    [ 
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_C),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "30") then
+    [ 
+      Mons.Map.tile_of_one(Mons.CAPIVARA),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "31") then
+    [ 
+      Mons.Map.tile_of_one(Mons.BEHOLDER),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "32") then
+    [ 
+      Mons.Map.tile_of_one(Mons.CRONI),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "33") then
+    [ 
+      Mons.Map.tile_of_one(Mons.ELLIOT),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "34") then
+    [ 
+      Mons.Map.tile_of_one(Mons.ESPECTRONUS),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "35") then
+    [ 
+      Mons.Map.tile_of_one(Mons.GAKI),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "36") then
+    [ 
+      Mons.Map.tile_of_one(Mons.GORR),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "37") then
+    [ 
+      Mons.Map.tile_of_one(Mons.LAMURIA),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "38") then
+    [ 
+      Mons.Map.tile_of_one(Mons.RAFIRE),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
+  else if String.eql(code, "39") then
+    [ 
+      Mons.Map.tile_of_one(Mons.VARGOULI),
+      Mons.Map.tile_of_one(Mons.GRASS)
+    ]
   else
     []
 
@@ -386,6 +479,20 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
+  | BIG_TREE_00         => Bool.false;
+  | BIG_TREE_01         => Bool.false;
+  | ROCK_PATH_C         => Bool.false;
+  | Mons.CAPIVARA       => Bool.true;
+  | Mons.BEHOLDER       => Bool.true;
+  | Mons.CRONI          => Bool.true;
+  | Mons.ELLIOT         => Bool.true;
+  | Mons.ESPECTRONUS    => Bool.true;
+  | Mons.GAKI           => Bool.true;
+  | Mons.GORR           => Bool.true;
+  | Mons.LAMURIA        => Bool.true;
+  | Mons.RAFIRE         => Bool.true;
+  | Mons.VARGOULI       => Bool.true;
+
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
   case kin:
@@ -411,6 +518,19 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
+  | BIG_TREE_00         => Bool.false;
+  | BIG_TREE_01         => Bool.false;
+  | ROCK_PATH_C         => Bool.false;
+  | Mons.CAPIVARA       => Bool.false;
+  | Mons.BEHOLDER       => Bool.false;
+  | Mons.CRONI          => Bool.false;
+  | Mons.ELLIOT         => Bool.false;
+  | Mons.ESPECTRONUS    => Bool.false;
+  | Mons.GAKI           => Bool.false;
+  | Mons.GORR           => Bool.false;
+  | Mons.LAMURIA        => Bool.false;
+  | Mons.RAFIRE         => Bool.false;
+  | Mons.VARGOULI       => Bool.false;
 
 
 // Moves the hero to a given direction
