@@ -53,10 +53,10 @@ class Play extends Component {
     this.canvas.style["image-rendering"] = "pixelated";
     this.canvas.width = width;
     this.canvas.height = height;
-    this.canvas.style.width = width+"px";
-    this.canvas.style.height = height+"px";
+    this.canvas.style.width = (width*2)+"px";
+    this.canvas.style.height = (height*2)+"px";
     this.canvas.clear = {length:0, data:new Uint32Array(width*height*32)};
-    this.canvas.style.border = "1px dashed gray";
+    this.canvas.style.border = "1px solid black";
     this.canvas.context = this.canvas.getContext("2d");
     this.canvas.image_data = this.canvas.context.getImageData(0, 0, this.canvas.width, this.canvas.height)
     this.canvas.image_buf = new ArrayBuffer(this.canvas.image_data.data.length);
@@ -420,7 +420,11 @@ class Play extends Component {
     const defs = this.defs;
 
     if (!defs || !defs[name]) {
-      return h("pre", {}, this.load_log);
+      return h("pre", {style: {
+        "width": "100%",
+        "height": "100%",
+        "overflow-y": "hidden",
+      }}, this.load_log);
     } else {
       var type = fm.synt.reduce(this.defs[name].type);
       // If this is an application...

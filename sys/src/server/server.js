@@ -87,6 +87,7 @@ function load_lib_files() {
       fm.synt.typesynth(def, Defs, fm.lang.stringify);
     }
   } catch (e) {
+	console.log(e())
     console.log("- Error reloading. Reverting...");
     Defs = OldDefs;
   }
