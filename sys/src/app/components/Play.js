@@ -420,7 +420,11 @@ class Play extends Component {
     const defs = this.defs;
 
     if (!defs || !defs[name]) {
-      return h("pre", {style: {"width": "100%"}}, this.load_log);
+      return h("pre", {style: {
+        "width": "100%",
+        "height": "100%",
+        "overflow-y": "hidden",
+      }}, this.load_log);
     } else {
       var type = fm.synt.reduce(this.defs[name].type);
       // If this is an application...
