@@ -87,7 +87,11 @@ function load_lib_files() {
       fm.synt.typesynth(def, Defs, fm.lang.stringify);
     }
   } catch (e) {
-	console.log(e())
+    if (typeof e === "function") {
+      console.log(e())
+    } else {
+      console.log(e);
+    }
     console.log("- Error reloading. Reverting...");
     Defs = OldDefs;
   }
@@ -256,4 +260,9 @@ logs.stderr.on("data", (data) => {
 });
 logs.on("close", (code) => {
   console.log("[LOGS]\n- EXIT (code: "+code+")");
+});
+process.on('uncaughtException', function (err) {
+  console.log(err);
+  logs.kill();
+  process.exit();
 });
