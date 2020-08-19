@@ -1,6 +1,5 @@
 // Get the head of a nonempty string
-String.head(xs: String, not_empty: String.not_empty(xs)) : Char
+String.head(xs: String): Maybe(Char)
   case xs:
-  with ne : String.not_empty(xs.self) = not_empty;
-  | Empty.absurd<>(ne);
-  | xs.head;
+  | Maybe.none<>;
+  | Maybe.some<>(xs.head);

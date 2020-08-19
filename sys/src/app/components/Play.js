@@ -4,6 +4,7 @@ const {Component, render} = require("inferno");
 const h = require("inferno-hyperscript").h;
 const fm = require("formality-lang");
 const front = require("./../front.js");
+const lib = require("./../../server/lib.js");
 
 class Play extends Component {
   constructor(props) {
@@ -116,12 +117,14 @@ class Play extends Component {
 
     // Key down event
     this.listeners.keydown = (e) => {
-      this.send_event({
-        _: "App.Event.xkey",
-        time: Date.now(),
-        down: true,
-        code: e.keyCode,
-      });
+      if (!e.repeat) {
+        this.send_event({
+          _: "App.Event.xkey",
+          time: Date.now(),
+          down: true,
+          code: e.keyCode,
+        });
+      }
     };
     document.body.addEventListener("keydown", this.listeners.keydown);
 
@@ -227,17 +230,19 @@ class Play extends Component {
             console.log(action.text);
             break;
           case "App.Action.post":
-            front.logs.send_post(action.room, action.data);
+            var data = lib.hex(256, lib.string_to_hex(action.text));
+            front.logs.send_post(action.room, data);
             break;
           case "App.Action.watch":
             front.logs.watch_room(action.room);
             front.logs.on_post(({room, time, addr, data}) => {
+              var text = lib.hex_to_string(data).replace(/\0/g,"");
               this.send_event({
                 _: "App.Event.post",
                 time: parseInt(time.slice(2), 16),
                 room: room,
                 auth: addr,
-                data: data,
+                text: text,
               });
             });
             break;

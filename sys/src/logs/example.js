@@ -7,7 +7,7 @@ var api = client({
 // When connected, watches room 0 and makes an example post.
 api.on_init(() => {
   var room = "0x000000000000";
-  var post = "0x7770000000000000000000000000000000000000000000000000000000000000000000000321";
+  var post = "0x1230000000000000000000000000000000000000000000000000000000000321";
 
   // Watches the room
   api.watch_room(room);
