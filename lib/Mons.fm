@@ -462,17 +462,17 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "K0") then
-    [ Mons.Map.tile_of_one(Mons.HOUSE_0_00),
-      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "K1") then
     [ Mons.Object.new_of_kind(Mons.HOUSE_0_01) ]
   else if String.eql(code, "K2") then
     [ Mons.Object.new_of_kind(Mons.HOUSE_0_02) ]
   else if String.eql(code, "K3") then
-    [ Mons.Map.tile_of_one(Mons.HOUSE_0_03) ]
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_03) ]
   else if String.eql(code, "K4") then
-    [ Mons.Map.tile_of_one(Mons.HOUSE_0_04),
-      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_04),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C0") then
     [ Mons.Object.new_of_kind(Mons.CASTLE_00)
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
@@ -483,11 +483,11 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     [ Mons.Object.new_of_kind(Mons.CASTLE_02),
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C3") then
-    [ Mons.Map.tile_of_one(Mons.CASTLE_03),
-      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.CASTLE_03),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C4") then
-    [ Mons.Map.tile_of_one(Mons.CASTLE_04),
-      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.CASTLE_04),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "S0") then
     [ Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "S1") then
