@@ -474,58 +474,42 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "31") then
-    [ 
-      Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "32") then
     [ 
-      Mons.Object.new_of_kind(Mons.CRONI),
+      Mons.Object.new(Mons.CRONI, Mons.Dir.down, Mons.Pad.null, 0u, 32u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "33") then
-    [ 
-      Mons.Object.new_of_kind(Mons.ELLIOT),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.ELLIOT, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS)  ]
   else if String.eql(code, "34") then
-    [ 
-      Mons.Object.new_of_kind(Mons.ESPECTRONUS),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.ESPECTRONUS, Mons.Dir.down, Mons.Pad.null, 0u, 38u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "35") then
-    [ 
-      Mons.Object.new_of_kind(Mons.GAKI),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.GAKI, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "36") then
-    [ 
-      Mons.Object.new_of_kind(Mons.GORR),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.GORR, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "37") then
-    [ 
-      Mons.Object.new_of_kind(Mons.LAMURIA),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.LAMURIA, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "38") then
-    [ 
-      Mons.Object.new_of_kind(Mons.RAFIRE),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.RAFIRE, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "39") then
-    [ 
-      Mons.Object.new_of_kind(Mons.VARGOULI),
-      Mons.Object.new_of_kind(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.VARGOULI, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "40") then
-    [ Mons.Object.new_of_kind(Mons.TUPITREE),
+    [ Mons.Object.new(Mons.TUPITREE, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "41") then
-    [ Mons.Object.new_of_kind(Mons.LELA),
+    [ Mons.Object.new(Mons.LELA, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "42") then
-    [ Mons.Object.new_of_kind(Mons.MOSHY),
+    [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "K0") then
     [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
