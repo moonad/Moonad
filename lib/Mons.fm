@@ -106,10 +106,12 @@ T Mons.Kind
 | Mons.HOUSE_0_01;
 | Mons.HOUSE_0_02;
 | Mons.HOUSE_0_03;
+| Mons.HOUSE_0_04;
 | Mons.CASTLE_00;
 | Mons.CASTLE_01;
 | Mons.CASTLE_02;
 | Mons.CASTLE_03;
+| Mons.CASTLE_04;
 | Mons.SAND_0;
 | Mons.SAND_1;
 | Mons.CHEST;
@@ -228,10 +230,12 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.HOUSE_0_01 => [Mons.Assets.brown_house0_01];
   | Mons.HOUSE_0_02 => [Mons.Assets.brown_house0_02];
   | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_03];
+  | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_04];
   | Mons.CASTLE_00 => [Mons.Assets.brown_castle_00];
   | Mons.CASTLE_01 => [Mons.Assets.brown_castle_01];
   | Mons.CASTLE_02 => [Mons.Assets.brown_castle_02];
   | Mons.CASTLE_03 => [Mons.Assets.brown_castle_03];
+  | Mons.CASTLE_04 => [Mons.Assets.brown_castle_04];
   | Mons.SAND_0 => [Mons.Assets.sand_0];
   | Mons.SAND_1 => [Mons.Assets.sand_1];
   | Mons.CHEST => [Mons.Assets.tile_chest_0];
@@ -440,13 +444,17 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.GRASS)
     ]
   else if String.eql(code, "K0") then
-    [ Mons.Map.tile_of_one(Mons.HOUSE_0_00) ]
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_00),
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "K1") then
     [ Mons.Map.tile_of_one(Mons.HOUSE_0_01) ]
   else if String.eql(code, "K2") then
     [ Mons.Map.tile_of_one(Mons.HOUSE_0_02) ]
   else if String.eql(code, "K3") then
     [ Mons.Map.tile_of_one(Mons.HOUSE_0_03) ]
+  else if String.eql(code, "K4") then
+    [ Mons.Map.tile_of_one(Mons.HOUSE_0_04),
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C0") then
     [ Mons.Map.tile_of_one(Mons.CASTLE_00)
       Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
@@ -458,6 +466,9 @@ Mons.Map.tile_of(code: String): List(Mons.Object)
       Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C3") then
     [ Mons.Map.tile_of_one(Mons.CASTLE_03),
+      Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C4") then
+    [ Mons.Map.tile_of_one(Mons.CASTLE_04),
       Mons.Map.tile_of_one(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "S0") then
     [ Mons.Map.tile_of_one(Mons.SAND_0) ]
@@ -564,10 +575,12 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.HOUSE_0_01     => Bool.true;
   | Mons.HOUSE_0_02     => Bool.true;
   | Mons.HOUSE_0_03     => Bool.true;
+  | Mons.HOUSE_0_04     => Bool.true;
   | Mons.CASTLE_00     => Bool.true;
   | Mons.CASTLE_01     => Bool.true;
   | Mons.CASTLE_02     => Bool.true;
   | Mons.CASTLE_03     => Bool.true;
+  | Mons.CASTLE_04     => Bool.true;
   | Mons.SAND_0        => Bool.false;
   | Mons.SAND_1        => Bool.false;
   | Mons.CHEST         => Bool.true;
@@ -616,10 +629,12 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.HOUSE_0_01     => Bool.false;
   | Mons.HOUSE_0_02     => Bool.false;
   | Mons.HOUSE_0_03     => Bool.false;
+  | Mons.HOUSE_0_04     => Bool.false;
   | Mons.CASTLE_00      => Bool.false;
   | Mons.CASTLE_01      => Bool.false;
   | Mons.CASTLE_02      => Bool.false;
   | Mons.CASTLE_03      => Bool.false;
+  | Mons.CASTLE_04      => Bool.false;
   | Mons.SAND_0         => Bool.false;
   | Mons.SAND_1         => Bool.false;
   | Mons.CHEST          => Bool.false;
@@ -667,10 +682,12 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.HOUSE_0_01     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_02     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_03     => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE_0_04     => Mons.Assets.battle_croni_u;
   | Mons.CASTLE_00      => Mons.Assets.battle_croni_u;
   | Mons.CASTLE_01      => Mons.Assets.battle_croni_u;
   | Mons.CASTLE_02      => Mons.Assets.battle_croni_u;
   | Mons.CASTLE_03      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_04      => Mons.Assets.battle_croni_u;
   | Mons.SAND_0         => Mons.Assets.battle_croni_u;
   | Mons.SAND_1         => Mons.Assets.battle_croni_u;
   | Mons.CHEST          => Mons.Assets.battle_croni_u;
@@ -718,10 +735,12 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.HOUSE_0_01     => "";
   | Mons.HOUSE_0_02     => "";
   | Mons.HOUSE_0_03     => "";
+  | Mons.HOUSE_0_04     => "";
   | Mons.CASTLE_00      => "";
   | Mons.CASTLE_01      => "";
   | Mons.CASTLE_02      => "";
   | Mons.CASTLE_03      => "";
+  | Mons.CASTLE_04      => "";
   | Mons.SAND_0         => "";
   | Mons.SAND_1         => "";
   | Mons.CHEST          => "";
