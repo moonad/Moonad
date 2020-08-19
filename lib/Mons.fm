@@ -34,8 +34,8 @@ T Mons.Dir
 | Mons.Dir.left;
 | Mons.Dir.down;
 
-T Mons.Action
-| Mons.Action.walk(dir: Mons.Dir);
+//T Mons.Action
+//| Mons.Action.walk(dir: Mons.Dir);
 
 //T Mons.Battle.Action
 //| Mons.Battle.Action.atk;
@@ -49,7 +49,7 @@ T Mons.Sign
 | Mons.Sign.plus;
 
 T Mons.Pad
-| Mons.Pad.new(x: Mons.Sign, y: Mons.Sign);
+| Mons.Pad.new(r: Bool, u: Bool, l: Bool, d: Bool);
 
 // A game object
 T Mons.Object
@@ -133,7 +133,23 @@ Mons.scr_mid: Pos32
 
 // The null pad
 Mons.Pad.null: Mons.Pad
-  Mons.Pad.new(Mons.Sign.zero, Mons.Sign.zero)
+  Mons.Pad.new(Bool.false, Bool.false, Bool.false, Bool.false)
+
+// Sets the r field of a pad
+Mons.Pad.set_r(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(val, pad.u, pad.l, pad.d)
+
+// Sets the u field of a pad
+Mons.Pad.set_u(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, val, pad.l, pad.d)
+
+// Sets the l field of a pad
+Mons.Pad.set_l(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, pad.u, val, pad.d)
+
+// Sets the d field of a pad
+Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, pad.u, pad.l, val)
 
 // The void tile
 Mons.Object.void: Mons.Object
@@ -171,9 +187,38 @@ Mons.Object.get_dmg(obj: Mons.Object): U32
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
   open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg)
 
+// Sets an object's pad.r
+Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_r(obj.pad, val))
+
+// Sets an object's pad.u
+Mons.Object.set_pad_u(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_u(obj.pad, val))
+
+// Sets an object's pad.l
+Mons.Object.set_pad_l(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_l(obj.pad, val))
+
+// Sets an object's pad.d
+Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_d(obj.pad, val))
+
 // Hits an object, damaging it
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
   Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))
+
+// Returns true if any of the object's pad is non-zero (it is walking)
+Mons.Object.is_walking(obj: Mons.Object): Bool
+  open obj:
+  open obj.pad:
+  let is_walking_x = Bool.or(obj.pad.u, obj.pad.d)
+  let is_walking_y = Bool.or(obj.pad.l, obj.pad.r)
+  Bool.or(is_walking_x, is_walking_y)
+
+// Is this object free to move?
+Mons.Object.is_free_to_move(obj: Mons.Object): Bool
+  open obj:
+  U32.eql(obj.ani, 0u)
 
 // Returns the image of a tile
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
@@ -294,6 +339,12 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
   | let map = Mons.Map.set_list(pos, objs.tail, map)
     Pair.new<,>(map, objs.head);
 
+// Deletes an object from a tile
+Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
+  let objs = Mons.Map.get_list(pos, map)
+  let objs = List.delete_at.u32<>(Pos32.get_z(pos), objs)
+  Mons.Map.set_list(pos, objs, map)
+
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
@@ -319,7 +370,6 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.PLANT_0),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
-  
   else if String.eql(code, "t0") then
     [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_00)]
   else if String.eql(code, "t1") then
@@ -503,12 +553,12 @@ Mons.Map.load(code: List(String)): Mons.Map
       Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);
 
 // Gets the hero position
-Mons.Game.get_hero_pos(game: Mons.Game): Pos32
+Mons.Game.get_pos(game: Mons.Game): Pos32
   open game:
   game.pos
 
 // Sets the hero position
-Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
+Mons.Game.set_pos(pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   Mons.Game.new(pos, game.map)
 
@@ -516,6 +566,13 @@ Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
   Mons.Game.new(game.pos, map)
+
+// Updates the object at given position on the game map
+Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let obj = fn(Mons.Map.get(pos, game.map))
+  let map = Mons.Map.set(pos, obj, game.map)
+  Mons.Game.set_map(map, game)
 
 Mons.Kind.blocks(kin: Mons.Kind): Bool
   case kin:
@@ -722,52 +779,27 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.SAND_1         => "";
   | Mons.CHEST          => "";
 
+Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
+  case dir:
+  | Pos32.add(pos, Pos32.new(1u, 0u, 0u));
+  | Pos32.sub(pos, Pos32.new(0u, 1u, 0u));
+  | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
+  | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
-// Moves the hero to a given direction
-Mons.Game.walk(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Mons.Game
-  let old_pos = pos
-  let new_pos
-    = case dir:
-    | Pos32.add(old_pos, Pos32.new(1u, 0u, 0u));
-    | Pos32.sub(old_pos, Pos32.new(0u, 1u, 0u));
-    | Pos32.sub(old_pos, Pos32.new(1u, 0u, 0u));
-    | Pos32.add(old_pos, Pos32.new(0u, 1u, 0u));
-  //let new_pos = Pos32.set_z(new_pos, 0u)
-  open game:
-  let map = game.map
-  get map obj = Mons.Map.pop(old_pos, map)
-  let ani = Mons.Object.get_ani(obj)
-  let trg = Mons.Map.get(new_pos, map)
-  open trg:
-  let is_walking = U32.gtn(ani, 0u)
-  let is_blocked = Mons.Kind.blocks(trg.kin)
-  if Bool.or(is_walking, is_blocked) then
-    let map = Mons.Map.push(old_pos, obj, map)
-    Mons.Game.new(old_pos, map)
+// Performs a key command on the object at given position
+Mons.Game.cmd(down: Bool, key: Char, pos: Pos32, game: Mons.Game): Mons.Game
+  if Bool.and(down, U16.eql(key, 'U')) then
+    Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+  else if U16.eql(key, 'D') then
+    Mons.Game.update((obj) Mons.Object.set_pad_r(obj, down), pos, game)
+  else if U16.eql(key, 'W') then
+    Mons.Game.update((obj) Mons.Object.set_pad_u(obj, down), pos, game)
+  else if U16.eql(key, 'A') then
+    Mons.Game.update((obj) Mons.Object.set_pad_l(obj, down), pos, game)
+  else if U16.eql(key, 'S') then
+    Mons.Game.update((obj) Mons.Object.set_pad_d(obj, down), pos, game)
   else
-    let obj = Mons.Object.set_dir(obj, dir)
-    let obj = Mons.Object.set_ani(obj, 16u)
-    let map = Mons.Map.push(new_pos, obj, map)
-    Mons.Game.new(new_pos, map)
-
-Mons.Game.act(pos: Pos32, act: Mons.Action, game: Mons.Game): Mons.Game
-  case act:
-  | Mons.Game.walk(pos, act.dir, game);
-
-Mons.Game.cmd(pos: Pos32, key: Char, game: Mons.Game): Mons.Game
-  let hero_pos = pos
-  let adve_pos = Pos32.add(pos, Pos32.new(0u,0u,1u))
-  open game:
-  case Mons.key_to_dir(key) as dir:
-  | if U16.eql(key, 'U') then
-      // TODO: make a proper get_battle(tile_pos) function
-      let hero_obj = Mons.Map.get(hero_pos, game.map)
-      let adve_obj = Mons.Map.get(adve_pos, game.map)
-      let adve_obj = Mons.Object.hit(adve_obj, 4u)
-      Mons.Game.set_map(Mons.Map.set(adve_pos, adve_obj, game.map), game)
-    else
-      game;
-  | Mons.Game.act(pos, Mons.Action.walk(dir.value), game);
+    game
 
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
@@ -947,27 +979,60 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
   open obj:
-  let ani = if U32.gtn(obj.ani, 0u)
-    then U32.sub(obj.ani, 2u)
-    else obj.ani
-  Mons.Object.set_ani(obj, ani)
+  // Configs the walk animation
+  let obj = Mons.Object.set_ani(obj)
+    | if U32.gtn(obj.ani, 0u)
+      then U32.sub(obj.ani, 2u)
+      else obj.ani;
+  // Sets the direction based on pad
+  let obj = Mons.Object.set_dir(obj)
+    | if Mons.Object.is_free_to_move(obj) then
+        open obj.pad:
+        if obj.pad.u then
+          Mons.Dir.up
+        else if obj.pad.l then
+          Mons.Dir.left
+        else if obj.pad.d then
+          Mons.Dir.down
+        else if obj.pad.r then
+          Mons.Dir.right
+        else
+          obj.dir
+      else
+        obj.dir;
+  obj
+
+// Moves an object towards a given direction
+Mons.Game.tick_at(pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let map = game.map
+  let obj = Mons.Map.get(pos, map)
+  let obj = Mons.Object.tick(obj)
+  open obj:
+  let old_pos = pos
+  let new_pos = Mons.Dir.move(obj.dir, pos)
+  let trg = Mons.Map.get(new_pos, map)
+  open trg:
+  let is_walking = Mons.Object.is_walking(obj)
+  let is_movfree = Mons.Object.is_free_to_move(obj)
+  let is_blocked = Mons.Kind.blocks(trg.kin)
+  if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
+    let obj = Mons.Object.set_ani(obj, 16u)
+    let map = Mons.Map.del(old_pos, map)
+    let map = Mons.Map.push(new_pos, obj, map)
+    //let map = Mons.Map.set(pos, obj, map)
+    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.set_pos(new_pos, game)
+    game
+  else
+    let map = Mons.Map.set(pos, obj, map)
+    Mons.Game.set_map(map, game)
 
 // For each tick, updates the game state
+// TODO: tick objects other than hero
 Mons.Game.tick(game: Mons.Game): Mons.Game
   open game:
-  let pos = game.pos
-  let map = 
-    def with_tile(objs)
-      def with_obj(obj)
-        Mons.Object.tick(obj)
-      def keep_obj(obj)
-        open obj:
-        U32.ltn(obj.dmg, 32u)
-      let objs = List.map<_,Mons.Object>(with_obj, objs)
-      let objs = List.filter<Mons.Object>(keep_obj, objs)
-      objs
-    Map.map<,>(with_tile, game.map)
-  Mons.Game.new(pos, map)
+  Mons.Game.tick_at(game.pos, game)
 
 // Examples
 // ========
@@ -1019,11 +1084,8 @@ Mons: App(Mons.Game)
     | tick => [
       App.Action.state<>(Mons.Game.tick(game))
     ];
-    | xkey =>
-      open game:
-      if event.down then
-        [App.Action.state<>(Mons.Game.cmd(game.pos, event.code, game))]
-      else
-        [];
+    | xkey => [
+      open game: App.Action.state<>(Mons.Game.cmd(event.down, event.code, game.pos, game))
+    ];
     | post => [];
   App.new<>(init, draw, when)
