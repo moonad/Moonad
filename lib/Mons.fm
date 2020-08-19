@@ -58,6 +58,7 @@ T Mons.Object
   dir: Mons.Dir,  // direction the object is facing
   pad: Mons.Pad,  // movement key pad
   ani: U32,       // number of walk frames to animate
+  mhp: U32,       // object's maximum health points
   dmg: U32        // object's current health points
 );
 
@@ -158,7 +159,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(Mons.VOID, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
+  Mons.Object.new(Mons.VOID, Mons.Dir.down, Mons.Pad.null, 0u, 0u, 0u)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -166,7 +167,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.mhp, obj.dmg)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -174,7 +175,7 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.mhp, obj.dmg)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -182,7 +183,7 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.mhp, obj.dmg)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -190,7 +191,7 @@ Mons.Object.get_dmg(obj: Mons.Object): U32
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.mhp,dmg)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -357,7 +358,7 @@ Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
 
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 16u, 0u)
 
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String): List(Mons.Object)
@@ -469,12 +470,12 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     [ Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "30") then
     [ 
-      Mons.Object.new_of_kind(Mons.BATH),
+      Mons.Object.new(Mons.BATH, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "31") then
     [ 
-      Mons.Object.new_of_kind(Mons.BEHOLDER),
+      Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "32") then
@@ -769,61 +770,61 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.SAND_1         => Mons.Assets.battle_croni_u;
   | Mons.CHEST          => Mons.Assets.battle_croni_u;
 
-Mons.Kind.get_name_hp(kin: Mons.Kind): Pair(String, U32)
+Mons.Kind.get_name(kin: Mons.Kind): String
   case kin:
-  | Mons.VOID           => Pair.new<,>("", 32u);
-  | Mons.HERO           => Pair.new<,>("", 32u);
-  | Mons.GRASS          => Pair.new<,>("", 32u);
-  | Mons.GRASS_PLANT    => Pair.new<,>("", 32u);
-  | Mons.BUSH           => Pair.new<,>("", 32u);
-  | Mons.PLANT_0        => Pair.new<,>("", 32u);
-  | Mons.ELV_TERRAIN_00 => Pair.new<,>("", 32u);
-  | Mons.ELV_TERRAIN_01 => Pair.new<,>("", 32u);
-  | Mons.ELV_TERRAIN_02 => Pair.new<,>("", 32u);
-  | Mons.OCEAN_L        => Pair.new<,>("", 32u);
-  | Mons.OCEAN_D        => Pair.new<,>("", 32u);
-  | Mons.OCEAN_M        => Pair.new<,>("", 32u);
-  | Mons.OCEAN_R        => Pair.new<,>("", 32u);
-  | Mons.OCEAN_U        => Pair.new<,>("", 32u);
-  | Mons.OCEAN_LD       => Pair.new<,>("", 32u);
-  | Mons.OCEAN_LU       => Pair.new<,>("", 32u);
-  | Mons.OCEAN_RD       => Pair.new<,>("", 32u);
-  | Mons.OCEAN_RU       => Pair.new<,>("", 32u);
-  | Mons.TREE_0_00      => Pair.new<,>("", 32u);
-  | Mons.TREE_0_01      => Pair.new<,>("", 32u);
-  | Mons.TENT           => Pair.new<,>("", 32u);
-  | Mons.TENT           => Pair.new<,>("", 32u);
-  | Mons.TENT           => Pair.new<,>("", 32u);
-  | BIG_TREE_00         => Pair.new<,>("", 32u);
-  | BIG_TREE_01         => Pair.new<,>("", 32u);
-  | ROCK_PATH_C         => Pair.new<,>("", 32u);
-  | ROCK_PATH_M         => Pair.new<,>("", 32u);
-  | Mons.CAPIVARA       => Pair.new<,>("BATH", 50u);
-  | Mons.BEHOLDER       => Pair.new<,>("BEHOLDER", 62u);
-  | Mons.CRONI          => Pair.new<,>("CRONI", 30u);
-  | Mons.ELLIOT         => Pair.new<,>("ELLIOT", 40u);
-  | Mons.ESPECTRONUS    => Pair.new<,>("ESPECTRONUS", 50u);
-  | Mons.GAKI           => Pair.new<,>("GAKI", 55u);
-  | Mons.GORR           => Pair.new<,>("GORR", 32u);
-  | Mons.LAMURIA        => Pair.new<,>("LAMURIA", 28u);
-  | Mons.RAFIRE         => Pair.new<,>("RAFIRE", 28u);
-  | Mons.VARGOULI       => Pair.new<,>("VARGOULI", 40u);
-  | Mons.TUPITREE       => Pair.new<,>("TUPITREE",42u);
-  | Mons.LELA           => Pair.new<,>("LELA", 32u);
-  | Mons.MOSHY          => Pair.new<,>("MOSHY", 40u);
-  | Mons.HOUSE_0_00     => Pair.new<,>("", 32u);
-  | Mons.HOUSE_0_01     => Pair.new<,>("", 32u);
-  | Mons.HOUSE_0_02     => Pair.new<,>("", 32u);
-  | Mons.HOUSE_0_03     => Pair.new<,>("", 32u);
-  | Mons.HOUSE_0_04     => Pair.new<,>("", 32u);
-  | Mons.CASTLE_00      => Pair.new<,>("", 32u);
-  | Mons.CASTLE_01      => Pair.new<,>("", 32u);
-  | Mons.CASTLE_02      => Pair.new<,>("", 32u);
-  | Mons.CASTLE_03      => Pair.new<,>("", 32u);
-  | Mons.CASTLE_04      => Pair.new<,>("", 32u);
-  | Mons.SAND_0         => Pair.new<,>("", 32u);
-  | Mons.SAND_1         => Pair.new<,>("", 32u);
-  | Mons.CHEST          => Pair.new<,>("", 32u);
+  | Mons.VOID           => "";
+  | Mons.HERO           => "";
+  | Mons.GRASS          => "";
+  | Mons.GRASS_PLANT    => "";
+  | Mons.BUSH           => "";
+  | Mons.PLANT_0        => "";
+  | Mons.ELV_TERRAIN_00 => "";
+  | Mons.ELV_TERRAIN_01 => "";
+  | Mons.ELV_TERRAIN_02 => "";
+  | Mons.OCEAN_L        => "";
+  | Mons.OCEAN_D        => "";
+  | Mons.OCEAN_M        => "";
+  | Mons.OCEAN_R        => "";
+  | Mons.OCEAN_U        => "";
+  | Mons.OCEAN_LD       => "";
+  | Mons.OCEAN_LU       => "";
+  | Mons.OCEAN_RD       => "";
+  | Mons.OCEAN_RU       => "";
+  | Mons.TREE_0_00      => "";
+  | Mons.TREE_0_01      => "";
+  | Mons.TENT           => "";
+  | Mons.TENT           => "";
+  | Mons.TENT           => "";
+  | BIG_TREE_00         => "";
+  | BIG_TREE_01         => "";
+  | ROCK_PATH_C         => "";
+  | ROCK_PATH_M         => "";
+  | Mons.CAPIVARA       => "BATH";
+  | Mons.BEHOLDER       => "BEHOLDER";
+  | Mons.CRONI          => "CRONI";
+  | Mons.ELLIOT         => "ELLIOT";
+  | Mons.ESPECTRONUS    => "ESPECTRONUS";
+  | Mons.GAKI           => "GAKI";
+  | Mons.GORR           => "GORR";
+  | Mons.LAMURIA        => "LAMURIA";
+  | Mons.RAFIRE         => "RAFIRE";
+  | Mons.VARGOULI       => "VARGOULI";
+  | Mons.TUPITREE       => "TUPITREE";
+  | Mons.LELA           => "LELA";
+  | Mons.MOSHY          => "MOSHY";
+  | Mons.HOUSE_0_00     => "";
+  | Mons.HOUSE_0_01     => "";
+  | Mons.HOUSE_0_02     => "";
+  | Mons.HOUSE_0_03     => "";
+  | Mons.HOUSE_0_04     => "";
+  | Mons.CASTLE_00      => "";
+  | Mons.CASTLE_01      => "";
+  | Mons.CASTLE_02      => "";
+  | Mons.CASTLE_03      => "";
+  | Mons.CASTLE_04      => "";
+  | Mons.SAND_0         => "";
+  | Mons.SAND_1         => "";
+  | Mons.CHEST          => "";
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
@@ -961,16 +962,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos,1u), game.map)
   open hero_obj:
   open adve_obj:
+  let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
+  let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
   let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
   let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-  let hero_inf = Mons.Kind.get_name_hp(hero_obj.kin)
-  let adve_inf = Mons.Kind.get_name_hp(adve_obj.kin)
-  open hero_inf:
-  open adve_inf:
-  let hero_chp = U32.sub(hero_inf.snd, hero_obj.dmg)
-  let adve_chp = U32.sub(adve_inf.snd, adve_obj.dmg)
-  let hero_txt = String.flatten([hero_inf.fst, " ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten([adve_inf.fst, " ", U32.to_string(adve_chp), " HP"])
+  let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
+  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
   let scr = Image3D.clear(scr)
   // When hero is in a battle, draw it...
   let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
