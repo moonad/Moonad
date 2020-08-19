@@ -1,0 +1,40 @@
+// similar to GMap.concat3, but doesn't use a "glue" key-value pair
+GMap.concat<K: Type, V: Type>(map_a: GMap(K,V), map_b: GMap(K,V)): GMap(K,V)
+  case map_a:
+  | tip => 
+    case map_b:
+    | tip => GMap.tip<K,V>;
+    | bin => map_b;
+  ;
+  | bin => 
+    case map_b:
+    | tip => map_a;
+    | bin => 
+      let b_is_too_heavy = Nat.ltn(Nat.mul(GMap.w, map_a.size), map_b.size)
+      let a_is_too_heavy = Nat.ltn(Nat.mul(GMap.w, map_b.size), map_a.size)
+
+      if b_is_too_heavy then 
+        let new_key   = map_b.key
+        let new_val   = map_b.val 
+        let new_left  = GMap.concat<K,V>(map_a, map_b.left)
+        let new_right = map_b.right
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+
+      else if a_is_too_heavy then 
+        let new_key   = map_a.key
+        let new_val   = map_a.val 
+        let new_left  = map_a.left 
+        let new_right = GMap.concat<K,V>(map_a.right, map_b)
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+
+      else 
+        let maybe_min_b = GMap.min<K,V>(map_b)
+        let dummy       = Pair.new<K,V>(map_b.key, map_b.val) 
+        let min_b       = Maybe.extract<Pair(K,V)>(maybe_min_b, dummy) // we know map_b isn't empty
+        let new_key     = Pair.fst<K,V>(min_b)
+        let new_val     = Pair.snd<K,V>(min_b)
+        let new_left    = map_a
+        let new_right   = GMap.delete_min<K,V>(map_b)
+        GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+    ;
+  ;
