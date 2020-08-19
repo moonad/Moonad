@@ -221,6 +221,15 @@ Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
   Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))
 
+// Hits an object, damaging it
+Mons.Object.heal(obj: Mons.Object, heal: U32): Mons.Object
+  open obj:
+  let new_dmg = U32.add(heal, obj.dmg)
+  if U32.ltn(new_dmg, obj.mhp) then
+    Mons.Object.set_dmg(obj, new_dmg)
+  else
+    Mons.Object.set_dmg(obj, 0u)
+
 // Returns true if any of the object's pad is non-zero (it is walking)
 Mons.Object.is_walking(obj: Mons.Object): Bool
   open obj:
@@ -825,10 +834,16 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
+Mons.Object.hero_pos(game: Mons.Game): Pos32
+  open game: game.pos
+
+
 // Performs a key command on the object at given position
 Mons.Game.cmd(down: Bool, key: Char, pos: Pos32, game: Mons.Game): Mons.Game
   if Bool.and(down, U16.eql(key, 'U')) then
-    Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+    Mons.Game.update((obj) Mons.Object.hit(obj, 10u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+  else if U16.eql(key, 'J') then // TODO: is this the hero pos?
+    Mons.Game.update((obj) Mons.Object.heal(obj, 10u), Mons.Object.hero_pos(game), game)
   else if U16.eql(key, 'D') then
     Mons.Game.update((obj) Mons.Object.set_pad_r(obj, down), pos, game)
   else if U16.eql(key, 'W') then
@@ -952,6 +967,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let hero_pos = game.pos
   let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos,0u), game.map)
   let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos,1u), game.map)
+  let hero_obj = Mons.Object.set_dmg(hero_obj, 10u) // TEST: dmg hero
   open hero_obj:
   open adve_obj:
   let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
@@ -969,7 +985,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
     let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
     let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-    let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
+    let scr = Mons.draw.text("[J] HEAL          | [K] _           ", Pos32.new(16u,144u,0u), scr)
     let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
     let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
     scr
