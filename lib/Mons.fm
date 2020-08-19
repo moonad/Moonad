@@ -769,61 +769,61 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.SAND_1         => Mons.Assets.battle_croni_u;
   | Mons.CHEST          => Mons.Assets.battle_croni_u;
 
-Mons.Kind.get_name(kin: Mons.Kind): String
+Mons.Kind.get_name_hp(kin: Mons.Kind): Pair(String, U32)
   case kin:
-  | Mons.VOID           => "";
-  | Mons.HERO           => "";
-  | Mons.GRASS          => "";
-  | Mons.GRASS_PLANT    => "";
-  | Mons.BUSH           => "";
-  | Mons.PLANT_0        => "";
-  | Mons.ELV_TERRAIN_00 => "";
-  | Mons.ELV_TERRAIN_01 => "";
-  | Mons.ELV_TERRAIN_02 => "";
-  | Mons.OCEAN_L        => "";
-  | Mons.OCEAN_D        => "";
-  | Mons.OCEAN_M        => "";
-  | Mons.OCEAN_R        => "";
-  | Mons.OCEAN_U        => "";
-  | Mons.OCEAN_LD       => "";
-  | Mons.OCEAN_LU       => "";
-  | Mons.OCEAN_RD       => "";
-  | Mons.OCEAN_RU       => "";
-  | Mons.TREE_0_00      => "";
-  | Mons.TREE_0_01      => "";
-  | Mons.TENT           => "";
-  | Mons.TENT           => "";
-  | Mons.TENT           => "";
-  | BIG_TREE_00         => "";
-  | BIG_TREE_01         => "";
-  | ROCK_PATH_C         => "";
-  | ROCK_PATH_M         => "";
-  | Mons.CAPIVARA       => "BATH";
-  | Mons.BEHOLDER       => "BEHOLDER";
-  | Mons.CRONI          => "CRONI";
-  | Mons.ELLIOT         => "ELLIOT";
-  | Mons.ESPECTRONUS    => "ESPECTRONUS";
-  | Mons.GAKI           => "GAKI";
-  | Mons.GORR           => "GORR";
-  | Mons.LAMURIA        => "LAMURIA";
-  | Mons.RAFIRE         => "RAFIRE";
-  | Mons.VARGOULI       => "VARGOULI";
-  | Mons.TUPITREE       => "TUPITREE";
-  | Mons.LELA           => "LELA";
-  | Mons.MOSHY          => "MOSHY";
-  | Mons.HOUSE_0_00     => "";
-  | Mons.HOUSE_0_01     => "";
-  | Mons.HOUSE_0_02     => "";
-  | Mons.HOUSE_0_03     => "";
-  | Mons.HOUSE_0_04     => "";
-  | Mons.CASTLE_00      => "";
-  | Mons.CASTLE_01      => "";
-  | Mons.CASTLE_02      => "";
-  | Mons.CASTLE_03      => "";
-  | Mons.CASTLE_04      => "";
-  | Mons.SAND_0         => "";
-  | Mons.SAND_1         => "";
-  | Mons.CHEST          => "";
+  | Mons.VOID           => Pair.new<,>("", 32u);
+  | Mons.HERO           => Pair.new<,>("", 32u);
+  | Mons.GRASS          => Pair.new<,>("", 32u);
+  | Mons.GRASS_PLANT    => Pair.new<,>("", 32u);
+  | Mons.BUSH           => Pair.new<,>("", 32u);
+  | Mons.PLANT_0        => Pair.new<,>("", 32u);
+  | Mons.ELV_TERRAIN_00 => Pair.new<,>("", 32u);
+  | Mons.ELV_TERRAIN_01 => Pair.new<,>("", 32u);
+  | Mons.ELV_TERRAIN_02 => Pair.new<,>("", 32u);
+  | Mons.OCEAN_L        => Pair.new<,>("", 32u);
+  | Mons.OCEAN_D        => Pair.new<,>("", 32u);
+  | Mons.OCEAN_M        => Pair.new<,>("", 32u);
+  | Mons.OCEAN_R        => Pair.new<,>("", 32u);
+  | Mons.OCEAN_U        => Pair.new<,>("", 32u);
+  | Mons.OCEAN_LD       => Pair.new<,>("", 32u);
+  | Mons.OCEAN_LU       => Pair.new<,>("", 32u);
+  | Mons.OCEAN_RD       => Pair.new<,>("", 32u);
+  | Mons.OCEAN_RU       => Pair.new<,>("", 32u);
+  | Mons.TREE_0_00      => Pair.new<,>("", 32u);
+  | Mons.TREE_0_01      => Pair.new<,>("", 32u);
+  | Mons.TENT           => Pair.new<,>("", 32u);
+  | Mons.TENT           => Pair.new<,>("", 32u);
+  | Mons.TENT           => Pair.new<,>("", 32u);
+  | BIG_TREE_00         => Pair.new<,>("", 32u);
+  | BIG_TREE_01         => Pair.new<,>("", 32u);
+  | ROCK_PATH_C         => Pair.new<,>("", 32u);
+  | ROCK_PATH_M         => Pair.new<,>("", 32u);
+  | Mons.CAPIVARA       => Pair.new<,>("BATH", 50u);
+  | Mons.BEHOLDER       => Pair.new<,>("BEHOLDER", 62u);
+  | Mons.CRONI          => Pair.new<,>("CRONI", 30u);
+  | Mons.ELLIOT         => Pair.new<,>("ELLIOT", 40u);
+  | Mons.ESPECTRONUS    => Pair.new<,>("ESPECTRONUS", 50u);
+  | Mons.GAKI           => Pair.new<,>("GAKI", 55u);
+  | Mons.GORR           => Pair.new<,>("GORR", 32u);
+  | Mons.LAMURIA        => Pair.new<,>("LAMURIA", 28u);
+  | Mons.RAFIRE         => Pair.new<,>("RAFIRE", 28u);
+  | Mons.VARGOULI       => Pair.new<,>("VARGOULI", 40u);
+  | Mons.TUPITREE       => Pair.new<,>("TUPITREE",42u);
+  | Mons.LELA           => Pair.new<,>("LELA", 32u);
+  | Mons.MOSHY          => Pair.new<,>("MOSHY", 40u);
+  | Mons.HOUSE_0_00     => Pair.new<,>("", 32u);
+  | Mons.HOUSE_0_01     => Pair.new<,>("", 32u);
+  | Mons.HOUSE_0_02     => Pair.new<,>("", 32u);
+  | Mons.HOUSE_0_03     => Pair.new<,>("", 32u);
+  | Mons.HOUSE_0_04     => Pair.new<,>("", 32u);
+  | Mons.CASTLE_00      => Pair.new<,>("", 32u);
+  | Mons.CASTLE_01      => Pair.new<,>("", 32u);
+  | Mons.CASTLE_02      => Pair.new<,>("", 32u);
+  | Mons.CASTLE_03      => Pair.new<,>("", 32u);
+  | Mons.CASTLE_04      => Pair.new<,>("", 32u);
+  | Mons.SAND_0         => Pair.new<,>("", 32u);
+  | Mons.SAND_1         => Pair.new<,>("", 32u);
+  | Mons.CHEST          => Pair.new<,>("", 32u);
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
@@ -961,12 +961,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos,1u), game.map)
   open hero_obj:
   open adve_obj:
-  let hero_chp = U32.sub(32u, hero_obj.dmg)
-  let adve_chp = U32.sub(32u, adve_obj.dmg)
   let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
   let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-  let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
+  let hero_inf = Mons.Kind.get_name_hp(hero_obj.kin)
+  let adve_inf = Mons.Kind.get_name_hp(adve_obj.kin)
+  open hero_inf:
+  open adve_inf:
+  let hero_chp = U32.sub(hero_inf.snd, hero_obj.dmg)
+  let adve_chp = U32.sub(adve_inf.snd, adve_obj.dmg)
+  let hero_txt = String.flatten([hero_inf.fst, " ", U32.to_string(hero_chp), " HP"])
+  let adve_txt = String.flatten([adve_inf.fst, " ", U32.to_string(adve_chp), " HP"])
   let scr = Image3D.clear(scr)
   // When hero is in a battle, draw it...
   let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
