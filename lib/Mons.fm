@@ -111,6 +111,9 @@ T Mons.Kind
 | Mons.LAMURIA;
 | Mons.RAFIRE;
 | Mons.VARGOULI;
+| Mons.TUPITREE;
+| Mons.LELA;
+| Mons.MOSHY;
 | Mons.HOUSE_0_00;
 | Mons.HOUSE_0_01;
 | Mons.HOUSE_0_02;
@@ -286,6 +289,9 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.LAMURIA => [Mons.Assets.mons_lamuria_d_0];
   | Mons.RAFIRE => [Mons.Assets.mons_rafire_d_0]; 
   | Mons.VARGOULI => [Mons.Assets.mons_vargouli_d_0];
+  | Mons.TUPITREE => [Mons.Assets.mons_tupitree_d_0];
+  | Mons.LELA => [Mons.Assets.mons_lela_d_0];
+  | Mons.MOSHY => [Mons.Assets.mons_moshy_d_0];
   | Mons.HOUSE_0_00 => [Mons.Assets.brown_house0_00];
   | Mons.HOUSE_0_01 => [Mons.Assets.brown_house0_01];
   | Mons.HOUSE_0_02 => [Mons.Assets.brown_house0_02];
@@ -511,6 +517,15 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.VARGOULI),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
+  else if String.eql(code, "40") then
+    [ Mons.Object.new_of_kind(Mons.TUPITREE),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "41") then
+    [ Mons.Object.new_of_kind(Mons.LELA),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "42") then
+    [ Mons.Object.new_of_kind(Mons.MOSHY),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "K0") then
     [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
@@ -624,19 +639,22 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.LAMURIA        => Bool.false;
   | Mons.RAFIRE         => Bool.false;
   | Mons.VARGOULI       => Bool.false;
+  | Mons.TUPITREE       => Bool.false;
+  | Mons.LELA           => Bool.false;
+  | Mons.MOSHY          => Bool.false;
   | Mons.HOUSE_0_00     => Bool.true;
   | Mons.HOUSE_0_01     => Bool.true;
   | Mons.HOUSE_0_02     => Bool.true;
   | Mons.HOUSE_0_03     => Bool.true;
   | Mons.HOUSE_0_04     => Bool.true;
-  | Mons.CASTLE_00     => Bool.true;
-  | Mons.CASTLE_01     => Bool.true;
-  | Mons.CASTLE_02     => Bool.true;
-  | Mons.CASTLE_03     => Bool.true;
-  | Mons.CASTLE_04     => Bool.true;
-  | Mons.SAND_0        => Bool.false;
-  | Mons.SAND_1        => Bool.false;
-  | Mons.CHEST         => Bool.true;
+  | Mons.CASTLE_00      => Bool.true;
+  | Mons.CASTLE_01      => Bool.true;
+  | Mons.CASTLE_02      => Bool.true;
+  | Mons.CASTLE_03      => Bool.true;
+  | Mons.CASTLE_04      => Bool.true;
+  | Mons.SAND_0         => Bool.false;
+  | Mons.SAND_1         => Bool.false;
+  | Mons.CHEST          => Bool.true;
 
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
@@ -678,6 +696,9 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.LAMURIA        => Bool.true;
   | Mons.RAFIRE         => Bool.true;
   | Mons.VARGOULI       => Bool.true;
+  | Mons.TUPITREE       => Bool.true;
+  | Mons.LELA           => Bool.true;
+  | Mons.MOSHY          => Bool.true;
   | Mons.HOUSE_0_00     => Bool.false;
   | Mons.HOUSE_0_01     => Bool.false;
   | Mons.HOUSE_0_02     => Bool.false;
@@ -731,6 +752,9 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.LAMURIA        => case up: |Mons.Assets.battle_lamuria_u; |Mons.Assets.battle_lamuria_d;;
   | Mons.RAFIRE         => case up: |Mons.Assets.battle_rafire_u; |Mons.Assets.battle_rafire_d;;
   | Mons.VARGOULI       => case up: |Mons.Assets.battle_vargouli_u; |Mons.Assets.battle_vargouli_d;;
+  | Mons.TUPITREE       => case up: |Mons.Assets.battle_tupitree_u; |Mons.Assets.battle_tupitree_d;;
+  | Mons.LELA           => case up: |Mons.Assets.battle_lela_u; |Mons.Assets.battle_lela_d;;
+  | Mons.MOSHY          => case up: |Mons.Assets.battle_moshy_u; |Mons.Assets.battle_moshy_d;;
   | Mons.HOUSE_0_00     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_01     => Mons.Assets.battle_croni_u;
   | Mons.HOUSE_0_02     => Mons.Assets.battle_croni_u;
@@ -784,6 +808,9 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.LAMURIA        => "LAMURIA";
   | Mons.RAFIRE         => "RAFIRE";
   | Mons.VARGOULI       => "VARGOULI";
+  | Mons.TUPITREE       => "TUPITREE";
+  | Mons.LELA           => "LELA";
+  | Mons.MOSHY          => "MOSHY";
   | Mons.HOUSE_0_00     => "";
   | Mons.HOUSE_0_01     => "";
   | Mons.HOUSE_0_02     => "";
