@@ -23,7 +23,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
   function send_post(post_room, post_data, priv_key = key) {
     var priv_key = lib.check_hex(256, priv_key);
     var post_room = lib.check_hex(48, post_room);
-    var post_data = lib.check_hex(304, post_data);
+    var post_data = lib.check_hex(256, post_data);
     var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
     var post_sign = sig.signMessage(post_hash, priv_key);
     var msge_buff = lib.hexs_to_bytes([
@@ -37,6 +37,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
 
   // Starts watching a room
   function watch_room(room_name) {
+    console.log("WATCHING", room_name);
     var room_name = lib.check_hex(48, room_name);
     var msge_buff = lib.hexs_to_bytes([
       lib.u8_to_hex(lib.WATCH),
@@ -70,7 +71,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
       var room = lib.bytes_to_hex(msge.slice(1, 7));
       var time = lib.bytes_to_hex(msge.slice(7, 13));
       var addr = lib.bytes_to_hex(msge.slice(13, 33));
-      var data = lib.bytes_to_hex(msge.slice(33, 71));
+      var data = lib.bytes_to_hex(msge.slice(33, 65));
       Posts[room].push({time, addr, data});
       if (on_post_callback) {
         on_post_callback({room, time, addr, data}, Posts);

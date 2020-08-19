@@ -2,4 +2,4 @@ T App.Event
 | App.Event.init(time: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
 | App.Event.tick(time: U64, screen: Pair(U32,U32), mouse: Pair(U32,U32));
 | App.Event.xkey(time: U64, down: Bool, code: U16);
-| App.Event.post(time: U64, room: String, addr: String, data: String);
+| App.Event.post(time: U64, room: String, addr: String, text: String);

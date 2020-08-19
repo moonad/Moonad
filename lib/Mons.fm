@@ -131,6 +131,14 @@ Mons.vox_mid: Pos32
 Mons.scr_mid: Pos32
   Pos32.new(120u, 80u, 0u)
 
+// The game screen width
+Mons.scr_w: U32
+  U32.mul(Pos32.get_x(Mons.scr_mid), 2u)
+
+// The game screen height
+Mons.scr_h: U32
+  U32.mul(Pos32.get_y(Mons.scr_mid), 2u)
+
 // The null pad
 Mons.Pad.null: Mons.Pad
   Mons.Pad.new(Bool.false, Bool.false, Bool.false, Bool.false)
@@ -1068,7 +1076,7 @@ Mons.example_game: Mons.Game
   Mons.Game.new(Pos32.new(2048u, 2048u, 0u), Mons.example_map)
 
 // The entire game as an App
-Mons: App(Mons.Game)
+Mons.local: App(Mons.Game)
   let screen = Image3D.alloc_capacity(524288u)
   def init
     Mons.example_game
@@ -1089,3 +1097,65 @@ Mons: App(Mons.Game)
     ];
     | post => [];
   App.new<>(init, draw, when)
+
+// Serializes a game input (a bool+char) to a post body (a string)
+Mons.Input.serialize(down: Bool, char: Char): String
+  String.cons(if down then '+' else '-', String.cons(char, String.nil))
+
+// Serializes a post body (a string) to a game input (a bool+char)
+Mons.Input.deserialize(code: String): Maybe(Pair(Bool, Char))
+  case code:
+  | Maybe.none<>;
+  | case code.tail:
+    | Maybe.none<>;
+    | let down = U16.eql(code.head, '+')
+      let char = code.tail.head
+      Maybe.some<>(Pair.new<,>(down, char));;
+
+// Online mode room name
+Mons.App.room: String
+  "0x4d4f4e530000"
+
+// Startup
+Mons.start(on: Bool): App(Mons.Game)
+  let screen = Image3D.alloc_capacity(524288u)
+  App.new<>
+  | Mons.example_game; // initial state
+  | (game) App.Render.vox(Mons.draw(game, screen)); // render function
+  | (event, game) // event handlers
+    // Online mode
+    if on then 
+      case event:
+      | [
+        App.Action.resize<>(Mons.scr_w, Mons.scr_h),
+        App.Action.watch<>(Mons.App.room),
+      ];
+      | [App.Action.state<>(Mons.Game.tick(game))];
+      | [App.Action.post<>(Mons.App.room, Mons.Input.serialize(event.down, event.code))];
+      | case Mons.Input.deserialize(event.text) as got:
+        | [];
+        | [
+          open game:
+          get down code = got.value
+          App.Action.state<>(Mons.Game.cmd(down, code, game.pos, game)),
+          App.Action.print<>(String.concat("Received post:", event.text)),
+        ];;
+    // Offline mode
+    else
+      case event:
+      | [App.Action.resize<>(Mons.scr_w, Mons.scr_h)];
+      | [App.Action.state<>(Mons.Game.tick(game))];
+      | [open game: App.Action.state<>(Mons.Game.cmd(event.down, event.code, game.pos, game))];
+      | [];;
+
+// Startup (online mode)
+Mons.on: App(Mons.Game)
+  Mons.start(Bool.true)
+
+// Startup (offline mode)
+Mons.off: App(Mons.Game)
+  Mons.start(Bool.false)
+
+// Startup (default mode = offline)
+Mons: App(Mons.Game)
+  Mons.off

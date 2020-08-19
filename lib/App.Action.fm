@@ -1,6 +1,6 @@
 T App.Action<S: Type>
 | App.Action.state(state: S);
 | App.Action.print(text: String);
-| App.Action.post(room: String, data: String);
+| App.Action.post(room: String, text: String);
 | App.Action.watch(room: String);
 | App.Action.resize(width: U32, height: U32);
