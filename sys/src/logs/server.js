@@ -29,9 +29,8 @@ for (var file of files) {
     var room_posts = [];
     for (var i = 0; i < file_data.length; i += 64) {
       var head = Buffer.from([lib.SHOW]);
-      var room = Buffer.from(lib.hex_to_bytes(room_name));
       var body = file_data.slice(i, i + 64);
-      room_posts.push(new Uint8Array(Buffer.concat([head, room, body])));
+      room_posts.push(new Uint8Array(Buffer.concat([head, body])));
     }
     console.log("Loaded "+room_posts.length+" posts from room "+room_name+".");
     RoomPosts[room_name] = room_posts;
@@ -117,7 +116,6 @@ function save_post(post_room, post_user, post_data) {
   RoomPosts[post_room].push(post_buff);
 
   // Broadcasts
-  
   if (Watchlist[post_room]) {
     log_msg += "- broadcasting to " + Watchlist[post_room].length + " watcher(s).\n";
     for (var ws of Watchlist[post_room]) {

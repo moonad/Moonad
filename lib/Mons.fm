@@ -1135,6 +1135,21 @@ Mons.Input.deserialize(code: String): Maybe(Pair(Bool, Char))
 Mons.App.room: String
   "0x4d4f4e530000"
 
+// TODO: we need a List.find function
+Mons.App.is_input(char: Char): Bool
+  List.or([
+    U16.eql(char, 'A'),
+    U16.eql(char, 'S'),
+    U16.eql(char, 'D'),
+    U16.eql(char, 'W'),
+    U16.eql(char, 'U'),
+    U16.eql(char, 'I'),
+    U16.eql(char, 'O'),
+    U16.eql(char, 'J'),
+    U16.eql(char, 'K'),
+    U16.eql(char, '6'),
+  ])
+
 // Startup
 Mons.start(on: Bool): App(Mons.Game)
   let screen = Image3D.alloc_capacity(524288u)
@@ -1148,9 +1163,14 @@ Mons.start(on: Bool): App(Mons.Game)
       | [
         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
         App.Action.watch<>(Mons.App.room),
+        App.Action.print<>("Initialized Mons game state."),
       ];
-      | [App.Action.state<>(Mons.Game.tick(game))];
-      | [App.Action.post<>(Mons.App.room, Mons.Input.serialize(event.down, event.code))];
+      | [
+        App.Action.state<>(Mons.Game.tick(game)),
+      ];
+      | if Mons.App.is_input(event.code) 
+        then [App.Action.post<>(Mons.App.room, Mons.Input.serialize(event.down, event.code))]
+        else [];
       | case Mons.Input.deserialize(event.text) as got:
         | [];
         | [
