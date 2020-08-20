@@ -6,7 +6,7 @@ const fm = require("formality-lang");
 const front = require("./../front.js");
 const lib = require("./../../server/lib.js");
 
-const GENESIS_TIME = 1597939168722;
+const GENESIS_TIME = 1597955449124;
 //var INIT = Date.now();
 
 class Play extends Component {
