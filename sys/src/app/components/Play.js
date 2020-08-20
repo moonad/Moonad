@@ -6,7 +6,7 @@ const fm = require("formality-lang");
 const front = require("./../front.js");
 const lib = require("./../../server/lib.js");
 
-const GENESIS_TIME = 1597882586488;
+const GENESIS_TIME = 1597939168722;
 //var INIT = Date.now();
 
 class Play extends Component {
@@ -154,21 +154,21 @@ class Play extends Component {
     }, 1000 / 40);
 
     // Save memory by freeing states older than 6 seconds
-    this.intervals.clean_states = setInterval(() => {
-      if (this.events.length > 0) {
-        var i = this.events.length - 1;
-        var ct = Date.now();
-        while (i >= 0 && this.events[i].time > ct - 6000) {
-          --i;
-        }
-        for (var j = i; j >= 0; --j) {
-          if (this.events[j].state === null) {
-            break;
-          }
-          this.events[j].state = null;
-        }
-      }
-    }, 3000);
+    //this.intervals.clean_states = setInterval(() => {
+      //if (this.events.length > 0) {
+        //var i = this.events.length - 1;
+        //var ct = Date.now();
+        //while (i >= 0 && this.events[i].time > ct - 6000) {
+          //--i;
+        //}
+        //for (var j = i; j >= 0; --j) {
+          //if (this.events[j].state === null) {
+            //break;
+          //}
+          //this.events[j].state = null;
+        //}
+      //}
+    //}, 3000);
 
     // HTML element getter
     this.intervals.app_elem = setInterval(() => {
@@ -234,6 +234,7 @@ class Play extends Component {
   // Given an event and an app state, executes the event's
   // side-effects and returns the updated state
   execute_event(ev, state) {
+    //console.log("execute", ev._);
     var actions = this.app.when(ev)(state);
     while (actions._ === "List.cons") {
       var action = actions.head;
@@ -242,11 +243,14 @@ class Play extends Component {
           state = action.state;
           break;
         case "App.Action.print":
-          console.log(action.text);
+          if (!ev.done) {
+            console.log(action.text);
+          }
           break;
         case "App.Action.post":
           if (!ev.done) {
             var data = lib.hex(256, lib.string_to_hex(action.text));
+            console.log("send_post", action.text);
             front.logs.send_post(action.room, data);
           }
           break;
@@ -255,6 +259,7 @@ class Play extends Component {
             front.logs.watch_room(action.room);
             front.logs.on_post(({room, time, addr, data}) => {
               var text = lib.hex_to_string(data).replace(/\0/g,"");
+              console.log("got_post", text);
               this.register_event({
                 _: "App.Event.post",
                 time: parseInt(time.slice(2), 16),
@@ -296,24 +301,31 @@ class Play extends Component {
       while (this.events[i-1] && this.events[i-1].time > this.events[i].time) {
         var prev = this.events[i-1];
         var next = this.events[i-0];
+        prev.state = null;
         this.events[i-1] = next;
         this.events[i-0] = prev;
         --i;
       }
-      // Computes the event's state
-      for (var j = i; j < this.events.length; ++j) {
-        if (j === 0) {
-          this.events[j].state = this.app.init;
-        } else {
-          this.events[j].state = this.execute_event(this.events[j], this.events[j-1].state);
-        }
-      }
+      // Frees memory of old events
+      //if (this.events.length > 64) {
+        //this.events[this.events.length - 64] = null;
+      //}
     }
   }
   get_app_state() {
     if (this.events.length === 0) {
       return this.app.init;
     } else {
+      var last_with_state = this.events.length - 1;
+      while (last_with_state > 0 && !this.events[last_with_state-1].state) {
+        --last_with_state;
+      }
+      //return this.app.init;
+      for (var i = last_with_state; i < this.events.length; ++i) {
+        var last_state = i === 0 ? this.app.init : this.events[i-1].state;
+        this.events[i].state = this.execute_event(this.events[i], last_state);
+        //console.log("compute", i, this.events[i]._);
+      }
       return this.events[this.events.length - 1].state;
     }
   }
