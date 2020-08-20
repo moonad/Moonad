@@ -263,10 +263,10 @@ class Play extends Component {
         case "App.Action.watch":
           if (!ev.done) {
             front.logs.watch_room(lib.fmword_to_hex(action.room));
-            console.log("watching room");
+            //console.log("watching room");
             front.logs.on_post(({room, time, addr, data}) => {
               //var text = lib.hex_to_string(data).replace(/\0/g,"");
-              console.log("got post");
+              //console.log("got post");
               this.register_event({
                 _: "App.Event.post",
                 time: parseInt(time.slice(2), 16),
