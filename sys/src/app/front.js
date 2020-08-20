@@ -19,16 +19,22 @@ function gen_pkey() {
   for (var i = 0; i < nums.length; ++i) {
     pkey += ("00" + nums[i].toString(16)).slice(-2);
   }
+  pkey = "0x"+pkey;
   localStorage.setItem("pkey", pkey);
   return pkey;
 };
 
 function get_pkey() {
-  return localStorage.getItem("pkey") || gen_pkey();
+  var pkey = localStorage.getItem("pkey") || gen_pkey();
+  if (pkey.slice(0,2) !== "0x") {
+    return "0x" + pkey;
+  } else {
+    return pkey;
+  }
 };
 
 function get_addr() {
-  return pkey_to_addr(get_pkey());
+  return pkey_to_addr(get_pkey()).toLowerCase();
 };
 
 function format_date(date) {
@@ -46,7 +52,7 @@ const pkey_to_addr = memoize(ethsig.addressFromKey);
 
 const logs = require("./../logs/client.js")({
   url: "ws://"+window.location.host+":7171",
-  key: "0x"+get_pkey(),
+  key: get_pkey(),
 });
 
 // Login

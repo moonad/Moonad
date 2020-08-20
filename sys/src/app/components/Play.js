@@ -6,7 +6,7 @@ const fm = require("formality-lang");
 const front = require("./../front.js");
 const lib = require("./../../server/lib.js");
 
-const GENESIS_TIME = 1597939168722;
+const GENESIS_TIME = 1597955449124;
 //var INIT = Date.now();
 
 class Play extends Component {
@@ -23,18 +23,18 @@ class Play extends Component {
     this.app_elem = null;
     this.canvas = null;
     this.run_term = null;
-    this.load_log = "Loading...";
+    this.log = "Loading...";
   }
   async componentDidMount() {
     try {
-      this.load_log = "";
+      this.log = "";
       this.defs = await front.load_core_defs_of({
         name: this.props.name,
         code: this.props.code || null,
         cache: false,
         debug: false,
         on_dependency: name => {
-          this.load_log = "Loading "+name+"...\n" + this.load_log;
+          this.log = "Loading "+name+"...";
           this.forceUpdate();
         }
       });
@@ -74,6 +74,7 @@ class Play extends Component {
     }
   }
   start_app(name) {
+    this.log = "Compiling to JavaScript...";
     var js_code = fm.tojs.compile(name, this.defs, true);
     console.log(js_code);
     this.app = eval(js_code);
@@ -87,7 +88,8 @@ class Play extends Component {
     // Init event
     this.register_event({
       _: "App.Event.init",
-      time: Date.now(),
+      time: 0,
+      addr: lib.hex_to_fmword(front.get_addr()),
       screen: {
         _: "Pair.new",
         fst: this.app_elem ? this.app_elem.offsetWidth : 0,
@@ -151,7 +153,12 @@ class Play extends Component {
     // Tick event
     this.intervals.tick = setInterval(() => {
       this.register_ticks();
-    }, 1000 / 40);
+    }, 1000 / 80);
+
+    // State computer
+    this.intervals.compute_states = setInterval(() => {
+      this.compute_states(2000); // computes at most 128000 events per second
+    }, 1000 / 64);
 
     // Save memory by freeing states older than 6 seconds
     //this.intervals.clean_states = setInterval(() => {
@@ -234,7 +241,7 @@ class Play extends Component {
   // Given an event and an app state, executes the event's
   // side-effects and returns the updated state
   execute_event(ev, state) {
-    //console.log("execute", ev._);
+    //if (ev._ !== "App.Event.tick") console.log("execute", ev._, ev.time, ev.done);
     var actions = this.app.when(ev)(state);
     while (actions._ === "List.cons") {
       var action = actions.head;
@@ -249,23 +256,23 @@ class Play extends Component {
           break;
         case "App.Action.post":
           if (!ev.done) {
-            var data = lib.hex(256, lib.string_to_hex(action.text));
-            console.log("send_post", action.text);
-            front.logs.send_post(action.room, data);
+            var data = lib.hex(256, lib.fmword_to_hex(action.data));
+            front.logs.send_post(lib.fmword_to_hex(action.room), data);
           }
           break;
         case "App.Action.watch":
           if (!ev.done) {
-            front.logs.watch_room(action.room);
+            front.logs.watch_room(lib.fmword_to_hex(action.room));
+            //console.log("watching room");
             front.logs.on_post(({room, time, addr, data}) => {
-              var text = lib.hex_to_string(data).replace(/\0/g,"");
-              console.log("got_post", text);
+              //var text = lib.hex_to_string(data).replace(/\0/g,"");
+              //console.log("got post");
               this.register_event({
                 _: "App.Event.post",
                 time: parseInt(time.slice(2), 16),
-                room: room,
-                auth: addr,
-                text: text,
+                room: lib.hex_to_fmword(room),
+                addr: lib.hex_to_fmword(addr),
+                data: lib.hex_to_fmword(data),
               });
             });
           }
@@ -286,14 +293,18 @@ class Play extends Component {
     var dt = 32; // ticks per second
     var ct = Date.now();
     var lt = this.last_tick;
+    var ts = 0;
+    //console.log("Registering ticks...");
     for (var t = lt + (dt - lt % dt); t < ct; t += dt) {
       this.register_event({_: "App.Event.tick", time: t});
       this.last_tick = t;
+      ++ts;
     }
+    //console.log("Registered "+ts+" ticks...");
   }
   // Adds an event to the list of events
   register_event(ev) {
-    //console.log("register", ev._);
+    //console.log("register", ev._, ev.time);
     if (this.app) {
       this.events.push(ev);
       // If it is older than the last event, reorder 
@@ -312,22 +323,27 @@ class Play extends Component {
       //}
     }
   }
-  get_app_state() {
-    if (this.events.length === 0) {
-      return this.app.init;
-    } else {
+  compute_states(max_events = Infinity) {
+    if (this.events.length > 0) {
       var last_with_state = this.events.length - 1;
       while (last_with_state > 0 && !this.events[last_with_state-1].state) {
         --last_with_state;
       }
-      //return this.app.init;
-      for (var i = last_with_state; i < this.events.length; ++i) {
+      var lim = Math.min(last_with_state + max_events, this.events.length);
+      for (var i = last_with_state; i < lim; ++i) {
+        this.log = "Computing event " + i + "...";
         var last_state = i === 0 ? this.app.init : this.events[i-1].state;
         this.events[i].state = this.execute_event(this.events[i], last_state);
-        //console.log("compute", i, this.events[i]._);
       }
-      return this.events[this.events.length - 1].state;
     }
+  }
+  get_app_state() {
+    for (var i = this.events.length - 1; i >= 0; --i) {
+      if (this.events[i].state) {
+        return this.events[i].state;
+      }
+    }
+    return this.app.init;
   }
   render_app(type) {
     const name = this.props.name;
@@ -498,25 +514,30 @@ class Play extends Component {
   render() {
     const name = this.props.name;
     const defs = this.defs;
-
-    if (!defs || !defs[name]) {
-      return h("pre", {style: {
-        "width": "100%",
-        "height": "100%",
-        "overflow-y": "hidden",
-      }}, this.load_log);
-    } else {
-      var type = fm.synt.reduce(this.defs[name].type);
-      // If this is an application...
-      if ( type.ctor === "App"
-        && type.func.ctor === "Ref"
-        && type.func.name === "App") {
-        return this.render_app(type);
-      // If this is just a function...
-      } else {
-        return this.render_fun(type);
-      }
-    }
+    return h("div", {}, [
+      (() => {
+        if (defs && defs[name]) {
+          var type = fm.synt.reduce(this.defs[name].type);
+          // If this is an application...
+          if ( type.ctor === "App"
+            && type.func.ctor === "Ref"
+            && type.func.name === "App") {
+            return this.render_app(type);
+          // If this is just a function...
+          } else {
+            return this.render_fun(type);
+          }
+        } else {
+          return null;
+        }
+      })(),
+      h("pre", {style: {
+        "text-align": "center",
+        //"width": "100%",
+        //"height": "100%",
+        //"overflow-y": "hidden",
+      }}, this.log),
+    ]);
   }
 };
 
