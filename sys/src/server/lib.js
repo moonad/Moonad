@@ -152,6 +152,81 @@ function bytes_concat(bytes) {
   return done;
 };
 
+function hex_to_bits(hex) {
+  var bits = "0b";
+  for (var i = 2; i < hex.length; ++i) {
+    switch (hex[i].toLowerCase()) {
+      case "0": bits += "0000"; break;
+      case "1": bits += "0001"; break;
+      case "2": bits += "0010"; break;
+      case "3": bits += "0011"; break;
+      case "4": bits += "0100"; break;
+      case "5": bits += "0101"; break;
+      case "6": bits += "0110"; break;
+      case "7": bits += "0111"; break;
+      case "8": bits += "1000"; break;
+      case "9": bits += "1001"; break;
+      case "a": bits += "1010"; break;
+      case "b": bits += "1011"; break;
+      case "c": bits += "1100"; break;
+      case "d": bits += "1101"; break;
+      case "e": bits += "1110"; break;
+      case "f": bits += "1111"; break;
+    }
+  }
+  return bits;
+}
+
+function bits_to_hex(bits) {
+  var hex = "0x";
+  for (var i = 2; i < bits.length; i += 4) {
+    switch (bits.slice(i, i+4)) {
+      case "0000": hex += "0"; break;
+      case "0001": hex += "1"; break;
+      case "0010": hex += "2"; break;
+      case "0011": hex += "3"; break;
+      case "0100": hex += "4"; break;
+      case "0101": hex += "5"; break;
+      case "0110": hex += "6"; break;
+      case "0111": hex += "7"; break;
+      case "1000": hex += "8"; break;
+      case "1001": hex += "9"; break;
+      case "1010": hex += "a"; break;
+      case "1011": hex += "b"; break;
+      case "1100": hex += "c"; break;
+      case "1101": hex += "d"; break;
+      case "1110": hex += "e"; break;
+      case "1111": hex += "f"; break;
+    }
+  }
+  return hex;
+}
+
+function bits_to_fmword(bits) {
+  var fmword = {_:"Word.nil"};
+  for (var i = 2; i < bits.length; ++i) {
+    fmword = {_:bits[i]==="0"?"Word.0":"Word.1",pred:fmword};
+  }
+  return fmword;
+}
+
+function fmword_to_bits(fmword) {
+  var bits = "";
+  while (fmword._ !== "Word.nil") {
+    bits = (fmword._ === "Word.0" ? "0" : "1") + bits;
+    fmword = fmword.pred;
+  }
+  return "0b"+bits;
+}
+
+function hex_to_fmword(hex) {
+  return bits_to_fmword(hex_to_bits(hex));
+}
+
+function fmword_to_hex(fmword) {
+  return bits_to_hex(fmword_to_bits(fmword));
+}
+
 module.exports = {
   hex,
   nam,
@@ -173,4 +248,8 @@ module.exports = {
   get_hex_from_bytes,
   hex_to_hex64s,
   bytes_concat,
+  bits_to_hex,
+  hex_to_bits,
+  hex_to_fmword,
+  fmword_to_hex,
 };

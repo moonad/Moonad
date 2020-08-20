@@ -69,7 +69,8 @@ Mons.Map: Type
 // The global game state
 T Mons.Game
 | Mons.Game.new(
-  pos: Pos32, // main hero position
+  usr: Word(160), // player name
+  pos: Map(Pos32), // player positions
   map: Mons.Map // the game map
 );
 
@@ -556,7 +557,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     []
 
 // Converts a string map source to an actual map
-Mons.Map.load(code: List(String)): Mons.Map
+Mons.Map.build(code: List(String)): Mons.Map
   let size = List.length.u32<>(code) // NOTE: assumes width == height
   List.ifor.u32<>(code)<>
   | Mons.Map.new;
@@ -571,20 +572,32 @@ Mons.Map.load(code: List(String)): Mons.Map
       let sli = String.slice(ini, end, row) // slice with tile code
       Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);
 
-// Gets the hero position
-Mons.Game.get_pos(game: Mons.Game): Pos32
-  open game:
-  game.pos
+// Get the game user
+Mons.Game.get_usr(game: Mons.Game): Word(160)
+  open game: game.usr
 
-// Sets the hero position
-Mons.Game.set_pos(pos: Pos32, game: Mons.Game): Mons.Game
+// Set the game user
+Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
+  open game: Mons.Game.new(usr, game.pos, game.map)
+
+// Gets an user's position
+Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
   open game:
-  Mons.Game.new(pos, game.map)
+  Map.get<>(Word.to_bits<160>(user), game.pos)
+
+// Sets an user's position
+Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map)
+
+// Gets the hero's position
+Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
+  open game: Mons.Game.get_user_pos(game.usr, game)
 
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.pos, map)
+  Mons.Game.new(game.usr, game.pos, map)
 
 // Updates the object at given position on the game map
 Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): Mons.Game
@@ -825,20 +838,40 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
-// Performs a key command on the object at given position
-Mons.Game.cmd(down: Bool, key: Char, pos: Pos32, game: Mons.Game): Mons.Game
-  if Bool.and(down, U16.eql(key, 'U')) then
-    Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
-  else if U16.eql(key, 'D') then
-    Mons.Game.update((obj) Mons.Object.set_pad_r(obj, down), pos, game)
-  else if U16.eql(key, 'W') then
-    Mons.Game.update((obj) Mons.Object.set_pad_u(obj, down), pos, game)
-  else if U16.eql(key, 'A') then
-    Mons.Game.update((obj) Mons.Object.set_pad_l(obj, down), pos, game)
-  else if U16.eql(key, 'S') then
-    Mons.Game.update((obj) Mons.Object.set_pad_d(obj, down), pos, game)
-  else
-    game
+// Computes a command from an user
+Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
+  open game:
+  let pos = Mons.Game.get_user_pos(usr, game)
+  case pos:
+  // New player
+  | let pos = Pos32.new(2048u, 2048u, 0u)
+    let obj = Mons.Object.new_of_kind(Mons.HERO)
+    let map = Mons.Map.push(pos, obj, game.map)
+    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.set_user_pos(usr, pos, game)
+    game;
+  // Existing player
+  | let pos = pos.value
+    if U16.eql(cmd, 'U') then
+      Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+    else if U16.eql(cmd, 'D') then
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'W') then
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'A') then
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'S') then
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'd') then
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 'w') then
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 'a') then
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 's') then
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, game)
+    else
+      game;
 
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
@@ -892,11 +925,13 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 // TODO: for some reason, using a `case obj` here causes the
 // function not to type check anymore. Investigate why.
 Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
-  case game:
-  | let sprs = []
-    let c_x = Pos32.get_x(game.pos)
-    let c_y = Pos32.get_y(game.pos)
-    let c_z = Pos32.get_z(game.pos)
+  open game:
+  let sprs = []
+  case Mons.Game.get_hero_pos(game) as cam_pos:
+  | [];
+  | let c_x = Pos32.get_x(cam_pos.value)
+    let c_y = Pos32.get_y(cam_pos.value)
+    let c_z = Pos32.get_z(cam_pos.value)
     for x : U32 = 0u .. 17u with sprs:
       for y : U32 = 0u .. 13u with sprs:
         let t_x = U32.add(U32.sub(c_x, 8u), x)
@@ -949,71 +984,73 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
-  let hero_pos = game.pos
-  let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos,0u), game.map)
-  let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos,1u), game.map)
-  open hero_obj:
-  open adve_obj:
-  let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
-  let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
-  let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
-  let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-  let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
-  let scr = Image3D.clear(scr)
-  // When hero is in a battle, draw it...
-  let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
-  let is_battling = Mons.Kind.battles(adve_obj.kin)
-  if Bool.and(is_standing, is_battling) then
-    let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-    let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-    let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
-    let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-    let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-    let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
-    let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
-    scr
-  // When hero isn't battling, draw map...
-  else 
-    let sprs = Mons.game_sprites(game)
-    // For each sprite around the hero...
-    for spr in sprs with scr:
-      // For each pixel of the sprite...
-      open spr:
-      let len = Image3D.get_length(spr.img)
-      for i : U32 = 0u .. len with scr:
-        let s_w = Pos32.get_x(Mons.scr_mid)
-        let s_h = Pos32.get_y(Mons.scr_mid)
-        // The origin global position (centered on hero)
-        let h_x = Pos32.get_x(hero_pos)
-        let h_y = Pos32.get_y(hero_pos)
-        //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
-        //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
-        get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-        // Gets the spr global position
-        let s_x = spr.x
-        let s_y = spr.y
-        let s_z = spr.z
-        // Gets the pixel global position (its cpos on img is x=128, y=128)
-        let xyz = Image3D.get_pos(i, spr.img)
-        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
-        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
-        let v_z = Pos32.get_z(xyz)
-        // Temporary: if pixel is out of screen, make it invisible
-        let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-        let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-        let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-        let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-        //let ok  = List.and([ok0, ok1, ok2, ok3])
-        let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-        // Computes the pixel position on the final canvas
-        let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
-        let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-        let c_z = Bool.if<>(ok, v_z, 0u)
-        // Pushes the pixel to the scr
-        let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
-        let col = Image3D.get_col(i, spr.img) // final pixel col
-        Image3D.push(pos, col, scr) // pushes to scr
+  let hero_pos = Mons.Game.get_hero_pos(game)
+  case hero_pos:
+  | scr;
+  | let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,0u), game.map)
+    let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,1u), game.map)
+    open hero_obj:
+    open adve_obj:
+    let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
+    let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
+    let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
+    let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
+    let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
+    let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
+    let scr = Image3D.clear(scr)
+    // When hero is in a battle, draw it...
+    let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
+    let is_battling = Mons.Kind.battles(adve_obj.kin)
+    if Bool.and(is_standing, is_battling) then
+      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+      let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
+      let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+      let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
+      let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
+      let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
+      let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
+      scr
+    // When hero isn't battling, draw map...
+    else 
+      let sprs = Mons.game_sprites(game)
+      // For each sprite around the hero...
+      for spr in sprs with scr:
+        // For each pixel of the sprite...
+        open spr:
+        let len = Image3D.get_length(spr.img)
+        for i : U32 = 0u .. len with scr:
+          let s_w = Pos32.get_x(Mons.scr_mid)
+          let s_h = Pos32.get_y(Mons.scr_mid)
+          // The origin global position (centered on hero)
+          let h_x = Pos32.get_x(hero_pos.value)
+          let h_y = Pos32.get_y(hero_pos.value)
+          //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
+          //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
+          get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
+          // Gets the spr global position
+          let s_x = spr.x
+          let s_y = spr.y
+          let s_z = spr.z
+          // Gets the pixel global position (its cpos on img is x=128, y=128)
+          let xyz = Image3D.get_pos(i, spr.img)
+          let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+          let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
+          let v_z = Pos32.get_z(xyz)
+          // Temporary: if pixel is out of screen, make it invisible
+          let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+          let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+          let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+          let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+          //let ok  = List.and([ok0, ok1, ok2, ok3])
+          let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+          // Computes the pixel position on the final canvas
+          let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+          let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
+          let c_z = Bool.if<>(ok, v_z, 0u)
+          // Pushes the pixel to the scr
+          let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+          let col = Image3D.get_col(i, spr.img) // final pixel col
+          Image3D.push(pos, col, scr); // pushes to scr
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
@@ -1042,7 +1079,7 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
   obj
 
 // Moves an object towards a given direction
-Mons.Game.tick_at(pos: Pos32, game: Mons.Game): Mons.Game
+Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   let map = game.map
   let obj = Mons.Map.get(pos, map)
@@ -1061,7 +1098,7 @@ Mons.Game.tick_at(pos: Pos32, game: Mons.Game): Mons.Game
     let map = Mons.Map.push(new_pos, obj, map)
     //let map = Mons.Map.set(pos, obj, map)
     let game = Mons.Game.set_map(map, game)
-    let game = Mons.Game.set_pos(new_pos, game)
+    let game = Mons.Game.set_user_pos(user, new_pos, game)
     game
   else
     let map = Mons.Map.set(pos, obj, map)
@@ -1071,133 +1108,129 @@ Mons.Game.tick_at(pos: Pos32, game: Mons.Game): Mons.Game
 // TODO: tick objects other than hero
 Mons.Game.tick(game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.tick_at(game.pos, game)
+  for user_pos in Map.to_list<>(game.pos) with game:
+    get key pos = user_pos
+    let user = Word.from_bits(160, key)
+    Mons.Game.tick_user(user, pos, game)
 
-// Examples
-// ========
+// All valid inputs and its code
+Mons.Input.list: List(Pair(Char, Bits))
+  let b0 = Bits.0
+  let b1 = Bits.1
+  let bn = Bits.nil
+  [
+    {'D', b0(b0(b0(b0(b0(b0(b0(b0(bn))))))))},
+    {'W', b0(b0(b0(b0(b0(b0(b0(b1(bn))))))))},
+    {'A', b0(b0(b0(b0(b0(b0(b1(b0(bn))))))))},
+    {'S', b0(b0(b0(b0(b0(b0(b1(b1(bn))))))))},
+    {'U', b0(b0(b0(b0(b0(b1(b0(b0(bn))))))))},
+    {'I', b0(b0(b0(b0(b0(b1(b0(b1(bn))))))))},
+    {'J', b0(b0(b0(b0(b0(b1(b1(b0(bn))))))))},
+    {'K', b0(b0(b0(b0(b0(b1(b1(b1(bn))))))))},
+    {'d', b0(b0(b0(b0(b1(b0(b0(b0(bn))))))))},
+    {'w', b0(b0(b0(b0(b1(b0(b0(b1(bn))))))))},
+    {'a', b0(b0(b0(b0(b1(b0(b1(b0(bn))))))))},
+    {'s', b0(b0(b0(b0(b1(b0(b1(b1(bn))))))))},
+    {'u', b0(b0(b0(b0(b1(b1(b0(b0(bn))))))))},
+    {'i', b0(b0(b0(b0(b1(b1(b0(b1(bn))))))))},
+    {'j', b0(b0(b0(b0(b1(b1(b1(b0(bn))))))))},
+    {'k', b0(b0(b0(b0(b1(b1(b1(b1(bn))))))))},
+  ]
 
-// An example map
-//Mons.example_map: Mons.Map
-  //let grass = Mons.Object.new(Mons.GRASS, Mons.Dir.down)
-  //let hero = Mons.Object.new(Mons.HERO, Mons.Dir.down)
-  //let bush = Mons.Object.new(Mons.BUSH, Mons.Dir.down)
-  //let map = Mons.Map.new
-  //let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
-    //grass,
-    //bush,
-  //], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
-    //hero,
-    //grass,
-  //], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [grass], map)
-  //map
+// Maps from chars to their codes
+Mons.Input.char_to_code_map: Map(Bits)
+  let map = Map.new<>
+  for char_code in Mons.Input.list with map:
+    get char code = char_code
+    Map.set<>(U16.to_bits(char), code, map)
 
-Mons.example_map: Mons.Map
-  Mons.Map.load(Mons.map_source)
+// Maps from codes to their chars
+Mons.Input.code_to_char_map: Map(Char)
+  let map = Map.new<>
+  for char_code in Mons.Input.list with map:
+    get char code = char_code
+    Map.set<>(code, char, map)
 
-// An example game
-Mons.example_game: Mons.Game
-  Mons.Game.new(Pos32.new(2048u, 2048u, 0u), Mons.example_map)
-
-// The entire game as an App
-Mons.local: App(Mons.Game)
-  let screen = Image3D.alloc_capacity(524288u)
-  def init
-    Mons.example_game
-  def draw(game)
-    App.Render.vox(Mons.draw(game, screen))
-  def when(event, game)
-    case event:
-    | init => [
-      let width = U32.mul(Pos32.get_x(Mons.scr_mid), 2u)
-      let height = U32.mul(Pos32.get_y(Mons.scr_mid), 2u)
-      App.Action.resize<>(width, height)
-    ];
-    | tick => [
-      App.Action.state<>(Mons.Game.tick(game))
-    ];
-    | xkey => [
-      open game: App.Action.state<>(Mons.Game.cmd(event.down, event.code, game.pos, game))
-    ];
-    | post => [];
-  App.new<>(init, draw, when)
-
-// Serializes a game input (a bool+char) to a post body (a string)
-Mons.Input.serialize(down: Bool, char: Char): String
-  String.cons(if down then '+' else '-', String.cons(char, String.nil))
-
-// Serializes a post body (a string) to a game input (a bool+char)
-Mons.Input.deserialize(code: String): Maybe(Pair(Bool, Char))
-  case code:
+// Serializes an input to its code
+Mons.Input.serialize(char: Char): Maybe(Word(256))
+  case Map.get<>(U16.to_bits(char), Mons.Input.char_to_code_map) as code:
   | Maybe.none<>;
-  | case code.tail:
-    | Maybe.none<>;
-    | let down = U16.eql(code.head, '+')
-      let char = code.tail.head
-      Maybe.some<>(Pair.new<,>(down, char));;
+  | Maybe.some<>(Word.from_bits(256, code.value));
+
+// Deserializes a code to its input
+Mons.Input.deserialize(code: Word(256)): Maybe(Char)
+  Map.get<>(Bits.slice(8, Word.to_bits<256>(code)), Mons.Input.code_to_char_map)
+
+// Generates an input char from the event down/code info
+Mons.Input.char(down: Bool, code: Char): Char
+  if down
+  then Char.to_upper(code)
+  else Char.to_lower(code)
 
 // Online mode room name
-Mons.App.room: String
-  "0x4d4f4e530000"
-
-// TODO: we need a List.find function
-Mons.App.is_input(char: Char): Bool
-  List.or([
-    U16.eql(char, 'A'),
-    U16.eql(char, 'S'),
-    U16.eql(char, 'D'),
-    U16.eql(char, 'W'),
-    U16.eql(char, 'U'),
-    U16.eql(char, 'I'),
-    U16.eql(char, 'O'),
-    U16.eql(char, 'J'),
-    U16.eql(char, 'K'),
-    U16.eql(char, '6'),
-  ])
+Mons.App.room: Word(48)
+  Word.from_bits(48, String.to_bits("MON"))
 
 // Startup
-Mons.start(on: Bool): App(Mons.Game)
+Mons.start(online: Bool): App(Mons.Game)
   let screen = Image3D.alloc_capacity(524288u)
   App.new<>
-  | Mons.example_game; // initial state
-  | (game) App.Render.vox(Mons.draw(game, screen)); // render function
-  | (event, game) // event handlers
-    // Online mode
-    if on then 
+  // Initial state
+  | let game_usr = Word.zero(160)
+    let game_pos = Map.new<>
+    let game_map = Mons.Map.build(Mons.map_source)
+    Mons.Game.new(game_usr, game_pos, game_map);
+  // Render function
+  | (game) App.Render.vox(Mons.draw(game, screen));
+  // Event handlers
+  | (event, game)
+    if online then // online mode
       case event:
-      | [
+      | init => [
+        App.Action.print<>("Starting app."),
         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
+        App.Action.state<>(Mons.Game.set_usr(event.addr, game)),
         App.Action.watch<>(Mons.App.room),
-        App.Action.print<>("Initialized Mons game state."),
+        // Sends a J to init our char. TODO: better initialization.
+        let chr = Mons.Input.char(Bool.true, 'j')
+        case Mons.Input.serialize(chr) as data:
+        | App.Action.print<>(""); // unreachable
+        | App.Action.post<>(Mons.App.room, data.value);
       ];
-      | [
+      | tick => [
         App.Action.state<>(Mons.Game.tick(game)),
       ];
-      | if Mons.App.is_input(event.code) 
-        then [App.Action.post<>(Mons.App.room, Mons.Input.serialize(event.down, event.code))]
-        else [];
-      | case Mons.Input.deserialize(event.text) as got:
+      | xkey => // send input to server
+        let chr = Mons.Input.char(event.down, event.code)
+        case Mons.Input.serialize(chr) as data:
+        | [];
+        | [App.Action.post<>(Mons.App.room, data.value)];;
+      | post => // applies input to this post's hero
+        //use skp = Debug.log<>("Got post.")
+        //use skp = Debug.log<>(Bits.to_string(Word.to_bits<256>(event.data)))
+        case Mons.Input.deserialize(event.data) as input:
         | [];
         | [
+          //use skp = Debug.log<>(String.concat("Got input:", String.pure(input.value)))
+          //use skp = Debug.log<>(String.concat("From user:", Bits.to_string(Word.to_bits<160>(event.addr))))
           open game:
-          get down code = got.value
-          App.Action.state<>(Mons.Game.cmd(down, code, game.pos, game)),
-          App.Action.print<>(String.concat("Received post:", event.text)),
+          App.Action.state<>(Mons.Game.cmd(input.value, event.addr, game))
         ];;
-    // Offline mode
-    else
+    else // offline mode
       case event:
-      | [App.Action.resize<>(Mons.scr_w, Mons.scr_h)];
-      | [App.Action.state<>(Mons.Game.tick(game))];
-      | [open game: App.Action.state<>(Mons.Game.cmd(event.down, event.code, game.pos, game))];
-      | [];;
+      | init => [
+        App.Action.resize<>(Mons.scr_w, Mons.scr_h),
+        let game = Mons.Game.set_usr(event.addr, game)
+        let game = Mons.Game.cmd('j', event.addr, game) // inits hero
+        App.Action.state<>(game),
+      ];
+      | tick => [App.Action.state<>(Mons.Game.tick(game))];
+      | xkey => [
+        open game:
+        let chr = Mons.Input.char(event.down, event.code)
+        App.Action.state<>(Mons.Game.cmd(chr, game.usr, game))
+      ];
+      | post => [];;
 
 // Startup (online mode)
 Mons.on: App(Mons.Game)
@@ -1210,3 +1243,13 @@ Mons.off: App(Mons.Game)
 // Startup (default mode = offline)
 Mons: App(Mons.Game)
   Mons.off
+
+//Mons: _
+  //let map = Map.new<>
+  //let map = Map.set<>(U16.to_bits('i'), 5, map)
+  //Map.get<>(U16.to_bits('i'), map)
+  //let map = Map.set<>(U16.to_bits('i'), 7)
+  //U16.to_bits('i')
+//0000000001100001
+//0000000001101001
+  //Map.get<>(U16.to_bits('h'), Mons.Input.char_to_code_map)
