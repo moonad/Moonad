@@ -34,8 +34,8 @@ T Mons.Dir
 | Mons.Dir.left;
 | Mons.Dir.down;
 
-T Mons.Action
-| Mons.Action.walk(dir: Mons.Dir);
+//T Mons.Action
+//| Mons.Action.walk(dir: Mons.Dir);
 
 //T Mons.Battle.Action
 //| Mons.Battle.Action.atk;
@@ -43,13 +43,23 @@ T Mons.Action
 //| Mons.Battle.Action.mon;
 //| Mons.Battle.Action.run;
 
+T Mons.Sign
+| Mons.Sign.minus;
+| Mons.Sign.zero;
+| Mons.Sign.plus;
+
+T Mons.Pad
+| Mons.Pad.new(r: Bool, u: Bool, l: Bool, d: Bool);
+
 // A game object
 T Mons.Object
 | Mons.Object.new(
-  kin: Mons.Kind,   // represent the type of the object
-  dir: Mons.Dir,    // direction the object is facing
-  wlk: U32,         // number of walk frames to animate
-  dmg: U32          // object's current health points
+  kin: Mons.Kind, // represent the type of the object
+  dir: Mons.Dir,  // direction the object is facing
+  pad: Mons.Pad,  // movement key pad
+  ani: U32,       // number of walk frames to animate
+  mhp: U32,       // object's maximum health points
+  dmg: U32        // object's current health points
 );
 
 // A 2d map of game tiles
@@ -59,7 +69,8 @@ Mons.Map: Type
 // The global game state
 T Mons.Game
 | Mons.Game.new(
-  pos: Pos32, // main hero position
+  usr: Word(160), // player name
+  pos: Map(Pos32), // player positions
   map: Mons.Map // the game map
 );
 
@@ -68,6 +79,7 @@ T Mons.Kind
 | Mons.VOID;
 | Mons.HERO;
 | Mons.GRASS;
+| Mons.GRASS_PLANT;
 | Mons.BUSH;
 | Mons.PLANT_0;
 | Mons.ELV_TERRAIN_00;
@@ -78,10 +90,6 @@ T Mons.Kind
 | Mons.OCEAN_U;
 | Mons.OCEAN_L;
 | Mons.OCEAN_D;
-| Mons.OCEAN_RU;
-| Mons.OCEAN_LU;
-| Mons.OCEAN_LD;
-| Mons.OCEAN_RD;
 | Mons.TREE_0_00;
 | Mons.TREE_0_01;
 | Mons.TENT_00;
@@ -90,7 +98,8 @@ T Mons.Kind
 | Mons.BIG_TREE_00;
 | Mons.BIG_TREE_01;
 | Mons.ROCK_PATH_C;
-| Mons.CAPIVARA;
+| Mons.ROCK_PATH_M;
+| Mons.BATH;
 | Mons.BEHOLDER;
 | Mons.CRONI;
 | Mons.ELLIOT;
@@ -100,6 +109,42 @@ T Mons.Kind
 | Mons.LAMURIA;
 | Mons.RAFIRE;
 | Mons.VARGOULI;
+| Mons.TUPITREE;
+| Mons.LELA;
+| Mons.MOSHY;
+| Mons.HOUSE_0_00;
+| Mons.HOUSE_0_01;
+| Mons.HOUSE_0_02;
+| Mons.HOUSE_0_03;
+| Mons.HOUSE_0_04;
+| Mons.CASTLE_00;
+| Mons.CASTLE_01;
+| Mons.CASTLE_02;
+| Mons.CASTLE_03;
+| Mons.CASTLE_04;
+| Mons.SAND_0;
+| Mons.SAND_1;
+| Mons.CHEST;
+| Mons.WATER_M;
+| Mons.WATER1_M;
+| Mons.WATER_R;
+| Mons.WATER_U;
+| Mons.WATER_L;
+| Mons.WATER_D;
+| Mons.WATER_RU;
+| Mons.WATER_LU;
+| Mons.WATER_LD;
+| Mons.WATER_RD;
+| Mons.PATH_BLOCKER;
+| Mons.WOOD_FENCE_R;
+| Mons.WOOD_FENCE_M;
+| Mons.WOOD_FENCE_L;
+| Mons.WOOD_FENCE_RU;
+| Mons.WOOD_FENCE_LU;
+| Mons.WOOD_FENCE_LD;
+| Mons.WOOD_FENCE_RD;
+
+
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -109,43 +154,102 @@ Mons.vox_mid: Pos32
 Mons.scr_mid: Pos32
   Pos32.new(120u, 80u, 0u)
 
+// The game screen width
+Mons.scr_w: U32
+  U32.mul(Pos32.get_x(Mons.scr_mid), 2u)
+
+// The game screen height
+Mons.scr_h: U32
+  U32.mul(Pos32.get_y(Mons.scr_mid), 2u)
+
+// The null pad
+Mons.Pad.null: Mons.Pad
+  Mons.Pad.new(Bool.false, Bool.false, Bool.false, Bool.false)
+
+// Sets the r field of a pad
+Mons.Pad.set_r(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(val, pad.u, pad.l, pad.d)
+
+// Sets the u field of a pad
+Mons.Pad.set_u(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, val, pad.l, pad.d)
+
+// Sets the l field of a pad
+Mons.Pad.set_l(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, pad.u, val, pad.d)
+
+// Sets the d field of a pad
+Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
+  open pad: Mons.Pad.new(pad.r, pad.u, pad.l, val)
+
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(Mons.VOID, Mons.Dir.down, 0u, 0u)
+  Mons.Object.new(Mons.VOID, Mons.Dir.down, Mons.Pad.null, 0u, 0u, 0u)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
-  open obj:
-  obj.dir
+  open obj: obj.dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj:
-  Mons.Object.new(obj.kin, dir, obj.wlk, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.mhp, obj.dmg)
+
+// Gets an object's pad
+Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
+  open obj: obj.pad
+
+// Sets an object's pad
+Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.mhp, obj.dmg)
 
 // Gets an object's walk animation frames
-Mons.Object.get_wlk(obj: Mons.Object): U32
-  open obj:
-  obj.wlk
+Mons.Object.get_ani(obj: Mons.Object): U32
+  open obj: obj.ani
 
 // Sets an object's walk animation frames
-Mons.Object.set_wlk(obj: Mons.Object, wlk: U32): Mons.Object
-  open obj:
-  Mons.Object.new(obj.kin, obj.dir, wlk, obj.dmg)
+Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.mhp, obj.dmg)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
-  open obj:
-  obj.dmg
+  open obj: obj.dmg
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj:
-  Mons.Object.new(obj.kin, obj.dir, obj.wlk, dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.mhp,dmg)
+
+// Sets an object's pad.r
+Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_r(obj.pad, val))
+
+// Sets an object's pad.u
+Mons.Object.set_pad_u(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_u(obj.pad, val))
+
+// Sets an object's pad.l
+Mons.Object.set_pad_l(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_l(obj.pad, val))
+
+// Sets an object's pad.d
+Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
+  open obj: Mons.Object.set_pad(obj, Mons.Pad.set_d(obj.pad, val))
 
 // Hits an object, damaging it
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
   Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))
+
+// Returns true if any of the object's pad is non-zero (it is walking)
+Mons.Object.is_walking(obj: Mons.Object): Bool
+  open obj:
+  open obj.pad:
+  let is_walking_x = Bool.or(obj.pad.u, obj.pad.d)
+  let is_walking_y = Bool.or(obj.pad.l, obj.pad.r)
+  Bool.or(is_walking_x, is_walking_y)
+
+// Is this object free to move?
+Mons.Object.is_free_to_move(obj: Mons.Object): Bool
+  open obj:
+  U32.eql(obj.ani, 0u)
 
 // Returns the image of a tile
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
@@ -156,8 +260,8 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
     //0 = parado
     //1 = pe direito pra frente
     //2 = pe esquerdo pra frente
-    //let wlk_num = 
-    if U32.eql(obj.wlk, 0u) then
+    //let ani = 
+    if U32.eql(obj.ani, 0u) then
       case obj.dir:
       | right => [Mons.Assets.boy_r_0];
       | up    => [Mons.Assets.boy_u_0];
@@ -176,21 +280,18 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
         | up    => [Mons.Assets.boy_u_2];
         | left  => [Mons.Assets.boy_l_2];
         | down  => [Mons.Assets.boy_d_2];;
-  | Mons.GRASS => [Mons.Assets.dark_grass_0];
+  | Mons.GRASS => [Mons.Assets.grass_3_m];
+  | Mons.GRASS_PLANT => [Mons.Assets.grass_4_m];
   | Mons.BUSH => [Mons.Assets.bush_0, Mons.Assets.bush_1];
   | Mons.PLANT_0 => [Mons.Assets.home_decor_plant_0];
-  | Mons.ELV_TERRAIN_00 => [Mons.Assets.dark_grass_elevated_00];
-  | Mons.ELV_TERRAIN_01 => [Mons.Assets.dark_grass_elevated_01];
-  | Mons.ELV_TERRAIN_02 => [Mons.Assets.dark_grass_elevated_02];
+  | Mons.ELV_TERRAIN_00 => [Mons.Assets.grass_elevated_3_00];
+  | Mons.ELV_TERRAIN_01 => [Mons.Assets.grass_elevated_3_01];
+  | Mons.ELV_TERRAIN_02 => [Mons.Assets.grass_elevated_3_02];
   | Mons.OCEAN_M => [Mons.Assets.ocean_m];
   | Mons.OCEAN_R => [Mons.Assets.ocean_r];
   | Mons.OCEAN_U => [Mons.Assets.ocean_u];
   | Mons.OCEAN_L => [Mons.Assets.ocean_l];
   | Mons.OCEAN_D => [Mons.Assets.ocean_d];
-  | Mons.OCEAN_RU => [Mons.Assets.ocean_ru];
-  | Mons.OCEAN_LU => [Mons.Assets.ocean_lu];
-  | Mons.OCEAN_LD => [Mons.Assets.ocean_ld];
-  | Mons.OCEAN_RD => [Mons.Assets.ocean_rd];
   | Mons.TREE_0_00 => [Mons.Assets.tree_0_00];
   | Mons.TREE_0_01 => [Mons.Assets.tree_0_01];
   | Mons.TENT => [Mons.Assets.tent_00];
@@ -199,7 +300,8 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.BIG_TREE_00 => [Mons.Assets.bigtree0_00];
   | Mons.BIG_TREE_01 => [Mons.Assets.bigtree0_01];
   | Mons.ROCK_PATH_C => [Mons.Assets.rock_path_0_c];
-  | Mons.CAPIVARA => [Mons.Assets.mons_bath_d_0];
+  | Mons.ROCK_PATH_M => [Mons.Assets.rock_path_0_m];
+  | Mons.BATH => [Mons.Assets.mons_bath_d_0];
   | Mons.BEHOLDER => [Mons.Assets.mons_beholder_d_0];
   | Mons.CRONI => [Mons.Assets.mons_croni_d_0];
   | Mons.ELLIOT => [Mons.Assets.mons_elliot_d_0];
@@ -209,6 +311,41 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.LAMURIA => [Mons.Assets.mons_lamuria_d_0];
   | Mons.RAFIRE => [Mons.Assets.mons_rafire_d_0]; 
   | Mons.VARGOULI => [Mons.Assets.mons_vargouli_d_0];
+  | Mons.TUPITREE => [Mons.Assets.mons_tupitree_d_0];
+  | Mons.LELA => [Mons.Assets.mons_lela_d_0];
+  | Mons.MOSHY => [Mons.Assets.mons_moshy_d_0];
+  | Mons.HOUSE_0_00 => [Mons.Assets.brown_house0_00];
+  | Mons.HOUSE_0_01 => [Mons.Assets.brown_house0_01];
+  | Mons.HOUSE_0_02 => [Mons.Assets.brown_house0_02];
+  | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_03];
+  | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_04];
+  | Mons.CASTLE_00 => [Mons.Assets.brown_castle_00];
+  | Mons.CASTLE_01 => [Mons.Assets.brown_castle_01];
+  | Mons.CASTLE_02 => [Mons.Assets.brown_castle_02];
+  | Mons.CASTLE_03 => [Mons.Assets.brown_castle_03];
+  | Mons.CASTLE_04 => [Mons.Assets.brown_castle_04];
+  | Mons.SAND_0 => [Mons.Assets.sand_0];
+  | Mons.SAND_1 => [Mons.Assets.sand_1];
+  | Mons.CHEST => [Mons.Assets.tile_chest_0];
+  | Mons.WATER_M => [Mons.Assets.water_0_m, Mons.Assets.water_0_10];
+  | Mons.WATER1_M => [Mons.Assets.water_1_m, Mons.Assets.water_0_10];
+  | Mons.WATER_R => [Mons.Assets.water_0_r];
+  | Mons.WATER_U => [Mons.Assets.water_0_u, Mons.Assets.water_0_10];
+  | Mons.WATER_L => [Mons.Assets.water_0_l];
+  | Mons.WATER_D => [Mons.Assets.water_0_d];
+  | Mons.WATER_RU => [Mons.Assets.water_1_ru];
+  | Mons.WATER_LU => [Mons.Assets.water_1_lu];
+  | Mons.WATER_LD => [Mons.Assets.water_1_ld];
+  | Mons.WATER_RD => [Mons.Assets.water_1_rd];
+  | Mons.PATH_BLOCKER => [Mons.Assets.rock_path_0_m];
+  | Mons.WOOD_FENCE_R => [Mons.Assets.wood_fence_r];
+  | Mons.WOOD_FENCE_M => [Mons.Assets.wood_fence_m];
+  | Mons.WOOD_FENCE_L => [Mons.Assets.wood_fence_l];
+  | Mons.WOOD_FENCE_RU => [Mons.Assets.wood_fence_ru];
+  | Mons.WOOD_FENCE_LU => [Mons.Assets.wood_fence_lu];
+  | Mons.WOOD_FENCE_LD => [Mons.Assets.wood_fence_ld];
+  | Mons.WOOD_FENCE_RD => [Mons.Assets.wood_fence_rd];
+
   
 // An empty map
 Mons.Map.new: Mons.Map
@@ -251,170 +388,228 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
   | let map = Mons.Map.set_list(pos, objs.tail, map)
     Pair.new<,>(map, objs.head);
 
+// Deletes an object from a tile
+Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
+  let objs = Mons.Map.get_list(pos, map)
+  let objs = List.delete_at.u32<>(Pos32.get_z(pos), objs)
+  Mons.Map.set_list(pos, objs, map)
+
+// Creates a new object with a given kind
+Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 16u, 0u)
+
 // Converts a tile code (ex: ".g") into a list of obs
-Mons.Map.tile_of(code: String): List(Mons.Object)
+Mons.Map.code_to_tile(code: String): List(Mons.Object)
   if String.eql(code, ".g") then
-    [Mons.Map.tile_of_one(Mons.GRASS)]
+    [Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, ".d") then
+    [ Mons.Object.new_of_kind(Mons.GRASS_PLANT)]
   else if String.eql(code, "bg") then
     [
-      Mons.Map.tile_of_one(Mons.BUSH),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.BUSH),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "hg") then
     [
-      Mons.Map.tile_of_one(Mons.HERO),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.HERO),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "pg") then
     [
-      Mons.Map.tile_of_one(Mons.PLANT_0),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.PLANT_0),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
-  
   else if String.eql(code, "t0") then
-    [Mons.Map.tile_of_one(Mons.ELV_TERRAIN_00)]
+    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_00)]
   else if String.eql(code, "t1") then
-    [Mons.Map.tile_of_one(Mons.ELV_TERRAIN_01)]
+    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_01)]
   else if String.eql(code, "t2") then
-    [Mons.Map.tile_of_one(Mons.ELV_TERRAIN_02)]
-
+    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_02)]
   else if String.eql(code, "w0") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_LU),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
-  else if String.eql(code, "w1") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_U),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
+    [ Mons.Object.new_of_kind(Mons.OCEAN_U),
+      Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "wm") then
-    [Mons.Map.tile_of_one(Mons.OCEAN_M)]
+    [Mons.Object.new_of_kind(Mons.OCEAN_M)]
+  else if String.eql(code, "w1") then
+    [ Mons.Object.new_of_kind(Mons.OCEAN_L),
+      Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "w2") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_RU),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
+    [ Mons.Object.new_of_kind(Mons.OCEAN_R),
+      Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "w3") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_L),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
-  else if String.eql(code, "w4") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_R),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
-  else if String.eql(code, "w5") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_LD),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
-  else if String.eql(code, "w6") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_D),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
-  else if String.eql(code, "w7") then
-    [
-      Mons.Map.tile_of_one(Mons.OCEAN_RD),
-      Mons.Map.tile_of_one(Mons.GRASS),
-    ]
+    [ Mons.Object.new_of_kind(Mons.OCEAN_D),
+      Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "T0") then
     [
-      Mons.Map.tile_of_one(Mons.TREE_0_00),
-      Mons.Map.tile_of_one(Mons.GRASS),
+      Mons.Object.new_of_kind(Mons.TREE_0_00),
+      Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "T1") then
     [
-      Mons.Map.tile_of_one(Mons.TREE_0_01),
-      Mons.Map.tile_of_one(Mons.GRASS),
+      Mons.Object.new_of_kind(Mons.TREE_0_01),
+      Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "/0") then
     [
-      Mons.Map.tile_of_one(Mons.TENT_00),
-      Mons.Map.tile_of_one(Mons.GRASS),
+      Mons.Object.new_of_kind(Mons.TENT_00),
+      Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "/1") then
-    [ Mons.Map.tile_of_one(Mons.TENT_01) ]
+    [ Mons.Object.new_of_kind(Mons.TENT_01) ]
   else if String.eql(code, "/2") then
     [
-      Mons.Map.tile_of_one(Mons.TENT_02),
-      Mons.Map.tile_of_one(Mons.GRASS),
+      Mons.Object.new_of_kind(Mons.TENT_02),
+      Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "B0") then
     [ 
-      Mons.Map.tile_of_one(Mons.BIG_TREE_00),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.BIG_TREE_00),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "B1") then
     [ 
-      Mons.Map.tile_of_one(Mons.BIG_TREE_01),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.BIG_TREE_01),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
-  else if String.eql(code, ".p") then
+  else if String.eql(code, ".s") then
     [ 
-      Mons.Map.tile_of_one(Mons.ROCK_PATH_C),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new_of_kind(Mons.ROCK_PATH_C),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
+  else if String.eql(code, ".r") then
+    [ Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "30") then
     [ 
-      Mons.Map.tile_of_one(Mons.CAPIVARA),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new(Mons.BATH, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "31") then
-    [ 
-      Mons.Map.tile_of_one(Mons.BEHOLDER),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "32") then
     [ 
-      Mons.Map.tile_of_one(Mons.CRONI),
-      Mons.Map.tile_of_one(Mons.GRASS)
+      Mons.Object.new(Mons.CRONI, Mons.Dir.down, Mons.Pad.null, 0u, 32u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "33") then
-    [ 
-      Mons.Map.tile_of_one(Mons.ELLIOT),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.ELLIOT, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS)  ]
   else if String.eql(code, "34") then
-    [ 
-      Mons.Map.tile_of_one(Mons.ESPECTRONUS),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.ESPECTRONUS, Mons.Dir.down, Mons.Pad.null, 0u, 38u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "35") then
-    [ 
-      Mons.Map.tile_of_one(Mons.GAKI),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.GAKI, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "36") then
-    [ 
-      Mons.Map.tile_of_one(Mons.GORR),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.GORR, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "37") then
-    [ 
-      Mons.Map.tile_of_one(Mons.LAMURIA),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.LAMURIA, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "38") then
-    [ 
-      Mons.Map.tile_of_one(Mons.RAFIRE),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.RAFIRE, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "39") then
-    [ 
-      Mons.Map.tile_of_one(Mons.VARGOULI),
-      Mons.Map.tile_of_one(Mons.GRASS)
-    ]
+    [ Mons.Object.new(Mons.VARGOULI, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "40") then
+    [ Mons.Object.new(Mons.TUPITREE, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "41") then
+    [ Mons.Object.new(Mons.LELA, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "42") then
+    [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "K0") then
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "K1") then
+    [ Mons.Object.new_of_kind(Mons.HOUSE_0_01) ]
+  else if String.eql(code, "K2") then
+    [ Mons.Object.new_of_kind(Mons.HOUSE_0_02) ]
+  else if String.eql(code, "K3") then
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_03) ]
+  else if String.eql(code, "K4") then
+    [Mons.Object.new_of_kind(Mons.HOUSE_0_04),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C0") then
+    [ Mons.Object.new_of_kind(Mons.CASTLE_00)
+      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C1") then
+    [ Mons.Object.new_of_kind(Mons.CASTLE_01)
+      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C2") then
+    [ Mons.Object.new_of_kind(Mons.CASTLE_02),
+      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C3") then
+    [Mons.Object.new_of_kind(Mons.CASTLE_03),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "C4") then
+    [Mons.Object.new_of_kind(Mons.CASTLE_04),
+     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+  else if String.eql(code, "S0") then
+    [ Mons.Object.new_of_kind(Mons.SAND_0) ]
+  else if String.eql(code, "S1") then
+    [ Mons.Object.new_of_kind(Mons.SAND_1) ]
+  else if String.eql(code, "ch") then
+    [ Mons.Object.new_of_kind(Mons.CHEST) ]
+  else if String.eql(code, "om") then
+    [ Mons.Object.new_of_kind(Mons.WATER_M) ]
+  else if String.eql(code, "on") then
+    [ Mons.Object.new_of_kind(Mons.WATER1_M) ]
+  else if String.eql(code, "o0") then
+    [ Mons.Object.new_of_kind(Mons.WATER_R),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o1") then
+    [ Mons.Object.new_of_kind(Mons.WATER_U),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "o2") then
+    [ Mons.Object.new_of_kind(Mons.WATER_L),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o3") then
+    [ Mons.Object.new_of_kind(Mons.WATER_D),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o4") then
+    [ Mons.Object.new_of_kind(Mons.WATER_RU),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o5") then
+    [ Mons.Object.new_of_kind(Mons.WATER_LU),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o6") then
+    [ Mons.Object.new_of_kind(Mons.WATER_LD),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "o7") then
+    [ Mons.Object.new_of_kind(Mons.WATER_RD),
+      Mons.Object.new_of_kind(Mons.GRASS) ]
+  else if String.eql(code, "xx") then
+    [ Mons.Object.new_of_kind(Mons.PATH_BLOCKER)]
+  else if String.eql(code, "f0") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_R),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f1") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_M),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f2") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_L),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f3") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_RU),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f4") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_LU),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f5") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_LD),
+      Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "f6") then
+    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_RD),
+      Mons.Object.new_of_kind(Mons.GRASS)]
   else
     []
 
-Mons.Map.tile_of_one(tile_kin: Mons.Kind): Mons.Object
-  Mons.Object.new(tile_kin, Mons.Dir.down, 0u, 0u)
-
 // Converts a string map source to an actual map
-Mons.Map.load(code: List(String)): Mons.Map
+Mons.Map.build(code: List(String)): Mons.Map
   let size = List.length.u32<>(code) // NOTE: assumes width == height
   List.ifor.u32<>(code)<>
   | Mons.Map.new;
@@ -427,47 +622,48 @@ Mons.Map.load(code: List(String)): Mons.Map
       let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
       let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
       let sli = String.slice(ini, end, row) // slice with tile code
-      Mons.Map.set_list(pos, Mons.Map.tile_of(sli), map);
+      Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);
 
-  //let code = String.slice(1, Nat.pred(String.length(code)), code)
-  //let rows = String.split(code, "\n")
-  //let rows = List.map<,>(String.chunks_of(2), rows)
-  //let mapw = List.length.u32<>(rows)
-  //let maph = List.length.u32<>(List.head_with_default<>([], rows))
-  //let objs = List.map<,>(List.map<,>(Mons.Map.tile_of), rows)
-  //let objs = List.flatten<>(objs)
-  //List.ifoldr.u32<,>
-  //| Mons.Map.new;
-  //| (i, objs, map)
-    //let o_x = U32.sub(2048u, U32.div(mapw, 2u))
-    //let o_y = U32.sub(2048u, U32.div(maph, 2u))
-    //let p_x = U32.add(U32.mod(i, mapw), o_x)
-    //let p_y = U32.add(U32.div(i, maph), o_y)
-    //let p_z = 0u
-    //let pos = Pos32.new(p_x, p_y, p_z)
-    //Mons.Map.set_list(pos, objs, map);
-  //| objs;
+// Get the game user
+Mons.Game.get_usr(game: Mons.Game): Word(160)
+  open game: game.usr
 
-// Gets the hero position
-Mons.Game.get_hero_pos(game: Mons.Game): Pos32
+// Set the game user
+Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
+  open game: Mons.Game.new(usr, game.pos, game.map)
+
+// Gets an user's position
+Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
   open game:
-  game.pos
+  Map.get<>(Word.to_bits<160>(user), game.pos)
 
-// Sets the hero position
-Mons.Game.set_hero_pos(pos: Pos32, game: Mons.Game): Mons.Game
+// Sets an user's position
+Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(pos, game.map)
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map)
+
+// Gets the hero's position
+Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
+  open game: Mons.Game.get_user_pos(game.usr, game)
 
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.pos, map)
+  Mons.Game.new(game.usr, game.pos, map)
+
+// Updates the object at given position on the game map
+Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let obj = fn(Mons.Map.get(pos, game.map))
+  let map = Mons.Map.set(pos, obj, game.map)
+  Mons.Game.set_map(map, game)
 
 Mons.Kind.blocks(kin: Mons.Kind): Bool
   case kin:
   | Mons.VOID           => Bool.false;
   | Mons.HERO           => Bool.false;
   | Mons.GRASS          => Bool.false;
+  | Mons.GRASS_PLANT    => Bool.false;
   | Mons.BUSH           => Bool.false;
   | Mons.PLANT_0        => Bool.true;
   | Mons.ELV_TERRAIN_00 => Bool.false;
@@ -478,19 +674,16 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.OCEAN_M        => Bool.true;
   | Mons.OCEAN_R        => Bool.true;
   | Mons.OCEAN_U        => Bool.true;
-  | Mons.OCEAN_LD       => Bool.true;
-  | Mons.OCEAN_LU       => Bool.true;
-  | Mons.OCEAN_RD       => Bool.true;
-  | Mons.OCEAN_RU       => Bool.true;
-  | Mons.TREE_0_00      => Bool.false;
-  | Mons.TREE_0_01      => Bool.false;
+  | Mons.TREE_0_00      => Bool.true;
+  | Mons.TREE_0_01      => Bool.true;
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
   | Mons.TENT           => Bool.false;
   | BIG_TREE_00         => Bool.true;
   | BIG_TREE_01         => Bool.true;
   | ROCK_PATH_C         => Bool.false;
-  | Mons.CAPIVARA       => Bool.false;
+  | ROCK_PATH_M         => Bool.false;
+  | Mons.BATH           => Bool.false;
   | Mons.BEHOLDER       => Bool.false;
   | Mons.CRONI          => Bool.false;
   | Mons.ELLIOT         => Bool.false;
@@ -500,12 +693,49 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.LAMURIA        => Bool.false;
   | Mons.RAFIRE         => Bool.false;
   | Mons.VARGOULI       => Bool.false;
+  | Mons.TUPITREE       => Bool.false;
+  | Mons.LELA           => Bool.false;
+  | Mons.MOSHY          => Bool.false;
+  | Mons.HOUSE_0_00     => Bool.true;
+  | Mons.HOUSE_0_01     => Bool.true;
+  | Mons.HOUSE_0_02     => Bool.true;
+  | Mons.HOUSE_0_03     => Bool.true;
+  | Mons.HOUSE_0_04     => Bool.true;
+  | Mons.CASTLE_00      => Bool.true;
+  | Mons.CASTLE_01      => Bool.true;
+  | Mons.CASTLE_02      => Bool.true;
+  | Mons.CASTLE_03      => Bool.true;
+  | Mons.CASTLE_04      => Bool.true;
+  | Mons.SAND_0         => Bool.false;
+  | Mons.SAND_1         => Bool.false;
+  | Mons.CHEST          => Bool.true;
+  | Mons.WATER_M        => Bool.false;
+  | Mons.WATER1_M       => Bool.false;
+  | Mons.WATER_R        => Bool.false;
+  | Mons.WATER_U        => Bool.false;
+  | Mons.WATER_L        => Bool.false;
+  | Mons.WATER_D        => Bool.false;
+  | Mons.WATER_RU       => Bool.false;
+  | Mons.WATER_LU       => Bool.false;
+  | Mons.WATER_LD       => Bool.false;
+  | Mons.WATER_RD       => Bool.false;
+  | Mons.PATH_BLOCKER   => Bool.true;
+  | Mons.WOOD_FENCE_R   => Bool.true;
+  | Mons.WOOD_FENCE_M   => Bool.true;
+  | Mons.WOOD_FENCE_L   => Bool.true;
+  | Mons.WOOD_FENCE_RU  => Bool.true;
+  | Mons.WOOD_FENCE_LU  => Bool.true;
+  | Mons.WOOD_FENCE_LD  => Bool.true;
+  | Mons.WOOD_FENCE_RD  => Bool.true;
+
+
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
   case kin:
   | Mons.VOID           => Bool.false;
   | Mons.HERO           => Bool.false;
   | Mons.GRASS          => Bool.false;
+  | Mons.GRASS_PLANT    => Bool.false;
   | Mons.BUSH           => Bool.false;
   | Mons.PLANT_0        => Bool.false;
   | Mons.ELV_TERRAIN_00 => Bool.false;
@@ -516,10 +746,6 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.OCEAN_M        => Bool.false;
   | Mons.OCEAN_R        => Bool.false;
   | Mons.OCEAN_U        => Bool.false;
-  | Mons.OCEAN_LD       => Bool.false;
-  | Mons.OCEAN_LU       => Bool.false;
-  | Mons.OCEAN_RD       => Bool.false;
-  | Mons.OCEAN_RU       => Bool.false;
   | Mons.TREE_0_00      => Bool.false;
   | Mons.TREE_0_01      => Bool.false;
   | Mons.TENT           => Bool.false;
@@ -528,7 +754,8 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | BIG_TREE_00         => Bool.false;
   | BIG_TREE_01         => Bool.false;
   | ROCK_PATH_C         => Bool.false;
-  | Mons.CAPIVARA       => Bool.true;
+  | ROCK_PATH_M         => Bool.false;
+  | Mons.BATH           => Bool.true;
   | Mons.BEHOLDER       => Bool.true;
   | Mons.CRONI          => Bool.true;
   | Mons.ELLIOT         => Bool.true;
@@ -538,12 +765,47 @@ Mons.Kind.battles(kin: Mons.Kind): Bool
   | Mons.LAMURIA        => Bool.true;
   | Mons.RAFIRE         => Bool.true;
   | Mons.VARGOULI       => Bool.true;
+  | Mons.TUPITREE       => Bool.true;
+  | Mons.LELA           => Bool.true;
+  | Mons.MOSHY          => Bool.true;
+  | Mons.HOUSE_0_00     => Bool.false;
+  | Mons.HOUSE_0_01     => Bool.false;
+  | Mons.HOUSE_0_02     => Bool.false;
+  | Mons.HOUSE_0_03     => Bool.false;
+  | Mons.HOUSE_0_04     => Bool.false;
+  | Mons.CASTLE_00      => Bool.false;
+  | Mons.CASTLE_01      => Bool.false;
+  | Mons.CASTLE_02      => Bool.false;
+  | Mons.CASTLE_03      => Bool.false;
+  | Mons.CASTLE_04      => Bool.false;
+  | Mons.SAND_0         => Bool.false;
+  | Mons.SAND_1         => Bool.false;
+  | Mons.CHEST          => Bool.false;
+  | Mons.WATER_M        => Bool.false;
+  | Mons.WATER1_M       => Bool.false;
+  | Mons.WATER_R        => Bool.false;
+  | Mons.WATER_U        => Bool.false;
+  | Mons.WATER_L        => Bool.false;
+  | Mons.WATER_D        => Bool.false;
+  | Mons.WATER_RU       => Bool.false;
+  | Mons.WATER_LU       => Bool.false;
+  | Mons.WATER_LD       => Bool.false;
+  | Mons.WATER_RD       => Bool.false;
+  | Mons.PATH_BLOCKER   => Bool.false;
+  | Mons.WOOD_FENCE_R   => Bool.false;
+  | Mons.WOOD_FENCE_M   => Bool.false;
+  | Mons.WOOD_FENCE_L   => Bool.false;
+  | Mons.WOOD_FENCE_RU  => Bool.false;
+  | Mons.WOOD_FENCE_LU  => Bool.false;
+  | Mons.WOOD_FENCE_LD  => Bool.false;
+  | Mons.WOOD_FENCE_RD  => Bool.false;
 
 Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   case kin:
   | Mons.VOID           => Mons.Assets.battle_croni_u;
   | Mons.HERO           => Mons.Assets.battle_croni_u;
   | Mons.GRASS          => Mons.Assets.battle_croni_u;
+  | Mons.GRASS_PLANT    => Mons.Assets.battle_croni_u;
   | Mons.BUSH           => Mons.Assets.battle_croni_u;
   | Mons.PLANT_0        => Mons.Assets.battle_croni_u;
   | Mons.ELV_TERRAIN_00 => Mons.Assets.battle_croni_u;
@@ -554,19 +816,16 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.OCEAN_M        => Mons.Assets.battle_croni_u;
   | Mons.OCEAN_R        => Mons.Assets.battle_croni_u;
   | Mons.OCEAN_U        => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_LD       => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_LU       => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_RD       => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_RU       => Mons.Assets.battle_croni_u;
   | Mons.TREE_0_00      => Mons.Assets.battle_croni_u;
   | Mons.TREE_0_01      => Mons.Assets.battle_croni_u;
   | Mons.TENT           => Mons.Assets.battle_croni_u;
   | Mons.TENT           => Mons.Assets.battle_croni_u;
   | Mons.TENT           => Mons.Assets.battle_croni_u;
-  | BIG_TREE_00         => Mons.Assets.battle_croni_u;
-  | BIG_TREE_01         => Mons.Assets.battle_croni_u;
-  | ROCK_PATH_C         => Mons.Assets.battle_croni_u;
-  | Mons.CAPIVARA       => case up: |Mons.Assets.battle_bath_u; |Mons.Assets.battle_bath_d;;
+  | Mons.BIG_TREE_00    => Mons.Assets.battle_croni_u;
+  | Mons.BIG_TREE_01    => Mons.Assets.battle_croni_u;
+  | Mons.ROCK_PATH_C    => Mons.Assets.battle_croni_u;
+  | Mons.ROCK_PATH_M    => Mons.Assets.battle_croni_u;
+  | Mons.BATH           => case up: |Mons.Assets.battle_bath_u; |Mons.Assets.battle_bath_d;;
   | Mons.BEHOLDER       => case up: |Mons.Assets.battle_beholder_u; |Mons.Assets.battle_beholder_d;;
   | Mons.CRONI          => case up: |Mons.Assets.battle_croni_u; |Mons.Assets.battle_croni_d;;
   | Mons.ELLIOT         => case up: |Mons.Assets.battle_elliot_u; |Mons.Assets.battle_elliot_d;;
@@ -576,12 +835,47 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.LAMURIA        => case up: |Mons.Assets.battle_lamuria_u; |Mons.Assets.battle_lamuria_d;;
   | Mons.RAFIRE         => case up: |Mons.Assets.battle_rafire_u; |Mons.Assets.battle_rafire_d;;
   | Mons.VARGOULI       => case up: |Mons.Assets.battle_vargouli_u; |Mons.Assets.battle_vargouli_d;;
+  | Mons.TUPITREE       => case up: |Mons.Assets.battle_tupitree_u; |Mons.Assets.battle_tupitree_d;;
+  | Mons.LELA           => case up: |Mons.Assets.battle_lela_u; |Mons.Assets.battle_lela_d;;
+  | Mons.MOSHY          => case up: |Mons.Assets.battle_moshy_u; |Mons.Assets.battle_moshy_d;;
+  | Mons.HOUSE_0_00     => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE_0_01     => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE_0_02     => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE_0_03     => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE_0_04     => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_00      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_01      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_02      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_03      => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE_04      => Mons.Assets.battle_croni_u;
+  | Mons.SAND_0         => Mons.Assets.battle_croni_u;
+  | Mons.SAND_1         => Mons.Assets.battle_croni_u;
+  | Mons.CHEST          => Mons.Assets.battle_croni_u;
+  | Mons.WATER_M        => Mons.Assets.battle_croni_u;
+  | Mons.WATER1_M       => Mons.Assets.battle_croni_u;
+  | Mons.WATER_R        => Mons.Assets.battle_croni_u;
+  | Mons.WATER_U        => Mons.Assets.battle_croni_u;
+  | Mons.WATER_L        => Mons.Assets.battle_croni_u;
+  | Mons.WATER_D        => Mons.Assets.battle_croni_u;
+  | Mons.WATER_RU       => Mons.Assets.battle_croni_u;
+  | Mons.WATER_LU       => Mons.Assets.battle_croni_u;
+  | Mons.WATER_LD       => Mons.Assets.battle_croni_u;
+  | Mons.WATER_RD       => Mons.Assets.battle_croni_u;
+  | Mons.PATH_BLOCKER   => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_R   => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_M   => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_L   => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_RU  => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_LU  => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_LD  => Mons.Assets.battle_croni_u;
+  | Mons.WOOD_FENCE_RD  => Mons.Assets.battle_croni_u;
 
 Mons.Kind.get_name(kin: Mons.Kind): String
   case kin:
   | Mons.VOID           => "";
   | Mons.HERO           => "";
   | Mons.GRASS          => "";
+  | Mons.GRASS_PLANT    => "";
   | Mons.BUSH           => "";
   | Mons.PLANT_0        => "";
   | Mons.ELV_TERRAIN_00 => "";
@@ -592,10 +886,6 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.OCEAN_M        => "";
   | Mons.OCEAN_R        => "";
   | Mons.OCEAN_U        => "";
-  | Mons.OCEAN_LD       => "";
-  | Mons.OCEAN_LU       => "";
-  | Mons.OCEAN_RD       => "";
-  | Mons.OCEAN_RU       => "";
   | Mons.TREE_0_00      => "";
   | Mons.TREE_0_01      => "";
   | Mons.TENT           => "";
@@ -604,6 +894,7 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | BIG_TREE_00         => "";
   | BIG_TREE_01         => "";
   | ROCK_PATH_C         => "";
+  | ROCK_PATH_M         => "";
   | Mons.CAPIVARA       => "BATH";
   | Mons.BEHOLDER       => "BEHOLDER";
   | Mons.CRONI          => "CRONI";
@@ -614,52 +905,83 @@ Mons.Kind.get_name(kin: Mons.Kind): String
   | Mons.LAMURIA        => "LAMURIA";
   | Mons.RAFIRE         => "RAFIRE";
   | Mons.VARGOULI       => "VARGOULI";
+  | Mons.TUPITREE       => "TUPITREE";
+  | Mons.LELA           => "LELA";
+  | Mons.MOSHY          => "MOSHY";
+  | Mons.HOUSE_0_00     => "";
+  | Mons.HOUSE_0_01     => "";
+  | Mons.HOUSE_0_02     => "";
+  | Mons.HOUSE_0_03     => "";
+  | Mons.HOUSE_0_04     => "";
+  | Mons.CASTLE_00      => "";
+  | Mons.CASTLE_01      => "";
+  | Mons.CASTLE_02      => "";
+  | Mons.CASTLE_03      => "";
+  | Mons.CASTLE_04      => "";
+  | Mons.SAND_0         => "";
+  | Mons.SAND_1         => "";
+  | Mons.CHEST          => "";
+  | Mons.WATER_M        => "";
+  | Mons.WATER1_M       => "";
+  | Mons.WATER_R        => "";
+  | Mons.WATER_U        => "";
+  | Mons.WATER_L        => "";
+  | Mons.WATER_D        => "";
+  | Mons.WATER_RU       => "";
+  | Mons.WATER_LU       => "";
+  | Mons.WATER_LD       => "";
+  | Mons.WATER_RD       => "";
+  | Mons.PATH_BLOCKER   => "";
+  | Mons.WOOD_FENCE_R   => "";
+  | Mons.WOOD_FENCE_M   => "";
+  | Mons.WOOD_FENCE_L   => "";
+  | Mons.WOOD_FENCE_RU  => "";
+  | Mons.WOOD_FENCE_LU  => "";
+  | Mons.WOOD_FENCE_LD  => "";
+  | Mons.WOOD_FENCE_RD  => "";
 
-// Moves the hero to a given direction
-Mons.Game.walk(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Mons.Game
-  let old_pos = pos
-  let new_pos
-    = case dir:
-    | Pos32.add(old_pos, Pos32.new(1u, 0u, 0u));
-    | Pos32.sub(old_pos, Pos32.new(0u, 1u, 0u));
-    | Pos32.sub(old_pos, Pos32.new(1u, 0u, 0u));
-    | Pos32.add(old_pos, Pos32.new(0u, 1u, 0u));
-  //let new_pos = Pos32.set_z(new_pos, 0u)
+
+Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
+  case dir:
+  | Pos32.add(pos, Pos32.new(1u, 0u, 0u));
+  | Pos32.sub(pos, Pos32.new(0u, 1u, 0u));
+  | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
+  | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
+
+// Computes a command from an user
+Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   open game:
-  let map = game.map
-  get map obj = Mons.Map.pop(old_pos, map)
-  let wlk = Mons.Object.get_wlk(obj)
-  let trg = Mons.Map.get(new_pos, map)
-  open trg:
-  let is_walking = U32.gtn(wlk, 0u)
-  let is_blocked = Mons.Kind.blocks(trg.kin)
-  if Bool.or(is_walking, is_blocked) then
-    let map = Mons.Map.push(old_pos, obj, map)
-    Mons.Game.new(old_pos, map)
-  else
-    let obj = Mons.Object.set_dir(obj, dir)
-    let obj = Mons.Object.set_wlk(obj, 16u)
-    let map = Mons.Map.push(new_pos, obj, map)
-    Mons.Game.new(new_pos, map)
-
-Mons.Game.act(pos: Pos32, act: Mons.Action, game: Mons.Game): Mons.Game
-  case act:
-  | Mons.Game.walk(pos, act.dir, game);
-
-Mons.Game.cmd(pos: Pos32, key: Char, game: Mons.Game): Mons.Game
-  let hero_pos = pos
-  let adve_pos = Pos32.add(pos, Pos32.new(0u,0u,1u))
-  open game:
-  case Mons.key_to_dir(key) as dir:
-  | if U16.eql(key, 'U') then
-      // TODO: make a proper get_battle(tile_pos) function
-      let hero_obj = Mons.Map.get(hero_pos, game.map)
-      let adve_obj = Mons.Map.get(adve_pos, game.map)
-      let adve_obj = Mons.Object.hit(adve_obj, 4u)
-      Mons.Game.set_map(Mons.Map.set(adve_pos, adve_obj, game.map), game)
+  let pos = Mons.Game.get_user_pos(usr, game)
+  case pos:
+  // New player
+  | let pos = Pos32.new(2048u, 2048u, 0u)
+    let obj = Mons.Object.new_of_kind(Mons.HERO)
+    let map = Mons.Map.push(pos, obj, game.map)
+    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.set_user_pos(usr, pos, game)
+    game;
+  // Existing player
+  | let pos = pos.value
+    if U16.eql(cmd, 'U') then
+      Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+    else if U16.eql(cmd, 'D') then
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'W') then
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'A') then
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'S') then
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, game)
+    else if U16.eql(cmd, 'd') then
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 'w') then
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 'a') then
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, game)
+    else if U16.eql(cmd, 's') then
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, game)
     else
       game;
-  | Mons.Game.act(pos, Mons.Action.walk(dir.value), game);
 
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
@@ -682,27 +1004,27 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
 // Given a tile (x, y) and an object, returns its global (x, y) positions
 Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
   case obj:
-  | let wlk = Mons.Object.get_wlk(obj)
+  | let ani = Mons.Object.get_ani(obj)
     let dir = Mons.Object.get_dir(obj)
     let g_x = U32.mul(t_x, 16u)
     let g_y = U32.mul(t_y, 16u)
     let g_x
       = case dir:
-      | right => U32.sub(g_x, wlk);
+      | right => U32.sub(g_x, ani);
       | up    => g_x;
-      | left  => U32.add(g_x, wlk);
+      | left  => U32.add(g_x, ani);
       | down  => g_x;
     let g_y
       = case dir:
       | right => g_y;
-      | up    => U32.add(g_y, wlk);
+      | up    => U32.add(g_y, ani);
       | left  => g_y;
-      | down  => U32.sub(g_y, wlk);
+      | down  => U32.sub(g_y, ani);
     Pair.new<,>(g_x, g_y);
 
 //Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
   //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
-    //let wlk = Mons.Object.get_wlk(obj)
+    //let ani = Mons.Object.get_ani(obj)
     //let dir = Mons.Object.get_dir(obj)
     //get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
     //let s_z = t_z
@@ -713,11 +1035,13 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 // TODO: for some reason, using a `case obj` here causes the
 // function not to type check anymore. Investigate why.
 Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
-  case game:
-  | let sprs = []
-    let c_x = Pos32.get_x(game.pos)
-    let c_y = Pos32.get_y(game.pos)
-    let c_z = Pos32.get_z(game.pos)
+  open game:
+  let sprs = []
+  case Mons.Game.get_hero_pos(game) as cam_pos:
+  | [];
+  | let c_x = Pos32.get_x(cam_pos.value)
+    let c_y = Pos32.get_y(cam_pos.value)
+    let c_z = Pos32.get_z(cam_pos.value)
     for x : U32 = 0u .. 17u with sprs:
       for y : U32 = 0u .. 13u with sprs:
         let t_x = U32.add(U32.sub(c_x, 8u), x)
@@ -728,10 +1052,10 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let objs
           = case got:
           | [Mons.Object.void];
-          | got.value;
+          | List.reverse<>(got.value);
         for obj in objs with sprs:
           for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
-            let wlk = Mons.Object.get_wlk(obj)
+            let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
             get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
             let s_z = t_z
@@ -770,154 +1094,272 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
-  let hero_pos = game.pos
-  let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos,0u), game.map)
-  let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos,1u), game.map)
-  open hero_obj:
-  open adve_obj:
-  let hero_chp = U32.sub(32u, hero_obj.dmg)
-  let adve_chp = U32.sub(32u, adve_obj.dmg)
-  let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
-  let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-  let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
-  let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
-  let scr = Image3D.clear(scr)
-  // When hero is in a battle, draw it...
-  let is_standing = U32.eql(Mons.Object.get_wlk(hero_obj),0u)
-  let is_battling = Mons.Kind.battles(adve_obj.kin)
-  if Bool.and(is_standing, is_battling) then
-    let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-    let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-    let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
-    let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-    let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-    let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
-    let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
-    scr
-  // When hero isn't battling, draw map...
-  else 
-    let sprs = Mons.game_sprites(game)
-    // For each sprite around the hero...
-    for spr in sprs with scr:
-      // For each pixel of the sprite...
-      open spr:
-      let len = Image3D.get_length(spr.img)
-      for i : U32 = 0u .. len with scr:
-        let s_w = Pos32.get_x(Mons.scr_mid)
-        let s_h = Pos32.get_y(Mons.scr_mid)
-        // The origin global position (centered on hero)
-        let h_x = Pos32.get_x(hero_pos)
-        let h_y = Pos32.get_y(hero_pos)
-        //let o_x = U32.mul(Pos32.get_x(hero_pos), 16u)
-        //let o_y = U32.mul(Pos32.get_y(hero_pos), 16u)
-        get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-        // Gets the spr global position
-        let s_x = spr.x
-        let s_y = spr.y
-        let s_z = spr.z
-        // Gets the pixel global position (its cpos on img is x=128, y=128)
-        let xyz = Image3D.get_pos(i, spr.img)
-        let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
-        let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
-        let v_z = Pos32.get_z(xyz)
-        // Temporary: if pixel is out of screen, make it invisible
-        let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-        let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-        let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-        let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-        //let ok  = List.and([ok0, ok1, ok2, ok3])
-        let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-        // Computes the pixel position on the final canvas
-        let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
-        let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-        let c_z = Bool.if<>(ok, v_z, 0u)
-        // Pushes the pixel to the scr
-        let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
-        let col = Image3D.get_col(i, spr.img) // final pixel col
-        Image3D.push(pos, col, scr) // pushes to scr
+  let hero_pos = Mons.Game.get_hero_pos(game)
+  case hero_pos:
+  | scr;
+  | let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,0u), game.map)
+    let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,1u), game.map)
+    open hero_obj:
+    open adve_obj:
+    let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
+    let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
+    let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
+    let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
+    let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
+    let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
+    let scr = Image3D.clear(scr)
+    // When hero is in a battle, draw it...
+    let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
+    let is_battling = Mons.Kind.battles(adve_obj.kin)
+    if Bool.and(is_standing, is_battling) then
+      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+      let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
+      let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+      let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
+      let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
+      let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
+      let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
+      scr
+    // When hero isn't battling, draw map...
+    else 
+      let sprs = Mons.game_sprites(game)
+      // For each sprite around the hero...
+      for spr in sprs with scr:
+        // For each pixel of the sprite...
+        open spr:
+        let len = Image3D.get_length(spr.img)
+        for i : U32 = 0u .. len with scr:
+          let s_w = Pos32.get_x(Mons.scr_mid)
+          let s_h = Pos32.get_y(Mons.scr_mid)
+          // The origin global position (centered on hero)
+          let h_x = Pos32.get_x(hero_pos.value)
+          let h_y = Pos32.get_y(hero_pos.value)
+          //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
+          //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
+          get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
+          // Gets the spr global position
+          let s_x = spr.x
+          let s_y = spr.y
+          let s_z = spr.z
+          // Gets the pixel global position (its cpos on img is x=128, y=128)
+          let xyz = Image3D.get_pos(i, spr.img)
+          let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+          let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
+          let v_z = Pos32.get_z(xyz)
+          // Temporary: if pixel is out of screen, make it invisible
+          let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+          let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+          let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+          let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+          //let ok  = List.and([ok0, ok1, ok2, ok3])
+          let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+          // Computes the pixel position on the final canvas
+          let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+          let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
+          let c_z = Bool.if<>(ok, v_z, 0u)
+          // Pushes the pixel to the scr
+          let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+          let col = Image3D.get_col(i, spr.img) // final pixel col
+          Image3D.push(pos, col, scr); // pushes to scr
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
   open obj:
-  let wlk =
-    if U32.gtn(obj.wlk, 0u) then
-      U32.sub(obj.wlk, 2u)
-    else
-      obj.wlk
-  Mons.Object.new(obj.kin, obj.dir, wlk, obj.dmg)
+  // Configs the walk animation
+  let obj = Mons.Object.set_ani(obj)
+    | if U32.gtn(obj.ani, 0u)
+      then U32.sub(obj.ani, 2u)
+      else obj.ani;
+  // Sets the direction based on pad
+  let obj = Mons.Object.set_dir(obj)
+    | if Mons.Object.is_free_to_move(obj) then
+        open obj.pad:
+        if obj.pad.u then
+          Mons.Dir.up
+        else if obj.pad.l then
+          Mons.Dir.left
+        else if obj.pad.d then
+          Mons.Dir.down
+        else if obj.pad.r then
+          Mons.Dir.right
+        else
+          obj.dir
+      else
+        obj.dir;
+  obj
+
+// Moves an object towards a given direction
+Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let map = game.map
+  let obj = Mons.Map.get(pos, map)
+  let obj = Mons.Object.tick(obj)
+  open obj:
+  let old_pos = pos
+  let new_pos = Mons.Dir.move(obj.dir, pos)
+  let trg = Mons.Map.get(new_pos, map)
+  open trg:
+  let is_walking = Mons.Object.is_walking(obj)
+  let is_movfree = Mons.Object.is_free_to_move(obj)
+  let is_blocked = Mons.Kind.blocks(trg.kin)
+  if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
+    let obj = Mons.Object.set_ani(obj, 16u)
+    let map = Mons.Map.del(old_pos, map)
+    let map = Mons.Map.push(new_pos, obj, map)
+    //let map = Mons.Map.set(pos, obj, map)
+    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.set_user_pos(user, new_pos, game)
+    game
+  else
+    let map = Mons.Map.set(pos, obj, map)
+    Mons.Game.set_map(map, game)
 
 // For each tick, updates the game state
+// TODO: tick objects other than hero
 Mons.Game.tick(game: Mons.Game): Mons.Game
   open game:
-  let pos = game.pos
-  let map = 
-    def with_tile(objs)
-      def with_obj(obj)
-        Mons.Object.tick(obj)
-      def keep_obj(obj)
-        open obj:
-        U32.ltn(obj.dmg, 32u)
-      let objs = List.map<_,Mons.Object>(with_obj, objs)
-      let objs = List.filter<Mons.Object>(keep_obj, objs)
-      objs
-    Map.map<,>(with_tile, game.map)
-  Mons.Game.new(pos, map)
+  for user_pos in Map.to_list<>(game.pos) with game:
+    get key pos = user_pos
+    let user = Word.from_bits(160, key)
+    Mons.Game.tick_user(user, pos, game)
 
-// Examples
-// ========
+// All valid inputs and its code
+Mons.Input.list: List(Pair(Char, Bits))
+  let b0 = Bits.0
+  let b1 = Bits.1
+  let bn = Bits.nil
+  [
+    {'D', b0(b0(b0(b0(b0(b0(b0(b0(bn))))))))},
+    {'W', b0(b0(b0(b0(b0(b0(b0(b1(bn))))))))},
+    {'A', b0(b0(b0(b0(b0(b0(b1(b0(bn))))))))},
+    {'S', b0(b0(b0(b0(b0(b0(b1(b1(bn))))))))},
+    {'U', b0(b0(b0(b0(b0(b1(b0(b0(bn))))))))},
+    {'I', b0(b0(b0(b0(b0(b1(b0(b1(bn))))))))},
+    {'J', b0(b0(b0(b0(b0(b1(b1(b0(bn))))))))},
+    {'K', b0(b0(b0(b0(b0(b1(b1(b1(bn))))))))},
+    {'d', b0(b0(b0(b0(b1(b0(b0(b0(bn))))))))},
+    {'w', b0(b0(b0(b0(b1(b0(b0(b1(bn))))))))},
+    {'a', b0(b0(b0(b0(b1(b0(b1(b0(bn))))))))},
+    {'s', b0(b0(b0(b0(b1(b0(b1(b1(bn))))))))},
+    {'u', b0(b0(b0(b0(b1(b1(b0(b0(bn))))))))},
+    {'i', b0(b0(b0(b0(b1(b1(b0(b1(bn))))))))},
+    {'j', b0(b0(b0(b0(b1(b1(b1(b0(bn))))))))},
+    {'k', b0(b0(b0(b0(b1(b1(b1(b1(bn))))))))},
+  ]
 
-// An example map
-//Mons.example_map: Mons.Map
-  //let grass = Mons.Object.new(Mons.GRASS, Mons.Dir.down)
-  //let hero = Mons.Object.new(Mons.HERO, Mons.Dir.down)
-  //let bush = Mons.Object.new(Mons.BUSH, Mons.Dir.down)
-  //let map = Mons.Map.new
-  //let map = Mons.Map.set(Pos32.new(2047u, 2047u, 0u), [
-    //grass,
-    //bush,
-  //], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2047u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2047u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2047u, 2048u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2048u, 0u), [
-    //hero,
-    //grass,
-  //], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2048u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2047u, 2049u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2048u, 2049u, 0u), [grass], map)
-  //let map = Mons.Map.set(Pos32.new(2049u, 2049u, 0u), [grass], map)
-  //map
+// Maps from chars to their codes
+Mons.Input.char_to_code_map: Map(Bits)
+  let map = Map.new<>
+  for char_code in Mons.Input.list with map:
+    get char code = char_code
+    Map.set<>(U16.to_bits(char), code, map)
 
-Mons.example_map: Mons.Map
-  Mons.Map.load(Mons.map_source)
+// Maps from codes to their chars
+Mons.Input.code_to_char_map: Map(Char)
+  let map = Map.new<>
+  for char_code in Mons.Input.list with map:
+    get char code = char_code
+    Map.set<>(code, char, map)
 
-// An example game
-Mons.example_game: Mons.Game
-  Mons.Game.new(Pos32.new(2048u, 2048u, 0u), Mons.example_map)
+// Serializes an input to its code
+Mons.Input.serialize(char: Char): Maybe(Word(256))
+  case Map.get<>(U16.to_bits(char), Mons.Input.char_to_code_map) as code:
+  | Maybe.none<>;
+  | Maybe.some<>(Word.from_bits(256, code.value));
 
-// The entire game as an App
-Mons: App(Mons.Game)
+// Deserializes a code to its input
+Mons.Input.deserialize(code: Word(256)): Maybe(Char)
+  Map.get<>(Bits.slice(8, Word.to_bits<256>(code)), Mons.Input.code_to_char_map)
+
+// Generates an input char from the event down/code info
+Mons.Input.char(down: Bool, code: Char): Char
+  if down
+  then Char.to_upper(code)
+  else Char.to_lower(code)
+
+// Online mode room name
+Mons.App.room: Word(48)
+  Word.from_bits(48, String.to_bits("MON"))
+
+// Startup
+Mons.start(online: Bool): App(Mons.Game)
   let screen = Image3D.alloc_capacity(524288u)
-  def init
-    Mons.example_game
-  def draw(game)
-    App.Render.vox(Mons.draw(game, screen))
-  def when(event, game)
-    case event:
-    | init => [
-      let width = U32.mul(Pos32.get_x(Mons.scr_mid), 2u)
-      let height = U32.mul(Pos32.get_y(Mons.scr_mid), 2u)
-      App.Action.resize<>(width, height)
-    ];
-    | tick => [
-      App.Action.state<>(Mons.Game.tick(game))
-    ];
-    | xkey =>
-      open game:
-      if event.down then
-        [App.Action.state<>(Mons.Game.cmd(game.pos, event.code, game))]
-      else
-        [];
-    | post => [];
-  App.new<>(init, draw, when)
+  App.new<>
+  // Initial state
+  | let game_usr = Word.zero(160)
+    let game_pos = Map.new<>
+    let game_map = Mons.Map.build(Mons.map_source)
+    Mons.Game.new(game_usr, game_pos, game_map);
+  // Render function
+  | (game) App.Render.vox(Mons.draw(game, screen));
+  // Event handlers
+  | (event, game)
+    if online then // online mode
+      case event:
+      | init => [
+        App.Action.print<>("Starting app."),
+        App.Action.resize<>(Mons.scr_w, Mons.scr_h),
+        App.Action.state<>(Mons.Game.set_usr(event.addr, game)),
+        App.Action.watch<>(Mons.App.room),
+        // Sends a J to init our char. TODO: better initialization.
+        let chr = Mons.Input.char(Bool.true, 'j')
+        case Mons.Input.serialize(chr) as data:
+        | App.Action.print<>(""); // unreachable
+        | App.Action.post<>(Mons.App.room, data.value);
+      ];
+      | tick => [
+        App.Action.state<>(Mons.Game.tick(game)),
+      ];
+      | xkey => // send input to server
+        let chr = Mons.Input.char(event.down, event.code)
+        case Mons.Input.serialize(chr) as data:
+        | [];
+        | [App.Action.post<>(Mons.App.room, data.value)];;
+      | post => // applies input to this post's hero
+        //use skp = Debug.log<>("Got post.")
+        //use skp = Debug.log<>(Bits.to_string(Word.to_bits<256>(event.data)))
+        case Mons.Input.deserialize(event.data) as input:
+        | [];
+        | [
+          //use skp = Debug.log<>(String.concat("Got input:", String.pure(input.value)))
+          //use skp = Debug.log<>(String.concat("From user:", Bits.to_string(Word.to_bits<160>(event.addr))))
+          open game:
+          App.Action.state<>(Mons.Game.cmd(input.value, event.addr, game))
+        ];;
+    else // offline mode
+      case event:
+      | init => [
+        App.Action.resize<>(Mons.scr_w, Mons.scr_h),
+        let game = Mons.Game.set_usr(event.addr, game)
+        let game = Mons.Game.cmd('j', event.addr, game) // inits hero
+        App.Action.state<>(game),
+      ];
+      | tick => [App.Action.state<>(Mons.Game.tick(game))];
+      | xkey => [
+        open game:
+        let chr = Mons.Input.char(event.down, event.code)
+        App.Action.state<>(Mons.Game.cmd(chr, game.usr, game))
+      ];
+      | post => [];;
+
+// Startup (online mode)
+Mons.on: App(Mons.Game)
+  Mons.start(Bool.true)
+
+// Startup (offline mode)
+Mons.off: App(Mons.Game)
+  Mons.start(Bool.false)
+
+// Startup (default mode = offline)
+Mons: App(Mons.Game)
+  Mons.off
+
+//Mons: _
+  //let map = Map.new<>
+  //let map = Map.set<>(U16.to_bits('i'), 5, map)
+  //Map.get<>(U16.to_bits('i'), map)
+  //let map = Map.set<>(U16.to_bits('i'), 7)
+  //U16.to_bits('i')
+//0000000001100001
+//0000000001101001
+  //Map.get<>(U16.to_bits('h'), Mons.Input.char_to_code_map)
