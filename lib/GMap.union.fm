@@ -27,7 +27,10 @@
 //              \            /
 //               \          /
 //             concat3(A<>C', v, B<>D')      
-//        
+// Right-biased operation, meaning that if 
+// both map contains the same key, the value
+// from map_b will be chosen
+//       
 GMap.union<K: Type, V: Type>(
   cmp  : K -> K -> Cmp,
   map_a: GMap(K,V), 
