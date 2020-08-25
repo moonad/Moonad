@@ -5,6 +5,7 @@ var WebSocket = require("isomorphic-ws");
 module.exports = function client({url = "ws://localhost:7171", key = "0x0000000000000000000000000000000000000000000000000000000000000001"} = {}) {
   var ws = new WebSocket(url);
   var Posts = {};
+  var watching = {};
 
   var on_init_callback = null;
   var on_post_callback = null;
@@ -26,6 +27,7 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
     var post_data = lib.check_hex(256, post_data);
     var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
     var post_sign = sig.signMessage(post_hash, priv_key);
+
     var msge_buff = lib.hexs_to_bytes([
       lib.u8_to_hex(lib.POST),
       post_room,
@@ -37,24 +39,29 @@ module.exports = function client({url = "ws://localhost:7171", key = "0x00000000
 
   // Starts watching a room
   function watch_room(room_name) {
-    console.log("WATCHING", room_name);
-    var room_name = lib.check_hex(48, room_name);
-    var msge_buff = lib.hexs_to_bytes([
-      lib.u8_to_hex(lib.WATCH),
-      room_name,
-    ]);
-    Posts[room_name] = [];
-    ws.send(msge_buff); 
+    if (!watching[room_name]) {
+      watching[room_name] = true;
+      var room_name = lib.check_hex(48, room_name);
+      var msge_buff = lib.hexs_to_bytes([
+        lib.u8_to_hex(lib.WATCH),
+        room_name,
+      ]);
+      Posts[room_name] = [];
+      ws.send(msge_buff); 
+    }
   };
 
   // Stops watching a room
   function unwatch_room(room_name) {
-    var room_name = lib.check_hex(48, room_name);
-    var msge_buff = lib.hexs_to_bytes([
-      lib.u8_to_hex(lib.UNWATCH),
-      room_name,
-    ]);
-    ws.send(msge_buff);
+    if (watching[room_name]) {
+      watching[room_name] = false;
+      var room_name = lib.check_hex(48, room_name);
+      var msge_buff = lib.hexs_to_bytes([
+        lib.u8_to_hex(lib.UNWATCH),
+        room_name,
+      ]);
+      ws.send(msge_buff);
+    }
   };
 
   ws.binaryType = "arraybuffer";
