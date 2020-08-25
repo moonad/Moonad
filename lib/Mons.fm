@@ -238,7 +238,7 @@ Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
   Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))
 
-// Hits an object, damaging it
+// Heals an object, restoring its hp and not exceeding mph
 Mons.Object.heal(obj: Mons.Object, heal: U32): Mons.Object
   open obj:
   Mons.Object.set_dmg(obj, U32.sub(obj.dmg, heal))
