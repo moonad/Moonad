@@ -1,24 +1,22 @@
-// TODO: adicionar uma lista de objetos "tickaveis" pra que não seja necessário
-// chamar o tick em todos os objetos do mapa a todo frame, por performance
-
+// TODO:
+// 1. Instead of many global `Kind -> T` functions, have only one that
+//    returns this `Kind -> Mons.Attr` type
+// 2. Avoid duplicated code on characters on the spr attribute by moving the ifs
+//    and cases to a separate function, and then sending the x/y and the 12 imgs
+// 3. Remove the Pos32.set_z(pos,0u) from Map.set_list, and start implementing 
+//    dimensions. Will probably just work, but may have some bugs
+// 4. Add a (idx: U32) argument to the Mons.Map.get, Mons.Map.set, Mons.Map.del. 
+//    Otherwise it would be confusing because we're now using Z for dimensions. 
+// 5. Debug the multiple chars in tile command problem
+// 6. Mons.Game.map_push, Mons.Game.map_set, Mons.Game.map_get, e todas as
+//    outras funções da map pra atuarem direto no Game, pra ficar mais clean
+// 7. Make the attack key more robust (right now it just gets the object below)
+// 8. Make the attack system (instead of just causing damage when the user
+//    presses U, we need each Kind to have a list of 4 attacks, and then get the
+//    correct attack, and then apply it)
+// 9. Simplify the Mons.Kind, collapsing many constructors in one
+// 10. Talk with artists & me about things they want to do and make more todos!
 // GBA position: divide OpenEMU by 2.575
-
-// enter_animation: quando você entra em um tile
-// - grass walk animation
-// - grass jump animation
-// - ground jump animation (fumacinha)
-
-// Exemplo de stack:
-// [
-//   [(GRASS, z=1)],
-//   [(BUSH_BACK, z=2), (BUSH_FRONT, z=16)]
-//   [(HERO, z=4..28), (BUSH_ANIM, z=30)]
-// ]
-
-// bush_back.png (16x16, a parte de trás do arbusto)
-// bush_front.png (16x16, a parte de frente do arbusto)
-// bush_anim_000.png (uns 3 frames, 16x16, a animação no arbusto)
-// pedir pra maisa: adicionar Z nos voxels das imagens
 
 Mons.placa: Image3D
   Image3D.parse("")
@@ -58,13 +56,29 @@ T Mons.Object
   dir: Mons.Dir,  // direction the object is facing
   pad: Mons.Pad,  // movement key pad
   ani: U32,       // number of walk frames to animate
-  mhp: U32,       // object's maximum health points
+  mhp: U32,       // object's maximum health points TODO: move to kind
   dmg: U32        // object's current health points
 );
+
+//T Mons.Attr
+//| Mons.Attr.new(
+  //blocks: Bool,
+  //battles: Bool,
+  //mhp: U32,
+  //atk: U32,
+  //def: U32,
+  //spr: (x: U32) -> (y: U32) -> List(Image3D),
+  //...)
 
 // A 2d map of game tiles
 Mons.Map: Type
   Map(List(Mons.Object))
+
+//let map = Map.new<>
+//let objs = [graminha, arbusto, heroi]
+//let map = Map.set(Pos32.to_bits(Pos32.new(2000u,2000u,0u)), objs, map)
+//map
+
 
 // The global game state
 T Mons.Game
@@ -85,7 +99,7 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_00;
 | Mons.ELV_TERRAIN_01;
 | Mons.ELV_TERRAIN_02;
-| Mons.OCEAN_M;
+| Mons.OCEAN_M; // TODO: Mons.OCEAN(dir: Maybe(Mons.Dir))
 | Mons.OCEAN_R;
 | Mons.OCEAN_U;
 | Mons.OCEAN_L;
@@ -112,7 +126,7 @@ T Mons.Kind
 | Mons.TUPITREE;
 | Mons.LELA;
 | Mons.MOSHY;
-| Mons.HOUSE_0_00;
+| Mons.HOUSE_0_00; // SUGGESTION: Mons.HOUSE(model: Nat, slice: Nat)
 | Mons.HOUSE_0_01;
 | Mons.HOUSE_0_02;
 | Mons.HOUSE_0_03;
@@ -144,13 +158,11 @@ T Mons.Kind
 | Mons.WOOD_FENCE_LD;
 | Mons.WOOD_FENCE_RD;
 
-
-
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
   Pos32.new(128u, 128u, 0u) 
 
-// The game screen is 256x256 pixels
+// The game screen is 240x160 pixels
 Mons.scr_mid: Pos32
   Pos32.new(120u, 80u, 0u)
 
@@ -251,6 +263,44 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj:
   U32.eql(obj.ani, 0u)
 
+// TODO
+//Mons.walk_char_pack(
+  //ani: U32,
+  //t_x: U32,
+  //t_x: U32,
+  //r_0: Image3D,
+  //u_0: Image3D,
+  //l_0: Image3D,
+  //d_0: Image3D,
+  //r_1: Image3D,
+  //u_1: Image3D,
+  //l_1: Image3D,
+  //d_1: Image3D,
+  //r_2: Image3D,
+  //u_2: Image3D,
+  //l_2: Image3D,
+  //d_2: Image3D,
+//): (x: U32, y: U32) -> List(Image3D)
+  //if U32.eql(obj.ani, 0u) then
+    //case obj.dir:
+    //| right => [Mons.Assets.boy_r_0];
+    //| up    => [Mons.Assets.boy_u_0];
+    //| left  => [Mons.Assets.boy_l_0];
+    //| down  => [Mons.Assets.boy_d_0];
+  //else
+    //if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
+      //case obj.dir:
+      //| right => [Mons.Assets.boy_r_1];
+      //| up    => [Mons.Assets.boy_u_1];
+      //| left  => [Mons.Assets.boy_l_1];
+      //| down  => [Mons.Assets.boy_d_1];
+    //else
+      //case obj.dir:
+      //| right => [Mons.Assets.boy_r_2];
+      //| up    => [Mons.Assets.boy_u_2];
+      //| left  => [Mons.Assets.boy_l_2];
+      //| down  => [Mons.Assets.boy_d_2];;
+
 // Returns the image of a tile
 Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   open obj:
@@ -261,6 +311,10 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
     //1 = pe direito pra frente
     //2 = pe esquerdo pra frente
     //let ani = 
+    // Mons.walk_char_pack(obj.ani, t_x, t_y,
+    //  Mons.Assets.boy_r_0,
+    //  Mons.Assets.boy_r_1,
+    //  ...)
     if U32.eql(obj.ani, 0u) then
       case obj.dir:
       | right => [Mons.Assets.boy_r_0];
@@ -287,7 +341,7 @@ Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
   | Mons.ELV_TERRAIN_00 => [Mons.Assets.grass_elevated_3_00];
   | Mons.ELV_TERRAIN_01 => [Mons.Assets.grass_elevated_3_01];
   | Mons.ELV_TERRAIN_02 => [Mons.Assets.grass_elevated_3_02];
-  | Mons.OCEAN_M => [Mons.Assets.ocean_m];
+  | Mons.OCEAN_M => [Mons.Assets.ocean_m]; // TODO: just 1 instead of 5 cases, use `case dir` inside
   | Mons.OCEAN_R => [Mons.Assets.ocean_r];
   | Mons.OCEAN_U => [Mons.Assets.ocean_u];
   | Mons.OCEAN_L => [Mons.Assets.ocean_l];
@@ -669,7 +723,7 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.ELV_TERRAIN_00 => Bool.false;
   | Mons.ELV_TERRAIN_01 => Bool.false;
   | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.OCEAN_L        => Bool.true;
+  | Mons.OCEAN_L        => Bool.true; // TODO: just 1 instead of 5 cases
   | Mons.OCEAN_D        => Bool.true;
   | Mons.OCEAN_M        => Bool.true;
   | Mons.OCEAN_R        => Bool.true;
@@ -727,8 +781,6 @@ Mons.Kind.blocks(kin: Mons.Kind): Bool
   | Mons.WOOD_FENCE_LU  => Bool.true;
   | Mons.WOOD_FENCE_LD  => Bool.true;
   | Mons.WOOD_FENCE_RD  => Bool.true;
-
-
 
 Mons.Kind.battles(kin: Mons.Kind): Bool
   case kin:
@@ -948,6 +1000,9 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
+// TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
+// Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
+
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   open game:
@@ -962,8 +1017,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     game;
   // Existing player
   | let pos = pos.value
+    // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
+    // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     if U16.eql(cmd, 'U') then
+      // TODO: use the correct attack instead of just damaging
       Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+    // TODO: make the other attacks (I, J, K)
     else if U16.eql(cmd, 'D') then
       Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, game)
     else if U16.eql(cmd, 'W') then
