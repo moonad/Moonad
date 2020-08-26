@@ -301,106 +301,6 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
       //| up    => [Mons.Assets.boy_u_2];
       //| left  => [Mons.Assets.boy_l_2];
       //| down  => [Mons.Assets.boy_d_2];;
-
-// Returns the image of a tile
-Mons.Object.get_images(t_x: U32, t_y: U32, obj: Mons.Object): List(Image3D)
-  open obj:
-  case obj.kin:
-  | Mons.VOID => [Mons.Assets.ocean_m];
-  | Mons.HERO => 
-    //0 = parado
-    //1 = pe direito pra frente
-    //2 = pe esquerdo pra frente
-    //let ani = 
-    // Mons.walk_char_pack(obj.ani, t_x, t_y,
-    //  Mons.Assets.boy_r_0,
-    //  Mons.Assets.boy_r_1,
-    //  ...)
-    if U32.eql(obj.ani, 0u) then
-      case obj.dir:
-      | right => [Mons.Assets.boy_r_0];
-      | up    => [Mons.Assets.boy_u_0];
-      | left  => [Mons.Assets.boy_l_0];
-      | down  => [Mons.Assets.boy_d_0];
-    else
-      if U32.eql(U32.mod(U32.add(t_x,t_y),2u), 0u) then
-        case obj.dir:
-        | right => [Mons.Assets.boy_r_1];
-        | up    => [Mons.Assets.boy_u_1];
-        | left  => [Mons.Assets.boy_l_1];
-        | down  => [Mons.Assets.boy_d_1];
-      else
-        case obj.dir:
-        | right => [Mons.Assets.boy_r_2];
-        | up    => [Mons.Assets.boy_u_2];
-        | left  => [Mons.Assets.boy_l_2];
-        | down  => [Mons.Assets.boy_d_2];;
-  | Mons.GRASS => [Mons.Assets.grass_3_m];
-  | Mons.GRASS_PLANT => [Mons.Assets.grass_4_m];
-  | Mons.BUSH => [Mons.Assets.bush_0, Mons.Assets.bush_1];
-  | Mons.PLANT_0 => [Mons.Assets.home_decor_plant_0];
-  | Mons.ELV_TERRAIN_00 => [Mons.Assets.grass_elevated_3_00];
-  | Mons.ELV_TERRAIN_01 => [Mons.Assets.grass_elevated_3_01];
-  | Mons.ELV_TERRAIN_02 => [Mons.Assets.grass_elevated_3_02];
-  | Mons.OCEAN_M => [Mons.Assets.ocean_m]; // TODO: just 1 instead of 5 cases, use `case dir` inside
-  | Mons.OCEAN_R => [Mons.Assets.ocean_r];
-  | Mons.OCEAN_U => [Mons.Assets.ocean_u];
-  | Mons.OCEAN_L => [Mons.Assets.ocean_l];
-  | Mons.OCEAN_D => [Mons.Assets.ocean_d];
-  | Mons.TREE_0_00 => [Mons.Assets.tree_0_00];
-  | Mons.TREE_0_01 => [Mons.Assets.tree_0_01];
-  | Mons.TENT => [Mons.Assets.tent_00];
-  | Mons.TENT => [Mons.Assets.tent_01];
-  | Mons.TENT => [Mons.Assets.tent_02];
-  | Mons.BIG_TREE_00 => [Mons.Assets.bigtree0_00];
-  | Mons.BIG_TREE_01 => [Mons.Assets.bigtree0_01];
-  | Mons.ROCK_PATH_C => [Mons.Assets.rock_path_0_c];
-  | Mons.ROCK_PATH_M => [Mons.Assets.rock_path_0_m];
-  | Mons.BATH => [Mons.Assets.mons_bath_d_0];
-  | Mons.BEHOLDER => [Mons.Assets.mons_beholder_d_0];
-  | Mons.CRONI => [Mons.Assets.mons_croni_d_0];
-  | Mons.ELLIOT => [Mons.Assets.mons_elliot_d_0];
-  | Mons.ESPECTRONUS => [Mons.Assets.mons_espectronus_d_0];
-  | Mons.GAKI => [Mons.Assets.mons_gaki_d_0];
-  | Mons.GORR => [Mons.Assets.mons_gorr_d_0];
-  | Mons.LAMURIA => [Mons.Assets.mons_lamuria_d_0];
-  | Mons.RAFIRE => [Mons.Assets.mons_rafire_d_0]; 
-  | Mons.VARGOULI => [Mons.Assets.mons_vargouli_d_0];
-  | Mons.TUPITREE => [Mons.Assets.mons_tupitree_d_0];
-  | Mons.LELA => [Mons.Assets.mons_lela_d_0];
-  | Mons.MOSHY => [Mons.Assets.mons_moshy_d_0];
-  | Mons.HOUSE_0_00 => [Mons.Assets.brown_house0_00];
-  | Mons.HOUSE_0_01 => [Mons.Assets.brown_house0_01];
-  | Mons.HOUSE_0_02 => [Mons.Assets.brown_house0_02];
-  | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_03];
-  | Mons.HOUSE_0_03 => [Mons.Assets.brown_house0_04];
-  | Mons.CASTLE_00 => [Mons.Assets.brown_castle_00];
-  | Mons.CASTLE_01 => [Mons.Assets.brown_castle_01];
-  | Mons.CASTLE_02 => [Mons.Assets.brown_castle_02];
-  | Mons.CASTLE_03 => [Mons.Assets.brown_castle_03];
-  | Mons.CASTLE_04 => [Mons.Assets.brown_castle_04];
-  | Mons.SAND_0 => [Mons.Assets.sand_0];
-  | Mons.SAND_1 => [Mons.Assets.sand_1];
-  | Mons.CHEST => [Mons.Assets.tile_chest_0];
-  | Mons.WATER_M => [Mons.Assets.water_0_m, Mons.Assets.water_0_10];
-  | Mons.WATER1_M => [Mons.Assets.water_1_m, Mons.Assets.water_0_10];
-  | Mons.WATER_R => [Mons.Assets.water_0_r];
-  | Mons.WATER_U => [Mons.Assets.water_0_u, Mons.Assets.water_0_10];
-  | Mons.WATER_L => [Mons.Assets.water_0_l];
-  | Mons.WATER_D => [Mons.Assets.water_0_d];
-  | Mons.WATER_RU => [Mons.Assets.water_1_ru];
-  | Mons.WATER_LU => [Mons.Assets.water_1_lu];
-  | Mons.WATER_LD => [Mons.Assets.water_1_ld];
-  | Mons.WATER_RD => [Mons.Assets.water_1_rd];
-  | Mons.PATH_BLOCKER => [Mons.Assets.rock_path_0_m];
-  | Mons.WOOD_FENCE_R => [Mons.Assets.wood_fence_r];
-  | Mons.WOOD_FENCE_M => [Mons.Assets.wood_fence_m];
-  | Mons.WOOD_FENCE_L => [Mons.Assets.wood_fence_l];
-  | Mons.WOOD_FENCE_RU => [Mons.Assets.wood_fence_ru];
-  | Mons.WOOD_FENCE_LU => [Mons.Assets.wood_fence_lu];
-  | Mons.WOOD_FENCE_LD => [Mons.Assets.wood_fence_ld];
-  | Mons.WOOD_FENCE_RD => [Mons.Assets.wood_fence_rd];
-
   
 // An empty map
 Mons.Map.new: Mons.Map
@@ -1132,11 +1032,9 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           | List.reverse<>(got.value);
         for obj in objs with sprs:
           open obj:
-          // Mons.Attr
-          let hero_attr = Mons.Kind.attr(obj.kin, t_x, t_y, obj.anim, obj.dir)
-          open hero_attr:
-          for img in hero_attr.sprites with sprs:
-          // for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
+          open Mons.Kind.attr(obj.kin) as hero_attr:
+          let sprites = hero_attr.spr(t_x, t_y, obj.ani, obj.dir)
+          for img in sprites with sprs:
             let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
             get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
