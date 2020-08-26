@@ -1,6 +1,4 @@
 // TODO:
-// 1. Instead of many global `Kind -> T` functions, have only one that
-//    returns this `Kind -> Mons.Attr` type
 // 2. Avoid duplicated code on characters on the spr attribute by moving the ifs
 //    and cases to a separate function, and then sending the x/y and the 12 imgs
 // 3. Remove the Pos32.set_z(pos,0u) from Map.set_list, and start implementing 
@@ -56,7 +54,6 @@ T Mons.Object
   dir: Mons.Dir,  // direction the object is facing
   pad: Mons.Pad,  // movement key pad
   ani: U32,       // number of walk frames to animate
-  mhp: U32,       // object's maximum health points TODO: move to kind
   dmg: U32        // object's current health points
 );
 
@@ -199,7 +196,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 
 // The void tile
 Mons.Object.void: Mons.Object
-  Mons.Object.new(Mons.VOID, Mons.Dir.down, Mons.Pad.null, 0u, 0u, 0u)
+  Mons.Object.new(Mons.VOID, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -207,7 +204,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.mhp, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -215,7 +212,7 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.mhp, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -223,7 +220,7 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.mhp, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -231,7 +228,7 @@ Mons.Object.get_dmg(obj: Mons.Object): U32
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.mhp,dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -453,7 +450,7 @@ Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
 
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 16u, 0u)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
 
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String): List(Mons.Object)
@@ -537,46 +534,46 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     [ Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "30") then
     [ 
-      Mons.Object.new(Mons.BATH, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+      Mons.Object.new(Mons.BATH, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "31") then
-    [ Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+    [ Mons.Object.new(Mons.BEHOLDER, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "32") then
     [ 
-      Mons.Object.new(Mons.CRONI, Mons.Dir.down, Mons.Pad.null, 0u, 32u, 0u),
+      Mons.Object.new(Mons.CRONI, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "33") then
-    [ Mons.Object.new(Mons.ELLIOT, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+    [ Mons.Object.new(Mons.ELLIOT, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)  ]
   else if String.eql(code, "34") then
-    [ Mons.Object.new(Mons.ESPECTRONUS, Mons.Dir.down, Mons.Pad.null, 0u, 38u, 0u),
+    [ Mons.Object.new(Mons.ESPECTRONUS, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "35") then
-    [ Mons.Object.new(Mons.GAKI, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+    [ Mons.Object.new(Mons.GAKI, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "36") then
-    [ Mons.Object.new(Mons.GORR, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+    [ Mons.Object.new(Mons.GORR, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "37") then
-    [ Mons.Object.new(Mons.LAMURIA, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+    [ Mons.Object.new(Mons.LAMURIA, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "38") then
-    [ Mons.Object.new(Mons.RAFIRE, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+    [ Mons.Object.new(Mons.RAFIRE, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "39") then
-    [ Mons.Object.new(Mons.VARGOULI, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+    [ Mons.Object.new(Mons.VARGOULI, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "40") then
-    [ Mons.Object.new(Mons.TUPITREE, Mons.Dir.down, Mons.Pad.null, 0u, 50u, 0u),
+    [ Mons.Object.new(Mons.TUPITREE, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "41") then
-    [ Mons.Object.new(Mons.LELA, Mons.Dir.down, Mons.Pad.null, 0u, 40u, 0u),
+    [ Mons.Object.new(Mons.LELA, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "42") then
-    [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 30u, 0u),
+    [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "K0") then
     [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
@@ -1030,8 +1027,10 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,1u), game.map)
     open hero_obj:
     open adve_obj:
-    let hero_chp = U32.sub(hero_obj.mhp, hero_obj.dmg)
-    let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
+    let hero_mph = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.mhp;
+    let adve_mph = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.mhp;
+    let hero_chp = U32.sub(hero_mph, hero_obj.dmg)
+    let adve_chp = U32.sub(adve_mph, adve_obj.dmg)
     let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
     let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
     let hero_name = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.name;
