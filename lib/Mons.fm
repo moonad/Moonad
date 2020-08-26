@@ -60,15 +60,17 @@ T Mons.Object
   dmg: U32        // object's current health points
 );
 
-//T Mons.Attr
-//| Mons.Attr.new(
-  //blocks: Bool,
-  //battles: Bool,
-  //mhp: U32,
-  //atk: U32,
-  //def: U32,
-  //spr: (x: U32) -> (y: U32) -> List(Image3D),
-  //...)
+T Mons.Attr
+| Mons.Attr.new(
+  blocks: Bool,
+  battles: Bool,
+  mhp: U32,
+  atk: U32,
+  name: String
+);
+  // def: U32,
+  // spr: (x: U32) -> (y: U32) -> List(Image3D),
+  // ...)
 
 // A 2d map of game tiles
 Mons.Map: Type
@@ -712,145 +714,82 @@ Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): M
   let map = Mons.Map.set(pos, obj, game.map)
   Mons.Game.set_map(map, game)
 
-Mons.Kind.blocks(kin: Mons.Kind): Bool
+// blocks: Bool,
+// battles: Bool,
+// mhp: U32,
+// atk: U32
+// name: String
+Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   case kin:
-  | Mons.VOID           => Bool.false;
-  | Mons.HERO           => Bool.false;
-  | Mons.GRASS          => Bool.false;
-  | Mons.GRASS_PLANT    => Bool.false;
-  | Mons.BUSH           => Bool.false;
-  | Mons.PLANT_0        => Bool.true;
-  | Mons.ELV_TERRAIN_00 => Bool.false;
-  | Mons.ELV_TERRAIN_01 => Bool.false;
-  | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.OCEAN_L        => Bool.true; // TODO: just 1 instead of 5 cases
-  | Mons.OCEAN_D        => Bool.true;
-  | Mons.OCEAN_M        => Bool.true;
-  | Mons.OCEAN_R        => Bool.true;
-  | Mons.OCEAN_U        => Bool.true;
-  | Mons.TREE_0_00      => Bool.true;
-  | Mons.TREE_0_01      => Bool.true;
-  | Mons.TENT           => Bool.false;
-  | Mons.TENT           => Bool.false;
-  | Mons.TENT           => Bool.false;
-  | BIG_TREE_00         => Bool.true;
-  | BIG_TREE_01         => Bool.true;
-  | ROCK_PATH_C         => Bool.false;
-  | ROCK_PATH_M         => Bool.false;
-  | Mons.BATH           => Bool.false;
-  | Mons.BEHOLDER       => Bool.false;
-  | Mons.CRONI          => Bool.false;
-  | Mons.ELLIOT         => Bool.false;
-  | Mons.ESPECTRONUS    => Bool.false;
-  | Mons.GAKI           => Bool.false;
-  | Mons.GORR           => Bool.false;
-  | Mons.LAMURIA        => Bool.false;
-  | Mons.RAFIRE         => Bool.false;
-  | Mons.VARGOULI       => Bool.false;
-  | Mons.TUPITREE       => Bool.false;
-  | Mons.LELA           => Bool.false;
-  | Mons.MOSHY          => Bool.false;
-  | Mons.HOUSE_0_00     => Bool.true;
-  | Mons.HOUSE_0_01     => Bool.true;
-  | Mons.HOUSE_0_02     => Bool.true;
-  | Mons.HOUSE_0_03     => Bool.true;
-  | Mons.HOUSE_0_04     => Bool.true;
-  | Mons.CASTLE_00      => Bool.true;
-  | Mons.CASTLE_01      => Bool.true;
-  | Mons.CASTLE_02      => Bool.true;
-  | Mons.CASTLE_03      => Bool.true;
-  | Mons.CASTLE_04      => Bool.true;
-  | Mons.SAND_0         => Bool.false;
-  | Mons.SAND_1         => Bool.false;
-  | Mons.CHEST          => Bool.true;
-  | Mons.WATER_M        => Bool.false;
-  | Mons.WATER1_M       => Bool.false;
-  | Mons.WATER_R        => Bool.false;
-  | Mons.WATER_U        => Bool.false;
-  | Mons.WATER_L        => Bool.false;
-  | Mons.WATER_D        => Bool.false;
-  | Mons.WATER_RU       => Bool.false;
-  | Mons.WATER_LU       => Bool.false;
-  | Mons.WATER_LD       => Bool.false;
-  | Mons.WATER_RD       => Bool.false;
-  | Mons.PATH_BLOCKER   => Bool.true;
-  | Mons.WOOD_FENCE_R   => Bool.true;
-  | Mons.WOOD_FENCE_M   => Bool.true;
-  | Mons.WOOD_FENCE_L   => Bool.true;
-  | Mons.WOOD_FENCE_RU  => Bool.true;
-  | Mons.WOOD_FENCE_LU  => Bool.true;
-  | Mons.WOOD_FENCE_LD  => Bool.true;
-  | Mons.WOOD_FENCE_RD  => Bool.true;
+  | Mons.VOID           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.HERO           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.GRASS          => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.GRASS_PLANT    => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.BUSH           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.PLANT_0        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.ELV_TERRAIN_00 => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.ELV_TERRAIN_01 => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.ELV_TERRAIN_02 => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.OCEAN_L        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, ""); // TODO: just 1 instead of 5 cases
+  | Mons.OCEAN_D        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.OCEAN_M        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.OCEAN_R        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.OCEAN_U        => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.TREE_0_00      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.TREE_0_01      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.TENT           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.TENT           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.TENT           => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | BIG_TREE_00         => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | BIG_TREE_01         => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | ROCK_PATH_C         => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | ROCK_PATH_M         => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
 
-Mons.Kind.battles(kin: Mons.Kind): Bool
-  case kin:
-  | Mons.VOID           => Bool.false;
-  | Mons.HERO           => Bool.false;
-  | Mons.GRASS          => Bool.false;
-  | Mons.GRASS_PLANT    => Bool.false;
-  | Mons.BUSH           => Bool.false;
-  | Mons.PLANT_0        => Bool.false;
-  | Mons.ELV_TERRAIN_00 => Bool.false;
-  | Mons.ELV_TERRAIN_01 => Bool.false;
-  | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.OCEAN_L        => Bool.false;
-  | Mons.OCEAN_D        => Bool.false;
-  | Mons.OCEAN_M        => Bool.false;
-  | Mons.OCEAN_R        => Bool.false;
-  | Mons.OCEAN_U        => Bool.false;
-  | Mons.TREE_0_00      => Bool.false;
-  | Mons.TREE_0_01      => Bool.false;
-  | Mons.TENT           => Bool.false;
-  | Mons.TENT           => Bool.false;
-  | Mons.TENT           => Bool.false;
-  | BIG_TREE_00         => Bool.false;
-  | BIG_TREE_01         => Bool.false;
-  | ROCK_PATH_C         => Bool.false;
-  | ROCK_PATH_M         => Bool.false;
-  | Mons.BATH           => Bool.true;
-  | Mons.BEHOLDER       => Bool.true;
-  | Mons.CRONI          => Bool.true;
-  | Mons.ELLIOT         => Bool.true;
-  | Mons.ESPECTRONUS    => Bool.true;
-  | Mons.GAKI           => Bool.true;
-  | Mons.GORR           => Bool.true;
-  | Mons.LAMURIA        => Bool.true;
-  | Mons.RAFIRE         => Bool.true;
-  | Mons.VARGOULI       => Bool.true;
-  | Mons.TUPITREE       => Bool.true;
-  | Mons.LELA           => Bool.true;
-  | Mons.MOSHY          => Bool.true;
-  | Mons.HOUSE_0_00     => Bool.false;
-  | Mons.HOUSE_0_01     => Bool.false;
-  | Mons.HOUSE_0_02     => Bool.false;
-  | Mons.HOUSE_0_03     => Bool.false;
-  | Mons.HOUSE_0_04     => Bool.false;
-  | Mons.CASTLE_00      => Bool.false;
-  | Mons.CASTLE_01      => Bool.false;
-  | Mons.CASTLE_02      => Bool.false;
-  | Mons.CASTLE_03      => Bool.false;
-  | Mons.CASTLE_04      => Bool.false;
-  | Mons.SAND_0         => Bool.false;
-  | Mons.SAND_1         => Bool.false;
-  | Mons.CHEST          => Bool.false;
-  | Mons.WATER_M        => Bool.false;
-  | Mons.WATER1_M       => Bool.false;
-  | Mons.WATER_R        => Bool.false;
-  | Mons.WATER_U        => Bool.false;
-  | Mons.WATER_L        => Bool.false;
-  | Mons.WATER_D        => Bool.false;
-  | Mons.WATER_RU       => Bool.false;
-  | Mons.WATER_LU       => Bool.false;
-  | Mons.WATER_LD       => Bool.false;
-  | Mons.WATER_RD       => Bool.false;
-  | Mons.PATH_BLOCKER   => Bool.false;
-  | Mons.WOOD_FENCE_R   => Bool.false;
-  | Mons.WOOD_FENCE_M   => Bool.false;
-  | Mons.WOOD_FENCE_L   => Bool.false;
-  | Mons.WOOD_FENCE_RU  => Bool.false;
-  | Mons.WOOD_FENCE_LU  => Bool.false;
-  | Mons.WOOD_FENCE_LD  => Bool.false;
-  | Mons.WOOD_FENCE_RD  => Bool.false;
+  | Mons.BATH           => Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "BATH");
+  | Mons.BEHOLDER       => Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "BEHOLDER");
+  | Mons.CRONI          => Mons.Attr.new(Bool.false, Bool.true, 32u, 0u, "CRONI");
+  | Mons.ELLIOT         => Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "ELLIOT");
+  | Mons.ESPECTRONUS    => Mons.Attr.new(Bool.false, Bool.true, 38u, 0u, "ESPECTRONUS");
+  | Mons.GAKI           => Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "GAKI");
+  | Mons.GORR           => Mons.Attr.new(Bool.false, Bool.true, 36u, 0u, "GORR");
+  | Mons.LAMURIA        => Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "LAMURIA");
+  | Mons.RAFIRE         => Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "RAFIRE");
+  | Mons.VARGOULI       => Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "VARGOULI");
+  | Mons.TUPITREE       => Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "TUPITREE");
+  | Mons.LELA           => Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "LELA");
+  | Mons.MOSHY          => Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "MOSHY");
+
+  | Mons.HOUSE_0_00     => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.HOUSE_0_01     => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.HOUSE_0_02     => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.HOUSE_0_03     => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.HOUSE_0_04     => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.CASTLE_00      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.CASTLE_01      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.CASTLE_02      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.CASTLE_03      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.CASTLE_04      => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.SAND_0         => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.SAND_1         => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.CHEST          => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WATER_M        => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER1_M       => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_R        => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_U        => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_L        => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_D        => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_RU       => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_LU       => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_LD       => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.WATER_RD       => Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "");
+  | Mons.PATH_BLOCKER   => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_R   => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_M   => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_L   => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_RU  => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_LU  => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_LD  => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
+  | Mons.WOOD_FENCE_RD  => Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "");
 
 Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   case kin:
@@ -921,76 +860,6 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.WOOD_FENCE_LU  => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_LD  => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_RD  => Mons.Assets.battle_croni_u;
-
-Mons.Kind.get_name(kin: Mons.Kind): String
-  case kin:
-  | Mons.VOID           => "";
-  | Mons.HERO           => "";
-  | Mons.GRASS          => "";
-  | Mons.GRASS_PLANT    => "";
-  | Mons.BUSH           => "";
-  | Mons.PLANT_0        => "";
-  | Mons.ELV_TERRAIN_00 => "";
-  | Mons.ELV_TERRAIN_01 => "";
-  | Mons.ELV_TERRAIN_02 => "";
-  | Mons.OCEAN_L        => "";
-  | Mons.OCEAN_D        => "";
-  | Mons.OCEAN_M        => "";
-  | Mons.OCEAN_R        => "";
-  | Mons.OCEAN_U        => "";
-  | Mons.TREE_0_00      => "";
-  | Mons.TREE_0_01      => "";
-  | Mons.TENT           => "";
-  | Mons.TENT           => "";
-  | Mons.TENT           => "";
-  | BIG_TREE_00         => "";
-  | BIG_TREE_01         => "";
-  | ROCK_PATH_C         => "";
-  | ROCK_PATH_M         => "";
-  | Mons.CAPIVARA       => "BATH";
-  | Mons.BEHOLDER       => "BEHOLDER";
-  | Mons.CRONI          => "CRONI";
-  | Mons.ELLIOT         => "ELLIOT";
-  | Mons.ESPECTRONUS    => "ESPECTRONUS";
-  | Mons.GAKI           => "GAKI";
-  | Mons.GORR           => "GORR";
-  | Mons.LAMURIA        => "LAMURIA";
-  | Mons.RAFIRE         => "RAFIRE";
-  | Mons.VARGOULI       => "VARGOULI";
-  | Mons.TUPITREE       => "TUPITREE";
-  | Mons.LELA           => "LELA";
-  | Mons.MOSHY          => "MOSHY";
-  | Mons.HOUSE_0_00     => "";
-  | Mons.HOUSE_0_01     => "";
-  | Mons.HOUSE_0_02     => "";
-  | Mons.HOUSE_0_03     => "";
-  | Mons.HOUSE_0_04     => "";
-  | Mons.CASTLE_00      => "";
-  | Mons.CASTLE_01      => "";
-  | Mons.CASTLE_02      => "";
-  | Mons.CASTLE_03      => "";
-  | Mons.CASTLE_04      => "";
-  | Mons.SAND_0         => "";
-  | Mons.SAND_1         => "";
-  | Mons.CHEST          => "";
-  | Mons.WATER_M        => "";
-  | Mons.WATER1_M       => "";
-  | Mons.WATER_R        => "";
-  | Mons.WATER_U        => "";
-  | Mons.WATER_L        => "";
-  | Mons.WATER_D        => "";
-  | Mons.WATER_RU       => "";
-  | Mons.WATER_LU       => "";
-  | Mons.WATER_LD       => "";
-  | Mons.WATER_RD       => "";
-  | Mons.PATH_BLOCKER   => "";
-  | Mons.WOOD_FENCE_R   => "";
-  | Mons.WOOD_FENCE_M   => "";
-  | Mons.WOOD_FENCE_L   => "";
-  | Mons.WOOD_FENCE_RU  => "";
-  | Mons.WOOD_FENCE_LU  => "";
-  | Mons.WOOD_FENCE_LD  => "";
-  | Mons.WOOD_FENCE_RD  => "";
 
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
@@ -1164,12 +1033,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let adve_chp = U32.sub(adve_obj.mhp, adve_obj.dmg)
     let hero_kin = Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
     let adve_kin = Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-    let hero_txt = String.flatten([Mons.Kind.get_name(hero_obj.kin), " ", U32.to_string(hero_chp), " HP"])
-    let adve_txt = String.flatten([Mons.Kind.get_name(adve_obj.kin), " ", U32.to_string(adve_chp), " HP"])
+    let hero_name = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.name;
+    let adve_name = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.name;
+    let hero_txt = String.flatten([hero_name, " ", U32.to_string(hero_chp), " HP"])
+    let adve_txt = String.flatten([adve_name, " ", U32.to_string(adve_chp), " HP"])
     let scr = Image3D.clear(scr)
     // When hero is in a battle, draw it...
     let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
-    let is_battling = Mons.Kind.battles(adve_obj.kin)
+    let is_battling = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.battles;
     if Bool.and(is_standing, is_battling) then
       let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
       let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
@@ -1260,7 +1131,7 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open trg:
   let is_walking = Mons.Object.is_walking(obj)
   let is_movfree = Mons.Object.is_free_to_move(obj)
-  let is_blocked = Mons.Kind.blocks(trg.kin)
+  let is_blocked = case Mons.Kind.attr(trg.kin) as kind: | kind.blocks;
   if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
     let obj = Mons.Object.set_ani(obj, 16u)
     let map = Mons.Map.del(old_pos, map)
