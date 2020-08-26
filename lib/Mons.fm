@@ -68,9 +68,10 @@ T Mons.Attr
   atk: U32,
   name: String
 );
-  // def: U32,
-  // spr: (x: U32) -> (y: U32) -> List(Image3D),
-  // ...)
+// TODO add:
+// def: U32,
+// spr: (x: U32) -> (y: U32) -> List(Image3D),
+// ...)
 
 // A 2d map of game tiles
 Mons.Map: Type
