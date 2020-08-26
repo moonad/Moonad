@@ -264,7 +264,6 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj:
   U32.eql(obj.ani, 0u)
 
-// TODO
 Mons.walk_char_pack(
   t_x: U32,
   t_y: U32,
@@ -779,7 +778,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.CASTLE_04 => 
     Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
     (x,y,obj_ani,obj_dir) [Mons.Assets.brown_castle_04]);
-    
+
   | Mons.SAND_0 => 
     Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
     (x,y,obj_ani,obj_dir) [Mons.Assets.sand_0]);
