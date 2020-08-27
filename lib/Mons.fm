@@ -141,16 +141,8 @@ T Mons.Kind
 | Mons.TUPITREE;
 | Mons.LELA;
 | Mons.MOSHY;
-| Mons.HOUSE_0_00; //(model: Nat, slice: Nat); // SUGGESTION: Mons.HOUSE(model: Nat, slice: Nat)
-| Mons.HOUSE_0_01;
-| Mons.HOUSE_0_02;
-| Mons.HOUSE_0_03;
-| Mons.HOUSE_0_04;
-| Mons.CASTLE_00;
-| Mons.CASTLE_01;
-| Mons.CASTLE_02;
-| Mons.CASTLE_03;
-| Mons.CASTLE_04;
+| Mons.HOUSE(model: Nat, slice: Nat);
+| Mons.CASTLE(model: Nat, slice: Nat);
 | Mons.SAND_0;
 | Mons.SAND_1;
 | Mons.CHEST;
@@ -495,32 +487,32 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "42") then
     [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
-  else if String.eql(code, "K0") then
-    [Mons.Object.new_of_kind(Mons.HOUSE_0_00),
+  else if String.eql(code, "K0") then // 00
+    [Mons.Object.new_of_kind(Mons.HOUSE(0, 0)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "K1") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE_0_01) ]
+    [ Mons.Object.new_of_kind(Mons.HOUSE(0, 1)) ]
   else if String.eql(code, "K2") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE_0_02) ]
+    [ Mons.Object.new_of_kind(Mons.HOUSE(0, 2)) ]
   else if String.eql(code, "K3") then
-    [Mons.Object.new_of_kind(Mons.HOUSE_0_03) ]
+    [Mons.Object.new_of_kind(Mons.HOUSE(0, 3)) ]
   else if String.eql(code, "K4") then
-    [Mons.Object.new_of_kind(Mons.HOUSE_0_04),
+    [Mons.Object.new_of_kind(Mons.HOUSE(0, 4)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C0") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE_00)
+    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 0))
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C1") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE_01)
+    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 1))
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C2") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE_02),
+    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 2)),
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C3") then
-    [Mons.Object.new_of_kind(Mons.CASTLE_03),
+    [Mons.Object.new_of_kind(Mons.CASTLE(0, 3)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "C4") then
-    [Mons.Object.new_of_kind(Mons.CASTLE_04),
+    [Mons.Object.new_of_kind(Mons.CASTLE(0, 4)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
   else if String.eql(code, "S0") then
     [ Mons.Object.new_of_kind(Mons.SAND_0) ]
@@ -668,7 +660,7 @@ Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
 // Mons.Attr with "block" and "batlles" equals to Bool.false
 Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
-    Bool.true, Bool.false, 0u, 0u, "",
+    Bool.false, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr))
 
 // blocks: Bool,
@@ -732,16 +724,30 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.LELA => Mons.Attr.new_battleable([Mons.Assets.mons_lela_d_0], "LELA");
   | Mons.MOSHY => Mons.Attr.new_battleable([Mons.Assets.mons_moshy_d_0], "MOSHY");
 
-  | Mons.HOUSE_0_00 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_00]);
-  | Mons.HOUSE_0_01 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_01]);
-  | Mons.HOUSE_0_02 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_02]);
-  | Mons.HOUSE_0_03 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_03]);
-  | Mons.HOUSE_0_04 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_04]);
-  | Mons.CASTLE_00 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_00]);
-  | Mons.CASTLE_01 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_01]);
-  | Mons.CASTLE_02 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_02]);
-  | Mons.CASTLE_03 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_03]);
-  | Mons.CASTLE_04 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_04]);
+  | Mons.HOUSE =>
+    if Nat.eql(kin.model, 0) then
+      if Nat.eql(kin.slice, 0) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
+      else if Nat.eql(kin.slice, 1) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
+      else if Nat.eql(kin.slice, 2) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
+      else if Nat.eql(kin.slice, 3) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
+      else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
+    else Mons.Attr.new_blockable([]);
+  | Mons.CASTLE_00 =>
+    if Nat.eql(kin.model, 0) then
+      if Nat.eql(kin.slice, 0) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
+      else if Nat.eql(kin.slice, 1) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
+      else if Nat.eql(kin.slice, 2) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
+      else if Nat.eql(kin.slice, 3) then
+        Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
+      else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
+    else Mons.Attr.new_blockable([]);
   | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
   | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
   | Mons.CHEST => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
@@ -800,29 +806,13 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.TUPITREE       => case up: |Mons.Assets.battle_tupitree_u; |Mons.Assets.battle_tupitree_d;;
   | Mons.LELA           => case up: |Mons.Assets.battle_lela_u; |Mons.Assets.battle_lela_d;;
   | Mons.MOSHY          => case up: |Mons.Assets.battle_moshy_u; |Mons.Assets.battle_moshy_d;;
-  | Mons.HOUSE_0_00     => Mons.Assets.battle_croni_u;
-  | Mons.HOUSE_0_01     => Mons.Assets.battle_croni_u;
-  | Mons.HOUSE_0_02     => Mons.Assets.battle_croni_u;
-  | Mons.HOUSE_0_03     => Mons.Assets.battle_croni_u;
-  | Mons.HOUSE_0_04     => Mons.Assets.battle_croni_u;
-  | Mons.CASTLE_00      => Mons.Assets.battle_croni_u;
-  | Mons.CASTLE_01      => Mons.Assets.battle_croni_u;
-  | Mons.CASTLE_02      => Mons.Assets.battle_croni_u;
-  | Mons.CASTLE_03      => Mons.Assets.battle_croni_u;
-  | Mons.CASTLE_04      => Mons.Assets.battle_croni_u;
+  | Mons.HOUSE          => Mons.Assets.battle_croni_u;
+  | Mons.CASTLE         => Mons.Assets.battle_croni_u;
   | Mons.SAND_0         => Mons.Assets.battle_croni_u;
   | Mons.SAND_1         => Mons.Assets.battle_croni_u;
   | Mons.CHEST          => Mons.Assets.battle_croni_u;
   | Mons.WATER          => Mons.Assets.battle_croni_u;
   | Mons.WATER1_M       => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_R        => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_U        => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_L        => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_D        => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_RU       => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_LU       => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_LD       => Mons.Assets.battle_croni_u;
-  // | Mons.WATER_RD       => Mons.Assets.battle_croni_u;
   | Mons.PATH_BLOCKER   => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_R   => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_M   => Mons.Assets.battle_croni_u;
