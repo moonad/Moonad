@@ -119,13 +119,10 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_01;
 | Mons.ELV_TERRAIN_02;
 | Mons.OCEAN(dir: Mons.Map.Dir);
-| Mons.TREE_0_00;
-| Mons.TREE_0_01;
+| Mons.TREE(model: Nat, slice: Nat);
 | Mons.TENT_00;
 | Mons.TENT_01;
 | Mons.TENT_02;
-| Mons.BIG_TREE_00;
-| Mons.BIG_TREE_01;
 | Mons.ROCK_PATH_C;
 | Mons.ROCK_PATH_M;
 | Mons.BATH;
@@ -149,13 +146,7 @@ T Mons.Kind
 | Mons.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.WATER1_M;
 | Mons.PATH_BLOCKER;
-| Mons.WOOD_FENCE_R;
-| Mons.WOOD_FENCE_M;
-| Mons.WOOD_FENCE_L;
-| Mons.WOOD_FENCE_RU;
-| Mons.WOOD_FENCE_LU;
-| Mons.WOOD_FENCE_LD;
-| Mons.WOOD_FENCE_RD;
+| Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -407,12 +398,12 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "T0") then
     [
-      Mons.Object.new_of_kind(Mons.TREE_0_00),
+      Mons.Object.new_of_kind(Mons.TREE(0, 0)),
       Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "T1") then
     [
-      Mons.Object.new_of_kind(Mons.TREE_0_01),
+      Mons.Object.new_of_kind(Mons.TREE(0, 1)),
       Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "/0") then
@@ -429,12 +420,12 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     ]
   else if String.eql(code, "B0") then
     [ 
-      Mons.Object.new_of_kind(Mons.BIG_TREE_00),
+      Mons.Object.new_of_kind(Mons.TREE(1, 0)),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, "B1") then
     [ 
-      Mons.Object.new_of_kind(Mons.BIG_TREE_01),
+      Mons.Object.new_of_kind(Mons.TREE(1, 1)),
       Mons.Object.new_of_kind(Mons.GRASS)
     ]
   else if String.eql(code, ".s") then
@@ -487,6 +478,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "42") then
     [ Mons.Object.new(Mons.MOSHY, Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
+
   else if String.eql(code, "K0") then // 00
     [Mons.Object.new_of_kind(Mons.HOUSE(0, 0)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
@@ -499,6 +491,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "K4") then
     [Mons.Object.new_of_kind(Mons.HOUSE(0, 4)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+
   else if String.eql(code, "C0") then
     [ Mons.Object.new_of_kind(Mons.CASTLE(0, 0))
       Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
@@ -514,6 +507,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "C4") then
     [Mons.Object.new_of_kind(Mons.CASTLE(0, 4)),
      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+     
   else if String.eql(code, "S0") then
     [ Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "S1") then
@@ -568,26 +562,27 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "xx") then
     [ Mons.Object.new_of_kind(Mons.PATH_BLOCKER)]
+
   else if String.eql(code, "f0") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_R),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f1") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_M),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.middle)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f2") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_L),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f3") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_RU),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_up)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f4") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_LU),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_up)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f5") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_LD),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_down)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "f6") then
-    [ Mons.Object.new_of_kind(Mons.WOOD_FENCE_RD),
+    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_down)),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else
     []
@@ -700,13 +695,19 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
       | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
       | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
-  | Mons.TREE_0_00 => Mons.Attr.new_blockable([Mons.Assets.tree_0_00]);
-  | Mons.TREE_0_01 => Mons.Attr.new_blockable([Mons.Assets.tree_0_01]);
+  | Mons.TREE =>
+    if Nat.eql(kin.model, 0) then // Tree
+      if Nat.eql(kin.slice, 0) then 
+        Mons.Attr.new_blockable([Mons.Assets.tree_0_00])
+      else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
+    if Nat.eql(kin.model, 1) then // Big tree
+      if Nat.eql(kin.slice, 0) then 
+        Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
+      else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
+    else Mons.Attr.new_blockable([]);
   | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_00]);
   | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_01]);
   | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_02]);
-  | BIG_TREE_00 => Mons.Attr.new_blockable([Mons.Assets.bigtree0_00]);
-  | BIG_TREE_01 => Mons.Attr.new_blockable([Mons.Assets.bigtree0_01]);
   | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
   | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
 
@@ -764,13 +765,19 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
   | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
   | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
-  | Mons.WOOD_FENCE_R => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]);
-  | Mons.WOOD_FENCE_M => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
-  | Mons.WOOD_FENCE_L => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]);
-  | Mons.WOOD_FENCE_RU => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]);
-  | Mons.WOOD_FENCE_LU => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]);
-  | Mons.WOOD_FENCE_LD => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
-  | Mons.WOOD_FENCE_RD => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]);
+  | Mons.FENCE =>
+    if Nat.eql(kin.model, 0) then
+      case kin.dir:
+      | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
+      | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
+      | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
+      | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
+      | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
+      | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
+      | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
+      | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
+      | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
+    else Mons.Attr.new_blockable([]);
 
 Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   case kin:
