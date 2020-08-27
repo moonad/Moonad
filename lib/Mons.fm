@@ -30,6 +30,18 @@ T Mons.Dir
 | Mons.Dir.left;
 | Mons.Dir.down;
 
+T Mons.Map.Dir
+| Mons.Map.Dir.right; // r
+| Mons.Map.Dir.up; // u
+| Mons.Map.Dir.left; // l
+| Mons.Map.Dir.down; // d
+| Mons.Map.Dir.middle; // m
+// | Mons.Dir.right.up; // ru
+// | Mons.Dir.right.down; // rd
+// | Mons.Dir.left.up; // lu
+// | Mons.Dir.left.down; // ld
+// | Mons.Dir.circle; // c
+
 //T Mons.Action
 //| Mons.Action.walk(dir: Mons.Dir);
 
@@ -100,11 +112,11 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_00;
 | Mons.ELV_TERRAIN_01;
 | Mons.ELV_TERRAIN_02;
-| Mons.OCEAN_M; // TODO: Mons.OCEAN(dir: Maybe(Mons.Dir))
-| Mons.OCEAN_R;
-| Mons.OCEAN_U;
-| Mons.OCEAN_L;
-| Mons.OCEAN_D;
+| Mons.OCEAN(dir: Mons.Map.Dir); // TODO: Mons.OCEAN(dir: Mons.Map.Dir))
+// | Mons.OCEAN_R;
+// | Mons.OCEAN_U;
+// | Mons.OCEAN_L;
+// | Mons.OCEAN_D;
 | Mons.TREE_0_00;
 | Mons.TREE_0_01;
 | Mons.TENT_00;
@@ -384,18 +396,28 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "t2") then
     [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_02)]
   else if String.eql(code, "w0") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN_U),
+    [ Mons.Object.new(
+        Mons.OCEAN(Mons.Map.Dir.up), 
+        Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "wm") then
-    [Mons.Object.new_of_kind(Mons.OCEAN_M)]
+    [ Mons.Object.new(
+      Mons.OCEAN(Mons.Map.Dir.middle), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u) ]
   else if String.eql(code, "w1") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN_L),
+    [ Mons.Object.new(
+      Mons.OCEAN(Mons.Map.Dir.left), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "w2") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN_R),
+    [ Mons.Object.new(
+      Mons.OCEAN(Mons.Map.Dir.right), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "w3") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN_D),
+    [ Mons.Object.new(
+      Mons.OCEAN(Mons.Map.Dir.down), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "T0") then
     [
@@ -660,25 +682,40 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.ELV_TERRAIN_01 => 
     Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
     (x,y,obj_ani,obj_dir) [Mons.Assets.grass_elevated_3_01]);
-  | Mons.ELV_TERRAIN_02 =>
+  | Mons.ELV_TERRAIN_02 => 
     Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
     (x,y,obj_ani,obj_dir) [Mons.Assets.grass_elevated_3_02]);
 
-  | Mons.OCEAN_L => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_l]); // TODO: just 1 instead of 5 cases
-  | Mons.OCEAN_D => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_d]);
-  | Mons.OCEAN_M => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_m]);
-  | Mons.OCEAN_R => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_r]);
-  | Mons.OCEAN_U => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) [Mons.Assets.grass_4_m]);
+  | Mons.OCEAN => 
+    case kin.dir:
+      | Mons.Map.Dir.right => 
+        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+        (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_r]);
+      | Mons.Map.Dir.up => 
+        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+        (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_u]);
+      | Mons.Map.Dir.left => 
+        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+        (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_l]);
+      | Mons.Map.Dir.down => 
+        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+        (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_d]);
+      | Mons.Map.Dir.middle => 
+        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+        (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_d]);;
+
+  // | Mons.OCEAN_D => 
+  //   Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+  //   (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_d]);
+  // | Mons.OCEAN_M => 
+  //   Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+  //   (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_m]);
+  // | Mons.OCEAN_R => 
+  //   Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+  //   (x,y,obj_ani,obj_dir) [Mons.Assets.ocean_r]);
+  // | Mons.OCEAN_U => 
+  //   Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
+  //   (x,y,obj_ani,obj_dir) [Mons.Assets.grass_4_m]);
 
   | Mons.TREE_0_00 => 
     Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
@@ -856,11 +893,7 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.ELV_TERRAIN_00 => Mons.Assets.battle_croni_u;
   | Mons.ELV_TERRAIN_01 => Mons.Assets.battle_croni_u;
   | Mons.ELV_TERRAIN_02 => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_L        => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_D        => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_M        => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_R        => Mons.Assets.battle_croni_u;
-  | Mons.OCEAN_U        => Mons.Assets.battle_croni_u;
+  | Mons.OCEAN          => Mons.Assets.battle_croni_u;
   | Mons.TREE_0_00      => Mons.Assets.battle_croni_u;
   | Mons.TREE_0_01      => Mons.Assets.battle_croni_u;
   | Mons.TENT           => Mons.Assets.battle_croni_u;
