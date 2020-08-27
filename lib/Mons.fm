@@ -120,9 +120,6 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_02;
 | Mons.OCEAN(dir: Mons.Map.Dir);
 | Mons.TREE(model: Nat, slice: Nat);
-| Mons.TENT_00;
-| Mons.TENT_01;
-| Mons.TENT_02;
 | Mons.ROCK_PATH_C;
 | Mons.ROCK_PATH_M;
 | Mons.BATH;
@@ -408,14 +405,14 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     ]
   else if String.eql(code, "/0") then
     [
-      Mons.Object.new_of_kind(Mons.TENT_00),
+      Mons.Object.new_of_kind(Mons.HOUSE(1, 0)),
       Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "/1") then
-    [ Mons.Object.new_of_kind(Mons.TENT_01) ]
+    [ Mons.Object.new_of_kind(Mons.HOUSE(1, 1)) ]
   else if String.eql(code, "/2") then
     [
-      Mons.Object.new_of_kind(Mons.TENT_02),
+      Mons.Object.new_of_kind(Mons.HOUSE(1, 2)),
       Mons.Object.new_of_kind(Mons.GRASS),
     ]
   else if String.eql(code, "B0") then
@@ -705,9 +702,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
       else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
     else Mons.Attr.new_blockable([]);
-  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_00]);
-  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_01]);
-  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_02]);
   | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
   | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
 
@@ -726,7 +720,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.MOSHY => Mons.Attr.new_battleable([Mons.Assets.mons_moshy_d_0], "MOSHY");
 
   | Mons.HOUSE =>
-    if Nat.eql(kin.model, 0) then
+    if Nat.eql(kin.model, 0) then // Simple house
       if Nat.eql(kin.slice, 0) then
         Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
       else if Nat.eql(kin.slice, 1) then
@@ -736,7 +730,14 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       else if Nat.eql(kin.slice, 3) then
         Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
       else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
+    else if Nat.eql(kin.model, 1) then // Tent
+      if Nat.eql(kin.slice, 0) then
+        Mons.Attr.new_blockable([Mons.Assets.tent_00])
+      else if Nat.eql(kin.slice, 1) then
+        Mons.Attr.new_blockable([Mons.Assets.tent_01])
+      else Mons.Attr.new_blockable([Mons.Assets.tent_02])
     else Mons.Attr.new_blockable([]);
+
   | Mons.CASTLE_00 =>
     if Nat.eql(kin.model, 0) then
       if Nat.eql(kin.slice, 0) then
@@ -791,13 +792,7 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.ELV_TERRAIN_01 => Mons.Assets.battle_croni_u;
   | Mons.ELV_TERRAIN_02 => Mons.Assets.battle_croni_u;
   | Mons.OCEAN          => Mons.Assets.battle_croni_u;
-  | Mons.TREE_0_00      => Mons.Assets.battle_croni_u;
-  | Mons.TREE_0_01      => Mons.Assets.battle_croni_u;
-  | Mons.TENT           => Mons.Assets.battle_croni_u;
-  | Mons.TENT           => Mons.Assets.battle_croni_u;
-  | Mons.TENT           => Mons.Assets.battle_croni_u;
-  | Mons.BIG_TREE_00    => Mons.Assets.battle_croni_u;
-  | Mons.BIG_TREE_01    => Mons.Assets.battle_croni_u;
+  | Mons.TREE           => Mons.Assets.battle_croni_u;
   | Mons.ROCK_PATH_C    => Mons.Assets.battle_croni_u;
   | Mons.ROCK_PATH_M    => Mons.Assets.battle_croni_u;
   | Mons.BATH           => case up: |Mons.Assets.battle_bath_u; |Mons.Assets.battle_bath_d;;
@@ -821,13 +816,7 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.WATER          => Mons.Assets.battle_croni_u;
   | Mons.WATER1_M       => Mons.Assets.battle_croni_u;
   | Mons.PATH_BLOCKER   => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_R   => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_M   => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_L   => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_RU  => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_LU  => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_LD  => Mons.Assets.battle_croni_u;
-  | Mons.WOOD_FENCE_RD  => Mons.Assets.battle_croni_u;
+  | Mons.FENCE          => Mons.Assets.battle_croni_u;
 
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
