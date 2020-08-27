@@ -636,7 +636,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.boy_l_0, Mons.Assets.boy_d_0,
 
         Mons.Assets.boy_r_1, Mons.Assets.boy_u_1,
-        Mons.Assets.boy_r_0, Mons.Assets.boy_l_1,
+        Mons.Assets.boy_l_1, Mons.Assets.boy_d_1,
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2)
