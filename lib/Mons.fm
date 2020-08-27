@@ -12,7 +12,6 @@
 // 8. Make the attack system (instead of just causing damage when the user
 //    presses U, we need each Kind to have a list of 4 attacks, and then get the
 //    correct attack, and then apply it)
-// 9. Simplify the Mons.Kind, collapsing many constructors in one
 // 10. Talk with artists & me about things they want to do and make more todos!
 // GBA position: divide OpenEMU by 2.575
 
@@ -36,11 +35,18 @@ T Mons.Map.Dir
 | Mons.Map.Dir.left; // l
 | Mons.Map.Dir.down; // d
 | Mons.Map.Dir.middle; // m
-// | Mons.Dir.right.up; // ru
-// | Mons.Dir.right.down; // rd
-// | Mons.Dir.left.up; // lu
-// | Mons.Dir.left.down; // ld
-// | Mons.Dir.circle; // c
+
+T Mons.Map.Dir.expanded
+| Mons.Map.Dir.expanded.right; // r
+| Mons.Map.Dir.expanded.up; // u
+| Mons.Map.Dir.expanded.left; // l
+| Mons.Map.Dir.expanded.down; // d
+| Mons.Map.Dir.expanded.middle; // m
+| Mons.Map.Dir.expanded.right_up; // ru
+| Mons.Map.Dir.expanded.right_down; // rd
+| Mons.Map.Dir.expanded.left_up; // lu
+| Mons.Map.Dir.expanded.left_down; // ld
+// | Mons.Map.Dir.expanded.circle; // c
 
 //T Mons.Action
 //| Mons.Action.walk(dir: Mons.Dir);
@@ -112,11 +118,7 @@ T Mons.Kind
 | Mons.ELV_TERRAIN_00;
 | Mons.ELV_TERRAIN_01;
 | Mons.ELV_TERRAIN_02;
-| Mons.OCEAN(dir: Mons.Map.Dir); // TODO: Mons.OCEAN(dir: Mons.Map.Dir))
-// | Mons.OCEAN_R;
-// | Mons.OCEAN_U;
-// | Mons.OCEAN_L;
-// | Mons.OCEAN_D;
+| Mons.OCEAN(dir: Mons.Map.Dir);
 | Mons.TREE_0_00;
 | Mons.TREE_0_01;
 | Mons.TENT_00;
@@ -152,16 +154,16 @@ T Mons.Kind
 | Mons.SAND_0;
 | Mons.SAND_1;
 | Mons.CHEST;
-| Mons.WATER_M;
+| Mons.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.WATER1_M;
-| Mons.WATER_R;
-| Mons.WATER_U;
-| Mons.WATER_L;
-| Mons.WATER_D;
-| Mons.WATER_RU;
-| Mons.WATER_LU;
-| Mons.WATER_LD;
-| Mons.WATER_RD;
+// | Mons.WATER_R;
+// | Mons.WATER_U;
+// | Mons.WATER_L;
+// | Mons.WATER_D;
+// | Mons.WATER_RU;
+// | Mons.WATER_LU;
+// | Mons.WATER_LD;
+// | Mons.WATER_RD;
 | Mons.PATH_BLOCKER;
 | Mons.WOOD_FENCE_R;
 | Mons.WOOD_FENCE_M;
@@ -535,32 +537,50 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "ch") then
     [ Mons.Object.new_of_kind(Mons.CHEST) ]
   else if String.eql(code, "om") then
-    [ Mons.Object.new_of_kind(Mons.WATER_M) ]
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.middle), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u) ]
   else if String.eql(code, "on") then
     [ Mons.Object.new_of_kind(Mons.WATER1_M) ]
   else if String.eql(code, "o0") then
-    [ Mons.Object.new_of_kind(Mons.WATER_R),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.right), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o1") then
-    [ Mons.Object.new_of_kind(Mons.WATER_U),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.up), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS)]
   else if String.eql(code, "o2") then
-    [ Mons.Object.new_of_kind(Mons.WATER_L),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.left), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o3") then
-    [ Mons.Object.new_of_kind(Mons.WATER_D),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.down), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o4") then
-    [ Mons.Object.new_of_kind(Mons.WATER_RU),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.right_up), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o5") then
-    [ Mons.Object.new_of_kind(Mons.WATER_LU),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.left_up), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o6") then
-    [ Mons.Object.new_of_kind(Mons.WATER_LD),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.left_down), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "o7") then
-    [ Mons.Object.new_of_kind(Mons.WATER_RD),
+    [ Mons.Object.new( 
+      Mons.WATER(Mons.Map.Dir.expanded.right_down), 
+      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
       Mons.Object.new_of_kind(Mons.GRASS) ]
   else if String.eql(code, "xx") then
     [ Mons.Object.new_of_kind(Mons.PATH_BLOCKER)]
@@ -817,35 +837,37 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     Mons.Kind.set_static_sprites([Mons.Assets.tile_chest_0]) );
 
   | Mons.WATER_M => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_0_m, Mons.Assets.water_0_10]) );
+    case kin.dir:
+    | Mons.Map.Dir.expanded.right => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+      Mons.Kind.set_static_sprites([Mons.Assets.water_0_r]) ); 
+    | Mons.Map.Dir.expanded.up => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_0_u, Mons.Assets.water_0_10]) ); 
+    | Mons.Map.Dir.expanded.left => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_0_l]) ); 
+    | Mons.Map.Dir.expanded.down => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_0_d]) ); 
+    | Mons.Map.Dir.expanded.middle => 
+      Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+      Mons.Kind.set_static_sprites([Mons.Assets.water_0_m, Mons.Assets.water_0_10]));
+    | Mons.Map.Dir.expanded.right_up => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_1_ru]) ); 
+    | Mons.Map.Dir.expanded.right_down => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_1_rd]) ); 
+    | Mons.Map.Dir.expanded.left_up => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_1_lu]) ); 
+    | Mons.Map.Dir.expanded.left_down => 
+        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+        Mons.Kind.set_static_sprites([Mons.Assets.water_1_ld]) );; 
   | Mons.WATER1_M => 
     Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites([Mons.Assets.water_1_m, Mons.Assets.water_0_10]) );
-  | Mons.WATER_R => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_0_r]) );
-  | Mons.WATER_U => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_0_u, Mons.Assets.water_0_10]) );
-  | Mons.WATER_L => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_0_l]) );
-  | Mons.WATER_D => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_0_d]) );
-  | Mons.WATER_RU => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_1_ru]) );
-  | Mons.WATER_LU => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_1_lu]) );
-  | Mons.WATER_LD => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_1_ld]) );
-  | Mons.WATER_RD => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_1_rd]) );
 
   | Mons.PATH_BLOCKER => 
     Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
@@ -919,16 +941,16 @@ Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   | Mons.SAND_0         => Mons.Assets.battle_croni_u;
   | Mons.SAND_1         => Mons.Assets.battle_croni_u;
   | Mons.CHEST          => Mons.Assets.battle_croni_u;
-  | Mons.WATER_M        => Mons.Assets.battle_croni_u;
+  | Mons.WATER          => Mons.Assets.battle_croni_u;
   | Mons.WATER1_M       => Mons.Assets.battle_croni_u;
-  | Mons.WATER_R        => Mons.Assets.battle_croni_u;
-  | Mons.WATER_U        => Mons.Assets.battle_croni_u;
-  | Mons.WATER_L        => Mons.Assets.battle_croni_u;
-  | Mons.WATER_D        => Mons.Assets.battle_croni_u;
-  | Mons.WATER_RU       => Mons.Assets.battle_croni_u;
-  | Mons.WATER_LU       => Mons.Assets.battle_croni_u;
-  | Mons.WATER_LD       => Mons.Assets.battle_croni_u;
-  | Mons.WATER_RD       => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_R        => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_U        => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_L        => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_D        => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_RU       => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_LU       => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_LD       => Mons.Assets.battle_croni_u;
+  // | Mons.WATER_RD       => Mons.Assets.battle_croni_u;
   | Mons.PATH_BLOCKER   => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_R   => Mons.Assets.battle_croni_u;
   | Mons.WOOD_FENCE_M   => Mons.Assets.battle_croni_u;
