@@ -141,7 +141,7 @@ T Mons.Kind
 | Mons.TUPITREE;
 | Mons.LELA;
 | Mons.MOSHY;
-| Mons.HOUSE_0_00; // SUGGESTION: Mons.HOUSE(model: Nat, slice: Nat)
+| Mons.HOUSE_0_00; //(model: Nat, slice: Nat); // SUGGESTION: Mons.HOUSE(model: Nat, slice: Nat)
 | Mons.HOUSE_0_01;
 | Mons.HOUSE_0_02;
 | Mons.HOUSE_0_03;
@@ -156,14 +156,6 @@ T Mons.Kind
 | Mons.CHEST;
 | Mons.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.WATER1_M;
-// | Mons.WATER_R;
-// | Mons.WATER_U;
-// | Mons.WATER_L;
-// | Mons.WATER_D;
-// | Mons.WATER_RU;
-// | Mons.WATER_LU;
-// | Mons.WATER_LD;
-// | Mons.WATER_RD;
 | Mons.PATH_BLOCKER;
 | Mons.WOOD_FENCE_R;
 | Mons.WOOD_FENCE_M;
@@ -661,6 +653,24 @@ Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): M
 Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
   (x,y,obj_ani,obj_dir) spr
 
+// Mons.Attr with "battles" equals to Bool.true
+Mons.Attr.new_battleable(spr: List(Image3D), name: String): Mons.Attr
+  Mons.Attr.new(
+    Bool.false, Bool.true, 40u, 0u, name,
+    Mons.Kind.set_static_sprites(spr))
+
+// Mons.Attr with "block" equals to Bool.true
+Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
+  Mons.Attr.new(
+    Bool.true, Bool.false, 0u, 0u, "",
+    Mons.Kind.set_static_sprites(spr))
+
+// Mons.Attr with "block" and "batlles" equals to Bool.false
+Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
+  Mons.Attr.new(
+    Bool.true, Bool.false, 0u, 0u, "",
+    Mons.Kind.set_static_sprites(spr))
+
 // blocks: Bool,
 // battles: Bool,
 // mhp: U32,
@@ -669,9 +679,7 @@ Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir 
 // spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   case kin:
-  | Mons.VOID => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "", 
-    Mons.Kind.set_static_sprites([Mons.Assets.ocean_m]) );
+  | Mons.VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
   | Mons.HERO => 
     Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
     (x,y,obj_ani,obj_dir) 
@@ -686,213 +694,77 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2)
     );
-  | Mons.GRASS => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.grass_3_m]) );
-  | Mons.GRASS_PLANT => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.grass_4_m]) );
-  | Mons.BUSH => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.bush_0, Mons.Assets.bush_1]) );
-  | Mons.PLANT_0 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.home_decor_plant_0]) );
-
-  | Mons.ELV_TERRAIN_00 => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.grass_elevated_3_00]) );
-  | Mons.ELV_TERRAIN_01 => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.grass_elevated_3_01]) );
-  | Mons.ELV_TERRAIN_02 => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.grass_elevated_3_02]) );
-
+  | Mons.GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
+  | Mons.GRASS_PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
+  | Mons.BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
+  | Mons.PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
+  | Mons.ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
+  | Mons.ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
+  | Mons.ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
   | Mons.OCEAN => 
     case kin.dir:
-      | Mons.Map.Dir.right => 
-        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.ocean_r]) );
-      | Mons.Map.Dir.up => 
-        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.ocean_u]) );
-      | Mons.Map.Dir.left => 
-        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.ocean_l]) );
-      | Mons.Map.Dir.down => 
-        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.ocean_d]) );
-      | Mons.Map.Dir.middle => 
-        Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.ocean_d]) );;
+      | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
+      | Mons.Map.Dir.up => Mons.Attr.new_blockable([Mons.Assets.ocean_u]);
+      | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
+      | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
+      | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
+  | Mons.TREE_0_00 => Mons.Attr.new_blockable([Mons.Assets.tree_0_00]);
+  | Mons.TREE_0_01 => Mons.Attr.new_blockable([Mons.Assets.tree_0_01]);
+  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_00]);
+  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_01]);
+  | Mons.TENT => Mons.Attr.new_neutral([Mons.Assets.tent_02]);
+  | BIG_TREE_00 => Mons.Attr.new_blockable([Mons.Assets.bigtree0_00]);
+  | BIG_TREE_01 => Mons.Attr.new_blockable([Mons.Assets.bigtree0_01]);
+  | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
+  | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
 
-  | Mons.TREE_0_00 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tree_0_00]) );
-  | Mons.TREE_0_01 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tree_0_01]) );
-  | Mons.TENT => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tent_00]) );
-  | Mons.TENT => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tent_01]) );
-  | Mons.TENT => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tent_02]) );
-  | BIG_TREE_00 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.bigtree0_00]) );
-  | BIG_TREE_01 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.bigtree0_01]) );
-  | ROCK_PATH_C => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.rock_path_0_c]) );
-  | ROCK_PATH_M => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.rock_path_0_m]) );
+  | Mons.BATH => Mons.Attr.new_battleable([Mons.Assets.mons_bath_d_0], "BATH");
+  | Mons.BEHOLDER => Mons.Attr.new_battleable([Mons.Assets.mons_beholder_d_0], "BEHOLDER");
+  | Mons.CRONI => Mons.Attr.new_battleable([Mons.Assets.mons_croni_d_0], "CRONI");
+  | Mons.ELLIOT => Mons.Attr.new_battleable([Mons.Assets.mons_elliot_d_0], "ELLIOT");
+  | Mons.ESPECTRONUS => Mons.Attr.new_battleable([Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS");
+  | Mons.GAKI => Mons.Attr.new_battleable([Mons.Assets.mons_gaki_d_0], "GAKI");
+  | Mons.GORR => Mons.Attr.new_battleable([Mons.Assets.mons_gorr_d_0], "GORR");
+  | Mons.LAMURIA => Mons.Attr.new_battleable([Mons.Assets.mons_lamuria_d_0], "LAMURIA");
+  | Mons.RAFIRE => Mons.Attr.new_battleable([Mons.Assets.mons_rafire_d_0], "RAFIRE");
+  | Mons.VARGOULI => Mons.Attr.new_battleable([Mons.Assets.mons_vargouli_d_0], "VARGOULI");
+  | Mons.TUPITREE => Mons.Attr.new_battleable([Mons.Assets.mons_tupitree_d_0], "TUPITREE");
+  | Mons.LELA => Mons.Attr.new_battleable([Mons.Assets.mons_lela_d_0], "LELA");
+  | Mons.MOSHY => Mons.Attr.new_battleable([Mons.Assets.mons_moshy_d_0], "MOSHY");
 
-  | Mons.BATH => 
-    Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "BATH",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_bath_d_0]) );
-  | Mons.BEHOLDER => 
-    Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "BEHOLDER",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_beholder_d_0]) );
-  | Mons.CRONI => 
-    Mons.Attr.new(Bool.false, Bool.true, 32u, 0u, "CRONI",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_croni_d_0]) );
-  | Mons.ELLIOT => 
-    Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "ELLIOT",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_elliot_d_0]) );
-  | Mons.ESPECTRONUS => 
-    Mons.Attr.new(Bool.false, Bool.true, 38u, 0u, "ESPECTRONUS",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_espectronus_d_0]) );
-  | Mons.GAKI => 
-    Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "GAKI",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_gaki_d_0]) );
-  | Mons.GORR => 
-    Mons.Attr.new(Bool.false, Bool.true, 36u, 0u, "GORR",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_gorr_d_0]) );
-  | Mons.LAMURIA => 
-    Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "LAMURIA",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_lamuria_d_0]) );
-  | Mons.RAFIRE => 
-    Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "RAFIRE",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_rafire_d_0]) );
-  | Mons.VARGOULI => 
-    Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "VARGOULI",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_vargouli_d_0]) );
-  | Mons.TUPITREE => 
-    Mons.Attr.new(Bool.false, Bool.true, 50u, 0u, "TUPITREE",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_tupitree_d_0]) );
-  | Mons.LELA => 
-    Mons.Attr.new(Bool.false, Bool.true, 40u, 0u, "LELA",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_lela_d_0]) );
-  | Mons.MOSHY => 
-    Mons.Attr.new(Bool.false, Bool.true, 30u, 0u, "MOSHY",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_moshy_d_0]) );
-
-  | Mons.HOUSE_0_00 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_house0_00]) );
-  | Mons.HOUSE_0_01 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_house0_01]) );
-  | Mons.HOUSE_0_02 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_house0_02]) );
-  | Mons.HOUSE_0_03 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_house0_03]) );
-  | Mons.HOUSE_0_04 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_house0_04]) );
-  | Mons.CASTLE_00 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_castle_00]) );
-  | Mons.CASTLE_01 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_castle_01]) );
-  | Mons.CASTLE_02 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_castle_02]) );
-  | Mons.CASTLE_03 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_castle_03]) );
-  | Mons.CASTLE_04 => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.brown_castle_04]) );
-
-  | Mons.SAND_0 => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.sand_0]) );
-  | Mons.SAND_1 => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.sand_1]) );
-  | Mons.CHEST => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.tile_chest_0]) );
-
-  | Mons.WATER_M => 
+  | Mons.HOUSE_0_00 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_00]);
+  | Mons.HOUSE_0_01 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_01]);
+  | Mons.HOUSE_0_02 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_02]);
+  | Mons.HOUSE_0_03 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_03]);
+  | Mons.HOUSE_0_04 => Mons.Attr.new_blockable([Mons.Assets.brown_house0_04]);
+  | Mons.CASTLE_00 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_00]);
+  | Mons.CASTLE_01 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_01]);
+  | Mons.CASTLE_02 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_02]);
+  | Mons.CASTLE_03 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_03]);
+  | Mons.CASTLE_04 => Mons.Attr.new_blockable([Mons.Assets.brown_castle_04]);
+  | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
+  | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
+  | Mons.CHEST => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
+  | Mons.WATER => 
     case kin.dir:
-    | Mons.Map.Dir.expanded.right => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-      Mons.Kind.set_static_sprites([Mons.Assets.water_0_r]) ); 
-    | Mons.Map.Dir.expanded.up => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_0_u, Mons.Assets.water_0_10]) ); 
-    | Mons.Map.Dir.expanded.left => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_0_l]) ); 
-    | Mons.Map.Dir.expanded.down => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_0_d]) ); 
-    | Mons.Map.Dir.expanded.middle => 
-      Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-      Mons.Kind.set_static_sprites([Mons.Assets.water_0_m, Mons.Assets.water_0_10]));
-    | Mons.Map.Dir.expanded.right_up => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_1_ru]) ); 
-    | Mons.Map.Dir.expanded.right_down => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_1_rd]) ); 
-    | Mons.Map.Dir.expanded.left_up => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_1_lu]) ); 
-    | Mons.Map.Dir.expanded.left_down => 
-        Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-        Mons.Kind.set_static_sprites([Mons.Assets.water_1_ld]) );; 
-  | Mons.WATER1_M => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.water_1_m, Mons.Assets.water_0_10]) );
-
-  | Mons.PATH_BLOCKER => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.rock_path_0_m]) );
-  | Mons.WOOD_FENCE_R => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_r]) );
-  | Mons.WOOD_FENCE_M => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_m]) );
-  | Mons.WOOD_FENCE_L => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_l]) );
-  | Mons.WOOD_FENCE_RU => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_ru]) );
-  | Mons.WOOD_FENCE_LU => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "", 
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_lu]) );
-  | Mons.WOOD_FENCE_LD => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_ld]) );
-  | Mons.WOOD_FENCE_RD => 
-    Mons.Attr.new(Bool.true, Bool.false, 0u, 0u, "",
-    Mons.Kind.set_static_sprites([Mons.Assets.wood_fence_rd]) );
+    | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
+    | Mons.Map.Dir.expanded.up => Mons.Attr.new_neutral([Mons.Assets.water_0_u, Mons.Assets.water_0_10]); 
+    | Mons.Map.Dir.expanded.left => Mons.Attr.new_neutral([Mons.Assets.water_0_l]); 
+    | Mons.Map.Dir.expanded.down => Mons.Attr.new_neutral([Mons.Assets.water_0_d]); 
+    | Mons.Map.Dir.expanded.middle => Mons.Attr.new_neutral([Mons.Assets.water_0_m, Mons.Assets.water_0_10]);
+    | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_neutral([Mons.Assets.water_1_ru]); 
+    | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_neutral([Mons.Assets.water_1_rd]); 
+    | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
+    | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
+  | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
+  | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+  | Mons.WOOD_FENCE_R => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]);
+  | Mons.WOOD_FENCE_M => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
+  | Mons.WOOD_FENCE_L => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]);
+  | Mons.WOOD_FENCE_RU => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]);
+  | Mons.WOOD_FENCE_LU => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]);
+  | Mons.WOOD_FENCE_LD => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
+  | Mons.WOOD_FENCE_RD => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]);
 
 Mons.Kind.get_battle_img(kin: Mons.Kind, up: Bool): Image3D
   case kin:
