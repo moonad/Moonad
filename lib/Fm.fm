@@ -1,0 +1,240 @@
+// A Formality Letter is a 6-bit value:
+//  0-25 is A-Z
+// 26-52 is a-z
+// 52-61 is 0-9
+//    62 is .
+//    63 is _
+Fm.Letter: Type
+  Word(6)
+
+// A Formality Name is a list of letters
+Fm.Name: Type
+  List(Fm.Letter)
+
+// A Fm.Core term
+T Fm.Core
+| Fm.Core.var(name: Fm.Name);
+| Fm.Core.typ;
+| Fm.Core.all(name: Fm.Name, type: Fm.Core, body: Fm.Core);
+| Fm.Core.lam(name: Fm.Name, body: Fm.Core);
+| Fm.Core.app(func: Fm.Core, argm: Fm.Core);
+
+// Converts a Char to a Letter
+Fm.Letter.read(chr: Char): Maybe(Fm.Letter)
+  def some = ((n) Maybe.some<>(Word.trim<16>(6, U16.to_word(n)))) :: U16 -> _
+  def none = Maybe.none<>
+  if      U16.btw('A', chr, 'Z') then some(U16.sub(chr, 65s))
+  else if U16.btw('a', chr, 'z') then some(U16.sub(chr, 71s))
+  else if U16.btw('0', chr, '9') then some(U16.add(chr, 4s))
+  else if U16.eql('.', chr)       then some(62s)
+  else if U16.eql('_', chr)       then some(63s)
+  else                                 none
+
+// Converts a Letter to a Char
+Fm.Letter.show(ltr: Fm.Letter): Char
+  let ltr = U16.new(Word.trim<6>(16, ltr))
+  if      U16.btw( 0s, ltr, 25s) then U16.add(ltr, 65s)
+  else if U16.btw(26s, ltr, 52s) then U16.add(ltr, 71s)
+  else if U16.btw(52s, ltr, 61s) then U16.sub(ltr, 4s)
+  else if U16.eql(62s, ltr)      then 46s
+  else                                95s
+
+// Converts a String to a Fm.Name
+Fm.Name.read(str: String): Fm.Name
+  case str:
+  | List.nil<>;
+  | case Fm.Letter.read(str.head) as got:
+    | List.nil<>;
+    | List.cons<>(got.value, Fm.Name.read(str.tail));;
+
+// Converts a Fm.Name to a String
+Fm.Name.show(name: Fm.Name): String
+  case name:
+  | String.nil;
+  | String.cons(Fm.Letter.show(name.head), Fm.Name.show(name.tail));
+  
+// Are two letters the same?
+Fm.Letter.eql(a: Fm.Letter, b: Fm.Letter): Bool
+  Word.eql<6>(a, b)
+
+// Are two names the same?
+Fm.Name.eql(a: Fm.Name, b: Fm.Name): Bool
+  List.fold_zip<,>(a,b)<Bool>(Fm.Letter.eql, Bool.true, Bool.and)
+
+// Converts a Fm.Core term to a String
+Fm.Core.show(term: Fm.Core): String
+  case term:
+  | var =>
+    Fm.Name.show(term.name);
+  | typ =>
+    "Type";
+  | all =>
+    let name = Fm.Name.show(term.name)
+    let type = Fm.Core.show(term.type)
+    let body = Fm.Core.show(term.body);
+    String.flatten(["@(",name,":",type,") ",body]);
+  | lam =>
+    let name = Fm.Name.show(term.name)
+    let body = Fm.Core.show(term.body)
+    String.flatten(["#",name," ",body]);
+  | app =>
+    let func = Fm.Core.show(term.func)
+    let argm = Fm.Core.show(term.argm)
+    String.flatten(["(",func," ",argm,")"]);
+
+// Formality's Parser
+T Fm.Parser.Reply<T: Type>
+| Fm.Parser.Reply.error(code: String, error: String);
+| Fm.Parser.Reply.value(code: String, value: T);
+
+// Formality Core's parser type
+Fm.Parser(T: Type): Type
+  String -> Fm.Parser.Reply(T)
+
+// Parser monadic binder
+Fm.Parser.bind<A: Type, B: Type>(p: Fm.Parser(A), f: A -> Fm.Parser(B)): Fm.Parser(B)
+  (code) case p(code) as reply:
+  | error => Fm.Parser.Reply.error<B>(reply.code, reply.error);
+  | value => f(reply.value, reply.code);
+
+// Parser monadic injection
+Fm.Parser.pure<A: Type>(value: A): Fm.Parser(A)
+  (code) Fm.Parser.Reply.value<A>(code, value)
+
+// Perser monad
+Fm.Parser.monad: Monad(Fm.Parser)
+  Monad.new<Fm.Parser>(Fm.Parser.bind, Fm.Parser.pure)
+
+// Consumes a specific text, returns the remaining code
+Fm.Parser.text(text: String): Fm.Parser(Unit)
+  (code) case text:
+  | Fm.Parser.Reply.value<>(code, Unit.new);
+  | case code:
+    | let error = String.flatten(["Expected '", text, "'."])
+      Fm.Parser.Reply.error<>(code, error);
+    | if U16.eql(text.head, code.head) then
+        Fm.Parser.text(text.tail, code.tail)
+      else
+        let error = String.flatten(["Expected '", text, "'."])
+        Fm.Parser.Reply.error<>(code, error);;
+
+// Parses many
+Fm.Parser.many.go<A: Type>(
+  parser: Fm.Parser(A),
+  list: List(A) -> List(A),
+  code: String
+): Fm.Parser.Reply(List(A))
+  case parser(code) as parsed:
+  | error => Fm.Parser.Reply.value<>(code, list([]));
+  | value => Fm.Parser.many.go<A>(parser, (xs) list(List.cons<>(parsed.value, xs)), parsed.code);
+
+// Parses many
+Fm.Parser.many<A: Type>(parser: Fm.Parser(A)): Fm.Parser(List(A))
+  Fm.Parser.many.go<A>(parser, (x) x)
+
+// Parses many, minimum 1
+Fm.Parser.many1<A: Type>(parser: Fm.Parser(A)): Fm.Parser(List(A))
+  do Fm.Parser {
+    var head = parser;
+    var tail = Fm.Parser.many<A>(parser);
+    return List.cons<A>(head, tail);
+  }
+
+// Parses the first in a list
+Fm.Parser.first_of<A: Type>(pars: List(Fm.Parser(A))): Fm.Parser(A)
+  (code) case pars:
+  | Fm.Parser.Reply.error<>(code, "No parse.");
+  | let parsed = pars.head(code)
+    case parsed:
+    | error => Fm.Parser.first_of<>(pars.tail, code);
+    | value => Fm.Parser.Reply.value<>(parsed.code, parsed.value);;
+
+// Skips whitespaces
+Fm.Parser.core.spaces: Fm.Parser(List(Unit))
+  Fm.Parser.many<>(Fm.Parser.text(" "))
+  
+// Parses a letter: `[a-zA-Z_.]`
+Fm.Parser.core.letter: Fm.Parser(Fm.Letter)
+  (code) case code:
+  | Fm.Parser.Reply.error<>(code, "Unexpected eof.");
+  | case Fm.Letter.read(code.head) as got:
+    | Fm.Parser.Reply.error<>(code, "Expected letter.");
+    | Fm.Parser.Reply.value<>(code.tail, got.value);;
+  
+// Parses a (possibly empty) name: `[a-zA-Z_.]*`
+Fm.Parser.core.name: Fm.Parser(Fm.Name)
+  Fm.Parser.many<Fm.Letter>(Fm.Parser.core.letter)
+
+// Parses a non-empty name: `[a-zA-Z_.]+`
+Fm.Parser.core.name1: Fm.Parser(Fm.Name)
+  Fm.Parser.many1<Fm.Letter>(Fm.Parser.core.letter)
+
+// Parses a type: `Type`
+Fm.Parser.core.type: Fm.Parser(Fm.Core)
+  do Fm.Parser {
+    Fm.Parser.core.spaces;
+    Fm.Parser.text("Type");
+    return Fm.Core.typ;
+  }
+
+// Parses a lambda: `!var body`
+Fm.Parser.core.lambda: Fm.Parser(Fm.Core)
+  do Fm.Parser {
+    Fm.Parser.core.spaces;
+    Fm.Parser.text("#");
+    var name = Fm.Parser.core.name;
+    var body = Fm.Parser.core;
+    return Fm.Core.lam(name, body);
+  }
+
+// Parses a forall: `!var body`
+Fm.Parser.core.forall: Fm.Parser(Fm.Core)
+  do Fm.Parser {
+    Fm.Parser.core.spaces;
+    Fm.Parser.text("@");
+    Fm.Parser.text("(");
+    var name = Fm.Parser.core.name;
+    Fm.Parser.text(":");
+    var type = Fm.Parser.core;
+    Fm.Parser.text(")");
+    var body = Fm.Parser.core;
+    return Fm.Core.all(name, type, body);
+  }
+
+// Parses an application: `(func argm0 argm1 ... argmN)`
+Fm.Parser.core.application: Fm.Parser(Fm.Core)
+  do Fm.Parser {
+    Fm.Parser.core.spaces;
+    Fm.Parser.text("(");
+    var func = Fm.Parser.core;
+    Fm.Parser.core.spaces;
+    var argm = Fm.Parser.core;
+    Fm.Parser.text(")");
+    return Fm.Core.app(func, argm);
+  }
+
+// Parses a variable: `name`
+Fm.Parser.core.variable: Fm.Parser(Fm.Core)
+  do Fm.Parser {
+    Fm.Parser.core.spaces;
+    var name = Fm.Parser.core.name;
+    return Fm.Core.var(name);
+  }
+
+// Parses a core term
+Fm.Parser.core: Fm.Parser(Fm.Core)
+  Fm.Parser.first_of<>([
+    Fm.Parser.core.type,
+    Fm.Parser.core.forall,
+    Fm.Parser.core.lambda,
+    Fm.Parser.core.application,
+    Fm.Parser.core.variable,
+  ])
+
+Fm: _
+  let source = "@(P: Type) @(true: P) @(false: P) P"
+  //let source = "#f #x (f (f x))"
+  let parsed = Fm.Parser.core(source)
+  case parsed:
+  | error => "No parse.";
+  | value => Fm.Core.show(parsed.value);
