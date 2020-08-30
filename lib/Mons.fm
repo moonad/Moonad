@@ -5,9 +5,6 @@
 //    dimensions. Will probably just work, but may have some bugs
 // 4. Add a (idx: U32) argument to the Mons.Map.get, Mons.Map.set, Mons.Map.del. 
 //    Otherwise it would be confusing because we're now using Z for dimensions. 
-// 5. Debug the multiple chars in tile command problem
-// 6. Mons.Game.map_push, Mons.Game.map_set, Mons.Game.map_get, e todas as
-//    outras funções da map pra atuarem direto no Game, pra ficar mais clean
 // 7. Make the attack key more robust (right now it just gets the object below)
 // 8. Make the attack system (instead of just causing damage when the user
 //    presses U, we need each Kind to have a list of 4 attacks, and then get the
