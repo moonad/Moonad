@@ -3,6 +3,6 @@ Nat.egcd.aux(a: Nat, b: Nat, x: Int, y: Int, u: Int, v: Int): Pair(Nat, Pair(Int
   | Pair.new<,>(b, Pair.new<,>(x, y));
   | let q = Nat.div(b, a)
     let r = Nat.mod(b, a)
-    let m = Int.sub(x, Int.mul(u, Int.from_Nat(q)))
-    let n = Int.sub(y, Int.mul(v, Int.from_Nat(q)))
+    let m = Int.sub(x, Int.mul(u, Int.from_nat(q)))
+    let n = Int.sub(y, Int.mul(v, Int.from_nat(q)))
     Nat.egcd.aux(r, a, u, v, m, n);

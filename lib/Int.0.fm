@@ -1,2 +1,2 @@
 Int.0: Int
-  Int.from_Nat(0)
+  Int.from_nat(0)

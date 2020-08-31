@@ -19,6 +19,122 @@ T Fm.Core
 | Fm.Core.lam(name: Fm.Name, body: Fm.Core);
 | Fm.Core.app(func: Fm.Core, argm: Fm.Core);
 
+// A High Order Fm.Core term
+T Fm.HCore
+| Fm.HCore.var(name: Fm.Name);
+| Fm.HCore.typ;
+| Fm.HCore.all(name: Fm.Name, type: Fm.HCore, body: Fm.HCore -> Fm.HCore);
+| Fm.HCore.lam(name: Fm.Name, body: Fm.HCore -> Fm.HCore);
+| Fm.HCore.app(func: Fm.HCore, argm: Fm.HCore);
+
+// A map from Names to Formality definitions
+Fm.Defs: Type
+  Map(Fm.Core)
+
+// An empty map
+Fm.Defs.new: Fm.Defs
+  Map.new<Fm.Core>
+
+// Gets a core term from a map by its name
+Fm.Defs.get(name: Fm.Name, defs: Fm.Defs): Maybe(Fm.Core)
+  Map.get<Fm.Core>(Fm.Name.to_bits(name), defs)
+
+// Adds a name, core term pair to a map
+Fm.Defs.set(name: Fm.Name, term: Fm.Core, defs: Fm.Defs): Map(Fm.Core)
+  Map.set<Fm.Core>(Fm.Name.to_bits(name), term, defs)
+  
+// A map from Names to Formality definitions
+Fm.HDefs: Type
+  Map(Fm.HCore)
+
+// An empty map
+Fm.HDefs.new: Fm.HDefs
+  Map.new<Fm.HCore>
+
+// Gets a core term from a map by its name
+Fm.HDefs.get(name: Fm.Name, defs: Fm.HDefs): Maybe(Fm.HCore)
+  Map.get<Fm.HCore>(Fm.Name.to_bits(name), defs)
+
+// Adds a name, core term pair to a map
+Fm.HDefs.set(name: Fm.Name, term: Fm.HCore, defs: Fm.HDefs): Map(Fm.HCore)
+  Map.set<Fm.HCore>(Fm.Name.to_bits(name), term, defs)
+
+// TODO Serializes a term
+//Fm.Core.serialize(term: Fm.Term): Bits
+//  Fm.Core.serialize(term)
+
+// Coverts a term to high order
+Fm.Core.to_high(term: Fm.Core, vars: Fm.HDefs): Fm.HCore
+  case term:
+  | var => case Fm.HDefs.get(term.name, vars) as got:
+    | Fm.HCore.var(term.name);
+    | got.value;;
+  | typ => Fm.HCore.typ;
+  | all =>
+    def type = Fm.Core.to_high(term.type, vars);
+    def body = (x) Fm.Core.to_high(term.body, Fm.HDefs.set(term.name,x,vars));
+    Fm.HCore.all(term.name, type, body);
+  | lam =>
+    def body = (x) Fm.Core.to_high(term.body, Fm.HDefs.set(term.name,x,vars));
+    Fm.HCore.lam(term.name, body);
+  | app =>
+    def func = Fm.Core.to_high(term.func, vars);
+    def argm = Fm.Core.to_high(term.argm, vars);
+    Fm.HCore.app(func, argm);
+
+// Coverts a term to high order
+// TODO: avoid capture
+Fm.HCore.to_low(term: Fm.HCore): Fm.Core
+  case term:
+  | var => Fm.Core.var(term.name);
+  | typ => Fm.Core.typ;
+  | all =>
+    def type = Fm.HCore.to_low(term.type)
+    def body = Fm.HCore.to_low(term.body(Fm.HCore.var(term.name)))
+    Fm.Core.all(term.name, type, body);
+  | lam =>
+    def body = Fm.HCore.to_low(term.body(Fm.HCore.var(term.name)));
+    Fm.Core.lam(term.name, body);
+  | app =>
+    def func = Fm.HCore.to_low(term.func);
+    def argm = Fm.HCore.to_low(term.argm);
+    Fm.Core.app(func, argm);
+
+// Reduces a high order term to weak head normal form
+Fm.HCore.reduce(term: Fm.HCore): Fm.HCore
+  case term:
+  | var => Fm.HCore.var(term.name);
+  | typ => Fm.HCore.typ;
+  | all => Fm.HCore.all(term.name, term.type, term.body);
+  | lam => Fm.HCore.lam(term.name, term.body);
+  | app =>
+    let func = Fm.HCore.reduce(term.func)
+    case func:
+    | var => term;
+    | typ => term;
+    | all => term;
+    | lam => Fm.HCore.reduce(func.body(term.argm));
+    | app => term;;
+
+// Normalizes a high order term
+Fm.HCore.normalize(term: Fm.HCore): Fm.HCore
+  case Fm.HCore.reduce(term) as term:
+  | var =>
+    Fm.HCore.var(term.name);
+  | typ =>
+    Fm.HCore.typ;
+  | all =>
+    def type = Fm.HCore.normalize(term.type)
+    def body = (x) Fm.HCore.normalize(term.body(x))
+    Fm.HCore.all(term.name, type, body);
+  | lam =>
+    def body = (x) Fm.HCore.normalize(term.body(x))
+    Fm.HCore.lam(term.name, body);
+  | app =>
+    def func = Fm.HCore.normalize(term.func)
+    def argm = Fm.HCore.normalize(term.argm)
+    Fm.HCore.app(func, argm);
+
 // Converts a Char to a Letter
 Fm.Letter.read(chr: Char): Maybe(Fm.Letter)
   def some = ((n) Maybe.some<>(Word.trim<16>(6, U16.to_word(n)))) :: U16 -> _
@@ -53,6 +169,12 @@ Fm.Name.show(name: Fm.Name): String
   | String.nil;
   | String.cons(Fm.Letter.show(name.head), Fm.Name.show(name.tail));
   
+// Converts a name to a bits
+Fm.Name.to_bits(name: Fm.Name): Bits
+  case name:
+  | Bits.nil;
+  | Bits.concat(Word.to_bits<6>(name.head), Fm.Name.to_bits(name.tail));
+
 // Are two letters the same?
 Fm.Letter.eql(a: Fm.Letter, b: Fm.Letter): Bool
   Word.eql<6>(a, b)
@@ -150,11 +272,14 @@ Fm.Parser.first_of<A: Type>(pars: List(Fm.Parser(A))): Fm.Parser(A)
     | value => Fm.Parser.Reply.value<>(parsed.code, parsed.value);;
 
 // Skips whitespaces
-Fm.Parser.core.spaces: Fm.Parser(List(Unit))
-  Fm.Parser.many<>(Fm.Parser.text(" "))
+Fm.Parser.Core.spaces: Fm.Parser(List(Unit))
+  Fm.Parser.many<>(Fm.Parser.first_of<>([
+    Fm.Parser.text(" "),
+    Fm.Parser.text("\n")
+  ]))
   
 // Parses a letter: `[a-zA-Z_.]`
-Fm.Parser.core.letter: Fm.Parser(Fm.Letter)
+Fm.Parser.Core.letter: Fm.Parser(Fm.Letter)
   (code) case code:
   | Fm.Parser.Reply.error<>(code, "Unexpected eof.");
   | case Fm.Letter.read(code.head) as got:
@@ -162,79 +287,84 @@ Fm.Parser.core.letter: Fm.Parser(Fm.Letter)
     | Fm.Parser.Reply.value<>(code.tail, got.value);;
   
 // Parses a (possibly empty) name: `[a-zA-Z_.]*`
-Fm.Parser.core.name: Fm.Parser(Fm.Name)
-  Fm.Parser.many<Fm.Letter>(Fm.Parser.core.letter)
+Fm.Parser.Core.name: Fm.Parser(Fm.Name)
+  Fm.Parser.many<Fm.Letter>(Fm.Parser.Core.letter)
 
 // Parses a non-empty name: `[a-zA-Z_.]+`
-Fm.Parser.core.name1: Fm.Parser(Fm.Name)
-  Fm.Parser.many1<Fm.Letter>(Fm.Parser.core.letter)
+Fm.Parser.Core.name1: Fm.Parser(Fm.Name)
+  Fm.Parser.many1<Fm.Letter>(Fm.Parser.Core.letter)
 
 // Parses a type: `Type`
-Fm.Parser.core.type: Fm.Parser(Fm.Core)
+Fm.Parser.Core.type: Fm.Parser(Fm.Core)
   do Fm.Parser {
-    Fm.Parser.core.spaces;
+    Fm.Parser.Core.spaces;
     Fm.Parser.text("Type");
     return Fm.Core.typ;
   }
 
 // Parses a lambda: `!var body`
-Fm.Parser.core.lambda: Fm.Parser(Fm.Core)
+Fm.Parser.Core.lambda: Fm.Parser(Fm.Core)
   do Fm.Parser {
-    Fm.Parser.core.spaces;
+    Fm.Parser.Core.spaces;
     Fm.Parser.text("#");
-    var name = Fm.Parser.core.name;
-    var body = Fm.Parser.core;
+    var name = Fm.Parser.Core.name;
+    var body = Fm.Parser.Core;
     return Fm.Core.lam(name, body);
   }
 
 // Parses a forall: `!var body`
-Fm.Parser.core.forall: Fm.Parser(Fm.Core)
+Fm.Parser.Core.forall: Fm.Parser(Fm.Core)
   do Fm.Parser {
-    Fm.Parser.core.spaces;
+    Fm.Parser.Core.spaces;
     Fm.Parser.text("@");
     Fm.Parser.text("(");
-    var name = Fm.Parser.core.name;
+    var name = Fm.Parser.Core.name;
     Fm.Parser.text(":");
-    var type = Fm.Parser.core;
+    var type = Fm.Parser.Core;
     Fm.Parser.text(")");
-    var body = Fm.Parser.core;
+    var body = Fm.Parser.Core;
     return Fm.Core.all(name, type, body);
   }
 
 // Parses an application: `(func argm0 argm1 ... argmN)`
-Fm.Parser.core.application: Fm.Parser(Fm.Core)
+Fm.Parser.Core.application: Fm.Parser(Fm.Core)
   do Fm.Parser {
-    Fm.Parser.core.spaces;
+    Fm.Parser.Core.spaces;
     Fm.Parser.text("(");
-    var func = Fm.Parser.core;
-    Fm.Parser.core.spaces;
-    var argm = Fm.Parser.core;
+    var func = Fm.Parser.Core;
+    Fm.Parser.Core.spaces;
+    var argm = Fm.Parser.Core;
     Fm.Parser.text(")");
     return Fm.Core.app(func, argm);
   }
 
 // Parses a variable: `name`
-Fm.Parser.core.variable: Fm.Parser(Fm.Core)
+Fm.Parser.Core.variable: Fm.Parser(Fm.Core)
   do Fm.Parser {
-    Fm.Parser.core.spaces;
-    var name = Fm.Parser.core.name;
+    Fm.Parser.Core.spaces;
+    var name = Fm.Parser.Core.name;
     return Fm.Core.var(name);
   }
 
 // Parses a core term
-Fm.Parser.core: Fm.Parser(Fm.Core)
+Fm.Parser.Core: Fm.Parser(Fm.Core)
   Fm.Parser.first_of<>([
-    Fm.Parser.core.type,
-    Fm.Parser.core.forall,
-    Fm.Parser.core.lambda,
-    Fm.Parser.core.application,
-    Fm.Parser.core.variable,
+    Fm.Parser.Core.type,
+    Fm.Parser.Core.forall,
+    Fm.Parser.Core.lambda,
+    Fm.Parser.Core.application,
+    Fm.Parser.Core.variable,
   ])
 
 Fm: _
-  let source = "@(P: Type) @(true: P) @(false: P) P"
+  let source = "(#f #x (f (f x)) #f #x (f (f x)))"
   //let source = "#f #x (f (f x))"
-  let parsed = Fm.Parser.core(source)
+  let parsed = Fm.Parser.Core(source)
   case parsed:
   | error => "No parse.";
-  | value => Fm.Core.show(parsed.value);
+  | value =>
+    let term = parsed.value;
+    let term = Fm.Core.to_high(term, Fm.HDefs.new)
+    let term = Fm.HCore.normalize(term)
+    let term = Fm.HCore.to_low(term)
+    Fm.Core.show(term);
