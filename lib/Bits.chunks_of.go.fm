@@ -1,0 +1,20 @@
+Bits.chunks_of.go(
+  len   : Nat,  // length of each chunk
+  bits  : Bits, // bits to be split
+  need  : Nat,  // number of vals to complete chunk
+  chunk : Bits  // current chunk
+) : List(Bits)
+  case bits:
+  | List.cons<>(Bits.reverse(chunk), List.nil<>);
+  | case need:
+    | let head = Bits.reverse(chunk)
+      let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
+      List.cons<>(head, tail);
+    | let chunk = Bits.0(chunk)
+      Bits.chunks_of.go(len, bits.pred, need.pred, chunk);;
+  | case need:
+    | let head = Bits.reverse(chunk)
+      let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
+      List.cons<>(head, tail);
+    | let chunk = Bits.1(chunk)
+      Bits.chunks_of.go(len, bits.pred, need.pred, chunk);;
