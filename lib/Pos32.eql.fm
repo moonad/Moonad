@@ -1,0 +1,31 @@
+Pos32.eql(p1: Pos32, p2: Pos32, with_z: Bool): Bool
+  let p1.x = Pos32.get_x(p1) 
+  let p1.y = Pos32.get_y(p1)
+  let p1.z = Pos32.get_z(p1)
+
+  let p2.x = Pos32.get_x(p2) 
+  let p2.y = Pos32.get_y(p2)
+  let p2.z = Pos32.get_z(p2)
+
+  let res = U32.eql(p1.x, p2.x)
+  let res = Bool.and(res, U32.eql(p1.y, p2.y))
+  if with_z then
+    Bool.and(res, U32.eql(p1.z, p2.z))
+  else
+    res
+
+
+Pos32.eql.test1: Bool
+  let p1 = Pos32.new(128u, 128u, 0u) 
+  let p2 = Pos32.new(128u, 128u, 1u) 
+  Pos32.eql(p1, p2, Bool.true)
+
+Pos32.eql.test2: Bool
+  let p1 = Pos32.new(120u, 128u, 0u) 
+  let p2 = Pos32.new(128u, 128u, 0u) 
+  Pos32.eql(p1, p2, Bool.true)
+
+Pos32.eql.test3: Bool
+  let p1 = Pos32.new(128u, 128u, 0u) 
+  let p2 = Pos32.new(128u, 120u, 0u) 
+  Pos32.eql(p1, p2, Bool.true)

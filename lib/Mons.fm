@@ -2,9 +2,9 @@
 // 2. Avoid duplicated code on characters on the spr attribute by moving the ifs
 //    and cases to a separate function, and then sending the x/y and the 12 imgs
 // 3. Remove the Pos32.set_z(pos,0u) from Map.set_list, and start implementing 
-//    dimensions. Will probably just work, but may have some bugs
+//    Dims. Will probably just work, but may have some bugs
 // 4. Add a (idx: U32) argument to the Mons.Map.get, Mons.Map.set, Mons.Map.del. 
-//    Otherwise it would be confusing because we're now using Z for dimensions. 
+//    Otherwise it would be confusing because we're now using Z for Dims. 
 // 5. Debug the multiple chars in tile command problem
 // 6. Mons.Game.map_push, Mons.Game.map_set, Mons.Game.map_get, e todas as
 //    outras funções da map pra atuarem direto no Game, pra ficar mais clean
@@ -105,7 +105,7 @@ T Mons.Game
 | Mons.Game.new(
   usr: Word(160), // player name
   pos: Map(Pos32), // player positions
-  map: Mons.Map // the game map
+  map: Mons.Map // the game map; should it be a Map(Mons.Map)?
 );
 
 // THING ID (kin)
@@ -145,14 +145,41 @@ T Mons.Kind
 | Mons.WATER1_M;
 | Mons.PATH_BLOCKER;
 | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+| Mons.DIM(z_index: U32);
+
+
+Mons.Dim.underground: U32
+  127u
+Mons.Dim.main: U32
+  0u
+Mons.Dim.construction: U32
+  129u
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
-  Pos32.new(128u, 128u, 0u) 
+  Pos32.new(128u, 128u, Mons.Dim.main) 
 
 // The game screen is 240x160 pixels
 Mons.scr_mid: Pos32
-  Pos32.new(120u, 80u, 0u)
+  Pos32.new(120u, 80u, Mons.Dim.main)
+
+Mons.Game.main_map_screen(game: Mons.Game): List(String)
+  case Mons.Game.get_map_screen(game, Mons.Dim.main) as screen:
+  | Mons.map_source.default;
+  | screen.value;
+
+Mons.Game.get_map_screen(game: Mons.Game, dim: U32): Maybe(List(String))
+  let dim = U32.to_nat(dim)
+  open game:
+  case List.at<>(dim, Mons.map_source): 
+  | Maybe.none<>;
+  | Maybe.some<>(Mons.map_source.default);
+
+// TODO
+// Mons.Game.set_map(game: Mons.Game, dim: U32, map: Mons.Map): Mons.Map
+//   let dim = U32.to_nat(dim)
+//   open game:
+//   List.at<>(dim, game.map)
 
 // The game screen width
 Mons.scr_w: U32
@@ -299,9 +326,11 @@ Mons.Map.new: Mons.Map
 // Adds a tile to a position on the map
 Mons.Map.set_list(pos: Pos32, objs: List(Mons.Object), map: Mons.Map): Mons.Map
   Map.set<>(U32.to_bits(Pos32.set_z(pos,0u)), objs, map)
+  // Map.set<>(U32.to_bits(pos), objs, map)
 
 // Gets the tile stored on a position on the map
 Mons.Map.get_list(pos: Pos32, map: Mons.Map): List(Mons.Object)
+// case Map.get<>(U32.to_bits(pos), map) as got:
   case Map.get<>(U32.to_bits(Pos32.set_z(pos,0u)), map) as got:
   | [];
   | got.value;
@@ -582,11 +611,13 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "f6") then
     [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_down)),
       Mons.Object.new_of_kind(Mons.GRASS)]
+  else if String.eql(code, "mm") then
+    [ Mons.Object.new_of_kind(Mons.DIM(Mons.Dim.construction))]
   else
     []
 
 // Converts a string map source to an actual map
-Mons.Map.build(code: List(String)): Mons.Map
+Mons.Map.build(code: List(String), dim: U32): Mons.Map
   let size = List.length.u32<>(code) // NOTE: assumes width == height
   List.ifor.u32<>(code)<>
   | Mons.Map.new;
@@ -594,7 +625,7 @@ Mons.Map.build(code: List(String)): Mons.Map
     for i : U32 = 0u .. size with map:
       let t_x = U32.add(U32.sub(2048u, U32.div(size, 2u)), i)
       let t_y = U32.add(U32.sub(2048u, U32.div(size, 2u)), j)
-      let t_z = 0u
+      let t_z = dim
       let pos = Pos32.new(t_x, t_y, t_z)
       let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
       let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
@@ -818,13 +849,16 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
       | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
     else Mons.Attr.new_blockable([]);
+  | Mons.DIM => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
+    
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
+  let z = Pos32.get_z(pos)
   case dir:
-  | Pos32.add(pos, Pos32.new(1u, 0u, 0u));
-  | Pos32.sub(pos, Pos32.new(0u, 1u, 0u));
-  | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
-  | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
+  | Pos32.add(pos, Pos32.new(1u, 0u, z));
+  | Pos32.sub(pos, Pos32.new(0u, 1u, z));
+  | Pos32.sub(pos, Pos32.new(1u, 0u, z));
+  | Pos32.add(pos, Pos32.new(0u, 1u, z));
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -835,7 +869,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
   case pos:
   // New player
-  | let pos = Pos32.new(2048u, 2048u, 0u)
+  | let pos = Pos32.new(2048u, 2048u, Mons.Dim.main)
     let obj = Mons.Object.new_of_kind(Mons.HERO)
     let map = Mons.Map.push(pos, obj, game.map)
     let game = Mons.Game.set_map(map, game)
@@ -1003,14 +1037,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     // When hero is in a battle, draw it...
     let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
     let is_battling = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.battles;
-    if Bool.and(is_standing, is_battling) then
-      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-      let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-      let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
-      let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-      let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-      let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
-      let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
+    if Bool.and(is_standing, is_battling) then //Bool.and(is_standing, is_battling) thenß
+      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,Mons.Dim.main), scr)
+      let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,Mons.Dim.main), scr)
+      let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,Mons.Dim.main), scr)
+      let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,Mons.Dim.main), scr)
+      let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,Mons.Dim.main), scr)
+      let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,Mons.Dim.main), scr) 
+      let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,Mons.Dim.main), scr)
       scr
     // When hero isn't battling, draw map...
     else 
@@ -1048,7 +1082,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
           // Computes the pixel position on the final canvas
           let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
           let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-          let c_z = Bool.if<>(ok, v_z, 0u)
+          let c_z = Bool.if<>(ok, v_z, Mons.Dim.main)
           // Pushes the pixel to the scr
           let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
           let col = Image3D.get_col(i, spr.img) // final pixel col
@@ -1180,7 +1214,7 @@ Mons.start(online: Bool): App(Mons.Game)
   // Initial state
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
-    let game_map = Mons.Map.build(Mons.map_source)
+    let game_map = Mons.Map.build(Mons.map_source.default, Mons.Dim.main)
     Mons.Game.new(game_usr, game_pos, game_map);
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
