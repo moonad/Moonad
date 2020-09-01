@@ -1,0 +1,10 @@
+// used for checking whether a tree is balanced
+// it represents the maximum factor by which
+// one subtree can outweigh its sibling
+//
+// this value was empirically chosen
+// in Haskell's `containers` package
+// and might be changed here later after
+// benchmarks are run
+GMap.w : Nat 
+  3
