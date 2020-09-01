@@ -103,7 +103,7 @@ T Mons.Game
 | Mons.Game.new(
   usr: Word(160), // player name
   pos: Map(Pos32), // player positions
-  map: Mons.Map // the game map; should it be a Map(Mons.Map)?
+  map: Mons.Map // the game map
 );
 
 // THING ID (kin)
@@ -1072,16 +1072,19 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       scr
     // When hero isn't battling, draw map...
     else
-      let is_portal = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.portal;
-      let game_map_source = 
-        if  Bool.and(is_standing, is_portal) then 
-          Mons.Map.build(Mons.map_source, Mons.Dim.construction)
-        else
-         Mons.Map.build(Mons.map_source, Mons.Dim.main)
-      // Update the game with a new game source, if needed
-      let game_map = Mons.Game.set_map(game_map_source, game)
-      Mons.Map.build_sprites(game_map, scr, hero_pos.value, hero_obj);
+    // TODO: is missing adding a player to the map
+      // let is_portal = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.portal;
+      // let game_map_source = 
+      //   if  Bool.and(is_standing, is_portal) then 
+      //     Mons.Map.build(Mons.map_source, Mons.Dim.construction)
+      //   else
+      //    Mons.Map.build(Mons.map_source, Mons.Dim.main)
+      // // Update the game with a new game source, if needed
+      // let game_map = Mons.Game.set_map(game_map, game)
+      // let game_map = Mons.Game.map_set(hero_pos.value, hero_obj, game_map_source)
+      Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
 
+// Build sprites around the hero
 Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
   let sprs = Mons.game_sprites(game)
   for spr in sprs with scr:
