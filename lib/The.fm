@@ -1,2 +1,2 @@
-T The <A: Type> ~ (x: A)
-| The.value(x: A)    ~ (x);
+T The <A: Type>   ~ (x: A)
+| The.value(x: A) ~ (x);

@@ -1,0 +1,15 @@
+// removes the focus, replacing it with an element from the right
+CList.remove_right<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.right:
+    | nil => 
+      case cl.left:
+      | nil  => CList.nil<>; //both right and left are empty
+      | cons =>             //right is empty, left is not
+        let  rev_left = List.reverse<>(cl.left)
+        case rev_left:
+        | nil  => CList.nil<>; //todo: replace with absurd
+        | cons => CList.ring<>([], rev_left.head, rev_left.tail);;;
+    | cons => CList.ring<>(cl.left, cl.right.head, cl.right.tail);;

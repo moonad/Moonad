@@ -1,0 +1,4 @@
+List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
+  let spanned = List.span<>(Nat.lte(n), ns)
+  get xs ys   = spanned
+  List.concat<>(xs, List.cons<>(n, ys))

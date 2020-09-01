@@ -1,0 +1,7 @@
+Bits.slice(len: Nat, bits: Bits): Bits
+  case len:
+  | Bits.nil;
+  | case bits:
+    | Bits.nil;
+    | Bits.0(Bits.slice(len.pred, bits.pred));
+    | Bits.1(Bits.slice(len.pred, bits.pred));;

@@ -1,0 +1,7 @@
+// checks if an element occurs in the list with a user-supplied equality predicate
+List.elem<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): Bool 
+  case as:
+  | Bool.false;
+  | case p(a, as.head):
+    | Bool.true;
+    | List.elem<A>(p, a, as.tail);;

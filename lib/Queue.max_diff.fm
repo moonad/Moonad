@@ -1,0 +1,4 @@
+// this constant represents how many times longer 
+// one half of the queue is allowed to be relative to the other
+Queue.max_diff : Nat 
+  2

@@ -1,4 +1,0 @@
-Set.get(bits: Bits, set: Set): Bool
-  case Map.get<Unit>(bits, set):
-  | Bool.false;
-  | Bool.true;

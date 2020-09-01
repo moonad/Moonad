@@ -1,8 +1,8 @@
 // A demo application that renders a square on the screen
 App.demo: App(Pair(U32,U32))
-  let vox = Image3D.alloc_size(256u)
+  let vox = Image3D.alloc_capacity(256u)
   def init
-    Pair.new<,>(U32.0, U32.0)
+    Pair.new<,>(64u, 64u)
   def draw(state)
     get mouse_x mouse_y = state
     App.Render.vox
@@ -17,7 +17,7 @@ App.demo: App(Pair(U32,U32))
   def when(event, state)
     case event:
     | init => [];
-    | tick => [App.Action.state<>(event.mouse)];
+    | tick => [];
     | xkey => [];
     | post => [];
   App.new<>(init, draw, when)

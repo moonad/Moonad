@@ -1,0 +1,13 @@
+// Possibly returns the minimum value of the set
+// Since we're working with a balanced tree we only need
+// to check the if the left subtree, if it's empty, the 
+// minimum value is the root, because all elements to the 
+// right are greater than it. If it's not, recurse until 
+// the leftmost element is found
+GSet.min<A: Type>(set: GSet(A)): Maybe(A)
+  case set:
+  | tip => Maybe.none<>;
+  | bin =>
+    case set.left:
+    | tip => Maybe.some<>(set.val); 
+    | bin => GSet.min<>(set.left);; 

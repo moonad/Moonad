@@ -9,8 +9,8 @@ ECDSA.Jacobian.add(p: ECDSA.Jacobian, q: ECDSA.Jacobian): ECDSA.Jacobian
       let q.z2 = Nat.square(q.z)
       let U1 = Nat.mul(p.x, q.z2)
       let U2 = Nat.mul(q.x, p.z2)
-      let S1 = Nat.mulVar(3, p.y, q.z, q.z2)
-      let S2 = Nat.mulVar(3, q.y, p.z, p.z2)
+      let S1 = Nat.mul_var(3, p.y, q.z, q.z2)
+      let S2 = Nat.mul_var(3, q.y, p.z, p.z2)
       let H = ECDSA.sub(U2, U1)
       let r = ECDSA.sub(S2, S1)
       // H = 0 meaning it's the same point.
@@ -23,5 +23,5 @@ ECDSA.Jacobian.add(p: ECDSA.Jacobian, q: ECDSA.Jacobian): ECDSA.Jacobian
         let V = Nat.mul(U1, HH)
         let x = ECDSA.sub(ECDSA.sub(Nat.square(r), HHH), Nat.mul(2, V))
         let y = ECDSA.sub(Nat.mul(r, ECDSA.sub(V, x)), Nat.mul(S1, HHH))
-        let z = ECDSA.mod(Nat.mulVar(3, p.z, q.z, H))
+        let z = ECDSA.mod(Nat.mul_var(3, p.z, q.z, H))
         ECDSA.Jacobian.new(x, y, z);;;

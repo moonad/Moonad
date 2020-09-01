@@ -1,0 +1,4 @@
+CList.rotate_n<A: Type>(dir: CList.Dir, n: Nat, cl: CList(A)): CList(A)
+  case dir:
+  | left  => Nat.apply<>(n, CList.rotate_left<>, cl);
+  | right => Nat.apply<>(n, CList.rotate_right<>, cl);

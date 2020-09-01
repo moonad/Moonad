@@ -1,0 +1,6 @@
+//A Circular List 
+// left is kept in reverse order 
+// right is kept in order
+T CList <A: Type>
+| CList.nil;
+| CList.ring(left: List(A), focus: A, right: List(A));

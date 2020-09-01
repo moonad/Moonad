@@ -1,0 +1,5 @@
+// Folds over a list with an index, right associative
+List.ifoldr.u32<A: Type,B: Type>(b: B, f: U32 -> A -> B -> B, xs: List(A)): B
+  case xs:
+  | b;
+  | f(0u, xs.head, List.ifoldr.u32<,>(b, (i) f(U32.add(1u, i)), xs.tail));

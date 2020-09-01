@@ -182,9 +182,21 @@ class Moonad extends Component {
   render() {
     var paths = front.get_paths();
     if (paths[0] === "play") {
-      return h(Play, {
-        name: paths[1],
-      });
+      return h("div", {
+        style: {
+          "display": "flex",
+          "align-items": "center",
+          "justify-content": "center",
+          "width": "100%",
+          "height": "100%",
+          "background": "#101216",
+          "background": "#101216",
+          "color": "white",
+        }}, [
+          h(Play, {
+            name: paths[1],
+          })
+        ]);
     } else {
       var blocks = [];
       blocks.push(h("div", {

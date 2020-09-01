@@ -1,0 +1,8 @@
+// Remove "match" from the beginning of "xs"
+String.remove_start_with(xs: String, match: String): String
+  case xs: 
+  | String.nil;
+  | case String.starts_with(xs, match):
+    | String.remove_start_with.go(xs, match);
+    | xs;
+  ;

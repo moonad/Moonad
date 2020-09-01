@@ -1,0 +1,12 @@
+Col32.show(rgba: Col32): String
+    // Get the U32 values
+  let r = Col32.get_r(rgba)
+  let g = Col32.get_g(rgba)
+  let b = Col32.get_b(rgba)
+  let a = Col32.get_a(rgba)
+  // TODO: add U32.show
+  let r_str = Nat.show(U32.to_nat(r))
+  let g_str = Nat.show(U32.to_nat(g))
+  let b_str = Nat.show(U32.to_nat(b))
+  let a_str = Nat.show(U32.to_nat(a))
+  String.flatten(["rgba(", String.intercalate(",", [r_str, g_str, b_str, a_str]), ")"])

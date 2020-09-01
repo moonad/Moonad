@@ -1,0 +1,113 @@
+// In order to to guarantee the efficiency of the search operation
+// we *must* preserve the tree balanced, otherwise it could become
+// degenerate, looking more like a list, which is much slower
+//
+// Here we use the size information along with a constant (GSet.w)
+// to ensure that one subtree is never more than w times bigger than
+// the other subtree
+//
+// Once a tree is found to be unbalanced, then we build a new tree
+// by rotating the former, shifting part of the heavy subtree to 
+// the lighter subtree. This rotation can be `single` or `double`.
+// In the single rotation the entire subtree of the heavy subtree 
+// is moved to the other side, while in the double only a part is  
+// moved
+//
+// A visual representation of these rotations is given below 
+//
+// { a, b, c } are tree elements (val) and a < b < c 
+// { X, Y, Z } are trees of size Nx, Ny, Nz respectively 
+// The sums inside the parens represent the size of the tree at that level 
+// 
+// SINGLE (LEFT) ROTATION 
+//    a (Nx + Ny + Nz + 2)                          b (Nx + Ny + Nz + 2)
+//   / \                     =>                    / \ 
+//  X   b (Ny + Nz + 1)            (Nx + Ny + 1)  a   Z 
+//     / \                                       / \ 
+//    Y   Z                                     X   Y  
+//
+// DOUBLE (LEFT) ROTATION 
+//                         a (Nx + Ny + Nz + 3)                                  b   (Nx + Ny + Nz + 3) 
+//                        / \                                                  /   \
+//                       X   c  (Ny_1 + Ny_2 + Nz + 2)        (Nx + Ny_1 + 1) a      c 
+//                          / \                          =>                  / \    / \ 
+// (Ny = Ny_1 + Ny_2 + 1)  b   Z                                            X  Y1  Y2  Z 
+//                        / \               
+//                      Y1  Y2             
+      
+
+GSet.balance<A: Type>(a: A, l: GSet(A), r: GSet(A)): GSet(A)
+  let size_l             = GSet.size<>(l)
+  let size_r             = GSet.size<>(r)
+  let size_l_plus_size_r = Nat.add(size_l, size_r)
+  let w_x_size_l         = Nat.mul(GSet.w, size_l)
+  let w_x_size_r         = Nat.mul(GSet.w, size_r)
+  
+  // size_l_plus_size_r < 2 means that one subtree is empty and the
+  // other contains only one element, hence the tree cannot be balanced 
+  if Nat.ltn(size_l_plus_size_r, 2) then 
+    GSet.node<>(a, l, r)
+  // size_r > w * size_l means the right subtree is too heavy
+  else if Nat.gtn(size_r, w_x_size_l) then
+    case r:
+    // this is an impossible case because we already know that
+    // the right subtree is too heavy
+    // question: how to deal with it?
+    | tip => GSet.node<>(a, l, r); 
+    | bin => 
+      let size_rl = GSet.size<>(r.left)
+      let size_rr = GSet.size<>(r.right)
+      // size_rl < size_rr means we should perform a single left rotation
+      if Nat.ltn(size_rl, size_rr) then 
+        let new_l = GSet.node<>(a, l, r.left)
+        GSet.node<>(r.val, new_l, r.right)
+      // size_rl > size_rr means we should perform a double left rotation
+      else 
+       // we need to branch on the left subtree of r in order to extract its components 
+       case r.left:
+       // impossible case 
+       | tip => GSet.node<>(a, l, r);
+       | bin => 
+         let new_val   = r.left.val 
+         let new_left  = GSet.node<>(a, l, r.left.left) 
+         let new_right = GSet.node<>(r.val, r.left.right, r.right)
+         GSet.node<>(new_val, new_left, new_right)
+       ;
+    ;
+    
+  // size_l > w * size_r means the left subtree is too heavy  
+  else if Nat.gtn(size_l, w_x_size_r) then 
+    case l:
+    // this is an impossible case because we already know that
+    // the left subtree is too heavy
+    // question: how to deal with it?
+    | tip =>  GSet.node<>(a, l, r);
+    | bin => 
+      let size_ll = GSet.size<>(l.left)
+      let size_lr = GSet.size<>(l.right)
+      // size_lr < size_lln means we should perform a single right rotation
+      if Nat.ltn(size_lr, size_ll) then 
+        let new_left  = l.left
+        let new_right = GSet.node<>(a, l.right, r)
+        GSet.node<>(l.val, new_left, new_right)
+      // size_lr > size_ll means we should perform a double right rotation
+      else 
+        // we need to branch on the right subtree of l in order to 
+        // extract its components and move them to the right
+        case l.right:
+        // impossible case 
+        | tip => GSet.node<>(a, l, r); 
+        | bin => 
+          let new_val   = l.right.val 
+          let new_left  = GSet.node<>(l.val, l.left, l.right.left)
+          let new_right = GSet.node<>(a, l.right.right, r)
+          GSet.node<>(new_val, new_left, new_right)
+        ;
+    ;
+  else // neither subtrees are too heavy, no balancing is needed 
+    GSet.node<>(a, l, r)
+    
+
+
+
+

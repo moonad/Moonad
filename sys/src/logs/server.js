@@ -29,9 +29,8 @@ for (var file of files) {
     var room_posts = [];
     for (var i = 0; i < file_data.length; i += 64) {
       var head = Buffer.from([lib.SHOW]);
-      var room = Buffer.from(lib.hex_to_bytes(room_name));
       var body = file_data.slice(i, i + 64);
-      room_posts.push(new Uint8Array(Buffer.concat([head, room, body])));
+      room_posts.push(new Uint8Array(Buffer.concat([head, body])));
     }
     console.log("Loaded "+room_posts.length+" posts from room "+room_name+".");
     RoomPosts[room_name] = room_posts;
@@ -90,7 +89,7 @@ function save_post(post_room, post_user, post_data) {
   var post_room = lib.check_hex(48, post_room);
   var post_time = lib.u48_to_hex(Date.now());
   var post_user = lib.check_hex(160, post_user);
-  var post_data = lib.check_hex(304, post_data);
+  var post_data = lib.check_hex(256, post_data);
   var post_buff = lib.hexs_to_bytes([
     lib.u8_to_hex(lib.SHOW),
     post_room,
@@ -104,9 +103,9 @@ function save_post(post_room, post_user, post_data) {
 
   log_msg += "Saving post!\n";
   log_msg += "- post_room: " + post_room + "\n";
-  log_msg += "- post_user:" + post_user + "\n";
-  log_msg += "- post_data:" + post_data + "\n";
-  log_msg += "- post_file:" + post_room+".room" + "\n";
+  log_msg += "- post_user: " + post_user + "\n";
+  log_msg += "- post_data: " + post_data + "\n";
+  log_msg += "- post_file: " + post_room+".room" + "\n";
 
   // Creates reconnection array for this room
   if (!RoomPosts[post_room]) {
@@ -117,7 +116,6 @@ function save_post(post_room, post_user, post_data) {
   RoomPosts[post_room].push(post_buff);
 
   // Broadcasts
-  
   if (Watchlist[post_room]) {
     log_msg += "- broadcasting to " + Watchlist[post_room].length + " watcher(s).\n";
     for (var ws of Watchlist[post_room]) {
@@ -131,7 +129,7 @@ function save_post(post_room, post_user, post_data) {
   }
 
   // Adds post to file
-  fs.appendFileSync(post_file, Buffer.from(post_buff.slice(7)));
+  fs.appendFileSync(post_file, Buffer.from(post_buff.slice(1)));
 
   // Log messages
   console.log(log_msg);
@@ -165,8 +163,8 @@ wss.on("connection", function connection(ws) {
       case lib.POST:
         //console.log("got post msge...", msge);
         var post_room = lib.bytes_to_hex(msge.slice(1, 7));
-        var post_data = lib.bytes_to_hex(msge.slice(7, 45));
-        var post_sign = lib.bytes_to_hex(msge.slice(45, 110));
+        var post_data = lib.bytes_to_hex(msge.slice(7, 39));
+        var post_sign = lib.bytes_to_hex(msge.slice(39, 104));
         var post_hash = sig.keccak(lib.hexs_to_bytes([post_room, post_data]));
         var post_user = sig.signerAddress(post_hash, post_sign);
         save_post(post_room, post_user, post_data);

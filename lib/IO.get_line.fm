@@ -1,0 +1,3 @@
+IO.get_line: IO(String)
+  use line = IO.ask<String>("get_line", "")
+  IO.end<String>(line)

@@ -1,0 +1,3 @@
+Queue.to_list<A: Type>(q: Queue(A)): List(A)
+  case q:
+  | List.concat<A>(q.front, List.reverse<A>(q.rear));

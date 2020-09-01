@@ -1,0 +1,5 @@
+Pos32.to_string(pos: Pos32): String
+  let x = U32.to_string(Pos32.get_x(pos))
+  let y = U32.to_string(Pos32.get_y(pos))
+  let z = U32.to_string(Pos32.get_z(pos))
+  String.flatten(["[",x,",",y,",",z,"]"])

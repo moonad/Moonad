@@ -1,0 +1,5 @@
+// May get the head of a list
+List.head_with_default<A: Type>(default: A, xs: List(A)): A
+  case xs:
+  | default;
+  | xs.head;

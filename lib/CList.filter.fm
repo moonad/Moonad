@@ -1,0 +1,7 @@
+CList.filter<A: Type>(p: A -> Bool, cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    let list     = CList.to_list<>(cl)
+    let filtered = List.filter<>(p, list) 
+    CList.from_list<>(filtered);
