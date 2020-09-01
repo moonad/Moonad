@@ -137,26 +137,29 @@ Fm.HCore.to_low(term: Fm.HCore): Fm.Core
   Fm.HCore.to_low.go(term, Fm.NameSet.new, List.nil<>)
 
 // Reduces a high order term to weak head normal form
-Fm.HCore.reduce(term: Fm.HCore): Fm.HCore
+Fm.HCore.reduce(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
   case term:
-  | ref => Fm.HCore.ref(term.name);
+  | ref => case Fm.Map.get<>(term.name, defs) as got:
+    | Fm.HCore.ref(term.name);
+    | get term type = got.value
+      term;;
   | var => Fm.HCore.var(term.flip, term.indx);
   | typ => Fm.HCore.typ;
   | all => Fm.HCore.all(term.name, term.type, term.body);
   | lam => Fm.HCore.lam(term.name, term.body);
   | app =>
-    let func = Fm.HCore.reduce(term.func)
+    let func = Fm.HCore.reduce(term.func, defs)
     case func:
     | ref => term;
     | var => term;
     | typ => term;
     | all => term;
-    | lam => Fm.HCore.reduce(func.body(term.argm));
+    | lam => Fm.HCore.reduce(func.body(term.argm), defs);
     | app => term;;
 
 // Normalizes a high order term
-Fm.HCore.normalize(term: Fm.HCore): Fm.HCore
-  case Fm.HCore.reduce(term) as term:
+Fm.HCore.normalize(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
+  case Fm.HCore.reduce(term, defs) as term:
   | ref =>
     Fm.HCore.ref(term.name);
   | var =>
@@ -164,15 +167,15 @@ Fm.HCore.normalize(term: Fm.HCore): Fm.HCore
   | typ =>
     Fm.HCore.typ;
   | all =>
-    def type = Fm.HCore.normalize(term.type)
-    def body = (x) Fm.HCore.normalize(term.body(x))
+    def type = Fm.HCore.normalize(term.type, defs)
+    def body = (x) Fm.HCore.normalize(term.body(x), defs)
     Fm.HCore.all(term.name, type, body);
   | lam =>
-    def body = (x) Fm.HCore.normalize(term.body(x))
+    def body = (x) Fm.HCore.normalize(term.body(x), defs)
     Fm.HCore.lam(term.name, body);
   | app =>
-    def func = Fm.HCore.normalize(term.func)
-    def argm = Fm.HCore.normalize(term.argm)
+    def func = Fm.HCore.normalize(term.func, defs)
+    def argm = Fm.HCore.normalize(term.argm, defs)
     Fm.HCore.app(func, argm);
 
 // Helper function
@@ -207,9 +210,9 @@ Fm.HCore.serialize(term: Fm.HCore): Bits
   Fm.HCore.serialize.go(term, 0, Bits.nil)
 
 // Determines if two terms are equal
-Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
-  let a1 = Fm.HCore.reduce(a)
-  let b1 = Fm.HCore.reduce(b)
+Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, vars: Nat, seen: Set): Bool
+  let a1 = Fm.HCore.reduce(a, defs)
+  let b1 = Fm.HCore.reduce(b, defs)
   let ah = Fm.HCore.serialize(a1)
   let bh = Fm.HCore.serialize(b1)
   let id = Bits.concat(ah, bh)
@@ -233,8 +236,8 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
       | all =>
         let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
         let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
-        let eq_type = Fm.HCore.equal(a1.type, b1.type, vars, seen)
-        let eq_body = Fm.HCore.equal(a1_body, b1_body, Nat.succ(vars), seen)
+        let eq_type = Fm.HCore.equal(a1.type, b1.type, defs, vars, seen)
+        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(vars), seen)
         Bool.and(eq_type, eq_body);
       | lam => Bool.false;
       | app => Bool.false;;
@@ -247,7 +250,7 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
       | lam =>
         let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
         let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
-        let eq_body = Fm.HCore.equal(a1_body, b1_body, Nat.succ(vars), seen)
+        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(vars), seen)
         eq_body;
       | app => Bool.false;;
     | app =>
@@ -258,8 +261,8 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
       | all => Bool.false;
       | lam => Bool.false;
       | app =>
-        let eq_func = Fm.HCore.equal(a1.func, b1.func, vars, seen)
-        let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, vars, seen)
+        let eq_func = Fm.HCore.equal(a1.func, b1.func, defs, vars, seen)
+        let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, defs, vars, seen)
         Bool.and(eq_func, eq_argm);;
 
 // A context is a list of names and types
@@ -271,14 +274,16 @@ Fm.HCore.view(x: Fm.HCore, ctx: Fm.Context): String
   Fm.Core.show(Fm.HCore.to_low.go(x, Fm.NameSet.new, List.map<,>((x) Pair.fst<,>(x), ctx)))
 
 // Infers the type of a core term
-Fm.HCore.infer(term: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.Context): Maybe(Fm.HCore)
-  use skp = Debug.log<>(String.concat("Infer: ",Fm.HCore.view(term,ctx)))
+Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
+  use skp = Debug.log<>(String.concat("- infer: ",Fm.HCore.view(term,ctx)))
   case term:
-  | ref => Maybe.none<>;
-  | var => Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx));
+  | ref =>
+    Maybe.none<>;
+  | var =>
+    Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx));
   | typ => Maybe.some<>(Fm.HCore.typ);
   | all =>
-    let body_var = Fm.HCore.ref(term.name)
+    let body_var = Fm.HCore.var(Bool.false, List.length<>(ctx))
     let body_ctx = List.cons<>({term.name,term.type}, ctx)
     do Maybe {
       Fm.HCore.check(term.type, Fm.HCore.typ, defs, ctx);
@@ -290,7 +295,7 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.Context): Maybe(F
     case Fm.HCore.infer(term.func, defs, ctx) as func_typ:
     | none => Maybe.none<>;
     | some =>
-      let func_typ = Fm.HCore.reduce(func_typ.value)
+      let func_typ = Fm.HCore.reduce(func_typ.value, defs)
       case func_typ:
       | ref => Maybe.none<>;
       | var => Maybe.none<>;
@@ -305,9 +310,9 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.Context): Maybe(F
   ;
 
 // Checks the type of a core term
-Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.Context): Maybe(Unit)
+Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Unit)
   use skp = Debug.log<>(String.flatten([
-    "Check: ",
+    "- check: ",
     Fm.HCore.view(term,ctx),
     " :: ",
     Fm.HCore.view(type,ctx),
@@ -318,7 +323,7 @@ Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.C
   | typ => Fm.HCore.check.test(term, type, defs, ctx);
   | all => Fm.HCore.check.test(term, type, defs, ctx);
   | lam =>
-    let typv = Fm.HCore.reduce(type)
+    let typv = Fm.HCore.reduce(type, defs)
     case typv:
     | ref => Maybe.none<>;
     | var => Maybe.none<>;
@@ -333,18 +338,18 @@ Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.C
   | app => Fm.HCore.check.test(term, type, defs, ctx);
 
 // Infers the type of a core term and checks if it is equal to type
-Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.Map(Fm.HCore), ctx: Fm.Context): Maybe(Unit)
+Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Unit)
   let infr = Fm.HCore.infer(term, defs, ctx);
   case infr:
   | none => Maybe.none<>;
   | some =>
     use skp = Debug.log<>(String.flatten([
-      "Match: "
+      "- equal: "
       Fm.HCore.view(infr.value, ctx),
       " == ",
       Fm.HCore.view(type, ctx)
     ]))
-    let eqls = Fm.HCore.equal(type, infr.value, List.length<>(ctx), Set.new)
+    let eqls = Fm.HCore.equal(type, infr.value, defs, List.length<>(ctx), Set.new)
     if eqls then
       Maybe.some<>(Unit.new)
     else
@@ -630,23 +635,33 @@ Fm.Core.Defs.show(defs: Fm.Core.Defs): String
       "\n\n",
     ])
 
-Fm: _
-  case do Maybe {
-    var defs = Fm.Core.Defs.read("
-      Nat: Type
-        @(A: type) @(z: A) @(s: @(x: A) A) A
+Fm.Defs.to_high(defs: Fm.Core.Defs): Fm.HCore.Defs
+  def fn(def)
+    open def:
+    Fm.HCore.Def.new(Fm.Core.to_high(def.term), Fm.Core.to_high(def.type))
+  Map.map<Fm.Core.Def, Fm.HCore.Def>(fn, defs)
 
-      zero: Nat
-        #A #z #s #z
-    ");
-    return Fm.Core.Defs.show(defs);
-    //let term = Fm.Core.to_high(term);
-    //let type = Fm.Core.to_high(type);
-    //let chck = Fm.HCore.check(term, type, Fm.Map.new<>, []);
-    //let term = Fm.HCore.normalize(term);
-    //let term = Fm.HCore.to_low(term);
-    //chck;
-    //Maybe.some<>(Fm.Core.show(type));
-  } as got:
-  | IO.print("Error.");
-  | IO.print(got.value);
+Fm.Defs.errors(defs: Fm.Core.Defs): Nat
+  let defs = Fm.Defs.to_high(defs)
+  let errs = 0
+  for name_def in Map.to_list<>(defs) with errs:
+    get name def = name_def
+    use skp = Debug.log<>(String.flatten(["Checking ",Fm.Name.show(Fm.Name.from_bits(name)),"..."]))
+    let checked = open def: Fm.HCore.check(def.term, def.type, defs, List.nil<>)
+    Nat.add(errs, case checked: | 1; | 0;)
+
+Fm: _
+  let defs = Maybe.extract<>(Fm.Core.Defs.read("
+    Nat: Type
+      @(A: Type) @(z: A) @(s: @(x: A) A) A
+
+    zero: Nat
+      #A #z #s z
+
+    succ: @(n: Nat) Nat
+      #n #A #z #s (s (((n A) z) s))
+  "), Fm.Map.new<>);
+  IO.print(String.flatten([
+    Nat.to_string_base(10, Fm.Defs.errors(defs)),
+    " errors.",
+  ]))
