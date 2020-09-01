@@ -5,9 +5,6 @@
 //    dimensions. Will probably just work, but may have some bugs
 // 4. Add a (idx: U32) argument to the Mons.Map.get, Mons.Map.set, Mons.Map.del. 
 //    Otherwise it would be confusing because we're now using Z for dimensions. 
-// 5. Debug the multiple chars in tile command problem
-// 6. Mons.Game.map_push, Mons.Game.map_set, Mons.Game.map_get, e todas as
-//    outras funções da map pra atuarem direto no Game, pra ficar mais clean
 // 7. Make the attack key more robust (right now it just gets the object below)
 // 8. Make the attack system (instead of just causing damage when the user
 //    presses U, we need each Kind to have a list of 4 attacks, and then get the
@@ -829,16 +826,29 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
+// Update a Mons.Game by pushing a new obj to a pos
+Mons.Game.map_push(pos: Pos32, old_pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
+  open game:
+  let map = game.map
+  let map = Mons.Map.del(old_pos, map)
+  let map = Mons.Map.push(pos, obj, map)
+  Mons.Game.set_map(map, game)
+
+// Update a Mons.Game by setting a new obj to a pos
+Mons.Game.map_set(pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
+  open game:
+  let map = Mons.Map.set(pos, obj, game.map)
+  Mons.Game.set_map(map, game)
+
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
-  open game:
   let pos = Mons.Game.get_user_pos(usr, game)
   case pos:
   // New player
   | let pos = Pos32.new(2048u, 2048u, 0u)
+    let old_pos = Pos32.new(0u, 0u, 0u)
     let obj = Mons.Object.new_of_kind(Mons.HERO)
-    let map = Mons.Map.push(pos, obj, game.map)
-    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.map_push(pos, old_pos, obj, game)
     let game = Mons.Game.set_user_pos(usr, pos, game)
     game;
   // Existing player
@@ -1096,15 +1106,11 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   let is_blocked = case Mons.Kind.attr(trg.kin) as kind: | kind.blocks;
   if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
     let obj = Mons.Object.set_ani(obj, 16u)
-    let map = Mons.Map.del(old_pos, map)
-    let map = Mons.Map.push(new_pos, obj, map)
-    //let map = Mons.Map.set(pos, obj, map)
-    let game = Mons.Game.set_map(map, game)
+    let game = Mons.Game.map_push(new_pos, old_pos, obj, game)
     let game = Mons.Game.set_user_pos(user, new_pos, game)
     game
   else
-    let map = Mons.Map.set(pos, obj, map)
-    Mons.Game.set_map(map, game)
+    Mons.Game.map_set(pos, obj, game)
 
 // For each tick, updates the game state
 // TODO: tick objects other than hero
