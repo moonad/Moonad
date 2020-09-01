@@ -29,11 +29,11 @@ T Fm.HCore
 | Fm.HCore.app(func: Fm.HCore, argm: Fm.HCore);
 
 // A map from Names to Formality definitions
-Fm.Defs: Type
+Fm.Core.Defs: Type
   Map(Fm.Core)
 
 // A map from Names to Formality definitions
-Fm.HDefs: Type
+Fm.HCore.Defs: Type
   Map(Fm.HCore)
 
 // A Set of names
@@ -41,27 +41,27 @@ Fm.NameSet: Type
   Set
 
 // An empty map
-Fm.Defs.new: Fm.Defs
+Fm.Core.Defs.new: Fm.Core.Defs
   Map.new<Fm.Core>
 
 // Gets a core term from a map by its name
-Fm.Defs.get(name: Fm.Name, defs: Fm.Defs): Maybe(Fm.Core)
+Fm.Core.Defs.get(name: Fm.Name, defs: Fm.Core.Defs): Maybe(Fm.Core)
   Map.get<Fm.Core>(Fm.Name.to_bits(name), defs)
 
 // Adds a name, core term pair to a map
-Fm.Defs.set(name: Fm.Name, term: Fm.Core, defs: Fm.Defs): Map(Fm.Core)
+Fm.Core.Defs.set(name: Fm.Name, term: Fm.Core, defs: Fm.Core.Defs): Map(Fm.Core)
   Map.set<Fm.Core>(Fm.Name.to_bits(name), term, defs)
   
 // An empty map
-Fm.HDefs.new: Fm.HDefs
+Fm.HCore.Defs.new: Fm.HCore.Defs
   Map.new<Fm.HCore>
 
 // Gets a core term from a map by its name
-Fm.HDefs.get(name: Fm.Name, defs: Fm.HDefs): Maybe(Fm.HCore)
+Fm.HCore.Defs.get(name: Fm.Name, defs: Fm.HCore.Defs): Maybe(Fm.HCore)
   Map.get<Fm.HCore>(Fm.Name.to_bits(name), defs)
 
 // Adds a name, core term pair to a map
-Fm.HDefs.set(name: Fm.Name, term: Fm.HCore, defs: Fm.HDefs): Map(Fm.HCore)
+Fm.HCore.Defs.set(name: Fm.Name, term: Fm.HCore, defs: Fm.HCore.Defs): Map(Fm.HCore)
   Map.set<Fm.HCore>(Fm.Name.to_bits(name), term, defs)
 
 // An empty NameSet
@@ -88,18 +88,18 @@ Fm.NameSet.fresh(name: Fm.Name, nset: Fm.NameSet): Pair(Fm.Name, Fm.NameSet)
     {name, Set.set(key, nset)}
 
 // Coverts a term to high order
-Fm.Core.to_high.go(term: Fm.Core, refs: Fm.HDefs): Fm.HCore
+Fm.Core.to_high.go(term: Fm.Core, refs: Fm.HCore.Defs): Fm.HCore
   case term:
-  | ref => case Fm.HDefs.get(term.name, refs) as got:
+  | ref => case Fm.HCore.Defs.get(term.name, refs) as got:
     | Fm.HCore.ref(term.name);
     | got.value;;
   | typ => Fm.HCore.typ;
   | all =>
     def type = Fm.Core.to_high.go(term.type, refs);
-    def body = (x) Fm.Core.to_high.go(term.body, Fm.HDefs.set(term.name,x,refs));
+    def body = (x) Fm.Core.to_high.go(term.body, Fm.HCore.Defs.set(term.name,x,refs));
     Fm.HCore.all(term.name, type, body);
   | lam =>
-    def body = (x) Fm.Core.to_high.go(term.body, Fm.HDefs.set(term.name,x,refs));
+    def body = (x) Fm.Core.to_high.go(term.body, Fm.HCore.Defs.set(term.name,x,refs));
     Fm.HCore.lam(term.name, body);
   | app =>
     def func = Fm.Core.to_high.go(term.func, refs);
@@ -108,7 +108,7 @@ Fm.Core.to_high.go(term: Fm.Core, refs: Fm.HDefs): Fm.HCore
 
 // Converts a term to high order
 Fm.Core.to_high(term: Fm.Core): Fm.HCore
-  Fm.Core.to_high.go(term, Fm.HDefs.new)
+  Fm.Core.to_high.go(term, Fm.HCore.Defs.new)
 
 // Coverts a term to high order
 Fm.HCore.to_low.go(term: Fm.HCore, nset: Fm.NameSet, names: List(Fm.Name)): Fm.Core
@@ -271,7 +271,7 @@ Fm.HCore.view(x: Fm.HCore, ctx: Fm.Context): String
   Fm.Core.show(Fm.HCore.to_low.go(x, Fm.NameSet.new, List.map<,>((x) Pair.fst<,>(x), ctx)))
 
 // Infers the type of a core term
-Fm.HCore.infer(term: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
+Fm.HCore.infer(term: Fm.HCore, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
   use skp = Debug.log<>(String.concat("Infer: ",Fm.HCore.view(term,ctx)))
   case term:
   | ref => Maybe.none<>;
@@ -305,7 +305,7 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
   ;
 
 // Checks the type of a core term
-Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Unit)
+Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Unit)
   use skp = Debug.log<>(String.flatten([
     "Check: ",
     Fm.HCore.view(term,ctx),
@@ -333,7 +333,7 @@ Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): 
   | app => Fm.HCore.check.test(term, type, defs, ctx);
 
 // Infers the type of a core term and checks if it is equal to type
-Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Unit)
+Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Unit)
   let infr = Fm.HCore.infer(term, defs, ctx);
   case infr:
   | none => Maybe.none<>;
@@ -577,6 +577,21 @@ Fm.Parser.Core: Fm.Parser(Fm.Core)
     Fm.Parser.Core.reference,
   ])
 
+// Parses a definition
+Fm.Parser.Core.def: Fm.Parser(Pair(Fm.Name, Pair(Fm.Core, Fm.Core)))
+  do {
+    var name = Fm.Parser.Core.name;
+    Fm.Parser.text(":");
+    var type = Fm.Parser.Core;
+    var term = Fm.Parser.Core;
+    return {name,{term,type}};
+  }
+
+// Parses many definitions TODO
+//Fm.Parser.Core.defs: Fm.Parser(Fm.Defs)
+  //(code)
+  //case Fm.Parser.Core.def
+
 // Reads a term from string
 Fm.Core.read(code: String): Maybe(Fm.Core)
   case Fm.Parser.Core(code) as parsed:
@@ -591,14 +606,15 @@ Fm: _
       @(f: @(x: A) B)
       @(g: @(x: B) A)
       @(x: A)
+      @(y: B)
       A
     ");
     var term = Fm.Core.read("
-      #A #B #f #g #x (g (f (g (f x))))
+      #A #B #f #g #x #y (g (f (g (f x))))
     ");
     let term = Fm.Core.to_high(term);
     let type = Fm.Core.to_high(type);
-    let chck = Fm.HCore.check(term, type, Fm.Defs.new, []);
+    let chck = Fm.HCore.check(term, type, Fm.Core.Defs.new, []);
     let term = Fm.HCore.normalize(term);
     let term = Fm.HCore.to_low(term);
     chck;
