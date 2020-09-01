@@ -579,7 +579,7 @@ Fm.Parser.Core: Fm.Parser(Fm.Core)
 
 // Parses a definition
 Fm.Parser.Core.def: Fm.Parser(Pair(Fm.Name, Pair(Fm.Core, Fm.Core)))
-  do {
+  do Fm.Parser {
     var name = Fm.Parser.Core.name;
     Fm.Parser.text(":");
     var type = Fm.Parser.Core;
