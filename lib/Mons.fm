@@ -83,7 +83,8 @@ T Mons.Attr
   atk: U32,
   name: String,
   spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List(Image3D),
-  battle_spr: (is_up: Bool) -> Image3D
+  battle_spr: (is_up: Bool) -> Image3D,
+  portal: Bool
 );
 // TODO add:
 // def: U32,
@@ -145,7 +146,7 @@ T Mons.Kind
 | Mons.WATER1_M;
 | Mons.PATH_BLOCKER;
 | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
-| Mons.DIM(z_index: U32);
+| Mons.DIM(up: Bool);
 
 
 Mons.Dim.underground: U32
@@ -153,7 +154,7 @@ Mons.Dim.underground: U32
 Mons.Dim.main: U32
   0u
 Mons.Dim.construction: U32
-  129u
+  1u
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -163,17 +164,17 @@ Mons.vox_mid: Pos32
 Mons.scr_mid: Pos32
   Pos32.new(120u, 80u, Mons.Dim.main)
 
-Mons.Game.main_map_screen(game: Mons.Game): List(String)
-  case Mons.Game.get_map_screen(game, Mons.Dim.main) as screen:
-  | Mons.map_source.default;
-  | screen.value;
+// Mons.Game.main_map_screen: List(String)
+//   Mons.Game.get_map_screen(game, Mons.Dim.main)
 
-Mons.Game.get_map_screen(game: Mons.Game, dim: U32): Maybe(List(String))
+// Mons.Game.houses_map_screen: List(String)
+//   Mons.Game.get_map_screen(game, Mons.Dim.construction)
+
+Mons.Game.get_map_screen(map_source: List(List(String)), dim: U32): List(String)
   let dim = U32.to_nat(dim)
-  open game:
-  case List.at<>(dim, Mons.map_source): 
-  | Maybe.none<>;
-  | Maybe.some<>(Mons.map_source.default);
+  case List.at<>(dim, map_source) as map: 
+  | Mons.map_source.default;
+  | map.value;
 
 // TODO
 // Mons.Game.set_map(game: Mons.Game, dim: U32, map: Mons.Map): Mons.Map
@@ -611,15 +612,16 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else if String.eql(code, "f6") then
     [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_down)),
       Mons.Object.new_of_kind(Mons.GRASS)]
-  else if String.eql(code, "mm") then
-    [ Mons.Object.new_of_kind(Mons.DIM(Mons.Dim.construction))]
+  else if String.eql(code, "mm") then // will rise a lvl
+    [ Mons.Object.new_of_kind(Mons.DIM(Bool.true))]
   else
     []
 
 // Converts a string map source to an actual map
-Mons.Map.build(code: List(String), dim: U32): Mons.Map
-  let size = List.length.u32<>(code) // NOTE: assumes width == height
-  List.ifor.u32<>(code)<>
+Mons.Map.build(code: List(List(String)), dim: U32): Mons.Map
+  let screen = Mons.Game.get_map_screen(code, dim)
+  let size = List.length.u32<>(screen) // NOTE: assumes width == height
+  List.ifor.u32<>(screen)<>
   | Mons.Map.new;
   | (j, row, map)
     for i : U32 = 0u .. size with map:
@@ -682,21 +684,31 @@ Mons.Attr.new_battleable(
   Mons.Attr.new(
     Bool.false, Bool.true, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
-    battle_spr)
+    battle_spr,
+    Bool.false)
 
 // Mons.Attr with "block" equals to Bool.true
 Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.true, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
-    Mons.Kind.set_default_battle_spr)
+    Mons.Kind.set_default_battle_spr,
+    Bool.false)
 
 // Mons.Attr with "block" and "batlles" equals to Bool.false
 Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.false, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
-    Mons.Kind.set_default_battle_spr)
+    Mons.Kind.set_default_battle_spr,
+    Bool.false)
+
+Mons.Attr.new_portal(spr: List(Image3D)): Mons.Attr
+  Mons.Attr.new(
+    Bool.false, Bool.false, 0u, 0u, "",
+    Mons.Kind.set_static_sprites(spr),
+    Mons.Kind.set_default_battle_spr,
+    Bool.true)
 
 // blocks: Bool,
 // battles: Bool,
@@ -720,7 +732,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-      Mons.Kind.set_default_battle_spr
+      Mons.Kind.set_default_battle_spr, 
+      Bool.false
     );
   | Mons.GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
   | Mons.GRASS_PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
@@ -849,7 +862,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
       | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
     else Mons.Attr.new_blockable([]);
-  | Mons.DIM => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
+  | Mons.DIM => Mons.Attr.new_portal([Mons.Assets.tile_chest_0]);
     
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
@@ -967,6 +980,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let t_y = U32.add(U32.sub(c_y, 6u), y)
         let t_z = c_z
         let pos = Pos32.new(t_x, t_y, t_z)
+        // let new = Mons.Game.get_map_screen(game, dim)
         let got = Map.get<>(U32.to_bits(pos), game.map)
         let objs
           = case got:
@@ -1047,46 +1061,57 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,Mons.Dim.main), scr)
       scr
     // When hero isn't battling, draw map...
-    else 
-      let sprs = Mons.game_sprites(game)
-      // For each sprite around the hero...
-      for spr in sprs with scr:
-        // For each pixel of the sprite...
-        open spr:
-        let len = Image3D.get_length(spr.img)
-        for i : U32 = 0u .. len with scr:
-          let s_w = Pos32.get_x(Mons.scr_mid)
-          let s_h = Pos32.get_y(Mons.scr_mid)
-          // The origin global position (centered on hero)
-          let h_x = Pos32.get_x(hero_pos.value)
-          let h_y = Pos32.get_y(hero_pos.value)
-          //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
-          //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
-          get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-          // Gets the spr global position
-          let s_x = spr.x
-          let s_y = spr.y
-          let s_z = spr.z
-          // Gets the pixel global position (its cpos on img is x=128, y=128)
-          let xyz = Image3D.get_pos(i, spr.img)
-          let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
-          let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
-          let v_z = Pos32.get_z(xyz)
-          // Temporary: if pixel is out of screen, make it invisible
-          let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-          let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-          let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-          let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-          //let ok  = List.and([ok0, ok1, ok2, ok3])
-          let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-          // Computes the pixel position on the final canvas
-          let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
-          let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-          let c_z = Bool.if<>(ok, v_z, Mons.Dim.main)
-          // Pushes the pixel to the scr
-          let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
-          let col = Image3D.get_col(i, spr.img) // final pixel col
-          Image3D.push(pos, col, scr); // pushes to scr
+    else
+      let is_portal = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.portal;
+      let game_map_source = 
+        if  Bool.and(is_standing, is_portal) then 
+          Mons.Map.build(Mons.map_source, Mons.Dim.construction)
+        else
+         Mons.Map.build(Mons.map_source, Mons.Dim.main)
+      // Update the game with a new game source, if needed
+      let game_map = Mons.Game.set_map(game_map_source, game)
+      Mons.Map.build_sprites(game_map, scr, hero_pos.value, hero_obj);
+
+Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
+  let sprs = Mons.game_sprites(game)
+  for spr in sprs with scr:
+  // For each pixel of the sprite...
+  open spr:
+  let len = Image3D.get_length(spr.img)
+  for i : U32 = 0u .. len with scr:
+    let s_w = Pos32.get_x(Mons.scr_mid)
+    let s_h = Pos32.get_y(Mons.scr_mid)
+    // The origin global position (centered on hero)
+    let h_x = Pos32.get_x(hero_pos)
+    let h_y = Pos32.get_y(hero_pos)
+    //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
+    //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
+    get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
+    // Gets the spr global position
+    let s_x = spr.x
+    let s_y = spr.y
+    let s_z = spr.z
+    // Gets the pixel global position (its cpos on img is x=128, y=128)
+    let xyz = Image3D.get_pos(i, spr.img)
+    let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+    let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
+    let v_z = Pos32.get_z(xyz)
+    // Temporary: if pixel is out of screen, make it invisible
+    let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+    let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+    let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+    let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+    //let ok  = List.and([ok0, ok1, ok2, ok3])
+    let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+    // Computes the pixel position on the final canvas
+    let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+    let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
+    let c_z = Bool.if<>(ok, v_z, Mons.Dim.main)
+    // Pushes the pixel to the scr
+    let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+    let col = Image3D.get_col(i, spr.img) // final pixel col
+    Image3D.push(pos, col, scr) // pushes to scr
+
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
@@ -1214,7 +1239,7 @@ Mons.start(online: Bool): App(Mons.Game)
   // Initial state
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
-    let game_map = Mons.Map.build(Mons.map_source.default, Mons.Dim.main)
+    let game_map = Mons.Map.build(Mons.map_source, Mons.Dim.main)
     Mons.Game.new(game_usr, game_pos, game_map);
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
