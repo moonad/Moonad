@@ -22,7 +22,7 @@ T Fm.Core
 // A High Order Fm.Core term
 T Fm.HCore
 | Fm.HCore.ref(name: Fm.Name);
-| Fm.HCore.bru(indx: Nat);
+| Fm.HCore.var(flip: Bool, indx: Nat);
 | Fm.HCore.typ;
 | Fm.HCore.all(name: Fm.Name, type: Fm.HCore, body: Fm.HCore -> Fm.HCore);
 | Fm.HCore.lam(name: Fm.Name, body: Fm.HCore -> Fm.HCore);
@@ -88,51 +88,59 @@ Fm.NameSet.fresh(name: Fm.Name, nset: Fm.NameSet): Pair(Fm.Name, Fm.NameSet)
     {name, Set.set(key, nset)}
 
 // Coverts a term to high order
-Fm.Core.to_high(term: Fm.Core, refs: Fm.HDefs): Fm.HCore
+Fm.Core.to_high.go(term: Fm.Core, refs: Fm.HDefs): Fm.HCore
   case term:
   | ref => case Fm.HDefs.get(term.name, refs) as got:
     | Fm.HCore.ref(term.name);
     | got.value;;
   | typ => Fm.HCore.typ;
   | all =>
-    def type = Fm.Core.to_high(term.type, refs);
-    def body = (x) Fm.Core.to_high(term.body, Fm.HDefs.set(term.name,x,refs));
+    def type = Fm.Core.to_high.go(term.type, refs);
+    def body = (x) Fm.Core.to_high.go(term.body, Fm.HDefs.set(term.name,x,refs));
     Fm.HCore.all(term.name, type, body);
   | lam =>
-    def body = (x) Fm.Core.to_high(term.body, Fm.HDefs.set(term.name,x,refs));
+    def body = (x) Fm.Core.to_high.go(term.body, Fm.HDefs.set(term.name,x,refs));
     Fm.HCore.lam(term.name, body);
   | app =>
-    def func = Fm.Core.to_high(term.func, refs);
-    def argm = Fm.Core.to_high(term.argm, refs);
+    def func = Fm.Core.to_high.go(term.func, refs);
+    def argm = Fm.Core.to_high.go(term.argm, refs);
     Fm.HCore.app(func, argm);
 
+// Converts a term to high order
+Fm.Core.to_high(term: Fm.Core): Fm.HCore
+  Fm.Core.to_high.go(term, Fm.HDefs.new)
+
 // Coverts a term to high order
-Fm.HCore.to_low(term: Fm.HCore, nset: Fm.NameSet, names: List(Fm.Name)): Fm.Core
+Fm.HCore.to_low.go(term: Fm.HCore, nset: Fm.NameSet, names: List(Fm.Name)): Fm.Core
   case term:
   | ref => Fm.Core.ref(term.name);
-  | bru => case List.at<>(term.indx, names) as got:
-    | none => Fm.Core.ref(Fm.Name.read("unbound"));
+  | var => case List.at_last<>(term.indx, names) as got:
+    | none => Fm.Core.ref(Fm.Name.read("_"));
     | some => Fm.Core.ref(got.value);;
   | typ => Fm.Core.typ;
   | all =>
-    def type = Fm.HCore.to_low(term.type, nset, names)
+    def type = Fm.HCore.to_low.go(term.type, nset, names)
     get name nset = Fm.NameSet.fresh(term.name, nset)
-    def body = Fm.HCore.to_low(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
+    def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
     Fm.Core.all(name, type, body);
   | lam =>
     get name nset = Fm.NameSet.fresh(term.name, nset)
-    def body = Fm.HCore.to_low(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names));
+    def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names));
     Fm.Core.lam(name, body);
   | app =>
-    def func = Fm.HCore.to_low(term.func, nset, names);
-    def argm = Fm.HCore.to_low(term.argm, nset, names);
+    def func = Fm.HCore.to_low.go(term.func, nset, names);
+    def argm = Fm.HCore.to_low.go(term.argm, nset, names);
     Fm.Core.app(func, argm);
+
+// Converts a term to low order
+Fm.HCore.to_low(term: Fm.HCore): Fm.Core
+  Fm.HCore.to_low.go(term, Fm.NameSet.new, List.nil<>)
 
 // Reduces a high order term to weak head normal form
 Fm.HCore.reduce(term: Fm.HCore): Fm.HCore
   case term:
   | ref => Fm.HCore.ref(term.name);
-  | bru => Fm.HCore.bru(term.indx);
+  | var => Fm.HCore.var(term.flip, term.indx);
   | typ => Fm.HCore.typ;
   | all => Fm.HCore.all(term.name, term.type, term.body);
   | lam => Fm.HCore.lam(term.name, term.body);
@@ -140,7 +148,7 @@ Fm.HCore.reduce(term: Fm.HCore): Fm.HCore
     let func = Fm.HCore.reduce(term.func)
     case func:
     | ref => term;
-    | bru => term;
+    | var => term;
     | typ => term;
     | all => term;
     | lam => Fm.HCore.reduce(func.body(term.argm));
@@ -151,8 +159,8 @@ Fm.HCore.normalize(term: Fm.HCore): Fm.HCore
   case Fm.HCore.reduce(term) as term:
   | ref =>
     Fm.HCore.ref(term.name);
-  | bru =>
-    Fm.HCore.bru(term.indx);
+  | var =>
+    Fm.HCore.var(term.flip, term.indx);
   | typ =>
     Fm.HCore.typ;
   | all =>
@@ -173,22 +181,26 @@ Fm.HCore.serialize.go(term: Fm.HCore, depth: Nat, x: Bits): Bits
   | ref =>
     let name = Bits.concat(Fm.Name.to_bits(term.name))
     Bits.0(Bits.0(Bits.0(name(x))));
-  | bru =>
-    let name = Bits.concat(Nat.to_bits(Nat.pred(Nat.sub(depth,term.indx))))
-    Bits.0(Bits.0(Bits.1(name(x))));
+  | var =>
+    if term.flip then
+      let name = Bits.concat(Nat.to_bits(Nat.pred(Nat.sub(depth,term.indx))))
+      Bits.0(Bits.0(Bits.1(name(x))))
+    else
+      let name = Bits.concat(Nat.to_bits(term.indx))
+      Bits.0(Bits.1(Bits.0(name(x))));
   | typ =>
-    Bits.0(Bits.1(Bits.0(x)));
+    Bits.0(Bits.1(Bits.1(x)));
   | all =>
     let type = Fm.HCore.serialize.go(term.type, depth)
-    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.bru(depth)), Nat.succ(depth))
-    Bits.0(Bits.1(Bits.1(type(body(x)))));
+    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(Bool.false,depth)), Nat.succ(depth))
+    Bits.1(Bits.0(Bits.0(type(body(x)))));
   | lam =>
-    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.bru(depth)), Nat.succ(depth))
-    Bits.1(Bits.0(Bits.0(body(x))));
+    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(Bool.false,depth)), Nat.succ(depth))
+    Bits.1(Bits.0(Bits.1(body(x))));
   | app =>
     let func = Fm.HCore.serialize.go(term.func, depth)
     let argm = Fm.HCore.serialize.go(term.argm, depth)
-    Bits.1(Bits.0(Bits.1(func(argm(x)))));
+    Bits.1(Bits.1(Bits.0(func(argm(x)))));
 
 // Serializes a term to a representative bitstring
 Fm.HCore.serialize(term: Fm.HCore): Bits
@@ -201,22 +213,26 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
   let ah = Fm.HCore.serialize(a1)
   let bh = Fm.HCore.serialize(b1)
   let id = Bits.concat(ah, bh)
+  //use skp = Debug.log<>(String.concat("a1:", Fm.HCore.view(a1,[])))
+  //use skp = Debug.log<>(String.concat("b1:", Fm.HCore.view(b1,[])))
+  //use skp = Debug.log<>(String.concat("ah:", Bits.to_string(ah)))
+  //use skp = Debug.log<>(String.concat("bh:", Bits.to_string(bh)))
   if Bool.or(Bits.eql(ah, bh), Set.has(id, seen)) then
     Bool.true
   else
     let seen = Set.set(id, seen)
     case a1:
     | ref => Bool.false;
-    | bru => Bool.false;
+    | var => Bool.false;
     | typ => Bool.false;
     | all =>
       case b1:
       | ref => Bool.false;
-      | bru => Bool.false;
+      | var => Bool.false;
       | typ => Bool.false;
       | all =>
-        let a1_body = a1.body(Fm.HCore.bru(vars))
-        let b1_body = b1.body(Fm.HCore.bru(vars))
+        let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
+        let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
         let eq_type = Fm.HCore.equal(a1.type, b1.type, vars, seen)
         let eq_body = Fm.HCore.equal(a1_body, b1_body, Nat.succ(vars), seen)
         Bool.and(eq_type, eq_body);
@@ -225,19 +241,19 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
     | lam =>
       case b1:
       | ref => Bool.false;
-      | bru => Bool.false;
+      | var => Bool.false;
       | typ => Bool.false;
       | all => Bool.false;
       | lam =>
-        let a1_body = a1.body(Fm.HCore.bru(vars))
-        let b1_body = b1.body(Fm.HCore.bru(vars))
+        let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
+        let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
         let eq_body = Fm.HCore.equal(a1_body, b1_body, Nat.succ(vars), seen)
         eq_body;
       | app => Bool.false;;
     | app =>
       case b1:
       | ref => Bool.false;
-      | bru => Bool.false;
+      | var => Bool.false;
       | typ => Bool.false;
       | all => Bool.false;
       | lam => Bool.false;
@@ -246,18 +262,23 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, vars: Nat, seen: Set): Bool
         let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, vars, seen)
         Bool.and(eq_func, eq_argm);;
 
-// TODO
+// A context is a list of names and types
 Fm.Context: Type
   List(Pair(Fm.Name, Fm.HCore))
   
-// TODO
+// Logs a term
+Fm.HCore.view(x: Fm.HCore, ctx: Fm.Context): String
+  Fm.Core.show(Fm.HCore.to_low.go(x, Fm.NameSet.new, List.map<,>((x) Pair.fst<,>(x), ctx)))
+
+// Infers the type of a core term
 Fm.HCore.infer(term: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
+  use skp = Debug.log<>(String.concat("Infer: ",Fm.HCore.view(term,ctx)))
   case term:
   | ref => Maybe.none<>;
-  | bru => Maybe.none<>;
+  | var => Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx));
   | typ => Maybe.some<>(Fm.HCore.typ);
   | all =>
-    let body_var = Fm.HCore.bru(List.length<>(ctx))
+    let body_var = Fm.HCore.ref(term.name)
     let body_ctx = List.cons<>({term.name,term.type}, ctx)
     do Maybe {
       Fm.HCore.check(term.type, Fm.HCore.typ, defs, ctx);
@@ -272,7 +293,7 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
       let func_typ = Fm.HCore.reduce(func_typ.value)
       case func_typ:
       | ref => Maybe.none<>;
-      | bru => Maybe.none<>;
+      | var => Maybe.none<>;
       | typ => Maybe.none<>;
       | all => do Maybe {
         Fm.HCore.check(term.argm, func_typ.type, defs, ctx);
@@ -283,9 +304,51 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
     ;
   ;
 
-// TODO
-Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
-  Fm.HCore.check(term, type, defs, ctx)
+// Checks the type of a core term
+Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Unit)
+  use skp = Debug.log<>(String.flatten([
+    "Check: ",
+    Fm.HCore.view(term,ctx),
+    " :: ",
+    Fm.HCore.view(type,ctx),
+  ]))
+  case term:
+  | ref => Fm.HCore.check.test(term, type, defs, ctx);
+  | var => Fm.HCore.check.test(term, type, defs, ctx);
+  | typ => Fm.HCore.check.test(term, type, defs, ctx);
+  | all => Fm.HCore.check.test(term, type, defs, ctx);
+  | lam =>
+    let typv = Fm.HCore.reduce(type)
+    case typv:
+    | ref => Maybe.none<>;
+    | var => Maybe.none<>;
+    | typ => Maybe.none<>;
+    | all =>
+      let body_var = Fm.HCore.var(Bool.false, List.length<>(ctx))
+      let body_typ = typv.body(body_var)
+      let body_ctx = List.cons<>({term.name,typv.type}, ctx)
+      Fm.HCore.check(term.body(body_var), body_typ, defs, body_ctx);
+    | lam => Maybe.none<>;
+    | app => Maybe.none<>;;
+  | app => Fm.HCore.check.test(term, type, defs, ctx);
+
+// Infers the type of a core term and checks if it is equal to type
+Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.Defs, ctx: Fm.Context): Maybe(Unit)
+  let infr = Fm.HCore.infer(term, defs, ctx);
+  case infr:
+  | none => Maybe.none<>;
+  | some =>
+    use skp = Debug.log<>(String.flatten([
+      "Match: "
+      Fm.HCore.view(infr.value, ctx),
+      " == ",
+      Fm.HCore.view(type, ctx)
+    ]))
+    let eqls = Fm.HCore.equal(type, infr.value, List.length<>(ctx), Set.new)
+    if eqls then
+      Maybe.some<>(Unit.new)
+    else
+      Maybe.none<>;
 
 // Converts a Char to a Letter
 Fm.Letter.read(chr: Char): Maybe(Fm.Letter)
@@ -514,18 +577,30 @@ Fm.Parser.Core: Fm.Parser(Fm.Core)
     Fm.Parser.Core.reference,
   ])
 
-//Fm: _
-  //Fm.Name.from_bits(Nat.to_bits(66))
+// Reads a term from string
+Fm.Core.read(code: String): Maybe(Fm.Core)
+  case Fm.Parser.Core(code) as parsed:
+  | Maybe.none<>;
+  | Maybe.some<>(parsed.value);
 
-//Fm: _
-  //let source = "(#f #x (f (f x)) #f #x (f (f x)))"
-  ////let source = "#f #x (f (f x))"
-  //let parsed = Fm.Parser.Core(source)
-  //case parsed:
-  //| error => "No parse.";
-  //| value =>
-    //let term = parsed.value;
-    //let term = Fm.Core.to_high(term, Fm.HDefs.new)
-    //let term = Fm.HCore.normalize(term)
-    //let term = Fm.HCore.to_low(term, Fm.NameSet.new)
-    //Fm.Core.show(term);
+Fm: _
+  do Maybe {
+    var type = Fm.Core.read("
+      @(A: Type)
+      @(B: Type)
+      @(f: @(x: A) B)
+      @(g: @(x: B) A)
+      @(x: A)
+      A
+    ");
+    var term = Fm.Core.read("
+      #A #B #f #g #x (g (f (g (f x))))
+    ");
+    let term = Fm.Core.to_high(term);
+    let type = Fm.Core.to_high(type);
+    let chck = Fm.HCore.check(term, type, Fm.Defs.new, []);
+    let term = Fm.HCore.normalize(term);
+    let term = Fm.HCore.to_low(term);
+    chck;
+    //Maybe.some<>(Fm.Core.show(type));
+  }
