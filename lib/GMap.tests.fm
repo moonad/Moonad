@@ -1,0 +1,131 @@
+GMap.tests.1 : IO(Unit)
+  let kvs = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+  let map = GMap.from_list<,>(Nat.cmp, kvs)
+  let map = GMap.show<,>(Nat.show, String.show, map)
+  IO.print(map) //["(1,"a")","(2,"b")","(3,"c")"]
+
+GMap.tests.2 : The(String, "b")
+  def kvs = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+  def map = GMap.from_list<,>(Nat.cmp, kvs)
+  def val_at_key_2 = GMap.lookup_with_default<,>(Nat.cmp, 2, "?", map)
+  The.value<>(val_at_key_2)
+
+GMap.tests.3 : The(String, "a")
+  def empty_map = GMap.tip<Nat,String>
+  def not_empty = GMap.insert<,>(Nat.cmp, 1, "a", empty_map)
+  def the_a     = GMap.lookup_with_default<,>(Nat.cmp, 1, "?", not_empty)
+  The.value<>(the_a)
+
+GMap.tests.4 : The(Maybe(String), Maybe.none<>)
+  def kvs = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+  def map = GMap.from_list<,>(Nat.cmp, kvs)
+  def map = GMap.delete<,>(Nat.cmp, 2, map)
+  def res = GMap.lookup<,>(Nat.cmp, 2, map)
+  The.value<>(res)
+
+GMap.tests.5 : IO(Unit)
+  let kvs_a = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+
+  let kvs_b = [
+    Pair.new<,>(2,"?")
+    Pair.new<,>(4,"d")
+    Pair.new<,>(5,"e")
+  ] 
+
+  let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+  let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+  let res = GMap.union<,>(Nat.cmp, map_a, map_b)
+  let res = GMap.show<,>(Nat.show, String.show, res)
+  IO.print(res)
+  
+GMap.tests.6 : IO(Unit)
+  let kvs_a = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+
+  let kvs_b = [
+    Pair.new<,>(2,"?")
+    Pair.new<,>(4,"d")
+    Pair.new<,>(5,"e")
+  ] 
+
+  let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+  let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+  let res = GMap.intersection<,>(Nat.cmp, map_a, map_b)
+  let res = GMap.show<,>(Nat.show, String.show, res)
+  IO.print(res)
+
+GMap.tests.7 : IO(Unit)
+  let kvs_a = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+
+  let kvs_b = [
+    Pair.new<,>(2,"?")
+    Pair.new<,>(4,"d")
+    Pair.new<,>(5,"e")
+  ] 
+
+  let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+  let map_b = GMap.from_list<,>(Nat.cmp, kvs_b)
+
+  let res = GMap.difference<,>(Nat.cmp, map_a, map_b)
+  let res = GMap.show<,>(Nat.show, String.show, res)
+  IO.print(res)
+
+GMap.tests.8 : IO(Unit)
+  let kvs_a = [
+    Pair.new<,>(1,"a")
+    Pair.new<,>(2,"b")
+    Pair.new<,>(3,"c")
+  ]
+  let map_a = GMap.from_list<,>(Nat.cmp, kvs_a)
+  let res   = GMap.delete_min<,>(map_a)
+  let res   = GMap.show<,>(Nat.show, String.show, res)
+  IO.print(res)
+
+GMap.tests.9 : IO(Unit)
+  let kvs = [
+    Pair.new<,>(1,"Hello"),
+    Pair.new<,>(2,","),
+    Pair.new<,>(3," "),
+    Pair.new<,>(4,"World"),
+    Pair.new<,>(5,"!")
+  ]
+  let map = GMap.from_list<,>(Nat.cmp, kvs)
+  let res = GMap.foldr<,,>(String.concat, String.nil, map)
+  IO.print(res)
+
+GMap.tests.10: The(Bool, Bool.true)
+  def kvs = [
+    Pair.new<,>(1,"Hello"),
+    Pair.new<,>(2,","),
+    Pair.new<,>(3," "),
+    Pair.new<,>(4,"World"),
+    Pair.new<,>(5,"!")
+  ]
+  def map = GMap.from_list<,>(Nat.cmp, kvs)
+  def res = GMap.is_balanced<,>(map)
+  The.value<>(res)
