@@ -1,0 +1,4 @@
+CList.right<A: Type>(cl: CList(A)): Maybe(List(A))
+  case cl:
+  | nil  => Maybe.none<>;
+  | ring => Maybe.some<>(cl.right);

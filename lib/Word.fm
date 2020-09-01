@@ -1,4 +1,4 @@
-T Word                            ~ (size: Nat)
-| Word.nil                             ~ (Nat.zero);
+T Word                                ~ (size: Nat)
+| Word.nil                            ~ (Nat.zero);
 | Word.0<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));
 | Word.1<size: Nat>(pred: Word(size)) ~ (Nat.succ(size));

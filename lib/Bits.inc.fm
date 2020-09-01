@@ -1,5 +1,5 @@
 Bits.inc(a: Bits): Bits
   case a:
-  | Bits.nil;
+  | Bits.1(Bits.nil);
   | Bits.1(a.pred);
   | Bits.0(Bits.inc(a.pred));

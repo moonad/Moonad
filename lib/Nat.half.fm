@@ -1,0 +1,6 @@
+Nat.half(n: Nat): Nat
+  case n:
+  | Nat.zero;
+  | case n.pred:
+    | Nat.zero;
+    | Nat.succ(Nat.half(n.pred.pred));;

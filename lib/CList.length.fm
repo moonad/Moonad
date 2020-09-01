@@ -1,0 +1,7 @@
+CList.length<A: Type>(cl: CList(A)): Nat
+  case cl:
+  | nil  => 0;
+  | ring => 
+      let left  = List.length<A>(cl.left)
+      let right = List.length<A>(cl.right)
+      Nat.add(1, Nat.add(left, right));

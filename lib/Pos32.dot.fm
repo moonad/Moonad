@@ -1,0 +1,7 @@
+// The dot product of two positions
+// Returns (ax * bx + ay * by + az * bz)
+Pos32.dot(a: Pos32, b: Pos32): U32
+  let x = U32.mul(Pos32.get_x(a), Pos32.get_x(b))
+  let y = U32.mul(Pos32.get_y(a), Pos32.get_y(b))
+  let z = U32.mul(Pos32.get_z(a), Pos32.get_z(b))
+  U32.add(U32.add(x, y), z)

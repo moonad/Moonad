@@ -1,0 +1,3 @@
+// Returns the values of a set in ascending order
+GSet.members<A: Type>(set: GSet(A)): List(A)
+  GSet.foldr<,>(List.cons<>, List.nil<>, set)

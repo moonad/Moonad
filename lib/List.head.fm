@@ -1,6 +1,5 @@
-// Get the head of a nonempty list
-List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
+// May get the head of a list
+List.head<A: Type>(xs: List(A)): Maybe(A)
   case xs:
-  with ne : List.not_empty<A>(xs.self) = not_empty;
-  | Empty.absurd<>(ne);
-  | xs.head;
+  | Maybe.none<>;
+  | Maybe.some<>(xs.head);

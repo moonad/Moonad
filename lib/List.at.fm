@@ -1,7 +1,7 @@
 // Returns the element at given position.
-List.at<A: Type>(list: List(A), index: Nat): Maybe(A)
+List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   case list:
   | Maybe.none<>;
   | case index:
     | Maybe.some<>(list.head);
-    | List.at<>(list.tail)(index.pred);;
+    | List.at<>(index.pred, list.tail);;

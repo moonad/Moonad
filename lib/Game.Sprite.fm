@@ -1,0 +1,3 @@
+// Sprites have a position, angle and a Image3D
+T Game.Sprite
+| Game.Sprite.new(mid: Pos32, pos: Pos32, ang: U32, img: Image3D);

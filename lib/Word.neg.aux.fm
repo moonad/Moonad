@@ -1,12 +1,10 @@
-Word.neg.aux: <size: Nat> -> Word(size) -> Bool -> Word(size)
-  <size> (word) (inc)
-  word<(size) () Word(size)>
+Word.neg.aux<size: Nat>(word: Word(size), inc: Bool): Word(size)
+  case word:
   | Word.nil;
-  | <size> (pred)
-    inc<() Word(Nat.succ(size))>
-    | Word.0<size>(Word.neg.aux<size>(pred, Bool.true));
-    | Word.1<size>(Word.neg.aux<size>(pred, Bool.false));;
-  | <size> (pred)
-    inc<() Word(Nat.succ(size))>
-    | Word.1<size>(Word.neg.aux<size>(pred, Bool.false));
-    | Word.0<size>(Word.neg.aux<size>(pred, Bool.false));;
+  | case inc:
+    | Word.0<word.size>(Word.neg.aux<word.size>(word.pred, Bool.true));
+    | Word.1<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false));;
+  | case inc:
+    | Word.1<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false));
+    | Word.0<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false));;
+  : Word(word.size);

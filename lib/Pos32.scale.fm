@@ -1,0 +1,6 @@
+// Multiplies all positions by a scaling factor
+Pos32.scale(a: Pos32, s: U32): Pos32
+  let x = U32.mul(Pos32.get_x(a), s)
+  let y = U32.mul(Pos32.get_y(a), s)
+  let z = U32.mul(Pos32.get_z(a), s)
+  Pos32.new(x, y, z)

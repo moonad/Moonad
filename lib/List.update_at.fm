@@ -1,0 +1,7 @@
+// Updates the element at given position
+List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
+  case list:
+  | [];
+  | case index:
+    | List.cons<>(fn(list.head), list.tail);
+    | List.cons<>(list.head, List.update_at<A>(index.pred, fn, list.tail));;

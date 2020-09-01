@@ -1,0 +1,4 @@
+// TODO
+// Divides two bitstrings.
+Bits.div(a: Bits, b: Bits): Bits
+  Bits.div(a, b)

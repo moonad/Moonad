@@ -1,0 +1,5 @@
+// Folds over a list, left associative
+List.ifor.u32<A: Type>(xs: List(A))<B: Type>(b: B, f: U32 -> A -> B -> B): B
+  case xs:
+  | b;
+  | List.ifor.u32<A>(xs.tail)<B>(f(0u,xs.head,b), (n) f(U32.add(n,1u)));

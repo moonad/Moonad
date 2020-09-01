@@ -56,30 +56,44 @@ function load_lib_files() {
     }
   };
   // Loads Formality definitions
-  var lib_files = fs.readdirSync(path_of(["lib"])).filter(x => x.slice(-3) === ".fm");
-  var new_def_names = [];
-  for (var lib_file of lib_files) {
-    var path = path_of(["lib", lib_file]);
-    var last_mod = fs.statSync(path).mtime.getTime();
-    if (!LastMod[path] || LastMod[path] !== last_mod) {
-      console.log("Loading "+lib_file+"...");
-      var lib_code = fs.readFileSync(path, "utf8");
-      var new_defs = fm.lang.parse(lib_code).defs;
-      var all_defs = {...Defs, ...new_defs};
-      FileDefs[path] = FileDefs[path] || {};
-      LastMod[path] = last_mod;
-      for (var def in new_defs) {
-        Defs[def] = new_defs[def];
-        Defs[def].file = lib_file;
-        FileDefs[path][def] = 1;
-        new_def_names.push(def);
+  try {
+    var lib_files = fs.readdirSync(path_of(["lib"])).filter(x => x.slice(-3) === ".fm");
+    var new_def_names = [];
+    var OldDefs = null;
+    for (var lib_file of lib_files) {
+      var path = path_of(["lib", lib_file]);
+      var last_mod = fs.statSync(path).mtime.getTime();
+      if (!LastMod[path] || LastMod[path] !== last_mod) {
+        console.log("Loading "+lib_file+"...");
+        if (OldDefs === null) {
+          OldDefs = {...Defs};
+        }
+        var lib_code = fs.readFileSync(path, "utf8");
+        var new_defs = fm.lang.parse(lib_code).defs;
+        var all_defs = {...Defs, ...new_defs};
+        FileDefs[path] = FileDefs[path] || {};
+        LastMod[path] = last_mod;
+        for (var def in new_defs) {
+          Defs[def] = new_defs[def];
+          Defs[def].file = lib_file;
+          FileDefs[path][def] = 1;
+          new_def_names.push(def);
+        }
       }
     }
-  }
-  // Type checks
-  for (var def of new_def_names) {
-    console.log("- Checking "+def+"...");
-    fm.synt.typesynth(def, Defs, fm.lang.stringify);
+    // Type checks
+    for (var def of new_def_names) {
+      console.log("- Checking "+def+"...");
+      fm.synt.typesynth(def, Defs, fm.lang.stringify);
+    }
+  } catch (e) {
+    if (typeof e === "function") {
+      console.log(e())
+    } else {
+      console.log(e);
+    }
+    console.log("- Error reloading. Reverting...");
+    Defs = OldDefs;
   }
 }
 
@@ -246,4 +260,9 @@ logs.stderr.on("data", (data) => {
 });
 logs.on("close", (code) => {
   console.log("[LOGS]\n- EXIT (code: "+code+")");
+});
+process.on('uncaughtException', function (err) {
+  console.log(err);
+  logs.kill();
+  process.exit();
 });

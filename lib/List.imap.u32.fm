@@ -1,0 +1,5 @@
+// Map over a list with the index
+List.imap.u32<A: Type,B: Type>(f: U32 -> A -> B, xs: List(A)): List(B)
+  case xs:
+  | List.nil<>;
+  | List.cons<>(f(0u, xs.head),List.imap.u32<,>((n) f(U32.add(1u, n)), xs.tail));

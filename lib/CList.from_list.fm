@@ -1,0 +1,10 @@
+// creates a balanced circular list from a regular list
+CList.from_list<A: Type>(as: List(A)): CList(A)
+  case as:
+  | nil  => CList.nil<>;
+  | ring =>
+      let len = List.length<>(as)
+      let mid = Nat.div(len, 2)
+      let spl = List.split_at<>(mid, as.tail)
+      get fst_half snd_half = spl 
+      CList.ring<>(List.reverse<>(snd_half), as.head, fst_half);

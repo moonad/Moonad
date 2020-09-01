@@ -1,5 +1,5 @@
 // Folds over a list, left associative
-List.foldl<A: Type,B: Type>(b: B, f: B -> A -> B, xs: List(A)): B
+List.foldl<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
   case xs:
   | b;
-  | List.foldl<,>(f(b,xs.head),f,xs.tail);
+  | List.foldl<,>(f(xs.head,b),f,xs.tail);

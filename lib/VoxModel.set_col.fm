@@ -1,4 +1,0 @@
-VoxModel.set_col(idx: U32, col: U32, vox: VoxModel): VoxModel
-  case vox:
-  | let vox.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, vox.buffer)
-    VoxModel.new(vox.size, vox.buffer);

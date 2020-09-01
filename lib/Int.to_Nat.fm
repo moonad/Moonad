@@ -1,0 +1,6 @@
+// true is negative, false otherwise
+Int.to_nat(a: Int): Pair(Bool, Nat)
+  get a.x a.y = a
+  case a.y:
+  | Pair.new<,>(Bool.false, a.x);
+  | Pair.new<,>(Bool.true, a.y);

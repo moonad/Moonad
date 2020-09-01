@@ -1,0 +1,41 @@
+// Add two bitstrings.
+Bits.add(a: Bits, b: Bits): Bits
+  case b:
+  | nil => a;
+  | 0 =>
+    case a:
+    | nil => b;
+    | 0 => Bits.0(Bits.add(a.pred, b.pred));
+    | 1 => Bits.1(Bits.add(a.pred, b.pred));
+  ;
+  | 1 =>
+    case a:
+    | nil => b;
+    | 0 => Bits.1(Bits.add(a.pred, b.pred));
+    | 1 => Bits.0(Bits.add(Bits.inc(a.pred), b.pred));
+  ;
+
+Bits.add_.10: _
+  Bits.0(Bits.1(Bits.0(Bits.1(Bits.nil))))
+
+Bits.add_.3: _
+  Bits.1(Bits.1(Bits.nil))
+
+Bits.add_.1: _
+  Bits.1(Bits.nil)
+
+
+Bits.add_.test.0: The(U32, Nat.to_u32(0))
+  The.value<>(Bits.to_u32(Bits.add(Bits.nil, Bits.nil)))
+
+Bits.add_.test.13: The(U32, Nat.to_u32(13))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.3)))
+
+Bits.add_.test.11: The(U32, Nat.to_u32(11))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.1)))
+
+Bits.add_.test.6: The(U32, Nat.to_u32(4))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add_.3, Bits.add_.1)))
+
+Bits.add_.test.20: The(U32, Nat.to_u32(20))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.10)))

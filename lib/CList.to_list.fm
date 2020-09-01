@@ -1,0 +1,8 @@
+// converts a circular list into a regular one with the head as the focus
+CList.to_list<A: Type>(cl: CList(A)): List(A)
+  case cl:
+  | nil  => List.nil<>;
+  | ring => 
+      let left  = List.reverse<>(cl.left)
+      let right = List.cons<>(cl.focus, cl.right)
+      List.concat<>(right, left); 

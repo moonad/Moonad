@@ -1,0 +1,8 @@
+// removes an element from the list at given index
+List.delete_at.u32<A: Type>(idx: U32, list: List(A)): List(A)
+  if U32.eql(idx, 0u) then
+    List.tail<A>(list)
+  else
+    case list:
+    | list;
+    | List.cons<A>(list.head, List.delete_at.u32<A>(U32.sub(idx,1u), list.tail));

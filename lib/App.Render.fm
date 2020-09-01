@@ -1,3 +1,3 @@
 T App.Render
 | App.Render.txt(text: String);
-| App.Render.vox(voxs: VoxModel);
+| App.Render.vox(voxs: Image3D);

@@ -1,0 +1,2 @@
+Col32.yellow : Col32
+  Col32.new(255u, 255u, 0u, 255u)

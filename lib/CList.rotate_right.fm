@@ -1,0 +1,27 @@
+// single clockwise rotation 
+CList.rotate_right<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.right:
+    | nil  => 
+      case cl.left:
+      //we have a singleton, nothing changes
+      | nil  => cl;
+      //right is empty, left is not
+      | cons => 
+        let  left = List.reverse<>(cl.left)
+        //todo: how to avoid this redundant case? we know left isn't empty
+        case left:
+        | nil  => cl;
+        | cons => 
+          let new_left  = [cl.focus]
+          let new_focus = left.head 
+          let new_right = left.tail 
+          CList.ring<>(new_left, new_focus, new_right);;;
+    // right is not empty      
+    | cons => 
+      let new_left  = List.cons<>(cl.focus, cl.left)
+      let new_focus = cl.right.head
+      let new_right = cl.right.tail
+      CList.ring<>(new_left, new_focus, new_right);;

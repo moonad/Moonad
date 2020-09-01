@@ -1,0 +1,2 @@
+Pos32.set_y(pos: Pos32, y: U32): U32
+  Pos32.new(Pos32.get_x(pos), y, Pos32.get_z(pos))

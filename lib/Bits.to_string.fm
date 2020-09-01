@@ -1,0 +1,6 @@
+// Converts a bitstring to a string
+Bits.to_string(bits: Bits): String
+  case bits:
+  | "";
+  | String.concat("0", Bits.to_string(bits.pred));
+  | String.concat("1", Bits.to_string(bits.pred));

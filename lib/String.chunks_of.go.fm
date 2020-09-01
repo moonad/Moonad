@@ -1,0 +1,14 @@
+String.chunks_of.go(
+  len   : Nat,    // length of each chunk
+  str   : String, // list to be split
+  need  : Nat,    // number of vals to complete chunk
+  chunk : String  // current chunk
+) : List(String)
+  case str:
+  | List.cons<>(String.reverse(chunk), List.nil<>);
+  | case need:
+    | let head = String.reverse(chunk)
+      let tail = String.chunks_of.go(len, str, len, String.nil)
+      List.cons<>(head, tail);
+    | let chunk = String.cons(str.head, chunk)
+      String.chunks_of.go(len, str.tail, need.pred, chunk);;

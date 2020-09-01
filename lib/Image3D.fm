@@ -1,0 +1,11 @@
+// An Image3D contains `size` 3d pixels (voxels). Each pixel has a 24-bit
+// position and a 24-bit color. It is stored on the buffer as follows:
+// buffer[0] = voxel0.pos
+// buffer[1] = voxel0.col
+// buffer[2] = voxel1.pos
+// buffer[3] = voxel1.col
+// buffer[4] = voxel2.pos
+// buffer[5] = voxel2.col
+// And so on. Positions and colors are `U32`, interpreted as `Pos32` / `Col32`.
+T Image3D
+| Image3D.new(length: U32, capacity: U32, buffer: Buffer32);

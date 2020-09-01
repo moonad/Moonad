@@ -1,5 +1,6 @@
-// This is compiled to a mutable array. Because of that, buffers must be used
-// linearly. This is NOT checked yet, so, right now, buffer compilation is
-// unsafe until linearity checks are added.
+// A Buffer32 contains 2^depth values of type U32.
+// Note: This is compiled to a mutable array. Because of that, buffers must be
+// used linearly. This is NOT checked yet, so, right now, buffer compilation is
+// unsafe until linearity checks are added!
 T Buffer32
 | Buffer32.new(depth: Nat, array: Array(U32, depth));
