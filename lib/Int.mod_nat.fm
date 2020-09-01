@@ -1,4 +1,4 @@
-Int.mod_Nat(a: Int, n: Nat): Nat
+Int.mod_nat(a: Int, n: Nat): Nat
   get a.x a.y = a
   let b = Nat.mod(a.y, n)
   let sum = Nat.add(a.x, Nat.sub(n, b))

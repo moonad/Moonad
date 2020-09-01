@@ -1,3 +1,0 @@
-Int.div_Nat(a: Int, n: Nat): Int
-  get a.x a.y = a
-  Int.new(Nat.div(a.x, n), Nat.div(a.y, n))
