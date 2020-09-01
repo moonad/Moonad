@@ -1,0 +1,7 @@
+// a smart constructor to ensure that the size of the tree is maintained correctly
+// the subtrees passed as arguments must already be balanced
+GMap.node<K: Type, V: Type>(key: K, val: V, left: GMap(K,V), right: GMap(K,V)): GMap(K,V)
+  let size_left  = GMap.size<K,V>(left)
+  let size_right = GMap.size<K,V>(right)
+  let new_size   = List.sum([1, size_left, size_right])
+  GMap.bin<K,V>(new_size, key, val, left, right)

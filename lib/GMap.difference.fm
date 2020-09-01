@@ -1,0 +1,55 @@
+//   Suppose we have two Maps: T1 and T2  
+//     T1            T2 
+//      v             u 
+//     / \           / \ 
+//    A   B         C   D        
+//
+//    We can implement efficient Map x Map -> Map operations
+//    but applying a "divide and conque" strategy, that means
+//    we'll break those sets in smaller parts using `split_ltn`
+//    and `split_gtn`, perform the desired  operation on those 
+//    smaller parts, and then combine everything with `concat3`
+//
+//    - <> can be union, difference, intersection...
+//    - v and u are keys
+//    - A, B, C and D are subtrees
+//
+//                 T1 <> T2 
+//              /           \ 
+//             v              u   C' = split_ltn(T2)
+//            / \            / \  D' = split_gtn(T2)  
+//           A   B          C   D     
+//             |              |               
+//             |              |    
+//             |              |  
+//           A <> C'        B <> D' 
+//             \              /
+//              \            /
+//               \          /
+//             concat3(A<>C', v, B<>D')      
+// 
+// Asymetric difference
+GMap.difference<K: Type, V: Type>(
+  cmp   : K -> K -> Cmp, 
+  map_a : GMap(K,V), 
+  map_b : GMap(K,V)
+) : GMap(K,V)
+
+  case map_a:
+  | tip => 
+    case map_b:
+    | tip => GMap.tip<K,V>;
+    | bin => map_b;
+  ;
+  | bin => 
+    case map_b:
+    | tip => map_a;
+    | bin => 
+      // divide & conquer 
+      let ltn   = GMap.split_ltn<K,V>(cmp, map_b.key, map_a) 
+      let gtn   = GMap.split_gtn<K,V>(cmp, map_b.key, map_a)
+      let left  = GMap.difference<K,V>(cmp, ltn, map_b.left)
+      let right = GMap.difference<K,V>(cmp, gtn, map_b.right)
+      GMap.concat<K,V>(left, right)
+    ;
+  ;

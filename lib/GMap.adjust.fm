@@ -1,0 +1,16 @@
+// modifies the value associated with a specific key
+// by applying a function to it
+// in case the key is not in the map, do nothing
+// as with other GMap operations, you must provide
+// a way to compare the keys
+GMap.adjust<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  f   : V -> V, 
+  key : K, 
+  map : GMap(K,V) 
+) : GMap(K,V)
+  GMap.adjust_with_key<K,V>
+  | cmp;
+  | (k, v) f(v);
+  | key;
+  | map;

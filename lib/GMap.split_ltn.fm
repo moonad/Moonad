@@ -1,0 +1,18 @@
+// Given a comparison function, a map, and a key (cut), this function
+// returns a map with keys which are less than the cut, discarding
+// the rest
+GMap.split_ltn<K: Type, V: Type>(cmp: K -> K-> Cmp, cut: K, map: GMap(K,V)): GMap(K,V)
+  case map:
+  | tip => map;
+  | bin => 
+    case cmp(cut, map.key):
+    | ltn => GMap.split_ltn<K,V>(cmp, cut, map.left);
+    | eql => map.left;
+    | gtn => 
+      let key   = map.key 
+      let val   = map.val 
+      let left  = map.left 
+      let right = GMap.split_ltn<K,V>(cmp, cut, map.right)
+      GMap.concat3<K,V>(cmp, key, val, left, right)
+    ;
+  ;
