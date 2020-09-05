@@ -249,6 +249,10 @@ Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
 Mons.Object.get_dmg(obj: Mons.Object): U32
   open obj: obj.dmg
 
+// Gets an object's kind 
+Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
+  open obj: obj.kin
+
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
   open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg)
@@ -368,6 +372,23 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
   | let map = Mons.Map.set_list(pos, objs.tail, map)
     Pair.new<,>(map, objs.head);
 
+// Gets the the object on top of a tile
+Mons.Map.get_top(pos: Pos32, map: Mons.Map): Mons.Object 
+  Pair.snd<,>(Mons.Map.pop(pos,map))
+
+// Gets the heros object and its index from a tile
+Mons.Map.get_hero(pos: Pos32, map: Mons.Map): Pair(Mons.Object, U32)
+  let tile = Mons.Map.get_list(pos, map)
+  let obj_is_hero = ((obj) Mons.Kind.is_hero(Mons.Object.get_kin(obj))) :: Mons.Object -> Bool 
+  let fun = ((obj, idx) obj_is_hero(obj)) :: Mons.Object -> Nat -> Bool
+  let both = List.ifind<>(tile, fun)
+  case both: 
+  | none => Pair.new<,>(Mons.Object.void, 0u);
+  | some => 
+    let hero = Pair.fst<,>(both.value)
+    let idx = Nat.to_u32(Pair.snd<,>(both.value))
+    Pair.new<,>(hero, idx);
+
 Mons.Object.bush_with_kin(kin: Mons.Kind): List(Mons.Object)
   [ Mons.Object.new_of_kind(kin),
     Mons.Object.new_of_kind(Mons.BUSH)
@@ -378,9 +399,9 @@ Mons.Object.water_with_kin(kin: Mons.Kind): List(Mons.Object)
     Mons.Object.new_of_kind(Mons.WATER(Mons.Map.Dir.expanded.middle))]
 
 // Deletes an object from a tile
-Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
+Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = Mons.Map.get_list(pos, map)
-  let objs = List.delete_at.u32<>(Pos32.get_z(pos), objs)
+  let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
 // Creates a new object with a given kind
@@ -632,10 +653,10 @@ Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   Mons.Game.new(game.usr, game.pos, map)
 
 // Updates the object at given position on the game map
-Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, game: Mons.Game): Mons.Game
+Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
-  let obj = fn(Mons.Map.get(pos, game.map))
-  let map = Mons.Map.set(pos, obj, game.map)
+  let obj = fn(Mons.Map.get(pos, idx, game.map))
+  let map = Mons.Map.set(pos, idx, obj, game.map)
   Mons.Game.set_map(map, game)
 
 Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
@@ -833,17 +854,17 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
 // Update a Mons.Game by pushing a new obj to a pos
-Mons.Game.map_push(pos: Pos32, old_pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
+Mons.Game.map_push(pos: Pos32, old_pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons.Game
   open game:
   let map = game.map
-  let map = Mons.Map.del(old_pos, map)
+  let map = Mons.Map.del(old_pos, idx, map)
   let map = Mons.Map.push(pos, obj, map)
   Mons.Game.set_map(map, game)
 
 // Update a Mons.Game by setting a new obj to a pos
-Mons.Game.map_set(pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
+Mons.Game.map_set(pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons.Game
   open game:
-  let map = Mons.Map.set(pos, obj, game.map)
+  let map = Mons.Map.set(pos, idx, obj, game.map)
   Mons.Game.set_map(map, game)
 
 // Computes a command from an user
@@ -1100,23 +1121,27 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
 Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   let map = game.map
-  let obj = Mons.Map.get(pos, map)
+  let obj_idx = Mons.Map.get_hero(pos, map)
+  let obj = Pair.fst<,>(obj_idx)
+  let idx = Pair.snd<,>(obj_idx)
+  // let obj = Mons.Map.get(pos, map)
   let obj = Mons.Object.tick(obj)
   open obj:
   let old_pos = pos
   let new_pos = Mons.Dir.move(obj.dir, pos)
-  let trg = Mons.Map.get(new_pos, map)
+  // let trg = Mons.Map.get(new_pos, map)
+  let trg = Mons.Map.get_top(new_pos, map)
   open trg:
   let is_walking = Mons.Object.is_walking(obj)
   let is_movfree = Mons.Object.is_free_to_move(obj)
   let is_blocked = case Mons.Kind.attr(trg.kin) as kind: | kind.blocks;
   if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
     let obj = Mons.Object.set_ani(obj, 16u)
-    let game = Mons.Game.map_push(new_pos, old_pos, obj, game)
+    let game = Mons.Game.map_push(new_pos, old_pos, idx, obj, game)
     let game = Mons.Game.set_user_pos(user, new_pos, game)
     game
   else
-    Mons.Game.map_set(pos, obj, game)
+    Mons.Game.map_set(pos, idx, obj, game)
 
 // For each tick, updates the game state
 // TODO: tick objects other than hero
