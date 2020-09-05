@@ -295,25 +295,25 @@ Mons.Map.new: Mons.Map
 
 // Adds a tile to a position on the map
 Mons.Map.set_list(pos: Pos32, objs: List(Mons.Object), map: Mons.Map): Mons.Map
-  Map.set<>(U32.to_bits(Pos32.set_z(pos,0u)), objs, map)
+  Map.set<>(U32.to_bits(pos), objs, map)
 
 // Gets the tile stored on a position on the map
 Mons.Map.get_list(pos: Pos32, map: Mons.Map): List(Mons.Object)
-  case Map.get<>(U32.to_bits(Pos32.set_z(pos,0u)), map) as got:
+  case Map.get<>(U32.to_bits(pos), map) as got:
   | [];
   | got.value;
 
 // Gets the nth object of a tile
-Mons.Map.get(pos: Pos32, map: Mons.Map): Mons.Object
+Mons.Map.get(pos: Pos32, idx: U32, map: Mons.Map): Mons.Object
   let list = Mons.Map.get_list(pos, map)
-  case List.at<>(U32.to_nat(Pos32.get_z(pos)), list) as got:
+  case List.at<>(U32.to_nat(idx), list) as got:
   | Mons.Object.void;
   | got.value;
 
 // Sets the nth object of a tile
-Mons.Map.set(pos: Pos32, val: Mons.Object, map: Mons.Map): Mons.Map
+Mons.Map.set(pos: Pos32, idx: U32, val: Mons.Object, map: Mons.Map): Mons.Map
   let list = Mons.Map.get_list(pos, map)
-  let list = List.update_at<>(U32.to_nat(Pos32.get_z(pos)), () val, list)
+  let list = List.update_at<>(U32.to_nat(idx), () val, list)
   Mons.Map.set_list(pos, list, map)
 
 // Pushes an object to the top of a tile
