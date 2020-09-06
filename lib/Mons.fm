@@ -659,6 +659,16 @@ Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, idx: U32, game: Mon
   let map = Mons.Map.set(pos, idx, obj, game.map)
   Mons.Game.set_map(map, game)
 
+Mons.Game.get_tile(pos: Pos32, game: Mons.Game): List(Mons.Object)
+  open game:
+  Mons.Map.get_list(pos, game.map)
+
+Mons.Game.move_obj(from: Pos32, idx: U32, to: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game 
+  let game = Mons.Game.map_del(from, idx, game)
+  let game = Mons.Game.map_push(to, obj, game)
+  game 
+
+
 Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
   (x,y,obj_ani,obj_dir) spr
 
@@ -876,39 +886,40 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
   case pos:
   // New player
-  | ?new_player;
-  // because Mons.Map.del / set now need an index, this hack needs to be revised
-  // due to the fact that we cant provide an index since we're creating a hero
-  // | let pos = Pos32.new(2048u, 2048u, 0u)
-  //   let old_pos = Pos32.new(0u, 0u, 0u)
-  //   let obj = Mons.Object.new_of_kind(Mons.HERO)
-  //   let game = Mons.Game.map_push(pos, old_pos, obj, game)
-  //   let game = Mons.Game.set_user_pos(usr, pos, game)
-  //   game;
+  | let pos = Pos32.new(2048u, 2048u, 0u) //TODO replace z with 'main level' 
+    let obj = Mons.Object.new_of_kind(Mons.HERO)
+    let game = Mons.Game.map_push(pos, obj, game)
+    let game = Mons.Game.set_user_pos(usr, pos, game)
+    game;
   // Existing player
   | let pos = pos.value
+    // TODO implement a smarter targeting strategy
+    let tile     = Mons.Game.get_tile(pos, game)
+    let tile_len = List.length.u32<>(tile)
+    let trg_idx  = U32.sub(tile_len, 2u)
+    let usr_idx  = U32.sub(tile_len, 1u)    
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     if U16.eql(cmd, 'U') then
       // TODO: use the correct attack instead of just damaging
-      Mons.Game.update((obj) Mons.Object.hit(obj, 4u), Pos32.add(pos, Pos32.new(0u,0u,1u)), game)
+      Mons.Game.update((obj) Mons.Object.hit(obj, 4u), pos, trg_idx, game)
     // TODO: make the other attacks (I, J, K)
     else if U16.eql(cmd, 'D') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, usr_idx, game)
     else if U16.eql(cmd, 'W') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, usr_idx, game)
     else if U16.eql(cmd, 'A') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, usr_idx, game)
     else if U16.eql(cmd, 'S') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, usr_idx, game)
     else if U16.eql(cmd, 'd') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, usr_idx, game)
     else if U16.eql(cmd, 'w') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, usr_idx, game)
     else if U16.eql(cmd, 'a') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, usr_idx, game)
     else if U16.eql(cmd, 's') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, game)
+      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, usr_idx, game)
     else
       game;
 
@@ -1144,7 +1155,7 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   let is_blocked = case Mons.Kind.attr(trg.kin) as kind: | kind.blocks;
   if Bool.and(is_walking, Bool.and(is_movfree, Bool.not(is_blocked))) then
     let obj = Mons.Object.set_ani(obj, 16u)
-    let game = Mons.Game.map_push(new_pos, old_pos, idx, obj, game)
+    let game = Mons.Game.move_obj(old_pos, idx, new_pos, obj, game)
     let game = Mons.Game.set_user_pos(user, new_pos, game)
     game
   else
