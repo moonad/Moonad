@@ -143,6 +143,33 @@ T Mons.Kind
 | Mons.PATH_BLOCKER;
 | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 
+Mons.Kind.get_mhp(kind: Mons.Kind): U32
+  case Mons.Kind.attr(kind) as attr:
+  | attr.mhp;
+
+Mons.Kind.get_battle_spr(kind: Mons.Kind, is_up: Bool): Image3D
+  case Mons.Kind.attr(kind) as attr:
+  | attr.battle_spr(is_up);
+
+Mons.Kind.get_name(kind: Mons.Kind): String 
+  case Mons.Kind.attr(kind) as attr:
+  | attr.name;
+
+Mons.Kind.get_battles(kind: Mons.Kind): Bool
+ case Mons.Kind.attr(kind) as attr:
+  | attr.battles; 
+
+Mons.Kind.get_blocks(kind: Mons.Kind): Bool
+ case Mons.Kind.attr(kind) as attr:
+  | attr.blocks;
+
+Mons.Kind.get_atk(kind: Mons.Kind): U32
+ case Mons.Kind.attr(kind) as attr:
+  | attr.atk; 
+
+
+// TODO make it better so it doesn't have to be updated
+// everytime a new Mon is added/removed 
 Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
   | Mons.VOID           => Bool.false;
@@ -1040,14 +1067,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   let hero_pos = Mons.Game.get_hero_pos(game)
   case hero_pos:
   | scr;
-  | let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,0u), game.map)
+  | // need to get the hero in a diff way
+    let hero_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,0u), game.map)
     let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,1u), game.map)
     open hero_obj:
     open adve_obj:
-    let hero_mph = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.mhp;
-    let adve_mph = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.mhp;
-    let hero_chp = U32.sub(hero_mph, hero_obj.dmg)
-    let adve_chp = U32.sub(adve_mph, adve_obj.dmg)
+    // fix mph => mhp
+    let hero_mhp = Mons.Attr.get_mhp(hero_obj);
+    let adve_mhp = Mons.Attr.get_mhp(adve_obj);
+    let hero_chp = U32.sub(hero_mhp, hero_obj.dmg)
+    let adve_chp = U32.sub(adve_mhp, adve_obj.dmg)
     let hero_kin = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.battle_spr(Bool.true); //Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
     let adve_kin = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.battle_spr(Bool.false); //Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
     let hero_name = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.name;
