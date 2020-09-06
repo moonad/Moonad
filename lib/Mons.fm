@@ -854,11 +854,9 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
 // Update a Mons.Game by pushing a new obj to a pos
-Mons.Game.map_push(pos: Pos32, old_pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons.Game
+Mons.Game.map_push(pos: Pos32, obj: Mons.Object, game: Mons.Game): Mons.Game
   open game:
-  let map = game.map
-  let map = Mons.Map.del(old_pos, idx, map)
-  let map = Mons.Map.push(pos, obj, map)
+  let map = Mons.Map.push(pos, obj, game.map)
   Mons.Game.set_map(map, game)
 
 // Update a Mons.Game by setting a new obj to a pos
@@ -867,17 +865,26 @@ Mons.Game.map_set(pos: Pos32, idx: U32, obj: Mons.Object, game: Mons.Game): Mons
   let map = Mons.Map.set(pos, idx, obj, game.map)
   Mons.Game.set_map(map, game)
 
+// Update a Mons.Game by deleting an obj from a tile
+Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game 
+  open game: 
+  let map = Mons.Map.del(pos, idx, game.map)
+  Mons.Game.set_map(map, game)
+
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
   case pos:
   // New player
-  | let pos = Pos32.new(2048u, 2048u, 0u)
-    let old_pos = Pos32.new(0u, 0u, 0u)
-    let obj = Mons.Object.new_of_kind(Mons.HERO)
-    let game = Mons.Game.map_push(pos, old_pos, obj, game)
-    let game = Mons.Game.set_user_pos(usr, pos, game)
-    game;
+  | ?new_player;
+  // because Mons.Map.del / set now need an index, this hack needs to be revised
+  // due to the fact that we cant provide an index since we're creating a hero
+  // | let pos = Pos32.new(2048u, 2048u, 0u)
+  //   let old_pos = Pos32.new(0u, 0u, 0u)
+  //   let obj = Mons.Object.new_of_kind(Mons.HERO)
+  //   let game = Mons.Game.map_push(pos, old_pos, obj, game)
+  //   let game = Mons.Game.set_user_pos(usr, pos, game)
+  //   game;
   // Existing player
   | let pos = pos.value
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
