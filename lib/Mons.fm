@@ -106,42 +106,89 @@ T Mons.Game
 );
 
 // THING ID (kin)
+// T Mons.Kind
+// | Mons.VOID;
+// | Mons.HERO;
+// | grass;
+// | grass_PLANT;
+// | Mons.BUSH;
+// | Mons.PLANT_0;
+// | Mons.ELV_TERRAIN_00;
+// | Mons.ELV_TERRAIN_01;
+// | Mons.ELV_TERRAIN_02;
+// | Mons.OCEAN(dir: Mons.Map.Dir);
+// | Mons.TREE(model: Nat, slice: Nat);
+// | Mons.ROCK_PATH_C;
+// | Mons.ROCK_PATH_M;
+// | Mons.BATH;
+// | Mons.BEHOLDER;
+// | Mons.CRONI;
+// | Mons.ELLIOT;
+// | Mons.ESPECTRONUS;
+// | Mons.GAKI;
+// | Mons.GORR;
+// | Mons.LAMURIA;
+// | Mons.RAFIRE;
+// | Mons.VARGOULI;
+// | Mons.TUPITREE;
+// | Mons.LELA;
+// | Mons.MOSHY;
+// | Mons.HOUSE(model: Nat, slice: Nat);
+// | Mons.CASTLE(model: Nat, slice: Nat);
+// | Mons.SAND_0;
+// | Mons.SAND_1;
+// | Mons.CHEST;
+// | Mons.WATER(dir: Mons.Map.Dir.expanded);
+// | Mons.WATER1_M;
+// | Mons.PATH_BLOCKER;
+// | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+
 T Mons.Kind
-| Mons.VOID;
-| Mons.HERO;
-| Mons.GRASS;
-| Mons.GRASS_PLANT;
-| Mons.BUSH;
-| Mons.PLANT_0;
-| Mons.ELV_TERRAIN_00;
-| Mons.ELV_TERRAIN_01;
-| Mons.ELV_TERRAIN_02;
-| Mons.OCEAN(dir: Mons.Map.Dir);
-| Mons.TREE(model: Nat, slice: Nat);
-| Mons.ROCK_PATH_C;
-| Mons.ROCK_PATH_M;
-| Mons.BATH;
-| Mons.BEHOLDER;
-| Mons.CRONI;
-| Mons.ELLIOT;
-| Mons.ESPECTRONUS;
-| Mons.GAKI;
-| Mons.GORR;
-| Mons.LAMURIA;
-| Mons.RAFIRE;
-| Mons.VARGOULI;
-| Mons.TUPITREE;
-| Mons.LELA;
-| Mons.MOSHY;
-| Mons.HOUSE(model: Nat, slice: Nat);
-| Mons.CASTLE(model: Nat, slice: Nat);
-| Mons.SAND_0;
-| Mons.SAND_1;
-| Mons.CHEST;
-| Mons.WATER(dir: Mons.Map.Dir.expanded);
-| Mons.WATER1_M;
-| Mons.PATH_BLOCKER;
-| Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+| Mons.mons(ele: Mons.Kind.mons);
+| Mons.construction(ele: Mons.Kind.const);
+| Mons.terrain(ele: Mons.Kind.terrain);
+
+T Mons.Kind.mons
+| Mons.Kind.mons.HERO;
+| Mons.Kind.mons.BATH;
+| Mons.Kind.mons.BEHOLDER;
+| Mons.Kind.mons.CRONI;
+| Mons.Kind.mons.ELLIOT;
+| Mons.Kind.mons.ESPECTRONUS;
+| Mons.Kind.mons.GAKI;
+| Mons.Kind.mons.GORR;
+| Mons.Kind.mons.LAMURIA;
+| Mons.Kind.mons.RAFIRE;
+| Mons.Kind.mons.VARGOULI;
+| Mons.Kind.mons.TUPITREE;
+| Mons.Kind.mons.LELA;
+| Mons.Kind.mons.MOSHY;
+
+T Mons.Kind.const
+| Mons.Kind.const.ROCK_PATH_C;
+| Mons.Kind.const.ROCK_PATH_M;
+| Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
+| Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
+| Mons.Kind.const.CHEST;
+| Mons.Kind.const.PATH_BLOCKER;
+| Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+
+T Mons.Kind.terrain
+| Mons.Kind.terrain.VOID;
+| Mons.Kind.terrain.GRASS;
+| Mons.Kind.terrain.GRASS_PLANT;
+| Mons.Kind.terrain.BUSH;
+| Mons.Kind.terrain.PLANT_0;
+| Mons.Kind.terrain.ELV_TERRAIN_00;
+| Mons.Kind.terrain.ELV_TERRAIN_01;
+| Mons.Kind.terrain.ELV_TERRAIN_02;
+| Mons.Kind.terrain.OCEAN(dir: Mons.Map.Dir);
+| Mons.Kind.terrain.TREE(model: Nat, slice: Nat);
+| Mons.Kind.terrain.SAND_0;
+| Mons.Kind.terrain.SAND_1;
+| Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
+| Mons.Kind.terrain.WATER1_M;
+
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -333,7 +380,7 @@ Mons.Map.pop(pos: Pos32, map: Mons.Map): Pair(Mons.Map, Mons.Object)
 Mons.Object.bush_with_kin(kin: Mons.Kind): List(Mons.Object)
   [ Mons.Object.new_of_kind(kin),
     Mons.Object.new_of_kind(Mons.BUSH)
-    Mons.Object.new_of_kind(Mons.GRASS)]
+    Mons.Object.new_of_kind(grass)]
 
 Mons.Object.water_with_kin(kin: Mons.Kind): List(Mons.Object)
   [ Mons.Object.new_of_kind(kin),
@@ -352,201 +399,191 @@ Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
 
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String): List(Mons.Object)
+  let grass = Mons.terrain(Mons.Kind.terrain.GRASS)
+  let rock_path = Mons.Kind.const(Mons.Kind.const.ROCK_PATH_M)
   if String.eql(code, ".g") then
-    [Mons.Object.new_of_kind(Mons.GRASS)]
+    [Mons.Object.new_of_kind(grass)]
   else if String.eql(code, ".d") then
-    [ Mons.Object.new_of_kind(Mons.GRASS_PLANT)]
+    [ Mons.Object.new_of_kind(Mons.terrain(Mons.Kind.terrain.GRASS_PLANT))]
   else if String.eql(code, "bg") then
-    [ Mons.Object.new_of_kind(Mons.BUSH),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
-  else if String.eql(code, "hg") then
-    [ Mons.Object.new_of_kind(Mons.HERO),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.terrain(Mons.Kind.terrain.BUSH)),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "pg") then
-    [ Mons.Object.new_of_kind(Mons.PLANT_0),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.PLANT_0)),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "t0") then
-    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_00)]
+    [Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.ELV_TERRAIN_00))]
   else if String.eql(code, "t1") then
-    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_01)]
+    [Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.ELV_TERRAIN_01))]
   else if String.eql(code, "t2") then
-    [Mons.Object.new_of_kind(Mons.ELV_TERRAIN_02)]
+    [Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.ELV_TERRAIN_02))]
   else if String.eql(code, "w0") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN(Mons.Map.Dir.up)),
-      Mons.Object.new_of_kind(Mons.SAND_0) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.up))),
+      Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.SAND_0))]
   else if String.eql(code, "wm") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN(Mons.Map.Dir.middle)) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.middle))) ]
   else if String.eql(code, "w1") then
-    [ Mons.Object.new_of_kind( Mons.OCEAN(Mons.Map.Dir.left)),
+    [ Mons.Object.new_of_kind( Mons.Kind.terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.left))),
       Mons.Object.new_of_kind(Mons.SAND_0) ]
   else if String.eql(code, "w2") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN(Mons.Map.Dir.right)),
-      Mons.Object.new_of_kind(Mons.SAND_0) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.right))),
+      Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.SAND_0)) ]
   else if String.eql(code, "w3") then
-    [ Mons.Object.new_of_kind(Mons.OCEAN(Mons.Map.Dir.down)),
-      Mons.Object.new_of_kind(Mons.SAND_0) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.down))),
+      Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.SAND_0)) ]
   else if String.eql(code, "T0") then
-    [ Mons.Object.new_of_kind(Mons.TREE(0, 0)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.TREE(0, 0))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "T1") then
-    [ Mons.Object.new_of_kind(Mons.TREE(0, 1)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.TREE(0, 1))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "/0") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE(1, 0)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(1, 0))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "/1") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE(1, 1)) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(1, 1))) ]
   else if String.eql(code, "/2") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE(1, 2)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(1, 2))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "B0") then
-    [ Mons.Object.new_of_kind(Mons.TREE(1, 0)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.TREE(1, 0))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "B1") then
-    [ Mons.Object.new_of_kind(Mons.TREE(1, 1)),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.TREE(1, 1))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, ".s") then
-    [ Mons.Object.new_of_kind(Mons.ROCK_PATH_C),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.ROCK_PATH_C)),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, ".r") then
-    [ Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(Mons.ROCK_PATH_M)) ]
   else if String.eql(code, "30") then
-    Mons.Object.bush_with_kin(Mons.BATH)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.BATH))
   else if String.eql(code, "31") then
-    Mons.Object.bush_with_kin(Mons.BEHOLDER)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.BEHOLDER))
   else if String.eql(code, "32") then
-    Mons.Object.bush_with_kin(Mons.CRONI)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.CRONI))
   else if String.eql(code, "33") then
-    Mons.Object.bush_with_kin(Mons.ELLIOT)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.ELLIOT))
   else if String.eql(code, "34") then
-    Mons.Object.bush_with_kin(Mons.ESPECTRONUS)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.ESPECTRONUS))
   else if String.eql(code, "35") then
-    Mons.Object.bush_with_kin(Mons.GAKI)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.GAKI))
   else if String.eql(code, "36") then
-    Mons.Object.bush_with_kin(Mons.GORR)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.GORR))
   else if String.eql(code, "37") then
-    Mons.Object.bush_with_kin(Mons.LAMURIA)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.LAMURIA))
   else if String.eql(code, "38") then
-    Mons.Object.bush_with_kin(Mons.RAFIRE)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.RAFIRE))
   else if String.eql(code, "39") then
-    Mons.Object.bush_with_kin(Mons.VARGOULI)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.VARGOULI))
   else if String.eql(code, "40") then
-    Mons.Object.bush_with_kin(Mons.TUPITREE)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.TUPITREE))
   else if String.eql(code, "41") then
-    Mons.Object.bush_with_kin(Mons.LELA)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.LELA))
   else if String.eql(code, "42") then
-    Mons.Object.bush_with_kin(Mons.MOSHY)
+    Mons.Object.bush_with_kin(Mons.Kind.mons(Mons.Kind.mons.MOSHY))
 
   else if String.eql(code, "43") then
-    Mons.Object.water_with_kin(Mons.ESPECTRONUS)
+    Mons.Object.water_with_kin(Mons.Kind.mons(Mons.Kind.mons.ESPECTRONUS))
   else if String.eql(code, "44") then
-    Mons.Object.water_with_kin(Mons.LAMURIA)
+    Mons.Object.water_with_kin(Mons.Kind.mons(Mons.Kind.mons.LAMURIA))
 
   else if String.eql(code, "K0") then // 00
-    [Mons.Object.new_of_kind(Mons.HOUSE(0, 0)),
-     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(0, 0))),
+     Mons.Object.new_of_kind(rock_path) ]
   else if String.eql(code, "K1") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE(0, 1)) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(0, 1))) ]
   else if String.eql(code, "K2") then
-    [ Mons.Object.new_of_kind(Mons.HOUSE(0, 2)) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.HOUSE(0, 2))) ]
   else if String.eql(code, "K3") then
-    [Mons.Object.new_of_kind(Mons.HOUSE(0, 3)) ]
+    [Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(HOUSE(0, 3))) ]
   else if String.eql(code, "K4") then
-    [Mons.Object.new_of_kind(Mons.HOUSE(0, 4)),
-     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.Kind.const(HOUSE(0, 4))),
+     Mons.Object.new_of_kind(rock_path) ]
 
   else if String.eql(code, "C0") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 0))
-      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.CASTLE(0, 0)))
+      Mons.Object.new_of_kind(rock_path) ]
   else if String.eql(code, "C1") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 1))
-      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.CASTLE(0, 1)))
+      Mons.Object.new_of_kind(rock_path) ]
   else if String.eql(code, "C2") then
-    [ Mons.Object.new_of_kind(Mons.CASTLE(0, 2)),
-      Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.CASTLE(0, 2))),
+      Mons.Object.new_of_kind(rock_path) ]
   else if String.eql(code, "C3") then
-    [Mons.Object.new_of_kind(Mons.CASTLE(0, 3)),
-     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.CASTLE(0, 3))),
+     Mons.Object.new_of_kind(rock_path) ]
   else if String.eql(code, "C4") then
-    [Mons.Object.new_of_kind(Mons.CASTLE(0, 4)),
-     Mons.Object.new_of_kind(Mons.ROCK_PATH_M) ]
+    [Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.CASTLE(0, 4))),
+     Mons.Object.new_of_kind(rock_path) ]
      
   else if String.eql(code, "S0") then
-    [ Mons.Object.new_of_kind(Mons.SAND_0) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.SAND_0))]
   else if String.eql(code, "S1") then
-    [ Mons.Object.new_of_kind(Mons.SAND_1) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.SAND_1)) ]
   else if String.eql(code, "ch") then
-    [ Mons.Object.new_of_kind(Mons.CHEST) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(CHEST))) ]
   else if String.eql(code, "om") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.middle), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))) ]
   else if String.eql(code, "on") then
-    [ Mons.Object.new_of_kind(Mons.WATER1_M) ]
+    [ Mons.Object.new_of_kind(Mons.Kind.terrain(Mons.Kind.terrain.WATER1_M)) ]
   else if String.eql(code, "o0") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.right), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o1") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.up), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.up))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "o2") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.left), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o3") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.down), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.down))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o4") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.right_up), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_up))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o5") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.left_up), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_up))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o6") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.left_down), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_down))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "o7") then
-    [ Mons.Object.new( 
-      Mons.WATER(Mons.Map.Dir.expanded.right_down), 
-      Mons.Dir.down, Mons.Pad.null, 0u, 0u),
-      Mons.Object.new_of_kind(Mons.GRASS) ]
+    [ Mons.Object.new_of_kind(
+      Mons.Kind.terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_down))),
+      Mons.Object.new_of_kind(grass) ]
   else if String.eql(code, "xx") then
-    [ Mons.Object.new_of_kind(Mons.PATH_BLOCKER)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const.PATH_BLOCKER))]
 
   else if String.eql(code, "f0") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.right))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f1") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.middle)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.middle))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f2") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.left)),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f3") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_up)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.right_up))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f4") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_up)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.left_up))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f5") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_down)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.left_down))),
+      Mons.Object.new_of_kind(grass)]
   else if String.eql(code, "f6") then
-    [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_down)),
-      Mons.Object.new_of_kind(Mons.GRASS)]
+    [ Mons.Object.new_of_kind(Mons.Kind.const(Mons.Kind.const(0, Mons.Map.Dir.expanded.right_down))),
+      Mons.Object.new_of_kind(grass)]
   else
     []
 
@@ -656,8 +693,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
       Mons.Kind.set_default_battle_spr
     );
-  | Mons.GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
-  | Mons.GRASS_PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
+  | grass => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
+  | grass_PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
   | Mons.BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
   | Mons.PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
   | Mons.ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
