@@ -4,8 +4,8 @@
 ECDSA.Jacobian.mul_unsafe(d: ECDSA.Jacobian, scalar: Nat): ECDSA.Jacobian
   let n = Nat.mod(scalar, ECDSA.CURVE.n)
   get k1 k2 = ECDSA.split_scalar(n)
-  get k1neg k1 = Int.to_Nat(k1)
-  get k2neg k2 = Int.to_Nat(k2)
+  get k1neg k1 = Int.to_nat(k1)
+  get k2neg k2 = Int.to_nat(k2)
   get k1p k2p = ECDSA.Jacobian.mul_unsafe_aux(d, ECDSA.Jacobian.0, ECDSA.Jacobian.0, k1, k2)
   let k1p = Bool.if<>(k1neg, ECDSA.Jacobian.negate(k1p), k1p)
   let k2p = Bool.if<>(k2neg, ECDSA.Jacobian.negate(k2p), k2p)

@@ -1,0 +1,63 @@
+// Removes an element from a map, using a user-provided comparison 
+// function, balancing the resulting tree in case such element is found
+GMap.delete<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  key : K,
+  map : GMap(K,V)
+) : GMap(K,V)
+
+  case map: 
+  | tip => map;
+  | bin => 
+    case cmp(key, map.key):
+    // if key < map.key, we should look for it in the left subtree
+    | ltn => GMap.delete<K,V>(cmp, key, map.left);
+    // when the element is at the root of the current subtree
+    // things are a little trickier: we need to get the minimum
+    // key of the right subtree and then balance the tree composed
+    // of this minimum key we just found, the left subtree and 
+    // the right subtree without that minimum element
+    | eql => 
+      case map.right:
+      | tip => 
+        case map.left:
+        // if both subtrees are empty, we delete
+        // the root and return an empty map
+        | tip => GMap.tip<K,V>;
+        // if the right subtree is empty, and we just 
+        // deleted the root, we simply return the left
+        // subtree, which is not empty 
+        | bin => map.left;
+      ;
+      | bin => 
+        case map.left:
+        // conversely, if left is empty and right is not, we 
+        // return the right subtree
+        | tip => map.right;
+        // when none of the subtrees are empty, then we need to
+        // find the smallest value of the right subtree and delete it 
+        | bin => 
+          let maybe_min_pair = GMap.min<K,V>(map.right)
+          // a hack, we know it can never be `none` because the right
+          // subtree is not empty
+          let dummy    = Pair.new<K,V>(key, map.val)
+          let min_pair = Maybe.extract<Pair(K,V)>(maybe_min_pair, dummy)
+          case min_pair:
+          | let new_key   = min_pair.fst 
+            let new_val   = min_pair.snd 
+            let new_left  = map.left 
+            let new_right = GMap.delete<K,V>(cmp, new_key, map.right)
+            GMap.balance<K,V>(new_key, new_val, new_left, new_right) 
+          ; 
+        ;
+      ;
+    ;
+    // if key < map.key, we should look for it in the left subtree
+    | gtn => 
+      let new_key   = map.key 
+      let new_val   = map.val 
+      let new_left  = map.left 
+      let new_right = GMap.delete<K,V>(cmp, key, map.right)
+      GMap.balance<K,V>(new_key, new_val, new_left, new_right)
+    ;
+  ;

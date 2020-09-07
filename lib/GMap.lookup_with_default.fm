@@ -1,0 +1,12 @@
+// similar to GMap.lookup, but will return the provided default value
+// if the given key is not present in the map 
+GMap.lookup_with_default<K: Type, V: Type>(
+  cmp : K -> K -> Cmp,
+  key : K, 
+  dft : V,
+  map : GMap(K,V)
+) : V
+  let maybe_val = GMap.lookup<K,V>(cmp, key, map)
+  case maybe_val:
+  | none => dft;
+  | some => maybe_val.value;
