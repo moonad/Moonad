@@ -144,9 +144,9 @@ T Mons.Game
 // | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 
 T Mons.Kind
-| Mons.mons(ele: Mons.Kind.mons);
-| Mons.construction(ele: Mons.Kind.const);
-| Mons.terrain(ele: Mons.Kind.terrain);
+| Mons.Kind.mons(ele: Mons.Kind.mons);
+| Mons.Kind.construction(ele: Mons.Kind.const);
+| Mons.Kind.terrain(ele: Mons.Kind.terrain);
 
 T Mons.Kind.mons
 | Mons.Kind.mons.HERO;
@@ -677,149 +677,158 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
 // spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   case kin:
-  | Mons.VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
-  | Mons.HERO => 
-    Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
-    (x,y,obj_ani,obj_dir) 
-      Mons.walk_char_pack(
-        x, y, obj_ani, obj_dir,
-        Mons.Assets.boy_r_0, Mons.Assets.boy_u_0, 
-        Mons.Assets.boy_l_0, Mons.Assets.boy_d_0,
+  | Mons.Kind.mons => 
+    case ele:
+    | Mons.HERO => 
+      Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+      (x,y,obj_ani,obj_dir) 
+        Mons.walk_char_pack(
+          x, y, obj_ani, obj_dir,
+          Mons.Assets.boy_r_0, Mons.Assets.boy_u_0, 
+          Mons.Assets.boy_l_0, Mons.Assets.boy_d_0,
 
-        Mons.Assets.boy_r_1, Mons.Assets.boy_u_1,
-        Mons.Assets.boy_l_1, Mons.Assets.boy_d_1,
+          Mons.Assets.boy_r_1, Mons.Assets.boy_u_1,
+          Mons.Assets.boy_l_1, Mons.Assets.boy_d_1,
 
-        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
-        Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-      Mons.Kind.set_default_battle_spr
-    );
-  | grass => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
-  | grass_PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
-  | Mons.BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
-  | Mons.PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
-  | Mons.ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
-  | Mons.ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
-  | Mons.ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
-  | Mons.OCEAN => 
-    case kin.dir:
-      | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
-      | Mons.Map.Dir.up => Mons.Attr.new_blockable([Mons.Assets.ocean_u]);
-      | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
-      | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
-      | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
-  | Mons.TREE =>
-    if Nat.eql(kin.model, 0) then // Tree
-      if Nat.eql(kin.slice, 0) then 
-        Mons.Attr.new_blockable([Mons.Assets.tree_0_00])
-      else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
-    if Nat.eql(kin.model, 1) then // Big tree
-      if Nat.eql(kin.slice, 0) then 
-        Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
-      else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
-    else Mons.Attr.new_blockable([]);
-  | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
-  | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
+          Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
+          Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
+        Mons.Kind.set_default_battle_spr
+      );
+    | Mons.BATH => Mons.Attr.new_battleable(
+      [], "BATH",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
+    | Mons.BEHOLDER => Mons.Attr.new_battleable(
+      [], "BEHOLDER",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
+    | Mons.CRONI => Mons.Attr.new_battleable(
+      [], "CRONI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
+    | Mons.ELLIOT => Mons.Attr.new_battleable(
+      [], "ELLIOT",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
+    | Mons.ESPECTRONUS => Mons.Attr.new_battleable(
+      [], "ESPECTRONUS",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
+    | Mons.GAKI => Mons.Attr.new_battleable(
+      [], "GAKI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
+    | Mons.GORR => Mons.Attr.new_battleable(
+      [], "GORR",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
+    | Mons.LAMURIA => Mons.Attr.new_battleable(
+      [], "LAMURIA",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
+    | Mons.RAFIRE => Mons.Attr.new_battleable(
+      [], "RAFIRE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
+    | Mons.VARGOULI => Mons.Attr.new_battleable(
+      [], "VARGOULI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
+    | Mons.TUPITREE => Mons.Attr.new_battleable(
+      [], "TUPITREE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
+    | Mons.LELA => Mons.Attr.new_battleable(
+      [], "LELA",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
+    | Mons.MOSHY => Mons.Attr.new_battleable(
+      [], "MOSHY",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
+  ; // end mons
+  
+  | Mons.Kind.construction =>
+    case ele:
+    | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
+    | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
+    | Mons.HOUSE =>
+      if Nat.eql(kin.model, 0) then // Simple house
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
+        else if Nat.eql(kin.slice, 2) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
+        else if Nat.eql(kin.slice, 3) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
+        else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
+      else if Nat.eql(kin.model, 1) then // Tent
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.tent_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.tent_01])
+        else Mons.Attr.new_blockable([Mons.Assets.tent_02])
+      else Mons.Attr.new_blockable([]);
+    | Mons.CASTLE_00 =>
+      if Nat.eql(kin.model, 0) then
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
+        else if Nat.eql(kin.slice, 2) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
+        else if Nat.eql(kin.slice, 3) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
+        else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
+      else Mons.Attr.new_blockable([]);
+    | Mons.CHEST => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
+    | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+    | Mons.FENCE =>
+      if Nat.eql(kin.model, 0) then
+        case kin.dir:
+        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
+        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
+        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
+        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
+        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
+        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
+        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
+      else Mons.Attr.new_blockable([]);
+  ; // end of construction
 
-  | Mons.BATH => Mons.Attr.new_battleable(
-    [], "BATH",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
-  | Mons.BEHOLDER => Mons.Attr.new_battleable(
-    [], "BEHOLDER",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
-  | Mons.CRONI => Mons.Attr.new_battleable(
-    [], "CRONI",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
-  | Mons.ELLIOT => Mons.Attr.new_battleable(
-    [], "ELLIOT",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
-  | Mons.ESPECTRONUS => Mons.Attr.new_battleable(
-    [], "ESPECTRONUS",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
-  | Mons.GAKI => Mons.Attr.new_battleable(
-    [], "GAKI",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
-  | Mons.GORR => Mons.Attr.new_battleable(
-    [], "GORR",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
-  | Mons.LAMURIA => Mons.Attr.new_battleable(
-    [], "LAMURIA",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
-  | Mons.RAFIRE => Mons.Attr.new_battleable(
-    [], "RAFIRE",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
-  | Mons.VARGOULI => Mons.Attr.new_battleable(
-    [], "VARGOULI",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
-  | Mons.TUPITREE => Mons.Attr.new_battleable(
-    [], "TUPITREE",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
-  | Mons.LELA => Mons.Attr.new_battleable(
-    [], "LELA",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
-  | Mons.MOSHY => Mons.Attr.new_battleable(
-    [], "MOSHY",
-    (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
-
-  | Mons.HOUSE =>
-    if Nat.eql(kin.model, 0) then // Simple house
-      if Nat.eql(kin.slice, 0) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
-      else if Nat.eql(kin.slice, 1) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
-      else if Nat.eql(kin.slice, 2) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
-      else if Nat.eql(kin.slice, 3) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
-      else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
-    else if Nat.eql(kin.model, 1) then // Tent
-      if Nat.eql(kin.slice, 0) then
-        Mons.Attr.new_blockable([Mons.Assets.tent_00])
-      else if Nat.eql(kin.slice, 1) then
-        Mons.Attr.new_blockable([Mons.Assets.tent_01])
-      else Mons.Attr.new_blockable([Mons.Assets.tent_02])
-    else Mons.Attr.new_blockable([]);
-
-  | Mons.CASTLE_00 =>
-    if Nat.eql(kin.model, 0) then
-      if Nat.eql(kin.slice, 0) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
-      else if Nat.eql(kin.slice, 1) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
-      else if Nat.eql(kin.slice, 2) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
-      else if Nat.eql(kin.slice, 3) then
-        Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
-      else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
-    else Mons.Attr.new_blockable([]);
-  | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
-  | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
-  | Mons.CHEST => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
-  | Mons.WATER => 
-    case kin.dir:
-    | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
-    | Mons.Map.Dir.expanded.up => Mons.Attr.new_neutral([Mons.Assets.water_0_u, Mons.Assets.water_0_10]); 
-    | Mons.Map.Dir.expanded.left => Mons.Attr.new_neutral([Mons.Assets.water_0_l]); 
-    | Mons.Map.Dir.expanded.down => Mons.Attr.new_neutral([Mons.Assets.water_0_d]); 
-    | Mons.Map.Dir.expanded.middle => Mons.Attr.new_neutral([Mons.Assets.water_0_m, Mons.Assets.water_0_10]);
-    | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_neutral([Mons.Assets.water_1_ru]); 
-    | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_neutral([Mons.Assets.water_1_rd]); 
-    | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
-    | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
-  | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
-  | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
-  | Mons.FENCE =>
-    if Nat.eql(kin.model, 0) then
+  | Mons.Kind.terrain => 
+    case ele:
+    | VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
+    | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
+    | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
+    | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
+    | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
+    | ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
+    | ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
+    | ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
+    | OCEAN => 
       case kin.dir:
-      | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
-      | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
-      | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
-      | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
-      | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
-      | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
-      | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
-      | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
-      | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
-    else Mons.Attr.new_blockable([]);
+        | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
+        | Mons.Map.Dir.up => Mons.Attr.new_blockable([Mons.Assets.ocean_u]);
+        | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
+        | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
+        | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
+    | TREE =>
+      if Nat.eql(kin.model, 0) then // Tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.tree_0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
+      if Nat.eql(kin.model, 1) then // Big tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
+      else Mons.Attr.new_blockable([]);
+    | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
+    | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
+    | Mons.WATER => 
+      case kin.dir:
+      | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
+      | Mons.Map.Dir.expanded.up => Mons.Attr.new_neutral([Mons.Assets.water_0_u, Mons.Assets.water_0_10]); 
+      | Mons.Map.Dir.expanded.left => Mons.Attr.new_neutral([Mons.Assets.water_0_l]); 
+      | Mons.Map.Dir.expanded.down => Mons.Attr.new_neutral([Mons.Assets.water_0_d]); 
+      | Mons.Map.Dir.expanded.middle => Mons.Attr.new_neutral([Mons.Assets.water_0_m, Mons.Assets.water_0_10]);
+      | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_neutral([Mons.Assets.water_1_ru]); 
+      | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_neutral([Mons.Assets.water_1_rd]); 
+      | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
+      | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
+    | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
+  ; // end terrain
+  
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
