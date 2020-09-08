@@ -105,44 +105,6 @@ T Mons.Game
   map: Mons.Map // the game map
 );
 
-// THING ID (kin)
-// T Mons.Kind
-// | Mons.VOID;
-// | Mons.HERO;
-// | grass;
-// | grass_PLANT;
-// | Mons.BUSH;
-// | Mons.PLANT_0;
-// | Mons.ELV_TERRAIN_00;
-// | Mons.ELV_TERRAIN_01;
-// | Mons.ELV_TERRAIN_02;
-// | Mons.OCEAN(dir: Mons.Map.Dir);
-// | Mons.TREE(model: Nat, slice: Nat);
-// | Mons.ROCK_PATH_C;
-// | Mons.ROCK_PATH_M;
-// | Mons.BATH;
-// | Mons.BEHOLDER;
-// | Mons.CRONI;
-// | Mons.ELLIOT;
-// | Mons.ESPECTRONUS;
-// | Mons.GAKI;
-// | Mons.GORR;
-// | Mons.LAMURIA;
-// | Mons.RAFIRE;
-// | Mons.VARGOULI;
-// | Mons.TUPITREE;
-// | Mons.LELA;
-// | Mons.MOSHY;
-// | Mons.HOUSE(model: Nat, slice: Nat);
-// | Mons.CASTLE(model: Nat, slice: Nat);
-// | Mons.SAND_0;
-// | Mons.SAND_1;
-// | Mons.CHEST;
-// | Mons.WATER(dir: Mons.Map.Dir.expanded);
-// | Mons.WATER1_M;
-// | Mons.PATH_BLOCKER;
-// | Mons.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
-
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons);
 | Mons.Kind.Const(ele: Mons.Kind.const);
@@ -219,41 +181,25 @@ Mons.Kind.get_atk(kind: Mons.Kind): U32
 // everytime a new Mon is added/removed 
 Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
-  | Mons.VOID           => Bool.false;
-  | Mons.HERO           => Bool.true;
-  | Mons.GRASS          => Bool.false;
-  | Mons.GRASS_PLANT    => Bool.false;
-  | Mons.BUSH           => Bool.false;
-  | Mons.PLANT_0        => Bool.false;
-  | Mons.ELV_TERRAIN_00 => Bool.false;
-  | Mons.ELV_TERRAIN_01 => Bool.false;
-  | Mons.ELV_TERRAIN_02 => Bool.false;
-  | Mons.OCEAN          => Bool.false;
-  | Mons.TREE           => Bool.false;
-  | Mons.ROCK_PATH_C    => Bool.false;
-  | Mons.ROCK_PATH_M    => Bool.false;
-  | Mons.BATH           => Bool.false;
-  | Mons.BEHOLDER       => Bool.false;
-  | Mons.CRONI          => Bool.false;
-  | Mons.ELLIOT         => Bool.false;
-  | Mons.ESPECTRONUS    => Bool.false;
-  | Mons.GAKI           => Bool.false;
-  | Mons.GORR           => Bool.false;
-  | Mons.LAMURIA        => Bool.false;
-  | Mons.RAFIRE         => Bool.false;
-  | Mons.VARGOULI       => Bool.false;
-  | Mons.TUPITREE       => Bool.false;
-  | Mons.LELA           => Bool.false;
-  | Mons.MOSHY          => Bool.false;
-  | Mons.HOUSE          => Bool.false;
-  | Mons.CASTLE         => Bool.false;
-  | Mons.SAND_0         => Bool.false;
-  | Mons.SAND_1         => Bool.false;
-  | Mons.CHEST          => Bool.false;
-  | Mons.WATER          => Bool.false;
-  | Mons.WATER1_M       => Bool.false;
-  | Mons.PATH_BLOCKER   => Bool.false;
-  | Mons.FENCE          => Bool.false;
+  | mons => 
+    case kind.ele:
+    | HERO        => Bool.true;
+    | BATH        => Bool.false;
+    | BEHOLDER    => Bool.false;
+    | CRONI       => Bool.false;
+    | ELLIOT      => Bool.false;
+    | ESPECTRONUS => Bool.false;
+    | GAKI        => Bool.false;
+    | GORR        => Bool.false;
+    | LAMURIA     => Bool.false;
+    | RAFIRE      => Bool.false;
+    | VARGOULI    => Bool.false;
+    | TUPITREE    => Bool.false;
+    | LELA        => Bool.false;
+    | MOSHY       => Bool.false;;
+  | const => Bool.false;
+  | terrain => Bool.false;
+
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -690,28 +636,6 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   else
     []
 
-  { "f0", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right)),
-            Mons.Object.new_of_kind(Mons.GRASS)]
-  },
-  { "f1", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.middle)),
-            Mons.Object.new_of_kind(Mons.GRASS)]
-  },
-  { "f2", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left)),
-           Mons.Object.new_of_kind(Mons.GRASS)]
-  },
-  { "f3", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_up)),
-            Mons.Object.new_of_kind(Mons.GRASS)]
-  }, 
-  { "f4", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_up)),
-            Mons.Object.new_of_kind(Mons.GRASS)]
-  },
-  { "f5", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.left_down)),
-            Mons.Object.new_of_kind(Mons.GRASS)]
-  },
-  { "f6", [ Mons.Object.new_of_kind(Mons.FENCE(0, Mons.Map.Dir.expanded.right_down)),
-           Mons.Object.new_of_kind(Mons.GRASS)]}
-  ])
-
 // Converts a string map source to an actual map
 // TODO take dimensions into consideration
 Mons.Map.build(code: List(List(String))): Mons.Map
@@ -836,7 +760,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.Kind.mons => 
     case kin.ele as kin:
     | Mons.HERO => 
-      Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
+      Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "HERO",
       (x,y,obj_ani,obj_dir) 
         Mons.walk_char_pack(
           x, y, obj_ani, obj_dir,
