@@ -1013,70 +1013,88 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let adve_obj = Mons.Map.get(Pos32.set_z(hero_pos.value,1u), game.map)
     open hero_obj:
     open adve_obj:
-    let hero_mph = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.mhp;
-    let adve_mph = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.mhp;
-    let hero_chp = U32.sub(hero_mph, hero_obj.dmg)
-    let adve_chp = U32.sub(adve_mph, adve_obj.dmg)
-    let hero_kin = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.battle_spr(Bool.true); //Mons.Kind.get_battle_img(hero_obj.kin, Bool.true)
-    let adve_kin = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.battle_spr(Bool.false); //Mons.Kind.get_battle_img(adve_obj.kin, Bool.false)
-    let hero_name = case Mons.Kind.attr(hero_obj.kin) as kind: |kind.name;
-    let adve_name = case Mons.Kind.attr(adve_obj.kin) as kind: |kind.name;
-    let hero_txt = String.flatten([hero_name, " ", U32.to_string(hero_chp), " HP"])
-    let adve_txt = String.flatten([adve_name, " ", U32.to_string(adve_chp), " HP"])
     let scr = Image3D.clear(scr)
-    // When hero is in a battle, draw it...
-    let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
-    let is_battling = case Mons.Kind.attr(adve_obj.kin) as kind: | kind.battles;
-    if Bool.and(is_standing, is_battling) then
-      let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-      let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-      let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
-      let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-      let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-      let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
-      let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
-      scr
+    case Mons.Kind.attr(hero_obj.kin) as hero_kind:
+    | mons =>
+      case Mons.Kind.attr(adve_obj.kin) as adve_kind:
+      | mons =>
+        let hero_mon = hero_kind.ele // antigo hero_obj
+        let hero_mhp = case hero_mon: |hero_mon.mhp;
+        let hero_chp = U32.sub(hero_mhp, hero_mon.dmg)
+        let hero_btl_img = case hero_mon: |hero_mon.battle_spr(Bool.true);
+        let hero_name = case hero_mon: |hero_mon.name;
+        let hero_txt = String.flatten([hero_name, " ", U32.to_string(hero_chp), " HP"])
+
+        let adve_mon = adve_kind.ele
+        let adve_mhp = case adve_mon: |adve_mon.mhp;
+        let adve_chp = U32.sub(adve_mhp, adve_mon.dmg)
+        let adve_btl_img = case adve_mon: |adve_mon.battle_spr(Bool.false);
+        let adve_name = case adve_name: |adve_name.name;
+        let adve_txt = String.flatten([adve_name, " ", U32.to_string(adve_chp), " HP"])
+        
+        let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
+        if is_standing then
+          let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+          let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
+          let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+          let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
+          let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
+          let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
+          let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
+          scr
+        else
+          scr
+      ;
+      | construction =>
+        Mons.Map.build_sprites(game, scr, hero_pos, hero_obj)
+      ;
+      | terrain =>  Mons.Map.build_sprites(game, scr, hero_pos, hero_obj);
+    ;
+    | construction => src;
+    | terrain => src;
     // When hero isn't battling, draw map...
-    else 
-      let sprs = Mons.game_sprites(game)
-      // For each sprite around the hero...
-      for spr in sprs with scr:
-        // For each pixel of the sprite...
-        open spr:
-        let len = Image3D.get_length(spr.img)
-        for i : U32 = 0u .. len with scr:
-          let s_w = Pos32.get_x(Mons.scr_mid)
-          let s_h = Pos32.get_y(Mons.scr_mid)
-          // The origin global position (centered on hero)
-          let h_x = Pos32.get_x(hero_pos.value)
-          let h_y = Pos32.get_y(hero_pos.value)
-          //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
-          //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
-          get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
-          // Gets the spr global position
-          let s_x = spr.x
-          let s_y = spr.y
-          let s_z = spr.z
-          // Gets the pixel global position (its cpos on img is x=128, y=128)
-          let xyz = Image3D.get_pos(i, spr.img)
-          let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
-          let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
-          let v_z = Pos32.get_z(xyz)
-          // Temporary: if pixel is out of screen, make it invisible
-          let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
-          let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
-          let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
-          let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
-          //let ok  = List.and([ok0, ok1, ok2, ok3])
-          let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
-          // Computes the pixel position on the final canvas
-          let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
-          let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-          let c_z = Bool.if<>(ok, v_z, 0u)
-          // Pushes the pixel to the scr
-          let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
-          let col = Image3D.get_col(i, spr.img) // final pixel col
-          Image3D.push(pos, col, scr); // pushes to scr
+    
+
+// Build sprites around the hero
+Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
+  let sprs = Mons.game_sprites(game)
+  for spr in sprs with scr:
+  // For each pixel of the sprite...
+  open spr:
+  let len = Image3D.get_length(spr.img)
+  for i : U32 = 0u .. len with scr:
+    let s_w = Pos32.get_x(Mons.scr_mid)
+    let s_h = Pos32.get_y(Mons.scr_mid)
+    // The origin global position (centered on hero)
+    let h_x = Pos32.get_x(hero_pos)
+    let h_y = Pos32.get_y(hero_pos)
+    //let o_x = U32.mul(Pos32.get_x(hero_pos.value), 16u)
+    //let o_y = U32.mul(Pos32.get_y(hero_pos.value), 16u)
+    get o_x o_y = Mons.draw.global_xy(h_x, h_y, hero_obj)
+    // Gets the spr global position
+    let s_x = spr.x
+    let s_y = spr.y
+    let s_z = spr.z
+    // Gets the pixel global position (its cpos on img is x=128, y=128)
+    let xyz = Image3D.get_pos(i, spr.img)
+    let v_x = U32.sub(U32.add(Pos32.get_x(xyz),s_x),Pos32.get_x(Mons.vox_mid))
+    let v_y = U32.sub(U32.add(Pos32.get_y(xyz),s_y),Pos32.get_y(Mons.vox_mid))
+    let v_z = Pos32.get_z(xyz)
+    // Temporary: if pixel is out of screen, make it invisible
+    let ok0 = U32.lte(U32.sub(o_x, s_w), v_x) // o_x - s_w <= v_x
+    let ok1 = U32.ltn(v_x, U32.add(o_x, s_w)) // v_x < o_x + s_w
+    let ok2 = U32.lte(U32.sub(o_y, s_h), v_y) // o_y - s_h <= v_y
+    let ok3 = U32.ltn(v_y, U32.add(o_y, s_h)) // v_y < o_y + s_h
+    //let ok  = List.and([ok0, ok1, ok2, ok3])
+    let ok  = Bool.and(ok0, Bool.and(ok1, Bool.and(ok2, ok3)))
+    // Computes the pixel position on the final canvas
+    let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
+    let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
+    let c_z = Bool.if<>(ok, v_z, Mons.Dim.main)
+    // Pushes the pixel to the scr
+    let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
+    let col = Image3D.get_col(i, spr.img) // final pixel col
+    Image3D.push(pos, col, scr) // pushes to scr
 
 // For each tick, updates an object
 Mons.Object.tick(obj: Mons.Object): Mons.Object
