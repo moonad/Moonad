@@ -57,7 +57,8 @@ T Mons.Object
   dir: Mons.Dir,  // direction the object is facing
   pad: Mons.Pad,  // movement key pad
   ani: U32,       // number of walk frames to animate
-  dmg: U32        // object's current health points
+  dmg: U32,       // object's current health points
+  bag: List(Mons.Object) // store Mons.Object
 );
 
 T Mons.Attr
@@ -228,7 +229,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 // The void tile
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [])
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -236,7 +237,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -244,7 +245,7 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -252,7 +253,7 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -264,7 +265,7 @@ Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -414,13 +415,38 @@ Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
+// TODO: Add condition only accept 3 mons
+Mons.Bag.push(mon: Mons.Object, obj: Mons.Object): Mons.Object
+  open mon:
+  case mon.kin as kind:
+  | mon =>
+    let new_bag = List.cons<>(mon, mon.bag)
+    Mons.Object.set_bag(new_bag, obj);
+  | const => obj;
+  | terrain => obj;
+
+// TODO
+// Mons.Bag.remove(mon: Mons.Object, game: Mons.Game): Mons.Game
+
+// Get names in a list of Mons.Objects
+Mons.Object.get_names(bag: List(Mons.Object)): List(String)
+  let names = List.nil<String>
+  for mon in bag with names:
+    open mon:
+    let name = Mons.Kind.get_name(mon.kin);
+    List.cons<>(name, names)
+
+Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
+   open obj:
+   Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag)
+
 Mons.Object.hero: Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO))
   
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [])
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
@@ -956,6 +982,35 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
 
+// Draw an inventory showing the amount of mons on it and their names
+Mons.Bag.draw(obj: Mons.Object, scr: Image3D): Image3D
+   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
+   let scr = Mons.draw.text("INVENTORY", Pos32.new(95u,28u,0u), scr)
+   open obj:
+   let qtd = Nat.to_u32(List.length<>(obj.bag))
+   let qtd_field = 
+     if U32.eql(qtd, 0u) then "Nothing to show for now"
+     else
+       let qtd = U32.to_string(qtd)
+       String.flatten(["Qtd: ", qtd])
+   let mons_names = Mons.Object.get_names(obj.bag)
+   let text = List.cons<>(qtd_field, mons_names)
+   let scr = Mons.draw.list(text, Pos32.new(30u,40u,0u), scr)
+   scr
+
+Mons.draw.list(texts: List(String), start_pos: Pos32, scr: Image3D): Image3D
+   let qtd = Nat.to_u32(List.length<>(texts))
+   Mons.draw.list.go(texts, start_pos, scr, 0u)
+
+Mons.draw.list.go(texts: List(String), pos: Pos32, scr: Image3D, idx: U32): Image3D
+   let x = Pos32.get_x(pos)
+   let y = Pos32.get_y(pos)
+   let pos = Pos32.new(x,U32.add(U32.add(15u, idx), y),0u)
+   case texts:
+   | scr;
+   | let scr = Mons.draw.text(texts.head, pos, scr)
+     Mons.draw.list.go(texts.tail, pos, scr, U32.add(idx, 1u));
+
 // Draws an ASCII char to a position using 
 Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
   case Mons.font.get_img(chr, Mons.font.map) as got:
@@ -1031,9 +1086,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     ;
     | construction => src;
     | terrain => src;
-  ;
-
-    
+  ;    
 
 // Build sprites around the hero
 Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
@@ -1157,8 +1210,8 @@ Mons.Input.list: List(Pair(Char, Bits))
     {'i', b0(b0(b0(b0(b1(b1(b0(b1(bn))))))))},
     {'j', b0(b0(b0(b0(b1(b1(b1(b0(bn))))))))},
     {'k', b0(b0(b0(b0(b1(b1(b1(b1(bn))))))))},
-    {'P', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))} //TODO remove! for now its just a hack to test dimensions
-    {'O', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))} //TODO remove! for now its just a hack to test dimensions
+    {'P', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))}, //TODO remove! for now its just a hack to test dimensions
+    {'O', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))}, //TODO remove! for now its just a hack to test dimensions
   ]
 
 // Maps from chars to their codes
