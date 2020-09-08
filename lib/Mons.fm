@@ -1,15 +1,3 @@
-// TODO:
-// 2. Avoid duplicated code on characters on the spr attribute by moving the ifs
-//    and cases to a separate function, and then sending the x/y and the 12 imgs
-// 3. Remove the Pos32.set_z(pos,0u) from Map.set_list, and start implementing 
-//    dimensions. Will probably just work, but may have some bugs
-// 4. Add a (idx: U32) argument to the Mons.Map.get, Mons.Map.set, Mons.Map.del. 
-//    Otherwise it would be confusing because we're now using Z for dimensions. 
-// 7. Make the attack key more robust (right now it just gets the object below)
-// 8. Make the attack system (instead of just causing damage when the user
-//    presses U, we need each Kind to have a list of 4 attacks, and then get the
-//    correct attack, and then apply it)
-// 10. Talk with artists & me about things they want to do and make more todos!
 // GBA position: divide OpenEMU by 2.575
 
 Mons.placa: Image3D
@@ -1014,7 +1002,6 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | mons =>
       case Mons.Kind.attr(adve_obj.kin) as adve_mon:
       | mons =>
-        // let hero_mon = hero_kind.ele // antigo hero_obj
         let hero_chp = U32.sub(hero_mon.mhp, hero_obj.dmg)
         let hero_btl_img = hero_mon.battle_spr(Bool.true);
         let hero_txt = String.flatten([hero_mon.name, " ", U32.to_string(hero_chp), " HP"])
