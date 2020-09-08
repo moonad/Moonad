@@ -395,6 +395,9 @@ Mons.Map.del(pos: Pos32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(Pos32.get_z(pos), objs)
   Mons.Map.set_list(pos, objs, map)
 
+Mons.Object.hero: Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO))
+  
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg
@@ -681,7 +684,7 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   case kin:
   | Mons.Kind.mons => 
-    case ele:
+    case kin.ele as kin:
     | Mons.HERO => 
       Mons.Attr.new(Bool.false, Bool.false, 0u, 0u, "",
       (x,y,obj_ani,obj_dir) 
@@ -739,7 +742,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   ; // end mons
   
   | Mons.Kind.construction =>
-    case ele:
+    case kin.ele as kin:
     | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
     | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
     | Mons.HOUSE =>
@@ -790,7 +793,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   ; // end of construction
 
   | Mons.Kind.terrain => 
-    case ele:
+    case kin.ele as kin:
     | VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
     | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
     | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
@@ -864,7 +867,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   // New player
   | let pos = Pos32.new(2048u, 2048u, 0u)
     let old_pos = Pos32.new(0u, 0u, 0u)
-    let obj = Mons.Object.new_of_kind(Mons.HERO)
+    let obj = Mons.Object.hero
     let game = Mons.Game.map_push(pos, old_pos, obj, game)
     let game = Mons.Game.set_user_pos(usr, pos, game)
     game;
@@ -1017,46 +1020,42 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     open hero_obj:
     open adve_obj:
     let scr = Image3D.clear(scr)
-    case Mons.Kind.attr(hero_obj.kin) as hero_kind:
+    case Mons.Kind.attr(hero_obj.kin) as hero_mon:
     | mons =>
-      case Mons.Kind.attr(adve_obj.kin) as adve_kind:
+      case Mons.Kind.attr(adve_obj.kin) as adve_mon:
       | mons =>
-        let hero_mon = hero_kind.ele // antigo hero_obj
-        let hero_mhp = case hero_mon: |hero_mon.mhp;
-        let hero_chp = U32.sub(hero_mhp, hero_mon.dmg)
-        let hero_btl_img = case hero_mon: |hero_mon.battle_spr(Bool.true);
-        let hero_name = case hero_mon: |hero_mon.name;
-        let hero_txt = String.flatten([hero_name, " ", U32.to_string(hero_chp), " HP"])
+        // let hero_mon = hero_kind.ele // antigo hero_obj
+        let hero_chp = U32.sub(hero_mon.mhp, hero_obj.dmg)
+        let hero_btl_img = hero_mon.battle_spr(Bool.true);
+        let hero_txt = String.flatten([hero_mon.name, " ", U32.to_string(hero_chp), " HP"])
 
-        let adve_mon = adve_kind.ele
-        let adve_mhp = case adve_mon: |adve_mon.mhp;
-        let adve_chp = U32.sub(adve_mhp, adve_mon.dmg)
-        let adve_btl_img = case adve_mon: |adve_mon.battle_spr(Bool.false);
-        let adve_name = case adve_name: |adve_name.name;
-        let adve_txt = String.flatten([adve_name, " ", U32.to_string(adve_chp), " HP"])
+        let adve_chp = U32.sub(adve_mon.mhp, adve_obj.dmg)
+        let adve_btl_img = adve_mon.battle_spr(Bool.false);
+        let adve_txt = String.flatten([adve_mon.name, " ", U32.to_string(adve_chp), " HP"])
         
         let is_standing = U32.eql(Mons.Object.get_ani(hero_obj),0u)
-        if is_standing then
+        let is_battling = adve_mon.battles
+        if Bool.and(is_standing, is_battling) then
           let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
           let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
           let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
           let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
           let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
-          let scr = Mons.draw.image(hero_kin, Pos32.new(75u,80u,0u), scr) 
-          let scr = Mons.draw.image(adve_kin, Pos32.new(180u,40u,0u), scr)
+          let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
+          let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
           scr
-        else
-          scr
+        else // When hero isn't battling, draw map...
+          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | construction =>
-        Mons.Map.build_sprites(game, scr, hero_pos, hero_obj)
+        Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
-      | terrain =>  Mons.Map.build_sprites(game, scr, hero_pos, hero_obj);
+      | terrain =>  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ;
     | construction => src;
     | terrain => src;
   ;
-    // When hero isn't battling, draw map...
+
     
 
 // Build sprites around the hero
@@ -1094,7 +1093,7 @@ Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj:
     // Computes the pixel position on the final canvas
     let c_x = U32.sub(U32.add(v_x, Pos32.get_x(Mons.scr_mid)), o_x)
     let c_y = U32.sub(U32.add(v_y, Pos32.get_y(Mons.scr_mid)), o_y)
-    let c_z = Bool.if<>(ok, v_z, Mons.Dim.main)
+    let c_z = Bool.if<>(ok, v_z, 0u)
     // Pushes the pixel to the scr
     let pos = Pos32.new(c_x, c_y, c_z) // final pixel pos
     let col = Image3D.get_col(i, spr.img) // final pixel col
