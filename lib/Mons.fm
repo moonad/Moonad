@@ -60,6 +60,16 @@ T Mons.Object
   dmg: U32        // object's current health points
 );
 
+// TODO add more skills
+T Mons.Skill
+| Mons.Skill.Dummy;
+
+// TODO remove
+Mons.dummy_skills: List(Mons.Skill)
+ [ Mons.Skill.Dummy, Mons.Skill.Dummy,
+   Mons.Skill.Dummy, Mons.Skill.Dummy ]
+
+
 T Mons.Attr
 | Mons.Attr.new(
   blocks: Bool,
@@ -68,7 +78,8 @@ T Mons.Attr
   atk: U32,
   name: String,
   spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List(Image3D),
-  battle_spr: (is_up: Bool) -> Image3D
+  battle_spr: (is_up: Bool) -> Image3D,
+  skills: List(Mons.Skill)
 );
 // TODO add:
 // def: U32,
@@ -185,7 +196,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     | TUPITREE    => Bool.false;
     | LELA        => Bool.false;
     | MOSHY       => Bool.false;;
-  | const => Bool.false;
+  | const   => Bool.false;
   | terrain => Bool.false;
 
 
@@ -524,7 +535,6 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
   ])
 
 // Converts a string map source to an actual map
-// TODO take dimensions into consideration
 Mons.Map.build(code: List(List(String))): Mons.Map
   List.ifor.u32<>(code)<>
   | Mons.Map.new;
@@ -541,24 +551,7 @@ Mons.Map.build(code: List(List(String))): Mons.Map
         let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
         let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
         let sli = String.slice(ini, end, row) // slice with tile code
-        Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map)
-    ;
-  ;   
-
-// Mons.Map.build(code: List(String)): Mons.Map
-//   let size = List.length.u32<>(code) // NOTE: assumes width == height
-//   List.ifor.u32<>(code)<>
-//   | Mons.Map.new;
-//   | (j, row, map)
-//     for i : U32 = 0u .. size with map:
-//       let t_x = U32.add(U32.sub(2048u, U32.div(size, 2u)), i)
-//       let t_y = U32.add(U32.sub(2048u, U32.div(size, 2u)), j)
-//       let t_z = 0u
-//       let pos = Pos32.new(t_x, t_y, t_z)
-//       let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
-//       let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
-//       let sli = String.slice(ini, end, row) // slice with tile code
-//       Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);
+        Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);;   
 
 // Get the game user
 Mons.Game.get_usr(game: Mons.Game): Word(160)
@@ -620,21 +613,21 @@ Mons.Attr.new_battleable(
   Mons.Attr.new(
     Bool.false, Bool.true, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
-    battle_spr)
+    battle_spr, Mons.dummy_skills)
 
 // Mons.Attr with "block" equals to Bool.true
 Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.true, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
-    Mons.Kind.set_default_battle_spr)
+    Mons.Kind.set_default_battle_spr, [])
 
 // Mons.Attr with "block" and "batlles" equals to Bool.false
 Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.false, Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
-    Mons.Kind.set_default_battle_spr)
+    Mons.Kind.set_default_battle_spr, [])
 
 // blocks: Bool,
 // battles: Bool,
@@ -659,7 +652,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
 
           Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
           Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-        Mons.Kind.set_default_battle_spr
+        Mons.Kind.set_default_battle_spr,
+        Mons.dummy_skills
       );
     | Mons.BATH => Mons.Attr.new_battleable(
       [], "BATH",
@@ -803,6 +797,23 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(0u, 1u, 0u));
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
+
+Mons.Skill.get_name(skill: Mons.Skill): String
+  case skill:
+  | dummy => "dummy";
+
+Mons.damage(pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game 
+  Mons.Game.update((obj) Mons.Object.hit(obj, dmg), pos, idx, game)
+
+// pos    : position of the map in which the battle is taking place
+// source : index of the object which is casting a skill
+// target : index of the object which is receiving the effect 
+Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
+  open game:
+  let source_obj = Mons.Map.get(pos, source, game.map)
+  let target_obj = Mons.Map.get(pos, target, game.map)
+  case skill: 
+  | dummy => Mons.damage(pos, target, 4u, game);  
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
