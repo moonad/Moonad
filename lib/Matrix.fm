@@ -1,0 +1,31 @@
+// An attempt at a matrix library
+T Matrix <A: Type> ~ (rows : Nat, cols : Nat)
+| Matrix.new<rows: Nat, cols: Nat>(vec: Vector(Vector(A, cols), rows)) ~ (rows, cols);
+
+Matrix.fill<A : Type>(value : A, rows: Nat, cols: Nat): Matrix(A, rows, cols)
+    let row = Vector.fill<A>(cols, value)
+    let rows_vec = Vector.fill<Vector(A,cols)>(rows, row)
+    Matrix.new<A, rows, cols>(rows_vec)
+
+
+Matrix.show<A : Type, rows : Nat, cols : Nat>(f : A -> String, m : Matrix(A, rows, cols)): String
+  case m:
+    | Vector.show<Vector(A,m.cols), m.rows>(Vector.show<A, m.cols>(f), m.vec);
+    : String;
+
+Matrix.test: IO(Unit)
+  do IO {
+    let m = Matrix.fill<Nat>(10,2,2);
+    IO.print(Matrix.show<Nat,2,2>(Nat.show, m));
+  }
+
+
+Matrix.add<A : Type,  (m1: Matrix(A, r, c), m2: Matrix(A, r, c)): Matrix(A, r, c)
+  case m1:
+  | Matrix.new(vec1) =>
+    case m2:
+    | Matrix.new(vec2) =>
+      for (r1, r2) in zip(vec1, vec2)
+        Vector.add(r1, r2)
+      end
+
