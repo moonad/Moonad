@@ -420,8 +420,14 @@ Mons.Object.push_to_bag(mon: Mons.Object, obj: Mons.Object): Mons.Object
   | const => obj;
   | terrain => obj;
 
-// TODO
-// Mons.Bag.remove(mon: Mons.Object, game: Mons.Game): Mons.Game
+Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
+  open obj:
+  let qtd = List.length<>(obj.bag)
+  if Nat.eql(qtd, 1) then
+    obj
+  else
+    let new_bag = List.drop<>(1, obj.bag)
+    Mons.Object.set_bag(new_bag, obj)
 
 // Get names in a list of Mons.Objects
 Mons.Object.get_names(bag: List(Mons.Object)): List(String)
@@ -1062,13 +1068,13 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let hero_obj = Pair.fst<,>(hero_pair)
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
-    // TEST a bag with two Mons
+    // TEST a bag by adding and removing Mon
     let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
     let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
     let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
     let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
     let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
-    let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+    let hero_obj = Mons.Object.pop_from_bag(hero_obj)
     // ---
     if game.bag then Mons.draw.bag(hero_obj, scr) 
     else
