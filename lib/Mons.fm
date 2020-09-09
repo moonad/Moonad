@@ -406,14 +406,17 @@ Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
-// TODO: Add condition only accept 3 mons
 Mons.Object.push_to_bag(mon: Mons.Object, obj: Mons.Object): Mons.Object
   open mon:
   open obj:
+  let qtd = List.length<>(obj.bag)
   case mon.kin as kind:
   | mon =>
-    let new_bag = List.cons<>(mon, obj.bag)
-    Mons.Object.set_bag(new_bag, obj);
+    if Nat.ltn(qtd, 3) then
+      let new_bag = List.cons<>(mon, obj.bag)
+      Mons.Object.set_bag(new_bag, obj)
+    else
+      obj;
   | const => obj;
   | terrain => obj;
 
@@ -1064,6 +1067,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
     let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
     let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
     // ---
     if game.bag then Mons.draw.bag(hero_obj, scr) 
     else
