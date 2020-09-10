@@ -466,9 +466,9 @@ Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
 Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Const(kin))
 
-Mons.Kind.bush_with_kin(kin: Mons.Kind): List(Mons.Object)
+Mons.Kind.new_mons(kin: Mons.Kind): List(Mons.Object)
   [ Mons.Object.new_of_kind(kin),
-    Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
+    // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
     Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
 
 Mons.Kind.water_with_kin(kin: Mons.Kind): List(Mons.Object)
@@ -522,19 +522,19 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
-    { "30", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.BATH)) },
-    { "31", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.BEHOLDER)) },
-    { "32", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.CRONI)) },
-    { "33", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT)) },
-    { "34", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS)) },
-    { "35", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.GAKI)) },
-    { "36", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.GORR)) },
-    { "37", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA)) },
-    { "38", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.RAFIRE)) },
-    { "39", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.VARGOULI)) },
-    { "40", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.TUPITREE)) },
-    { "41", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LELA)) },
-    { "42", Mons.Kind.bush_with_kin(Mons.Kind.Mons(Mons.Kind.mons.MOSHY)) },
+    { "30", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BATH)) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEHOLDER)) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.CRONI)) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT)) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS)) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GAKI)) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GORR)) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA)) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.RAFIRE)) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.VARGOULI)) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.TUPITREE)) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LELA)) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MOSHY)) },
     { "43", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS)) },
     { "44", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))},
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
@@ -696,43 +696,43 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.dummy_skills
       );
     | Mons.BATH => Mons.Attr.new_battleable(
-      [], "BATH",
+      [Mons.Assets.mons_bath_d_0], "BATH",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
     | Mons.BEHOLDER => Mons.Attr.new_battleable(
-      [], "BEHOLDER",
+      [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
     | Mons.CRONI => Mons.Attr.new_battleable(
-      [], "CRONI",
+      [Mons.Assets.mons_croni_d_0], "CRONI",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
     | Mons.ELLIOT => Mons.Attr.new_battleable(
-      [], "ELLIOT",
+      [Mons.Assets.mons_elliot_d_0], "ELLIOT",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
     | Mons.ESPECTRONUS => Mons.Attr.new_battleable(
-      [], "ESPECTRONUS",
+      [Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
     | Mons.GAKI => Mons.Attr.new_battleable(
-      [], "GAKI",
+      [Mons.Assets.mons_gaki_d_0], "GAKI",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
     | Mons.GORR => Mons.Attr.new_battleable(
-      [], "GORR",
+      [Mons.Assets.mons_gorr_d_0], "GORR",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
     | Mons.LAMURIA => Mons.Attr.new_battleable(
-      [], "LAMURIA",
+      [Mons.Assets.mons_lamuria_d_0], "LAMURIA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
     | Mons.RAFIRE => Mons.Attr.new_battleable(
-      [], "RAFIRE",
+      [Mons.Assets.mons_rafire_d_0], "RAFIRE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
     | Mons.VARGOULI => Mons.Attr.new_battleable(
-      [], "VARGOULI",
+      [Mons.Assets.mons_vargouli_d_0], "VARGOULI",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
     | Mons.TUPITREE => Mons.Attr.new_battleable(
-      [], "TUPITREE",
+      [Mons.Assets.mons_tupitree_d_0], "TUPITREE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
     | Mons.LELA => Mons.Attr.new_battleable(
-      [], "LELA",
+      [Mons.Assets.mons_lela_d_0], "LELA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
     | Mons.MOSHY => Mons.Attr.new_battleable(
-      [], "MOSHY",
+      [Mons.Assets.mons_moshy_d_0], "MOSHY",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
   ; // end mons
   
