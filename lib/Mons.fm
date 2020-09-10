@@ -665,6 +665,22 @@ Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
   let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
   Bool.and(is_adve_alive, is_hero_alive)
 
+Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
+  open adve:
+  open hero:
+  case adve.kin:
+  | mon => 
+    let adve_kin = Mons.Kind.attr(adve.kin)
+    let hero_kin = Mons.Kind.attr(hero.kin)
+    open adve_kin:
+    open hero_kin:
+    let adve_status = Mons.Object.is_obj_defeated(adve)
+    let hero_status = Mons.Object.is_obj_defeated(hero)
+    Bool.or(adve_status, hero_status)  
+  ;
+  | const => Bool.false;
+  | terrain => Bool.false;
+  
 Mons.Object.is_obj_defeated(obj: Mons.Object): Bool
   open obj:
   open Mons.Kind.attr(obj.kin) as kind:
@@ -933,6 +949,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
+    let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     if U16.eql(cmd, 'U') then
@@ -967,16 +984,18 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         Mons.Game.set_user_pos(usr, new_pos, game)
       
     else if U16.eql(cmd, 'e') then // Open hero's bag
-      if is_battling then game
+      if Bool.or(is_battling, end_battle) then game
       else Mons.Game.set_bag(Bool.not(game.bag), game)
 
     // --------- End battle
     // C and Z not working. Using C captures the bush hahaha
     else if U16.eql(cmd, 'c') then // Action to capture a Mon
       // TODO: wants to capture a Mon but bag is full
-      let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-      let game = Mons.Game.map_del(pos, adve_idx, game)
-      Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+      if Mons.Object.is_obj_defeated(adve_obj) then
+        let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+      else game
     else if U16.eql(cmd, 'z') then // Free Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
         let game = Mons.Game.map_del(pos, adve_idx, game)
