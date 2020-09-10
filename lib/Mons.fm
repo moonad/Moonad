@@ -426,6 +426,7 @@ Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   let qtd = List.length<>(hero.bag)
   case obj.kin as kind:
   | obj =>
+    let obj = Mons.Object.set_dmg(obj, 0u)
     if Nat.ltn(qtd, 3) then
       let new_bag = List.append<>(hero.bag, obj)
       Mons.Object.set_bag(new_bag, hero)
@@ -467,7 +468,7 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
 
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
-  // kin, dir, pad, ani, dmg
+  // kin, dir, pad, ani, dmg, bag
   Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [])
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
@@ -749,7 +750,8 @@ Mons.Attr.new_hero: Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-      (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u) 
+      (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
+      Mons.dummy_skills 
   )
 
 // blocks: Bool,
