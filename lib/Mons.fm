@@ -637,6 +637,11 @@ Mons.Game.set_bag(val: Bool, game: Mons.Game): Mons.Game
   open game:
   Mons.Game.new(game.usr, game.pos, game.map, val)
 
+Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  open game:
+  let map = Mons.Map.set(pos, idx, obj, game.map)
+  Mons.Game.set_map(map, game)
+
 // Updates the object at given position on the game map
 Mons.Game.update(fn: Mons.Object -> Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -739,7 +744,7 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_default_battle_spr)
 
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new(Bool.false, Bool.false, 40u, 0u, "HERO",
+  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "HERO",
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
@@ -751,7 +756,7 @@ Mons.Attr.new_hero: Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-      Mons.Kind.set_default_battle_spr
+      (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u) 
   )
 
 // blocks: Bool,
@@ -991,11 +996,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // C and Z not working. Using C captures the bush hahaha
     else if U16.eql(cmd, 'c') then // Action to capture a Mon
       // TODO: wants to capture a Mon but bag is full
+      // TODO: Update where hero will lose Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
         let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
         let game = Mons.Game.map_del(pos, adve_idx, game)
         Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+      else if Mons.Object.is_obj_defeated(hero_obj) then 
+        let hero_obj = Mons.Object.pop_from_bag(hero_obj)
+        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
       else game
+
     else if U16.eql(cmd, 'z') then // Free Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
         let game = Mons.Game.map_del(pos, adve_idx, game)
@@ -1157,10 +1167,10 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
     // TEST a bag by adding and removing Mon
-    let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
-    let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
-    let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
-    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    // let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
+    // let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
+    // let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+    // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
     // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
     // let hero_obj = Mons.Object.pop_from_bag(hero_obj)
     // ---
@@ -1205,7 +1215,9 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
               else // TODO: lose battle not working
                 let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-                let scr = Mons.draw.text("You lost the battle and your current Mon.", Pos32.new(16u,128u,0u), scr)
+                let scr = Mons.draw.text("You lost the battle and", Pos32.new(16u,26u,0u), scr)
+                let scr = Mons.draw.text("your current Mon.", Pos32.new(16u,42u,0u), scr)
+                let scr = Mons.draw.text("[c] I'll do better next time", Pos32.new(16u,128u,0u), scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             scr
         else // When hero isn't battling, draw map...
