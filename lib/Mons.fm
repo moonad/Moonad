@@ -198,6 +198,10 @@ Mons.Kind.get_atk(kind: Mons.Kind): U32
  case Mons.Kind.attr(kind) as attr:
   | attr.atk; 
 
+Mons.Kind.get_skills(kind: Mons.Kind): List(Mons.Skill)
+ case Mons.Kind.attr(kind) as attr:
+  | attr.skills; 
+
 
 // TODO make it better so it doesn't have to be updated
 // everytime a new Mon is added/removed 
@@ -205,44 +209,40 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
   | mons => 
     case kind.ele:
-    | HERO => Bool.true;
-    | BATH => Bool.false;
-    | BEHOLDER => Bool.false;
-    | CRONI => Bool.false;
-    | ELLIOT => Bool.false;
+    | HERO        => Bool.true;
+    | BATH        => Bool.false;
+    | BEHOLDER    => Bool.false;
+    | CRONI       => Bool.false;
+    | ELLIOT      => Bool.false;
     | ESPECTRONUS => Bool.false;
-    | GAKI => Bool.false;
-    | GORR => Bool.false;
-    | LAMURIA => Bool.false;
-    | RAFIRE => Bool.false;
-    | VARGOULI => Bool.false;
-    | TUPITREE => Bool.false;
-    | LELA => Bool.false;
-    | MOSHY => Bool.false;
-    | Mons.Kind.mons.POISOLICK => Bool.false;
-    | Mons.Kind.mons.BUFF => Bool.false;
-    | Mons.Kind.mons.LAUGH => Bool.false;
-    | Mons.Kind.mons.COBE_ORN => Bool.false;
-    | Mons.Kind.mons.SANDY => Bool.false;
-    | Mons.Kind.mons.SLIME => Bool.false;
-    | Mons.Kind.mons.MIMIC => Bool.false;
-    | Mons.Kind.mons.SPARKY => Bool.false;
-    | Mons.Kind.mons.DOOMFIRE => Bool.false;
-    | Mons.Kind.mons.BEANSTRONG => Bool.false;
-    | Mons.Kind.mons.NAMELESS => Bool.false;
-    | Mons.Kind.mons.OCTOKING => Bool.false;
-    | Mons.Kind.mons.INPUBU => Bool.false;
-    | Mons.Kind.mons.EMERELDER => Bool.false;
-    // | Mons.Kind.mons.ZOIO => Bool.false;
-    | Mons.Kind.mons.IGNITE => Bool.false;
-    | Mons.Kind.mons.FROST => Bool.false;
-    | Mons.Kind.mons.FRAB => Bool.false;
-    | Mons.Kind.mons.ELECTROWL => Bool.false;
-    | Mons.Kind.mons.NOCTUBRIGHT => Bool.false;
-    
-    
-    ;
-
+    | GAKI        => Bool.false;
+    | GORR        => Bool.false;
+    | LAMURIA     => Bool.false;
+    | RAFIRE      => Bool.false;
+    | VARGOULI    => Bool.false;
+    | TUPITREE    => Bool.false;
+    | LELA        => Bool.false;
+    | MOSHY       => Bool.false;
+    | POISOLICK   => Bool.false;
+    | BUFF        => Bool.false;
+    | LAUGH       => Bool.false;
+    | COBE_ORN    => Bool.false;
+    | SANDY       => Bool.false;
+    | SLIME       => Bool.false;
+    | MIMIC       => Bool.false;
+    | SPARKY      => Bool.false;
+    | DOOMFIRE    => Bool.false;
+    | BEANSTRONG  => Bool.false;
+    | NAMELESS    => Bool.false;
+    | OCTOKING    => Bool.false;
+    | INPUBU      => Bool.false;
+    | EMERELDER   => Bool.false;
+    // | ZOIO        => Bool.false;
+    | IGNITE      => Bool.false;
+    | FROST       => Bool.false;
+    | FRAB        => Bool.false;
+    | ELECTROWL   => Bool.false;
+    | NOCTUBRIGHT => Bool.false;;
   | const   => Bool.false;
   | terrain => Bool.false;
 
@@ -535,8 +535,7 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
   case cond:
   | nil  => [];
   | cons =>
-    let str  = Pair.fst<,>(cond.head)
-    let objs = Pair.snd<,>(cond.head) 
+    get str objs = cond.head
     if String.eql(code, str) then 
       objs 
     else 
@@ -1087,19 +1086,39 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let pos = pos.value
     let hero_pair = Mons.Map.get_hero(pos, game.map)
     let hero_obj  = Pair.fst<,>(hero_pair)
+    open hero_obj:
     let hero_idx  = Pair.snd<,>(hero_pair)
     let adve_idx  = 1u
     let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
+    let skills = Mons.Kind.get_skills(hero_obj.kin)
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
-    // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     if U16.eql(cmd, 'U') then
       if is_battling then
-        Mons.Game.update((obj) Mons.Object.hit(obj, 4u), pos, adve_idx, game)
+        case List.at<>(0, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
       else game
-    // TODO: make the other attacks (I, J, K)
+    if U16.eql(cmd, 'I') then
+      if is_battling then
+        case List.at<>(1, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
+    if U16.eql(cmd, 'J') then
+      if is_battling then
+        case List.at<>(2, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
+    if U16.eql(cmd, 'K') then
+      if is_battling then
+        case List.at<>(3, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
     else if U16.eql(cmd, 'D') then
       Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
     else if U16.eql(cmd, 'W') then
