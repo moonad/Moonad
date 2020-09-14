@@ -59,7 +59,7 @@ T Mons.Object
   ani: U32,       // number of walk frames to animate
   dmg: U32,       // object's current health points
   bag: List(Mons.Object), // store Mons.Object
-  mon: Nat
+  mon: U32 // idx of the current Mon. Default 0u
 );
 
 // TODO add more skills
@@ -292,7 +292,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 // The void tile
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0)
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u)
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -346,7 +346,7 @@ Mons.Object.set_pad_l(obj: Mons.Object, val: Bool): Mons.Object
 Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
   open obj: Mons.Object.set_pad(obj, Mons.Pad.set_d(obj.pad, val))
 
-Mons.Object.set_mon(idx: Nat, obj: Mons.Object): Mons.Object
+Mons.Object.set_mon(idx: U32, obj: Mons.Object): Mons.Object
   open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx)
 
 // Hits an object, damaging it
@@ -536,7 +536,7 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u)
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
@@ -1118,6 +1118,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
+
+    open hero_obj:
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
@@ -1185,9 +1187,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       if U16.eql(cmd, 'e') then
         Mons.Game.set_stt(Mons.Screen.game('.'), game)
       else if U16.eql(cmd, 'w') then // TODO: test with other keys too
-        Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
-      else if U16.eql(cmd, 's') then
+        let hero_obj = Mons.Object.set_mon(U32.sub(hero_obj.mon, 1u), hero_obj)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
         Mons.Game.set_stt(Mons.Screen.inventory(1u), game)
+      else if U16.eql(cmd, 's') then
+        let hero_obj = 
+          if U32.ltn(hero_obj.mon, 2u) then
+            Mons.Object.set_mon(U32.add(hero_obj.mon, 1u), hero_obj)
+          else Mons.Object.set_mon(hero_obj.mon, hero_obj)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.inventory(2u), game)
       else game;
   ;
 
@@ -1284,33 +1293,24 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
      else String.flatten(["Qtd: ", U32.to_string(qtd)])
    let scr =
       if U32.eql(qtd, 0u) then scr
-      else
-        let default = Pos32.new(20u,70u,0u)
-        Mons.draw.text(">", Mons.draw.bag_select(idx, default, qtd), scr)
+      else Mons.draw.text(">", Mons.draw.bag_select(idx, obj.mon), scr)
    let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
    let text = List.cons<>(qtd_field, mons_names)
    let scr = Mons.draw.list(text, Pos32.new(30u,40u,0u), scr)
    scr
 
-// 0: up
-// 1: down
-Mons.draw.bag_select(idx: U32, curr_pos: Pos32, qtd: U32): Pos32
-  let x = Pos32.get_x(curr_pos)
-  let y = Pos32.get_y(curr_pos)
-  let z = Pos32.get_z(curr_pos)
-  if U32.eql(idx, 0u) then // up arrow
-    if U32.lte(idx, 70u) then
-      Pos32.new(x, 70u, z)
+// 0: neutral
+// 1: up
+// 2: down
+Mons.draw.bag_select(idx: U32, mon_idx: U32): Pos32
+  let def_y = 70u
+  let pos = 
+    if U32.eql(mon_idx, 0u) then
+      Pos32.new(20u,def_y,0u)
     else
-      let new_y = U32.sub(y, 15u)
-      Pos32.new(x, new_y, z)
-  else
-    let max_qtd = U32.add(qtd, 15u)
-    if U32.gte(idx, max_qtd) then
-      Pos32.new(x, max_qtd, z)
-    else
-      let new_y = U32.add(y, 15u)
-      Pos32.new(x, new_y, z)
+      let y = U32.add(def_y, U32.mul(18u, mon_idx))
+      Pos32.new(20u,y,0u)
+  pos
 
 
 Mons.draw.list(texts: List(String), start_pos: Pos32, scr: Image3D): Image3D
@@ -1367,11 +1367,11 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
     // TEST a bag by adding and removing Mon
-    // let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
-    // let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
-    // let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
-    // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
-    // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
+    let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
+    let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
     // let hero_obj = Mons.Object.pop_from_bag(hero_obj)
     // ---
     case game.stt as stt:
@@ -1430,11 +1430,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | terrain => src;
     ;
     // end case stt.game
-    | inventory => // >>>>>> TODO: test up and down in inventory
-      if U32.eql(stt.idx, 0u) then
-        Mons.draw.bag(hero_obj, stt.idx, scr)
-      else // TODO: bugs
-        Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    | inventory => Mons.draw.bag(hero_obj, stt.idx, scr)
     ;
 
   ;    
