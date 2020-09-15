@@ -64,12 +64,13 @@ T Mons.Object
 
 // TODO add more skills
 T Mons.Skill
-| Mons.Skill.Dummy;
+| Mons.Skill.Dummy_hit;
+| Mons.Skill.Dummy_heal;
 
 // TODO remove
 Mons.dummy_skills: List(Mons.Skill)
- [ Mons.Skill.Dummy, Mons.Skill.Dummy,
-   Mons.Skill.Dummy, Mons.Skill.Dummy ]
+  [ Mons.Skill.Dummy_hit, Mons.Skill.Dummy_hit,
+   Mons.Skill.Dummy_heal, Mons.Skill.Dummy_heal ]
 
 
 T Mons.Attr
@@ -206,6 +207,10 @@ Mons.Kind.get_atk(kind: Mons.Kind): U32
  case Mons.Kind.attr(kind) as attr:
   | attr.atk; 
 
+Mons.Kind.get_skills(kind: Mons.Kind): List(Mons.Skill)
+ case Mons.Kind.attr(kind) as attr:
+  | attr.skills; 
+
 
 // TODO make it better so it doesn't have to be updated
 // everytime a new Mon is added/removed 
@@ -213,44 +218,40 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
   | mons => 
     case kind.ele:
-    | HERO => Bool.true;
-    | BATH => Bool.false;
-    | BEHOLDER => Bool.false;
-    | CRONI => Bool.false;
-    | ELLIOT => Bool.false;
+    | HERO        => Bool.true;
+    | BATH        => Bool.false;
+    | BEHOLDER    => Bool.false;
+    | CRONI       => Bool.false;
+    | ELLIOT      => Bool.false;
     | ESPECTRONUS => Bool.false;
-    | GAKI => Bool.false;
-    | GORR => Bool.false;
-    | LAMURIA => Bool.false;
-    | RAFIRE => Bool.false;
-    | VARGOULI => Bool.false;
-    | TUPITREE => Bool.false;
-    | LELA => Bool.false;
-    | MOSHY => Bool.false;
-    | Mons.Kind.mons.POISOLICK => Bool.false;
-    | Mons.Kind.mons.BUFF => Bool.false;
-    | Mons.Kind.mons.LAUGH => Bool.false;
-    | Mons.Kind.mons.COBE_ORN => Bool.false;
-    | Mons.Kind.mons.SANDY => Bool.false;
-    | Mons.Kind.mons.SLIME => Bool.false;
-    | Mons.Kind.mons.MIMIC => Bool.false;
-    | Mons.Kind.mons.SPARKY => Bool.false;
-    | Mons.Kind.mons.DOOMFIRE => Bool.false;
-    | Mons.Kind.mons.BEANSTRONG => Bool.false;
-    | Mons.Kind.mons.NAMELESS => Bool.false;
-    | Mons.Kind.mons.OCTOKING => Bool.false;
-    | Mons.Kind.mons.INPUBU => Bool.false;
-    | Mons.Kind.mons.EMERELDER => Bool.false;
-    | Mons.Kind.mons.ZOIO => Bool.false;
-    | Mons.Kind.mons.IGNITE => Bool.false;
-    | Mons.Kind.mons.FROST => Bool.false;
-    | Mons.Kind.mons.FRAB => Bool.false;
-    | Mons.Kind.mons.ELECTROWL => Bool.false;
-    | Mons.Kind.mons.NOCTUBRIGHT => Bool.false;
-    
-    
-    ;
-
+    | GAKI        => Bool.false;
+    | GORR        => Bool.false;
+    | LAMURIA     => Bool.false;
+    | RAFIRE      => Bool.false;
+    | VARGOULI    => Bool.false;
+    | TUPITREE    => Bool.false;
+    | LELA        => Bool.false;
+    | MOSHY       => Bool.false;
+    | POISOLICK   => Bool.false;
+    | BUFF        => Bool.false;
+    | LAUGH       => Bool.false;
+    | COBE_ORN    => Bool.false;
+    | SANDY       => Bool.false;
+    | SLIME       => Bool.false;
+    | MIMIC       => Bool.false;
+    | SPARKY      => Bool.false;
+    | DOOMFIRE    => Bool.false;
+    | BEANSTRONG  => Bool.false;
+    | NAMELESS    => Bool.false;
+    | OCTOKING    => Bool.false;
+    | INPUBU      => Bool.false;
+    | EMERELDER   => Bool.false;
+    | ZOIO        => Bool.false;
+    | IGNITE      => Bool.false;
+    | FROST       => Bool.false;
+    | FRAB        => Bool.false;
+    | ELECTROWL   => Bool.false;
+    | NOCTUBRIGHT => Bool.false;;
   | const   => Bool.false;
   | terrain => Bool.false;
 
@@ -354,6 +355,10 @@ Mons.Object.set_mon(idx: U32, obj: Mons.Object): Mons.Object
 // Hits an object, damaging it
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
   Mons.Object.set_dmg(obj, U32.add(Mons.Object.get_dmg(obj), dmg))
+
+// Heals an object
+Mons.Object.heal(obj: Mons.Object, val: U32): Mons.Object
+  Mons.Object.set_dmg(obj, U32.sub(Mons.Object.get_dmg(obj), val))
 
 // Returns true if any of the object's pad is non-zero (it is walking)
 Mons.Object.is_walking(obj: Mons.Object): Bool
@@ -560,8 +565,7 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
   case cond:
   | nil  => [];
   | cons =>
-    let str  = Pair.fst<,>(cond.head)
-    let objs = Pair.snd<,>(cond.head) 
+    get str objs = cond.head
     if String.eql(code, str) then 
       objs 
     else 
@@ -1070,10 +1074,22 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
 
 Mons.Skill.get_name(skill: Mons.Skill): String
   case skill:
-  | dummy => "dummy";
+  | dummy_hit  => "dummy_hit";
+  | dummy_heal => "dummy_heal";
 
 Mons.damage(pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game 
-  Mons.Game.update((obj) Mons.Object.hit(obj, dmg), pos, idx, game)
+  Mons.Game.update
+  | (obj) Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg);
+  | pos; 
+  | idx;
+  | game;
+
+Mons.heal(pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
+  Mons.Game.update
+  | (obj) Mons.Object.heal(Mons.Object.get_current_mon(obj), val);
+  | pos;
+  | idx;
+  | game;
 
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
@@ -1083,7 +1099,8 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   let source_obj = Mons.Map.get(pos, source, game.map)
   let target_obj = Mons.Map.get(pos, target, game.map)
   case skill: 
-  | dummy => Mons.damage(pos, target, 4u, game);  
+  | dummy_hit  => Mons.damage(pos, target, 4u, game);  
+  | dummy_heal => Mons.heal(pos, source, 2u, game);
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -1121,13 +1138,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let pos = pos.value
     let hero_pair = Mons.Map.get_hero(pos, game.map)
     let hero_obj  = Pair.fst<,>(hero_pair)
+    open hero_obj:
     let hero_idx  = Pair.snd<,>(hero_pair)
     let adve_idx  = 1u
     let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
-
+    let curr_mon = Mons.Object.get_current_mon(hero_obj)
+    open curr_mon: 
+    let skills = Mons.Kind.get_skills(curr_mon.kin)
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
 
     open hero_obj:
@@ -1135,11 +1155,34 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
     | game =>
+    // TODO remove - just testing dmg to hero to check heal eff
+    if U16.eql(cmd, 'T') then 
+      Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
+
     if U16.eql(cmd, 'U') then
       if is_battling then
-        Mons.Game.update((obj) Mons.Object.hit(obj, 4u), pos, adve_idx, game)
+        case List.at<>(0, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
       else game
-    // TODO: make the other attacks (I, J, K)
+    else if U16.eql(cmd, 'I') then
+      if is_battling then
+        case List.at<>(1, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
+    else if U16.eql(cmd, 'J') then
+      if is_battling then
+        case List.at<>(2, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
+    else if U16.eql(cmd, 'K') then
+      if is_battling then
+        case List.at<>(3, skills) as skill:
+        | none => game;
+        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+      else game
     else if U16.eql(cmd, 'D') then
       Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
     else if U16.eql(cmd, 'W') then
@@ -1678,7 +1721,8 @@ Mons.Input.list: List(Pair(Char, Bits))
     {'c', b0(b0(b0(b1(b0(b0(b1(b1(bn))))))))},
     {'C', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))},
     {'z', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))},
-    {'Z', b0(b0(b1(b0(b0(b0(b0(b0(bn))))))))}
+    {'Z', b0(b0(b1(b0(b0(b0(b0(b0(bn))))))))},
+    {'T', b0(b0(b1(b0(b0(b0(b0(b1(bn))))))))} //TODO remove! just using to test heal
   ]
 
 // Maps from chars to their codes
