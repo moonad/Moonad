@@ -149,7 +149,7 @@ T Mons.Kind.mons
 | Mons.Kind.mons.OCTOKING;
 | Mons.Kind.mons.INPUBU;
 | Mons.Kind.mons.EMERELDER;
-// | Mons.Kind.mons.ZOIO;
+| Mons.Kind.mons.ZOIO;
 | Mons.Kind.mons.IGNITE;
 | Mons.Kind.mons.FROST;
 | Mons.Kind.mons.FRAB;
@@ -241,7 +241,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     | Mons.Kind.mons.OCTOKING => Bool.false;
     | Mons.Kind.mons.INPUBU => Bool.false;
     | Mons.Kind.mons.EMERELDER => Bool.false;
-    // | Mons.Kind.mons.ZOIO => Bool.false;
+    | Mons.Kind.mons.ZOIO => Bool.false;
     | Mons.Kind.mons.IGNITE => Bool.false;
     | Mons.Kind.mons.FROST => Bool.false;
     | Mons.Kind.mons.FRAB => Bool.false;
@@ -632,7 +632,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "56", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.OCTOKING)) },
     { "57", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.INPUBU)) },
     { "58", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER)) },
-    // { "59", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ZOIO)) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ZOIO)) },
     { "60", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.IGNITE)) },
     { "61", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FROST)) },
     { "62", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FRAB)) },
@@ -946,9 +946,9 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | Mons.EMERELDER => Mons.Attr.new_battleable(
       [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d));
-    // | Mons.ZOIO => Mons.Attr.new_battleable(
-    //   [Mons.Assets.mons_zoio_d_0], "ZOIO",
-    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d));
+    | Mons.ZOIO => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_zoio_d_0], "ZOIO",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d));
     | Mons.IGNITE => Mons.Attr.new_battleable(
       [Mons.Assets.mons_ignite_d_0], "IGNITE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_ignite_u, Mons.Assets.battle_ignite_d));
@@ -1444,6 +1444,30 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
     let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), Mons.vox_mid)
     Image3D.push(pix_pos, pix_col, scr)
 
+// TODO: create a bg
+Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
+  // TODO: check if adve is of type Grass, Ice, etc.
+  // TODO: check if adve is boss
+  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
+  scr
+
+Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
+  let p_hp = U32.div(U32.mul(chp, 66u), mhp) // x = 66u: full hp
+  let pos_chp = Pos32.new(p_hp,22u,0u) 
+  let pos_name = Pos32.new(38u,22u,0u)
+  let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
+  let scr = Mons.draw.text(name, pos_name, scr)
+  scr
+
+Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
+  let p_hp = U32.div(U32.mul(chp, 175u), mhp) // x = 175u: full hp
+  let pos_chp = Pos32.new(p_hp,74u,0u) 
+  let pos_name = Pos32.new(146u,74u,0u)
+  let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
+  let scr = Mons.draw.text(name, pos_name, scr)
+  scr
+
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
@@ -1478,19 +1502,19 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 
         if Bool.and(is_standing, is_battleable) then
           if Mons.Object.is_battling(adve_obj, hero_obj) then
-            let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-            let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-            let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+            let scr = Mons.draw.battle_bg(adve_obj, scr)
+            let scr = Mons.draw.hero_hp(hero_chp, hero_mon.mhp, hero_txt, scr)
+            let scr = Mons.draw.adve_hp(adve_chp, adve_mon.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
             let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
           else
-            let src = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+            let scr = Mons.draw.battle_bg(adve_obj, scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
-                let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+                let scr = Mons.draw.text(adve_txt, Pos32.new(38u,22u,0u), scr)
                 let scr = Mons.draw.text("[c] Capture", Pos32.new(16u,128u,0u), scr)
                 let scr = Mons.draw.text("[z] Free", Pos32.new(16u,144u,0u), scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
