@@ -1178,7 +1178,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         let full_bag = Mons.Object.is_full_bag(hero_obj)
         if full_bag then
           Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag), game)
-        else // TODO: Why dows this code doesnt work in case "capture"?
+        else // TODO: Why does this code doesn't work in case "capture"?
           let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
@@ -1229,12 +1229,10 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
         else game
 
-      else //if Bool.or(U16.eql(cmd, 'w'), U16.eql(cmd, 's')) then
-      // update current Mon using 'w' or 's'
+      else // update current Mon using 'w' or 's'
         Mons.Object.change_curr_mon(
           cmd, (cmd: U32) Mons.Screen.capture_mon(cmd, Bool.true),
           pos, hero_obj, hero_idx, game)
-      //else Mons.Game.set_stt(Mons.Screen.game('.'), game)
     ;
   ;
 
