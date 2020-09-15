@@ -1137,7 +1137,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
-    let skills = Mons.Kind.get_skills(hero_obj.kin)
+    let curr_mon =
+      case List.at<>(U32.to_nat(hero_obj.mon), hero_obj.bag) as mon:
+      | none => hero_obj;
+      | some => mon.value;
+    open curr_mon: 
+    let skills = Mons.Kind.get_skills(curr_mon.kin)
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
 
     open hero_obj:
