@@ -111,7 +111,10 @@ T Mons.Game
 T Mons.Screen
 | Mons.Screen.game(cmd: Char); // cmd: movement
 | Mons.Screen.inventory(idx: U32);
-// | Mons.Screen.battle;
+| Mons.Screen.battle(
+  idx: U32,
+  full_bag: Bool,
+  defeated: Bool);
 
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons);
@@ -1119,6 +1122,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
 
+    let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
     open hero_obj:
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
@@ -1145,7 +1149,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, hero_idx, game)
     else if U16.eql(cmd, 's') then
       Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
-    
+
     else if U16.eql(cmd, 'O') then //TODO remove
         let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
         let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
@@ -1162,17 +1166,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
 
     // --------- End battle
-    // C and Z not working. Using C captures the bush hahaha
     else if U16.eql(cmd, 'c') then // Action to capture a Mon
       // TODO: wants to capture a Mon but bag is full
       // TODO: Update where hero will lose Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
-        let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        let full_bag = Mons.Object.is_full_bag(hero_obj)
+        Mons.Game.set_stt(Mons.Screen.battle(0u, full_bag, Bool.false), game)
       else if Mons.Object.is_obj_defeated(hero_obj) then 
         let hero_obj = Mons.Object.pop_from_bag(hero_obj)
-        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.battle(0u, Bool.false, Bool.true), game)
       else game
 
     else if U16.eql(cmd, 'z') then // Free Mon
@@ -1183,6 +1186,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else
       game
     ;
+
     | inventory => 
       if U16.eql(cmd, 'e') then
         Mons.Game.set_stt(Mons.Screen.game('.'), game)
@@ -1198,8 +1202,39 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
         Mons.Game.set_stt(Mons.Screen.inventory(2u), game)
       else game;
+
+    | battle => // accessed by pressing "c" in battle
+      if U16.eql(cmd, 'c') then
+        if stt.full_bag then
+          game // TODO: change Mon
+        else
+          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+          let game = Mons.Game.map_del(pos, adve_idx, game)
+          Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+
+      else if U16.eql(cmd, 'z') then // free Mon
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
+      else if U16.eql(cmd, 'w') then
+        Mons.Game.set_stt(Mons.Screen.battle(1u, Bool.true, Bool.false), game)
+      else if U16.eql(cmd, 's') then
+        Mons.Game.set_stt(Mons.Screen.battle(2u, Bool.true, Bool.false), game)
+      else game
+    ;
   ;
 
+Mons.Object.is_full_bag(obj: Mons.Object): Bool
+  open obj:
+  let len = List.length<>(obj.bag)
+  Nat.eql(len, 3)
+
+Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
+  open hero_obj:
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
+  let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+  let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+  let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+  Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
 // D = [ 1,  0,  0]
@@ -1299,16 +1334,29 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
    let scr = Mons.draw.list(text, Pos32.new(30u,40u,0u), scr)
    scr
 
+Mons.draw.full_bag(obj: Mons.Object, cmd: U32, scr: Image3D): Image3D
+   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
+   let scr = Mons.draw.text("INVENTORY", Pos32.new(95u,28u,0u), scr)
+   open obj:
+   let scr = Mons.draw.text(">", Mons.draw.bag_select(cmd, 2u), scr)
+   let title = "Select a mon to replace or skip:"
+   let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
+   let text = List.cons<>(title, mons_names)
+   let scr = Mons.draw.list(text, Pos32.new(30u,40u,0u), scr)
+   let options = ["[c] Replace", "[z] Skip"]
+   let scr = Mons.draw.list(options, Pos32.new(30u,115u,0u), scr)
+   scr
+
 // 0: neutral
 // 1: up
 // 2: down
-Mons.draw.bag_select(idx: U32, mon_idx: U32): Pos32
+Mons.draw.bag_select(idx: U32, qtd: U32): Pos32
   let def_y = 70u
   let pos = 
-    if U32.eql(mon_idx, 0u) then
+    if U32.eql(qtd, 0u) then
       Pos32.new(20u,def_y,0u)
     else
-      let y = U32.add(def_y, U32.mul(18u, mon_idx))
+      let y = U32.add(def_y, U32.mul(18u, qtd))
       Pos32.new(20u,y,0u)
   pos
 
@@ -1367,19 +1415,19 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
     // TEST a bag by adding and removing Mon
-    let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
-    let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
-    let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
-    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
-    let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    // let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
+    // let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
+    // let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+    // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+    // let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
     // let hero_obj = Mons.Object.pop_from_bag(hero_obj)
     // ---
-    case game.stt as stt:
-    | game =>
     open hero_obj:
     open adve_obj:
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
     open hero_mon_obj:
+    case game.stt as stt:
+    | game =>
     case Mons.Kind.attr(hero_mon_obj.kin) as hero_mon: // Mons.Attr
     | mons =>
       case Mons.Kind.attr(adve_obj.kin) as adve_mon:
@@ -1429,10 +1477,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | construction => src;
     | terrain => src;
     ;
-    // end case stt.game
-    | inventory => Mons.draw.bag(hero_obj, stt.idx, scr)
-    ;
 
+    // end case stt.game
+    | inventory => Mons.draw.bag(hero_obj, stt.idx, scr);
+
+    | battle => // pressed to capture mon
+      if stt.full_bag then
+        Mons.draw.full_bag(hero_obj, stt.idx, scr)
+      else
+        scr      
+      ;
   ;    
 
 // Build sprites around the hero
