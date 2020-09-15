@@ -113,8 +113,7 @@ T Mons.Screen
 | Mons.Screen.inventory(idx: U32);
 | Mons.Screen.capture_mon(
   idx: U32,
-  full_bag: Bool,
-  defeated: Bool);
+  full_bag: Bool);
 
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons);
@@ -1129,7 +1128,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
 
-    let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+    // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+
     open hero_obj:
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
@@ -1174,25 +1174,29 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     // --------- End battle
     else if U16.eql(cmd, 'c') then // Action to capture a Mon
-      // TODO: wants to capture a Mon but bag is full
-      // TODO: Update where hero will lose Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
         let full_bag = Mons.Object.is_full_bag(hero_obj)
-        Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag, Bool.false), game)
-      else if Mons.Object.is_obj_defeated(hero_obj) then 
-        let hero_obj = Mons.Object.pop_from_bag(hero_obj)
+        if full_bag then
+          Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag), game)
+        else // TODO: Why dows this code doesnt work in case "capture"?
+          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+          let game = Mons.Game.map_del(pos, adve_idx, game)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          Mons.Game.set_stt(Mons.Screen.game('.'), game)
+      else 
+        // TODO: if defeated, adve continue on the map
+        // hero loses the current mon and show map
+        let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
         let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.false, Bool.true), game)
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
+
+    else if U16.eql(cmd, 'z') then // Free Mon
+      if Mons.Object.is_obj_defeated(adve_obj) then
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
       else game
 
-    // else if U16.eql(cmd, 'z') then // Free Mon
-    //   if Mons.Object.is_obj_defeated(adve_obj) then
-    //     let game = Mons.Game.map_del(pos, adve_idx, game)
-    //     Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-    //   else game
-    else
-      game
-    ;
+    else game ;
 
     | inventory => 
       if U16.eql(cmd, 'e') then
@@ -1203,38 +1207,36 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           cmd, (cmd: U32) Mons.Screen.inventory(cmd),
           pos, hero_obj, hero_idx, game);
 
-    | capture => // accessed by pressing "c" in battle
+    | capture => // accessed by pressing "c" after battle
       if U16.eql(cmd, 'c') then
-        if stt.full_bag then // Update the current mon by the new one
+        // if stt.full_bag then // Update the current mon by the new one
           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
           let hero_obj = Mons.Object.set_mon(2u, hero_obj)
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        else
-          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+        // else
+          // let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+          // let game = Mons.Game.map_del(pos, adve_idx, game)
+          // let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          // Mons.Game.set_stt(Mons.Screen.game('.'), game)
+
+      else if U16.eql(cmd, 'z') then // Free Mon
+        if Mons.Object.is_obj_defeated(adve_obj) then
           let game = Mons.Game.map_del(pos, adve_idx, game)
-          Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else game
 
-      else if U16.eql(cmd, 'z') then // free Mon
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
-
-      else // update current Mon using 'w' or 's'
+      else //if Bool.or(U16.eql(cmd, 'w'), U16.eql(cmd, 's')) then
+      // update current Mon using 'w' or 's'
         Mons.Object.change_curr_mon(
-          cmd, (cmd: U32) Mons.Screen.capture_mon(cmd, Bool.true, Bool.false),
+          cmd, (cmd: U32) Mons.Screen.capture_mon(cmd, Bool.true),
           pos, hero_obj, hero_idx, game)
+      //else Mons.Game.set_stt(Mons.Screen.game('.'), game)
     ;
   ;
-
-// Mons.Object.update_bag_at(idx: U32, new_mon: Mons.Object, hero_obj: Mons.Object, game: Mons.Game): Mons.Game
-//   open hero_obj:
-//   let idx = U32.to_nat(idx)
-//   let cleaned = List.delete_at<>(idx, hero_ob.bag)
-//   let hero_mon = List.cons<>(new_mon, hero_ob.bag)
-  
 
 // Update the current Mon by changing it with the keys 'w' (up) and 's' (down)
 Mons.Object.change_curr_mon(
@@ -1355,7 +1357,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
 
-// Draw an inventory showing the amount of mons on it and their names
+// Draw an inventory showing mons captured and their names
 Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
    let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
    let scr = Mons.draw.text("INVENTORY", Pos32.new(95u,28u,0u), scr)
@@ -1372,6 +1374,8 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
    let scr = Mons.draw.list(text, Pos32.new(30u,40u,0u), scr)
    scr
 
+// Draw an inventory showing mons captured, their names and options to
+// replace or skip the "mon capture"
 Mons.draw.full_bag(obj: Mons.Object, cmd: U32, scr: Image3D): Image3D
    let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
    let scr = Mons.draw.text("INVENTORY", Pos32.new(95u,28u,0u), scr)
@@ -1496,7 +1500,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("You lost the battle and", Pos32.new(16u,26u,0u), scr)
                 let scr = Mons.draw.text("your current Mon.", Pos32.new(16u,42u,0u), scr)
                 let scr = Mons.draw.text("[c] I'll do better next time", Pos32.new(16u,128u,0u), scr)
-                Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
+                Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
             scr
         else // When hero isn't battling, draw map...
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
@@ -1512,8 +1516,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | inventory => Mons.draw.bag(hero_obj, stt.idx, scr);
 
     | capture => // pressed to capture mon
-      if stt.full_bag then Mons.draw.full_bag(hero_obj, stt.idx, scr)
-      else scr;
+      if stt.full_bag then Mons.draw.full_bag(hero_obj, stt.idx, scr) 
+      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
   ;    
 
 // Build sprites around the hero
