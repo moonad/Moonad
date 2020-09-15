@@ -1251,8 +1251,9 @@ Mons.Object.change_curr_mon(
     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
     Mons.Game.set_stt(stt(1u), game)
   else if U16.eql(cmd, 's') then
-    let hero_obj = 
-      if U32.ltn(hero_obj.mon, 2u) then
+    let hero_obj =
+      let qtd_mon = Nat.to_u32(List.length<>(hero_obj.bag))
+      if U32.ltn(hero_obj.mon, U32.sub(qtd_mon, 1u)) then
         Mons.Object.set_mon(U32.add(hero_obj.mon, 1u), hero_obj)
       else Mons.Object.set_mon(hero_obj.mon, hero_obj)
     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
@@ -1390,13 +1391,13 @@ Mons.draw.full_bag(obj: Mons.Object, cmd: U32, scr: Image3D): Image3D
 // 0: neutral
 // 1: up
 // 2: down
-Mons.draw.bag_select(idx: U32, qtd: U32): Pos32
+Mons.draw.bag_select(idx: U32, idx: U32): Pos32
   let def_y = 70u
   let pos = 
-    if U32.eql(qtd, 0u) then
+    if U32.eql(idx, 0u) then
       Pos32.new(20u,def_y,0u)
     else
-      let y = U32.add(def_y, U32.mul(18u, qtd))
+      let y = U32.add(def_y, U32.mul(18u, idx))
       Pos32.new(20u,y,0u)
   pos
 
