@@ -1089,7 +1089,9 @@ Mons.heal(pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game
 Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
   let source_obj = Mons.Map.get(pos, source, game.map)
+  let source_obj = Mons.Object.get_current_mon(source_obj)
   let target_obj = Mons.Map.get(pos, target, game.map)
+  let target_obj = Mons.Object.get_current_mon(source_obj)
   case skill: 
   | dummy_hit  => Mons.damage(pos, target, 4u, game);  
   | dummy_heal => Mons.heal(pos, source, 2u, game);
@@ -1137,10 +1139,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
-    let curr_mon =
-      case List.at<>(U32.to_nat(hero_obj.mon), hero_obj.bag) as mon:
-      | none => hero_obj;
-      | some => mon.value;
+    let curr_mon = Mons.Object.get_current_mon(hero_obj)
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
