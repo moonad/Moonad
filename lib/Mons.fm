@@ -1078,10 +1078,18 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | dummy_heal => "dummy_heal";
 
 Mons.damage(pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game 
-  Mons.Game.update((obj) Mons.Object.hit(obj, dmg), pos, idx, game)
+  Mons.Game.update
+  | (obj) Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg);
+  | pos; 
+  | idx;
+  | game;
 
 Mons.heal(pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
-  Mons.Game.update((obj) Mons.Object.heal(obj, val), pos, idx, game)
+  Mons.Game.update
+  | (obj) Mons.Object.heal(Mons.Object.get_current_mon(obj), val);
+  | pos;
+  | idx;
+  | game;
 
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
@@ -1089,9 +1097,7 @@ Mons.heal(pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game
 Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
   let source_obj = Mons.Map.get(pos, source, game.map)
-  let source_obj = Mons.Object.get_current_mon(source_obj)
   let target_obj = Mons.Map.get(pos, target, game.map)
-  let target_obj = Mons.Object.get_current_mon(source_obj)
   case skill: 
   | dummy_hit  => Mons.damage(pos, target, 4u, game);  
   | dummy_heal => Mons.heal(pos, source, 2u, game);
@@ -1151,7 +1157,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     | game =>
     // TODO remove - just testing dmg to hero to check heal eff
     if U16.eql(cmd, 'T') then 
-      Mons.damage(pos, 0u, 2u, game)
+      Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
 
     if U16.eql(cmd, 'U') then
       if is_battling then
