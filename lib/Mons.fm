@@ -1503,9 +1503,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         if Bool.and(is_standing, is_battleable) then
           if Mons.Object.is_battling(adve_obj, hero_obj) then
             let scr = Mons.draw.battle_bg(adve_obj, scr)
-            // TODO: the position of the display is inverted until the artist fix the bg
-            let scr = Mons.draw.adve_hp(hero_chp, hero_mon.mhp, hero_txt, scr)
-            let scr = Mons.draw.hero_hp(adve_chp, adve_mon.mhp, adve_txt, scr)
+            let scr = Mons.draw.hero_hp(hero_chp, hero_mon.mhp, hero_txt, scr)
+            let scr = Mons.draw.adve_hp(adve_chp, adve_mon.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
             let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
@@ -1515,7 +1514,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.battle_bg(adve_obj, scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
-                let scr = Mons.draw.text(adve_txt, Pos32.new(25u,26u,0u), scr)
+                let scr = Mons.draw.text(adve_txt, Pos32.new(38u,22u,0u), scr)
                 let scr = Mons.draw.text("[c] Capture", Pos32.new(16u,128u,0u), scr)
                 let scr = Mons.draw.text("[z] Free", Pos32.new(16u,144u,0u), scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
