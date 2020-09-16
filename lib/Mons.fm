@@ -1310,19 +1310,21 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 
 Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
+  let hero_obj = Mons.Object.set_bag([], hero_obj)
   let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
   let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
   let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
-  let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
+  // let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
 // D = [ 1,  0,  0]
 // W = [ 0, -1,  0]
 // S = [ 0,  1,  0]
-// * = [ 0,  0,  0]
+// * = [ 0,  0,  0]a
 Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
   if U16.eql(key_code, 'A') then
     Maybe.some<>(Mons.Dir.left)
@@ -1491,7 +1493,7 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
   // TODO: check if adve is of type Grass, Ice, etc.
   // TODO: check if adve is boss
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+  // let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
   scr
 
@@ -1504,8 +1506,8 @@ Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   scr
 
 Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
-  let p_hp = U32.div(U32.mul(chp, 175u), mhp) // x = 175u: full hp
-  let pos_chp = Pos32.new(p_hp,74u,0u) 
+  let p_hp = U32.div(U32.mul(chp, 66u), mhp) 
+  let pos_chp = Pos32.new(U32.add(109u, p_hp),74u,0u) // x = 175u: full hp
   let pos_name = Pos32.new(146u,74u,0u)
   let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
   let scr = Mons.draw.text(name, pos_name, scr)
@@ -1548,8 +1550,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.battle_bg(adve_obj, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_mon.mhp, adve_txt, scr)
-            let scr = Mons.draw.text("[U] SHADOW BALL   | [I] _           ", Pos32.new(16u,128u,0u), scr)
-            let scr = Mons.draw.text("[J] _             | [K] _           ", Pos32.new(16u,144u,0u), scr)
+            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Pos32.new(16u,128u,0u), scr)
+            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit     ", Pos32.new(16u,144u,0u), scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
