@@ -1158,6 +1158,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
 
     open hero_obj:
+    open adve_obj:
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
@@ -1223,21 +1224,30 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     // --------- End battle
     else if U16.eql(cmd, 'c') then // Action to capture a Mon
-      if Mons.Object.is_obj_defeated(adve_obj) then
-        let full_bag = Mons.Object.is_full_bag(hero_obj)
-        if full_bag then
-          Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag), game)
-        else // TODO: Why does this code doesn't work in case "capture"?
-          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-          let game = Mons.Game.map_del(pos, adve_idx, game)
+      case adve_obj.kin as kind:
+      | mon =>
+        if Mons.Object.is_obj_defeated(adve_obj) then
+          let full_bag = Mons.Object.is_full_bag(hero_obj)
+          if full_bag then
+            Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag), game)
+          else // TODO: Why does this code doesn't work in case "capture"?
+            let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+            let game = Mons.Game.map_del(pos, adve_idx, game)
+            let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+            Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else 
+          // TODO: if defeated, adve continue on the map
+          // hero loses the current mon and show map
+          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
-      else 
-        // TODO: if defeated, adve continue on the map
-        // hero loses the current mon and show map
-        let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
+      ;
+      | construction => 
+        let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
+        let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
+        Mons.Game.set_user_pos(usr, new_pos, game)
+      ;
+      | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else if U16.eql(cmd, 'z') then // Free Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
@@ -1508,7 +1518,7 @@ Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
       else Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
     scr
   ;
-  | const => scr;
+  | const => Mons.draw.image(Mons.Assets.lvl_up, Pos32.new(120u,80u,0u), scr);
   | terrain => scr;
 
 
@@ -1592,9 +1602,11 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       ;
       | cons =>
         if Bool.and(is_standing, adve_kind.portal) then
-          Mons.draw.text("portal press [c]", Pos32.new(16u,128u,0u), scr)
-        else
-          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+          if U32.eql(game.lvl, 0u) then
+            let scr = Mons.draw.battle_bg(adve_obj, scr)
+            Mons.draw.text("Press [c] to access next level", Pos32.new(30u,135u,0u), scr)
+          else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+        else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ; // end case stt.game
