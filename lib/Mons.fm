@@ -1493,7 +1493,7 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
   // TODO: check if adve is of type Grass, Ice, etc.
   // TODO: check if adve is boss
-  // let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
   scr
 
