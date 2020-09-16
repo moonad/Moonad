@@ -117,7 +117,7 @@ T Mons.Screen
   full_bag: Bool);
 
 T Mons.Kind
-| Mons.Kind.Mons(ele: Mons.Kind.mons);
+| Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool);
 | Mons.Kind.Const(ele: Mons.Kind.const);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 
@@ -532,7 +532,7 @@ Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon)
 
 Mons.Object.hero: Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO))
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false))
 
 Mons.Object.is_battleable(obj: Mons.Object): Bool
   open obj:
@@ -607,41 +607,42 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
-    { "30", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BATH)) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEHOLDER)) },
-    { "32", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.CRONI)) },
-    { "33", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT)) },
-    { "34", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS)) },
-    { "35", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GAKI)) },
-    { "36", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GORR)) },
-    { "37", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA)) },
-    { "38", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.RAFIRE)) },
-    { "39", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.VARGOULI)) },
-    { "40", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.TUPITREE)) },
-    { "41", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LELA)) },
-    { "42", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MOSHY)) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS)) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))},
-    { "45", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK)) },
-    { "46", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BUFF)) },
-    { "47", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAUGH)) },
-    { "48", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.COBE_ORN)) },
-    { "49", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SANDY)) },
-    { "50", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SLIME)) },
-    { "51", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MIMIC)) },
-    { "52", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SPARKY)) },
-    { "53", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.DOOMFIRE)) },
-    { "54", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEANSTRONG)) },
-    { "55", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NAMELESS)) },
-    { "56", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.OCTOKING)) },
-    { "57", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.INPUBU)) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER)) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ZOIO)) },
-    { "60", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.IGNITE)) },
-    { "61", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FROST)) },
-    { "62", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FRAB)) },
-    { "63", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELECTROWL)) },
-    { "64", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NOCTUBRIGHT)) },
+
+    { "30", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BATH, Bool.false)) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEHOLDER, Bool.false)) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false)) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false)) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS, Bool.false)) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GAKI, Bool.false)) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GORR, Bool.false)) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false)) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.RAFIRE, Bool.false)) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.VARGOULI, Bool.false)) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.TUPITREE, Bool.false)) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LELA, Bool.false)) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MOSHY, Bool.false)) },
+    { "43", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS, Bool.false)) },
+    { "44", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false))},
+    { "45", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK, Bool.false)) },
+    { "46", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true)) },
+    { "47", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAUGH, Bool.true)) },
+    { "48", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.COBE_ORN, Bool.false)) },
+    { "49", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SANDY, Bool.false)) },
+    { "50", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SLIME, Bool.false)) },
+    { "51", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MIMIC, Bool.false)) },
+    { "52", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SPARKY, Bool.false)) },
+    { "53", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.DOOMFIRE, Bool.false)) },
+    { "54", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEANSTRONG, Bool.false)) },
+    { "55", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NAMELESS, Bool.false)) },
+    { "56", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.OCTOKING, Bool.true)) },
+    { "57", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.INPUBU, Bool.false)) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER, Bool.false)) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ZOIO, Bool.false)) },
+    { "60", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.IGNITE, Bool.false)) },
+    { "61", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FROST, Bool.false)) },
+    { "62", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FRAB, Bool.false)) },
+    { "63", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELECTROWL, Bool.false)) },
+    { "64", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NOCTUBRIGHT, Bool.false)) },
 
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
     { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
@@ -1311,9 +1312,9 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bag([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   // let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
@@ -1492,10 +1493,19 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 // TODO: create a bg
 Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
   // TODO: check if adve is of type Grass, Ice, etc.
-  // TODO: check if adve is boss
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
-  scr
+  open adve_obj:
+  case adve_obj.kin as kind:
+  | mon =>
+    let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+    let scr = 
+      if kind.boss then
+        Mons.draw.image(Mons.Assets.battle_boss, Pos32.new(120u,80u,0u), scr)
+      else Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
+    scr
+  ;
+  | const => scr;
+  | terrain => scr;
+
 
 Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   let p_hp = U32.div(U32.mul(chp, 66u), mhp) // x = 66u: full hp
