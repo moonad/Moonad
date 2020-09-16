@@ -1493,6 +1493,7 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
   // TODO: check if adve is of type Grass, Ice, etc.
   // TODO: check if adve is boss
+  let scr = Mons.draw.image(Mons.Assets.battle_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
   scr
@@ -1507,8 +1508,8 @@ Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
 
 Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   let p_hp = U32.div(U32.mul(chp, 66u), mhp) 
-  let pos_chp = Pos32.new(U32.add(109u, p_hp),80u,0u) // x = 175u: full hp
-  let pos_name = Pos32.new(146u,80u,0u)
+  let pos_chp = Pos32.new(U32.add(109u, p_hp),83u,0u) // x = 175u: full hp
+  let pos_name = Pos32.new(147u,83u,0u)
   let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
   let scr = Mons.draw.text(name, pos_name, scr)
   scr
