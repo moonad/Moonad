@@ -105,8 +105,8 @@ T Mons.Game
   usr: Word(160), // player name
   pos: Map(Pos32), // player positions
   map: Mons.Map, // the game map
-  bag: Bool, // if is showing the screen of inventory
-  stt: Mons.Screen
+  stt: Mons.Screen, // the current state of the game
+  lvl: U32 // the last lvl unlocked
 );
 
 T Mons.Screen
@@ -709,10 +709,10 @@ Mons.Game.get_usr(game: Mons.Game): Word(160)
 
 // Set the game user
 Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(usr, game.pos, game.map, game.bag, game.stt)
+  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.lvl)
 
 Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(game.usr, game.pos, game.map, game.bag, stt)
+  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.lvl)
 
 // Gets an user's position
 Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
@@ -722,7 +722,7 @@ Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
 // Sets an user's position
 Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.bag, game.stt)
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt, game.lvl)
 
 // Gets the hero's position
 Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
@@ -731,11 +731,11 @@ Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, map, game.bag, game.stt)
+  Mons.Game.new(game.usr, game.pos, map, game.stt, game.lvl)
 
-Mons.Game.set_bag(val: Bool, game: Mons.Game): Mons.Game
+Mons.Game.set_lvl(lvl: U32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, game.map, val, game.stt)
+  Mons.Game.new(game.usr, game.pos, game.map, game.stt, lvl)
 
 Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -1012,7 +1012,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
           Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
         else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
       else Mons.Attr.new_blockable([]);
-    | Mons.CHEST => Mons.Attr.new_blockable([Mons.Assets.tile_chest_0]);
+    | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | Mons.FENCE =>
       if Nat.eql(kin.model, 0) then
@@ -1150,7 +1150,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let hero_idx  = Pair.snd<,>(hero_pair)
     let adve_idx  = 1u
     let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
-    let game = Mons.Game.set_bag(Bool.false, game)
     let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
     let end_battle = Mons.Object.ended_battle(adve_obj, hero_obj)
     let curr_mon = Mons.Object.get_current_mon(hero_obj)
@@ -1220,7 +1219,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if U16.eql(cmd, 'e') then // Open hero's bag
       if Bool.or(is_battling, end_battle) then game
       else 
-        let game = Mons.Game.set_bag(Bool.not(game.bag), game)
         Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
 
     // --------- End battle
@@ -1545,28 +1543,30 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     open adve_obj:
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
     open hero_mon_obj:
+
     case game.stt as stt:
     | game =>
-    case Mons.Kind.attr(hero_mon_obj.kin) as hero_mon: // Mons.Attr
-    | mons =>
-      case Mons.Kind.attr(adve_obj.kin) as adve_mon:
-      | mons =>
-        let hero_chp = U32.sub(hero_mon.mhp, hero_mon_obj.dmg)
-        let hero_btl_img = hero_mon.battle_spr(Bool.true);
-        let hero_txt = String.flatten([hero_mon.name, " ", U32.to_string(hero_chp), " HP"])
+      let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
+      let adve_attr = Mons.Kind.attr(adve_obj.kin)
+      let is_standing = Mons.Object.is_standing(hero_obj)
+      open hero_mon_attr:
+      open adve_attr:
 
-        let adve_chp = U32.sub(adve_mon.mhp, adve_obj.dmg)
-        let adve_btl_img = adve_mon.battle_spr(Bool.false);
-        let adve_txt = String.flatten([adve_mon.name, " ", U32.to_string(adve_chp), " HP"])
-        
-        let is_standing = Mons.Object.is_standing(hero_obj)
-        let is_battleable = Mons.Object.is_battleable(adve_obj)
+      case adve_obj.kin as adve_kind:
+      | mon => 
+        let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
+        let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
+        let hero_txt = String.flatten([hero_mon_attr.name, " ", U32.to_string(hero_chp), " HP"])
 
-        if Bool.and(is_standing, is_battleable) then
+        let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
+        let adve_btl_img = adve_attr.battle_spr(Bool.false);
+        let adve_txt = String.flatten([adve_attr.name, " ", U32.to_string(adve_chp), " HP"])
+
+        if is_standing then
           if Mons.Object.is_battling(adve_obj, hero_obj) then
             let scr = Mons.draw.battle_bg(adve_obj, scr)
-            let scr = Mons.draw.hero_hp(hero_chp, hero_mon.mhp, hero_txt, scr)
-            let scr = Mons.draw.adve_hp(adve_chp, adve_mon.mhp, adve_txt, scr)
+            let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
+            let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Pos32.new(16u,128u,0u), scr)
             let scr = Mons.draw.text("[J] heal(2)  | [T] self hit     ", Pos32.new(16u,144u,0u), scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
@@ -1587,17 +1587,17 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[c] I'll do better next time", Pos32.new(16u,128u,0u), scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
             scr
-        else // When hero isn't battling, draw map...
+        else
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
-      | construction => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-      | terrain =>  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-    ;
-    | construction => src;
-    | terrain => src;
-    ;
-
-    // end case stt.game
+      | cons =>
+        if Bool.and(is_standing, adve_kind.portal) then
+          Mons.draw.text("portal press [c]", Pos32.new(16u,128u,0u), scr)
+        else
+          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+      ;
+      | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    ; // end case stt.game
     | inventory => Mons.draw.bag(hero_obj, stt.idx, scr);
 
     | capture => // pressed to capture mon
@@ -1786,7 +1786,7 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    Mons.Game.new(game_usr, game_pos, game_map, Bool.false, Mons.Screen.game('.'));
+    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.game('.'), 0u);
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
   // Event handlers
