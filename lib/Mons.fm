@@ -118,7 +118,7 @@ T Mons.Screen
 
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool);
-| Mons.Kind.Const(ele: Mons.Kind.const);
+| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 
 T Mons.Kind.mons
@@ -550,15 +550,22 @@ Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
 
 Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin))
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false))
 
-Mons.Kind.new_mons(kin: Mons.Kind): List(Mons.Object)
-  [ Mons.Object.new_of_kind(kin),
+Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
+
+Mons.Kind.new_mons(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
     // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
     Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
 
-Mons.Kind.water_with_kin(kin: Mons.Kind): List(Mons.Object)
-  [ Mons.Object.new_of_kind(kin),
+Mons.Kind.new_boss(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true)),
+    Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
+
+Mons.Kind.water_with_kin(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
     Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
@@ -574,7 +581,7 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String): List(Mons.Object)
   let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
-  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M))
+  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false))
 
   Mons.Map.code_to_tile.aux(code,[
     { ".g", [ grass ]},
@@ -608,41 +615,41 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
-    { "30", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BATH, Bool.false)) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEHOLDER, Bool.false)) },
-    { "32", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false)) },
-    { "33", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false)) },
-    { "34", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS, Bool.false)) },
-    { "35", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GAKI, Bool.false)) },
-    { "36", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.GORR, Bool.false)) },
-    { "37", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false)) },
-    { "38", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.RAFIRE, Bool.false)) },
-    { "39", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.VARGOULI, Bool.false)) },
-    { "40", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.TUPITREE, Bool.false)) },
-    { "41", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LELA, Bool.false)) },
-    { "42", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MOSHY, Bool.false)) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.ESPECTRONUS, Bool.false)) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false))},
-    { "45", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK, Bool.false)) },
-    { "46", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true)) },
-    { "47", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.LAUGH, Bool.true)) },
-    { "48", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.COBE_ORN, Bool.false)) },
-    { "49", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SANDY, Bool.false)) },
-    { "50", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SLIME, Bool.false)) },
-    { "51", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.MIMIC, Bool.false)) },
-    { "52", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.SPARKY, Bool.false)) },
-    { "53", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.DOOMFIRE, Bool.false)) },
-    { "54", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.BEANSTRONG, Bool.false)) },
-    { "55", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NAMELESS, Bool.false)) },
-    { "56", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.OCTOKING, Bool.true)) },
-    { "57", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.INPUBU, Bool.false)) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER, Bool.false)) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ZOIO, Bool.false)) },
-    { "60", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.IGNITE, Bool.false)) },
-    { "61", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FROST, Bool.false)) },
-    { "62", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.FRAB, Bool.false)) },
-    { "63", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.ELECTROWL, Bool.false)) },
-    { "64", Mons.Kind.new_mons(Mons.Kind.Mons(Mons.Kind.mons.NOCTUBRIGHT, Bool.false)) },
+    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY) },
+    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS) },
+    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA)},
+    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK) },
+    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF) },
+    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH) },
+    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN) },
+    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY) },
+    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME) },
+    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC) },
+    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY) },
+    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE) },
+    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG) },
+    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS) },
+    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING) },
+    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO) },
+    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE) },
+    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST) },
+    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB) },
+    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL) },
+    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT) },
 
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
     { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
@@ -656,7 +663,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4)), rock_path ]},
     { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
-    { "ch", [ Mons.Kind.new_const(Mons.Kind.const.CHEST) ]},
+    { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
     { "om", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]},
     { "on", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER1_M) ]},
     { "o0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right)), grass ]},
