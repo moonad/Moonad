@@ -1472,20 +1472,19 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
 // Draw an inventory showing mons captured and their names
 Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
    let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
-   let scr = Mons.draw.text("INVENTORY", Pos32.new(130u,28u,0u), scr)
    open obj:
    let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
    let qtd = Nat.to_u32(List.length<>(obj.bag))
    let qtd_field = 
      if U32.eql(qtd, 0u) then "Nothing to show for now"
      else String.flatten(["Qtd boss defeated: ", boss_def])
+   let scr = Mons.draw.text(qtd_field, Pos32.new(95u,25u,0u), scr)
    let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
    let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
    let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
    let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-   let text = List.cons<>(qtd_field, mons_names)
    let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-   let scr = Mons.draw.list(text, Pos32.new(100u,40u,0u), scr)
+   let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,30u,0u), scr)
    scr
 
 // 0: neutral
@@ -1493,10 +1492,10 @@ Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
 // 2: right, down
 // To highlight a Mon name in inventory
 Mons.draw.bag_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
-  let def_y = 70u
+  let def_y = 42u
   let pos = 
-    if U32.eql(mon_idx, 0u) then Pos32.new(130u,def_y,0u)
-    else Pos32.new(130u, U32.add(def_y, U32.mul(18u, mon_idx)), 0u)
+    if U32.eql(mon_idx, 0u) then Pos32.new(160u,def_y,0u)
+    else Pos32.new(160u, U32.add(def_y, U32.mul(12u, mon_idx)), 0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_row_mon_selected, pos, scr)
 
@@ -1548,18 +1547,18 @@ Mons.draw.msg_screen.line_0: Pos32
 Mons.draw.msg_screen.line_1: Pos32
   Pos32.new(16u,144u,0u)
 
-Mons.draw.list(texts: List(String), start_pos: Pos32, scr: Image3D): Image3D
+Mons.draw.list(texts: List(String), spacing: U32, start_pos: Pos32, scr: Image3D): Image3D
    let qtd = Nat.to_u32(List.length<>(texts))
-   Mons.draw.list.go(texts, start_pos, scr, 0u)
+   Mons.draw.list.go(texts, spacing, start_pos, scr, 0u)
 
-Mons.draw.list.go(texts: List(String), pos: Pos32, scr: Image3D, idx: U32): Image3D
+Mons.draw.list.go(texts: List(String), spacing: U32, pos: Pos32, scr: Image3D, idx: U32): Image3D
    let x = Pos32.get_x(pos)
    let y = Pos32.get_y(pos)
-   let pos = Pos32.new(x,U32.add(U32.add(15u, idx), y),0u)
+   let pos = Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
    case texts:
    | scr;
    | let scr = Mons.draw.text(texts.head, pos, scr)
-     Mons.draw.list.go(texts.tail, pos, scr, U32.add(idx, 1u));
+     Mons.draw.list.go(texts.tail, spacing, pos, scr, U32.add(idx, 1u));
 
 // Draw images of Mons in the replace screen
 // TODO: UP and DOWn
@@ -1693,7 +1692,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.image(Mons.Assets.battle_capture_bg, Pos32.new(120u,80u,0u), scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
-                // let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(50u,30u,0u), scr)
+                let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(50u,30u,0u), scr)
                 let scr = Mons.draw.text("[c] Capture", Mons.draw.msg_screen.line_0, scr)
                 let scr = Mons.draw.text("[z] Free", Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
