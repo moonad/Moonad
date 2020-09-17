@@ -60,7 +60,7 @@ T Mons.Object
   dmg: U32,       // object's current health points
   bag: List(Mons.Object), // store normal Mons
   mon: U32, // idx of the current Mon. Default 0u
-  bos: List(Mons.Object) // store Monas that are boss 
+  bos: List(Mons.Object) // store Mons that are boss 
 );
 
 // TODO add more skills
@@ -106,8 +106,7 @@ T Mons.Game
   usr: Word(160), // player name
   pos: Map(Pos32), // player positions
   map: Mons.Map, // the game map
-  stt: Mons.Screen, // the current state of the game
-  lvl: U32 // the last lvl unlocked
+  stt: Mons.Screen // the current state of the game
 );
 
 T Mons.Screen
@@ -723,10 +722,10 @@ Mons.Game.get_usr(game: Mons.Game): Word(160)
 
 // Set the game user
 Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.lvl)
+  open game: Mons.Game.new(usr, game.pos, game.map, game.stt)
 
 Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.lvl)
+  open game: Mons.Game.new(game.usr, game.pos, game.map, stt)
 
 // Gets an user's position
 Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
@@ -736,7 +735,7 @@ Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
 // Sets an user's position
 Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt, game.lvl)
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt)
 
 // Gets the hero's position
 Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
@@ -745,11 +744,7 @@ Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, map, game.stt, game.lvl)
-
-Mons.Game.set_lvl(lvl: U32, game: Mons.Game): Mons.Game
-  open game:
-  Mons.Game.new(game.usr, game.pos, game.map, game.stt, lvl)
+  Mons.Game.new(game.usr, game.pos, map, game.stt)
 
 Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -1642,7 +1637,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       ;
       | cons =>
         if Bool.and(is_standing, adve_kind.portal) then
-          if U32.eql(game.lvl, 0u) then
+          if U32.eql(hero_idx, 0u) then
             let scr = Mons.draw.battle_bg(adve_obj, scr)
             Mons.draw.text("Press [c] to access next level", Pos32.new(30u,135u,0u), scr)
           else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
@@ -1838,7 +1833,7 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.game('.'), 0u);
+    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.game('.'));
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
   // Event handlers
