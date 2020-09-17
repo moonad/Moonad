@@ -1177,7 +1177,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
-    let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
+    // let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
 
     open hero_obj:
     open adve_obj:
