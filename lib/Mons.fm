@@ -58,8 +58,9 @@ T Mons.Object
   pad: Mons.Pad,  // movement key pad
   ani: U32,       // number of walk frames to animate
   dmg: U32,       // object's current health points
-  bag: List(Mons.Object), // store Mons.Object
-  mon: U32 // idx of the current Mon. Default 0u
+  bag: List(Mons.Object), // store normal Mons
+  mon: U32, // idx of the current Mon. Default 0u
+  bos: List(Mons.Object) // store Monas that are boss 
 );
 
 // TODO add more skills
@@ -295,7 +296,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 // The void tile
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u)
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [])
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -303,7 +304,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -311,7 +312,7 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, obj.mon)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -319,7 +320,7 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, obj.mon)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, obj.mon, obj.bos)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -331,7 +332,7 @@ Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -350,7 +351,10 @@ Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
   open obj: Mons.Object.set_pad(obj, Mons.Pad.set_d(obj.pad, val))
 
 Mons.Object.set_mon(idx: U32, obj: Mons.Object): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx, obj.bos)
+
+Mons.Object.set_bos(bos: List(Mons.Object), obj: Mons.Object): Mons.Object
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, bos)
 
 // Hits an object, damaging it
 Mons.Object.hit(obj: Mons.Object, dmg: U32): Mons.Object
@@ -486,13 +490,23 @@ Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open hero:
   let qtd = List.length<>(hero.bag)
   case obj.kin as kind:
-  | obj =>
+  | mon =>
     let obj = Mons.Object.set_dmg(obj, 0u)
     if Nat.ltn(qtd, 3) then
       let new_bag = List.append<>(hero.bag, obj)
       Mons.Object.set_bag(new_bag, hero)
     else
       hero;
+  | const => hero;
+  | terrain => hero;
+
+Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
+  open boss:
+  open hero:
+  case boss.kin as kind:
+  | mon => 
+    let new_boss_bag = List.append<>(hero.bos, boss)
+    Mons.Object.set_bos(new_boss_bag, hero);
   | const => hero;
   | terrain => hero;
 
@@ -529,7 +543,7 @@ Mons.Object.get_names(bag: List(Mons.Object)): List(String)
 
 Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   open obj:
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos)
 
 Mons.Object.hero: Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false))
@@ -544,7 +558,7 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [])
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
@@ -757,6 +771,18 @@ Mons.Game.move_obj(from: Pos32, idx: U32, to: Pos32, obj: Mons.Object, game: Mon
   let game = Mons.Game.map_del(from, idx, game)
   let game = Mons.Game.map_push(to, obj, game)
   game
+
+Mons.Game.delete_adve_obj(
+  adve_obj: Mons.Object, 
+  hero_obj: Mons.Object, 
+  pos: Pos32,
+  hero_idx: U32,
+  adve_idx: U32,
+  game: Mons.Game): Mons.Game
+  let game = Mons.Game.map_del(pos, adve_idx, game)
+  let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+  Mons.Game.set_stt(Mons.Screen.game('.'), game)
+  
 
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
@@ -1156,6 +1182,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
     // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+    let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
 
     open hero_obj:
     open adve_obj:
@@ -1227,14 +1254,15 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       case adve_obj.kin as kind:
       | mon =>
         if Mons.Object.is_obj_defeated(adve_obj) then
-          let full_bag = Mons.Object.is_full_bag(hero_obj)
-          if full_bag then
-            Mons.Game.set_stt(Mons.Screen.capture_mon(0u, full_bag), game)
-          else // TODO: Why does this code doesn't work in case "capture"?
-            let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-            let game = Mons.Game.map_del(pos, adve_idx, game)
-            let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-            Mons.Game.set_stt(Mons.Screen.game('.'), game)
+          if kind.boss then
+            let hero_obj = Mons.Object.capture_boss(adve_obj, hero_obj)
+            Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
+          else
+            if Mons.Object.is_full_bag(hero_obj) then
+              Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.true), game)
+            else
+              let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+              Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
         else 
           // TODO: if defeated, adve continue on the map
           // hero loses the current mon and show map
@@ -1242,10 +1270,14 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
       ;
-      | construction => 
-        let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
-        let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
-        Mons.Game.set_user_pos(usr, new_pos, game)
+      | construction =>
+        let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
+        let can_use_portal = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
+        if can_use_portal then
+          let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
+          let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
+          Mons.Game.set_user_pos(usr, new_pos, game)
+        else game
       ;
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
@@ -1335,6 +1367,13 @@ Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.G
   // let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
+Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
+  open hero_obj:
+  let hero_obj = Mons.Object.set_bos([], hero_obj)
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true))
+  let hero_obj = Mons.Object.capture_boss(mon0_bag, hero_obj)
+  Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
 // D = [ 1,  0,  0]
@@ -1422,10 +1461,11 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
    let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
    let scr = Mons.draw.text("INVENTORY", Pos32.new(95u,28u,0u), scr)
    open obj:
+   let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
    let qtd = Nat.to_u32(List.length<>(obj.bag))
    let qtd_field = 
      if U32.eql(qtd, 0u) then "Nothing to show for now"
-     else String.flatten(["Qtd: ", U32.to_string(qtd)])
+     else String.flatten(["Qtd boss defeated: ", boss_def])
    let scr =
       if U32.eql(qtd, 0u) then scr
       else Mons.draw.text(">", Mons.draw.bag_select(idx, obj.mon), scr)
