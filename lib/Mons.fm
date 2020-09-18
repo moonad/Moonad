@@ -899,14 +899,17 @@ Mons.Attr.new_hero: Mons.Attr
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
-        Mons.Assets.boy_r_0, Mons.Assets.boy_u_0, 
-        Mons.Assets.boy_l_0, Mons.Assets.boy_d_0,
+        Mons.Assets.mons_tupitree_r_0, Mons.Assets.mons_tupitree_u_0, 
+        Mons.Assets.mons_tupitree_l_0, Mons.Assets.mons_tupitree_d_0,
 
-        Mons.Assets.boy_r_1, Mons.Assets.boy_u_1,
-        Mons.Assets.boy_l_1, Mons.Assets.boy_d_1,
+        Mons.Assets.mons_tupitree_r_1, Mons.Assets.mons_tupitree_u_1,
+        Mons.Assets.mons_tupitree_l_1, Mons.Assets.mons_tupitree_d_1,
 
-        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
-        Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
+        Mons.Assets.mons_tupitree_r_2, Mons.Assets.mons_tupitree_u_2,
+        Mons.Assets.mons_tupitree_l_2, Mons.Assets.mons_tupitree_d_2),
+
+//        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
+//        Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
       Mons.dummy_skills 
   )
