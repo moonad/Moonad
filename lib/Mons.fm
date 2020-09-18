@@ -1484,7 +1484,7 @@ Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
    let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
    let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
    let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-   let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,30u,0u), scr)
+   let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,31u,0u), scr)
    scr
 
 // 0: neutral
