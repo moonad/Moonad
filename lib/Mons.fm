@@ -1478,7 +1478,7 @@ Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
    let qtd_field = 
      if U32.eql(qtd, 0u) then "Nothing to show for now"
      else String.flatten(["Qtd boss defeated: ", boss_def])
-   let scr = Mons.draw.text(qtd_field, Pos32.new(95u,25u,0u), scr)
+   let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
    let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
    let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
    let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
@@ -1523,8 +1523,8 @@ Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
   let scr = Mons.draw.list_image(mons_images, Bool.false, Pos32.new(30u,90u,0u), scr)
   let scr = Mons.draw.bag_full_select(obj.mon, qtd, scr)
-  let scr = Mons.draw.text("Select a mon to replace or skip", Mons.draw.msg_screen.line_0, scr)
-  let scr = Mons.draw.text("[c] Replace  | [z] Skip     ", Mons.draw.msg_screen.line_1, scr)
+  let scr = Mons.draw.text("Select a mon to replace or skip", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+  let scr = Mons.draw.text("[c] Replace  | [z] Skip     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
   scr
 
 // 0: neutral
@@ -1557,7 +1557,7 @@ Mons.draw.list.go(texts: List(String), spacing: U32, pos: Pos32, scr: Image3D, i
    let pos = Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
    case texts:
    | scr;
-   | let scr = Mons.draw.text(texts.head, pos, scr)
+   | let scr = Mons.draw.text(texts.head, Mons.font_black, pos, scr)
      Mons.draw.list.go(texts.tail, spacing, pos, scr, U32.add(idx, 1u));
 
 // Draw images of Mons in the replace screen
@@ -1583,8 +1583,8 @@ Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, pos: Pos32, scr
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u));
 
 // Draws an ASCII char to a position using 
-Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
-  case Mons.font.get_img(chr, Mons.font.map) as got:
+Mons.draw.char(chr: Char, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
+  case Mons.font.get_img(chr, font_map) as got:
   | scr;
   | let img = got.value
     let img_len = Image3D.get_length(img)
@@ -1596,11 +1596,11 @@ Mons.draw.char(chr: Char, chr_pos: Pos32, scr: Image3D): Image3D
     scr;
 
 // Draws an ASCII text to a position
-Mons.draw.text(txt: String, chr_pos: Pos32, scr: Image3D): Image3D
+Mons.draw.text(txt: String, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
   for pair in List.indices.u32<>(String.to_list(txt)) with scr:
     get i chr = pair
     let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
-    Mons.draw.char(chr, Pos32.add(chr_pos, add_pos), scr)
+    Mons.draw.char(chr, font_map, Pos32.add(chr_pos, add_pos), scr)
 
 // Draws a sprite to a position
 Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
@@ -1633,7 +1633,7 @@ Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   let pos_chp = Pos32.new(p_hp,22u,0u) 
   let pos_name = Pos32.new(38u,22u,0u)
   let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
-  let scr = Mons.draw.text(name, pos_name, scr)
+  let scr = Mons.draw.text(name, Mons.font_black, pos_name, scr)
   scr
 
 Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
@@ -1641,7 +1641,7 @@ Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   let pos_chp = Pos32.new(U32.add(109u, p_hp),83u,0u) // x = 175u: full hp
   let pos_name = Pos32.new(147u,83u,0u)
   let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
-  let scr = Mons.draw.text(name, pos_name, scr)
+  let scr = Mons.draw.text(name, Mons.font_black, pos_name, scr)
   scr
 
 // Draws the game to screen
@@ -1683,8 +1683,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.battle_bg(adve_obj, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
-            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit     ", Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
@@ -1693,14 +1693,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
                 let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(70u,90u,0u), scr)
-                let scr = Mons.draw.text("[c] Capture", Mons.draw.msg_screen.line_0, scr)
-                let scr = Mons.draw.text("[z] Free", Mons.draw.msg_screen.line_1, scr)
+                let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
               else // TODO: lose battle not working
-                let scr = Mons.draw.text(hero_txt, Pos32.new(130u,104u,0u), scr)
-                let scr = Mons.draw.text("You lost the battle and", Pos32.new(16u,26u,0u), scr)
-                let scr = Mons.draw.text("your current Mon.", Pos32.new(16u,42u,0u), scr)
-                let scr = Mons.draw.text("[c] I'll do better next time", Mons.draw.msg_screen.line_0, scr)
+                let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
+                let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
+                let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
+                let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
             scr
         else
@@ -1710,7 +1710,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         if Bool.and(is_standing, adve_kind.portal) then
           if U32.eql(hero_idx, 0u) then
             let scr = Mons.draw.battle_bg(adve_obj, scr)
-            Mons.draw.text("Press [c] to access next level", Pos32.new(30u,135u,0u), scr)
+            Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
           else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
