@@ -181,6 +181,8 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.TREE(model: Nat, slice: Nat);
 | Mons.Kind.terrain.SAND_0;
 | Mons.Kind.terrain.SAND_1;
+| Mons.Kind.terrain.SNOW_0;
+| Mons.Kind.terrain.SNOW_1;
 | Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.Kind.terrain.WATER1_M;
 
@@ -605,6 +607,8 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "t0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_00) ]},
     { "t1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_01) ]},
     { "t2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_02) ]},
+    { ".n", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SNOW_0) ]},
+    { ".m", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SNOW_1) ]},
     { "w0", [ 
       Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.up)),
       Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
@@ -1118,6 +1122,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       else Mons.Attr.new_blockable([]);
     | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
     | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
+    | Mons.SNOW_0 => Mons.Attr.new_neutral([Mons.Assets.snow_0]);
+    | Mons.SNOW_1 => Mons.Attr.new_neutral([Mons.Assets.snow_1]);
     | Mons.WATER => 
       case kin.dir:
       | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
