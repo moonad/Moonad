@@ -712,6 +712,13 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "f4", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_up)), grass ]},
     { "f5", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_down)), grass ]},
     { "f6", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_down)), grass ]},
+    { "fa", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right)), grass ]},
+    { "fb", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.middle)), grass ]},
+    { "fc", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left)), grass ]},
+    { "fd", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_up)), grass ]},
+    { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up)), grass ]},
+    { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
+    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},    
   ])
 
 // Converts a string map source to an actual map
@@ -1090,6 +1097,17 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
         | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
         | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
+        else if Nat.eql(kin.model, 1) then
+        case kin.dir:
+        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.rock_fence_r]); 
+        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_l]); 
+        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.rock_fence_m]);
+        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_ru]); 
+        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_ru]); 
+        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_lu]); 
+        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_lu]);        
       else Mons.Attr.new_blockable([]);
   ; // end of construction
 
