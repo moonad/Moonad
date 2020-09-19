@@ -1178,6 +1178,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   // New player
   | let pos = Pos32.new(2048u, 2048u, 0u)
     let obj = Mons.Object.hero
+    let obj = Mons.Object.hit(obj, 8u)
     let game = Mons.Game.map_push(pos, obj, game)
     let game = Mons.Game.set_user_pos(usr, pos, game)
     game;
@@ -1195,7 +1196,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let curr_mon = Mons.Object.get_current_mon(hero_obj)
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
-    let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+    // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
     // let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
 
     open hero_obj:
@@ -1205,8 +1206,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     case game.stt as stt:
     | game =>
     // TODO remove - just testing dmg to hero to check heal eff
-    if U16.eql(cmd, 'T') then 
-      Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
+    // if U16.eql(cmd, 'T') then 
+    //     // TEST - block the player from getting 0HP
+    //     if U32.gte(hero_obj.dmg, 8u) then
+    //       game
+    //     else 
+    //       Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
 
     if U16.eql(cmd, 'U') then
       if is_battling then
@@ -1249,14 +1254,14 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if U16.eql(cmd, 's') then
       Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
 
-    else if U16.eql(cmd, 'O') then //TODO remove
-        let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
-        let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
-        Mons.Game.set_user_pos(usr, new_pos, game)
-    else if U16.eql(cmd, 'P') then //TODO remove
-        let new_pos = Pos32.sub(pos, Pos32.new(0u,0u,1u)) 
-        let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
-        Mons.Game.set_user_pos(usr, new_pos, game)
+    // else if U16.eql(cmd, 'O') then //TODO remove
+    //     let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
+    //     let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
+    //     Mons.Game.set_user_pos(usr, new_pos, game)
+    // else if U16.eql(cmd, 'P') then //TODO remove
+    //     let new_pos = Pos32.sub(pos, Pos32.new(0u,0u,1u)) 
+    //     let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
+    //     Mons.Game.set_user_pos(usr, new_pos, game)
       
     else if U16.eql(cmd, 'e') then // Open hero's bag
       if Bool.or(is_battling, end_battle) then game
@@ -1280,8 +1285,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else 
           // TODO: if defeated, adve continue on the map
           // hero loses the current mon and show map
-          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          // let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
+          // let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
       ;
       | construction =>
@@ -1298,7 +1303,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if U16.eql(cmd, 'z') then // Free Mon
       if Mons.Object.is_obj_defeated(adve_obj) then
         let game = Mons.Game.map_del(pos, adve_idx, game)
-        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
       else game
 
     else game ;
@@ -1624,7 +1630,7 @@ Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
       else Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
     scr
   ;
-  | const => Mons.draw.image(Mons.Assets.lvl_up, Pos32.new(120u,80u,0u), scr);
+  | const => scr;
   | terrain => scr;
 
 
@@ -1684,7 +1690,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[J] heal(2)  | [K] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
@@ -1697,21 +1703,28 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
               else // TODO: lose battle not working
-                let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
-                let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
-                let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
-                let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-                Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
+                // let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
+                // let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
+                // let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
+                // let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                // Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
+                scr
             scr
         else
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | cons =>
         if Bool.and(is_standing, adve_kind.portal) then
-          if U32.eql(hero_idx, 0u) then
-            let scr = Mons.draw.battle_bg(adve_obj, scr)
+          let boss_def = Nat.to_u32(List.length<>(hero_obj.bos))
+          if U32.gtn(boss_def, hero_idx) then
+            let scr = Mons.draw.image(Mons.Assets.battle_capture_bg, Pos32.new(120u,80u,0u), scr)
             Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
-          else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+          else
+            // let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+            let scr = Mons.draw.image(Mons.Assets.portal_closed, Pos32.new(120u,80u,0u), scr)
+            let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+            Mons.draw.text("first defeat the boss.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            // Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
