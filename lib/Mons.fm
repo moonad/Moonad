@@ -164,7 +164,10 @@ T Mons.Kind.const
 | Mons.Kind.const.ROCK(model: Nat, slice: Nat);
 | Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
+| Mons.Kind.const.WELL(model: Nat, slice: Nat);
 | Mons.Kind.const.CHEST;
+| Mons.Kind.const.SIGN_0;
+| Mons.Kind.const.SIGN_1;
 | Mons.Kind.const.PATH_BLOCKER;
 | Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 
@@ -679,6 +682,8 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "C2", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 2)), rock_path ]},
     { "C3", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 3)), rock_path ]},
     { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4)), rock_path ]},
+    { "W0", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 0)), grass ]},
+    { "W1", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 1)), grass ]},
     { "p1", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 0)), grass ]},//Marcio
     { "p2", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 1)), grass ]},//Marcio
     { "p3", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(1, 0)), grass ]},//Marcio
@@ -694,6 +699,8 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
     { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
+    { "s0", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_0), grass ]},
+    { "s1", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_1), grass ]},
     { "om", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]},
     { "on", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER1_M) ]},
     { "o0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right)), grass ]},
@@ -895,22 +902,22 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_default_battle_spr, [])
 
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "HERO",
+  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "ZOIO",
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
-        Mons.Assets.mons_tupitree_r_0, Mons.Assets.mons_tupitree_u_0, 
-        Mons.Assets.mons_tupitree_l_0, Mons.Assets.mons_tupitree_d_0,
+        Mons.Assets.boy_r_0, Mons.Assets.boy_u_0, 
+        Mons.Assets.boy_l_0, Mons.Assets.boy_d_0,
 
-        Mons.Assets.mons_tupitree_r_1, Mons.Assets.mons_tupitree_u_1,
-        Mons.Assets.mons_tupitree_l_1, Mons.Assets.mons_tupitree_d_1,
+        Mons.Assets.boy_r_1, Mons.Assets.boy_u_1,
+        Mons.Assets.boy_l_1, Mons.Assets.boy_d_1,
 
-        Mons.Assets.mons_tupitree_r_2, Mons.Assets.mons_tupitree_u_2,
-        Mons.Assets.mons_tupitree_l_2, Mons.Assets.mons_tupitree_d_2),
-
-//        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
-//        Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-      (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
+        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
+        Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
+//        Mons.Assets.mons_zoio_l_2, Mons.Assets.mons_zoio_d_2),
+//        Mons.Assets.mons_tupitree_l_2, Mons.Assets.mons_tupitree_d_2),
+//        Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,        
+      (is_up) Bool.if<>(is_up,Mons.Assets.battle_tupitree_u,Mons.Assets.battle_tupitree_u),//(is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u), // Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d
       Mons.dummy_skills 
   )
 
@@ -1086,7 +1093,15 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
           Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
         else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
       else Mons.Attr.new_blockable([]);
+    | Mons.WELL =>
+      if Nat.eql(kin.model, 0) then
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.well_01])
+        else Mons.Attr.new_blockable([Mons.Assets.well_02])
+      else Mons.Attr.new_blockable([]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
+    | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
+    | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
     | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | Mons.FENCE =>
       if Nat.eql(kin.model, 0) then
