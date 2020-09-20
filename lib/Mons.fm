@@ -633,6 +633,16 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2)), grass ]},
     { "B0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 0)), grass ]},
     { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
+    { "P0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 0)), grass ]},
+    { "P1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 1)), grass ]},
+    { "P2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(3, 0)), grass ]},
+    { "P3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(3, 1)), grass ]},    
+    { "P4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(4, 0)), grass ]},
+    { "P5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(4, 1)), grass ]},    
+    { "P6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 0)), grass ]},
+    { "P7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 1)), grass ]},    
+    { "P8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(6, 0)), grass ]},    
+    { "P9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(7, 0)), grass ]},    
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
@@ -1155,6 +1165,26 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         if Nat.eql(kin.slice, 0) then 
           Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
         else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
+      if Nat.eql(kin.model, 2) then // Pine tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.pine_0_0])
+        else Mons.Attr.new_blockable([Mons.Assets.pine_0_1])
+      if Nat.eql(kin.model, 3) then // Big Pine tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.bigpine_0_0])
+        else Mons.Attr.new_blockable([Mons.Assets.bigpine_0_1])
+      if Nat.eql(kin.model, 4) then // Pine tree 2
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.pine_2_0])
+        else Mons.Attr.new_blockable([Mons.Assets.pine_2_1])
+      if Nat.eql(kin.model, 5) then // Big Pine tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.bigpine_2_0])
+        else Mons.Attr.new_blockable([Mons.Assets.bigpine_2_1])
+      if Nat.eql(kin.model, 6) then // Dead Pine tree 1
+          Mons.Attr.new_blockable([Mons.Assets.deadpine_0])
+      if Nat.eql(kin.model, 7) then // Dead Pine tree 2
+          Mons.Attr.new_blockable([Mons.Assets.deadpine_1])
       else Mons.Attr.new_blockable([]);
     | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
     | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
