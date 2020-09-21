@@ -1125,19 +1125,29 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | dummy_hit  => "dummy_hit";
   | dummy_heal => "dummy_heal";
 
-Mons.damage(pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game 
-  Mons.Game.update
-  | (obj) Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg);
-  | pos; 
-  | idx;
-  | game;
+Mons.update_mon_obj(
+  hero_obj: Mons.Object,
+  obj_updated: Mons.Object,
+  pos: Pos32,
+  idx: U32,
+  game: Mons.Game) : Mons.Game
+  open hero_obj:
+  let qtd = List.length<>(hero_obj.bag)
+  if Nat.eql(qtd, 0) then
+    Mons.Game.map_set(pos, idx, obj_updated, game) // hero_obj
+  else //game
+    let idx_nat = U32.to_nat(hero_obj.mon)
+    let new_bag = List.update_at<>(idx_nat, (a) obj_updated, hero_obj.bag)
+    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj) 
+    Mons.Game.map_set(pos, idx, hero_obj, game)
 
-Mons.heal(pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
-  Mons.Game.update
-  | (obj) Mons.Object.heal(Mons.Object.get_current_mon(obj), val);
-  | pos;
-  | idx;
-  | game;
+Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
+  let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
+  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
 
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
@@ -1147,8 +1157,8 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   let source_obj = Mons.Map.get(pos, source, game.map)
   let target_obj = Mons.Map.get(pos, target, game.map)
   case skill: 
-  | dummy_hit  => Mons.damage(pos, target, 4u, game);  
-  | dummy_heal => Mons.heal(pos, source, 2u, game);
+  | dummy_hit  => Mons.damage(target_obj, pos, target, 4u, game);  
+  | dummy_heal => Mons.heal(source_obj, pos, source, 2u, game);
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -1178,7 +1188,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   // New player
   | let pos = Pos32.new(2048u, 2048u, 0u)
     let obj = Mons.Object.hero
-    let obj = Mons.Object.hit(obj, 8u)
     let game = Mons.Game.map_push(pos, obj, game)
     let game = Mons.Game.set_user_pos(usr, pos, game)
     game;
@@ -1206,14 +1215,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     case game.stt as stt:
     | game =>
     // TODO remove - just testing dmg to hero to check heal eff
-    // if U16.eql(cmd, 'T') then 
-    //     // TEST - block the player from getting 0HP
-    //     if U32.gte(hero_obj.dmg, 8u) then
-    //       game
-    //     else 
-    //       Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
+    if U16.eql(cmd, 'T') then 
+      // TEST - block the player from getting 0HP
+      Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
 
-    if U16.eql(cmd, 'U') then
+    else if U16.eql(cmd, 'U') then
       if is_battling then
         case List.at<>(0, skills) as skill:
         | none => game;
@@ -1690,7 +1696,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [K] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
@@ -1703,12 +1709,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
               else // TODO: lose battle not working
-                // let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
-                // let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
-                // let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
-                // let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-                // Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
-                scr
+                let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
+                let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
+                let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
+                let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
+                // scr
             scr
         else
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
