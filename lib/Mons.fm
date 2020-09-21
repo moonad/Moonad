@@ -165,6 +165,7 @@ T Mons.Kind.const
 | Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
 | Mons.Kind.const.WELL(model: Nat, slice: Nat);
+| Mons.Kind.const.FONTAIN(model: Nat, slice: Nat);
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.SIGN_0;
 | Mons.Kind.const.SIGN_1;
@@ -694,6 +695,9 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4)), rock_path ]},
     { "W0", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 0)), grass ]},
     { "W1", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 1)), grass ]},
+    { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)), rock_path ]},
+    { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1)), rock_path ]},
+    { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2)), rock_path ]},
     { "p1", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 0)), grass ]},//Marcio
     { "p2", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 1)), grass ]},//Marcio
     { "p3", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(1, 0)), grass ]},//Marcio
@@ -1108,6 +1112,14 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         if Nat.eql(kin.slice, 0) then
           Mons.Attr.new_blockable([Mons.Assets.well_01])
         else Mons.Attr.new_blockable([Mons.Assets.well_02])
+      else Mons.Attr.new_blockable([]);
+    | Mons.FONTAIN =>
+      if Nat.eql(kin.model, 0) then
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
+        else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
       else Mons.Attr.new_blockable([]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
