@@ -523,8 +523,8 @@ Mons.Object.delete_from_bag(idx: U32, obj: Mons.Object): Mons.Object
   let idx = U32.to_nat(idx)
   open obj:
   let qtd = List.length<>(obj.bag)
-  if Nat.eql(qtd, 1) then obj
-  else 
+  if Nat.eql(qtd, 0) then obj
+  else
     let new_bag = List.delete_at<>(idx, obj.bag)
     Mons.Object.set_bag(new_bag, obj)
 
@@ -800,7 +800,7 @@ Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
     open Mons.Kind.attr(hero.kin) as hero_kin:
     let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
     Bool.and(is_adve_alive, is_hero_alive)
-  else //Bool.false
+  else
     let current_mon = Mons.Object.get_current_mon(hero)
     open current_mon:
     open Mons.Kind.attr(current_mon.kin) as mon_kin:
@@ -1224,31 +1224,31 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // TODO remove - just testing dmg to hero to check heal eff
     if U16.eql(cmd, 'T') then 
       // TEST - block the player from getting 0HP
-      Mons.cast(pos, 0u, 0u, Mons.Skill.Dummy_hit, game)
+      Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
 
     else if U16.eql(cmd, 'U') then
       if is_battling then
         case List.at<>(0, skills) as skill:
         | none => game;
-        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+        | some => Mons.cast(pos, hero_idx, adve_idx, skill.value, game);
       else game
     else if U16.eql(cmd, 'I') then
       if is_battling then
         case List.at<>(1, skills) as skill:
         | none => game;
-        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+        | some => Mons.cast(pos, hero_idx, adve_idx, skill.value, game);
       else game
     else if U16.eql(cmd, 'J') then
       if is_battling then
         case List.at<>(2, skills) as skill:
         | none => game;
-        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+        | some => Mons.cast(pos, hero_idx, adve_idx, skill.value, game);
       else game
     else if U16.eql(cmd, 'K') then
       if is_battling then
         case List.at<>(3, skills) as skill:
         | none => game;
-        | some => Mons.cast(pos, 0u, 1u, skill.value, game);
+        | some => Mons.cast(pos, hero_idx, adve_idx, skill.value, game);
       else game
     else if U16.eql(cmd, 'D') then
       Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
@@ -1300,7 +1300,14 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           // hero loses the current mon and show map
           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          Mons.Game.set_stt(Mons.Screen.game('.'), game)
+          // let y = Pos32.get_y(pos)
+          // let x = Pos32.get_x(pos)
+          // let z = Pos32.get_z(pos)
+          // let new_pos = Pos32.new(x,y,z)
+          // let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
+          // let game = Mons.Game.set_user_pos(usr, new_pos, game)
+          // Mons.Game.set_stt(Mons.Screen.game('.'), game)
+          Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
       ;
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
