@@ -793,13 +793,20 @@ Mons.Game.delete_adve_obj(
 Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
   open adve:
   open hero:
-  let adve_kin = Mons.Kind.attr(adve.kin)
-  let hero_kin = Mons.Kind.attr(hero.kin)
-  open adve_kin:
-  open hero_kin:
+  open Mons.Kind.attr(adve.kin) as adve_kin:
   let is_adve_alive = Bool.not(U32.eql(adve_kin.mhp, adve.dmg))
-  let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
-  Bool.and(is_adve_alive, is_hero_alive)
+  let qtd = List.length<>(hero.bag)
+  if Nat.eql(qtd, 0) then
+    open Mons.Kind.attr(hero.kin) as hero_kin:
+    let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
+    Bool.and(is_adve_alive, is_hero_alive)
+  else //Bool.false
+    let current_mon = Mons.Object.get_current_mon(hero)
+    open current_mon:
+    open Mons.Kind.attr(current_mon.kin) as mon_kin:
+    let is_mon_alive = Bool.not(U32.eql(mon_kin.mhp, current_mon.dmg))
+    Bool.and(is_adve_alive, is_mon_alive)
+  
 
 Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
   open adve:
@@ -1157,7 +1164,7 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   let source_obj = Mons.Map.get(pos, source, game.map)
   let target_obj = Mons.Map.get(pos, target, game.map)
   case skill: 
-  | dummy_hit  => Mons.damage(target_obj, pos, target, 4u, game);  
+  | dummy_hit  => Mons.damage(target_obj, pos, target, 4u, game);
   | dummy_heal => Mons.heal(source_obj, pos, source, 2u, game);
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
@@ -1289,10 +1296,10 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
               Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
         else 
-          // TODO: if defeated, adve continue on the map
+          // TODO: if defeated, adve continue on the map and is healed
           // hero loses the current mon and show map
-          // let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-          // let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
       ;
       | construction =>
