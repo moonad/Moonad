@@ -934,7 +934,7 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_default_battle_spr, [])
 
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "ZOIO",
+  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "BOY",
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
