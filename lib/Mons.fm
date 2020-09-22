@@ -1477,21 +1477,22 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
 
 // Draw an inventory showing mons captured and their names
 Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
-   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
-   open obj:
-   let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
-   let qtd = Nat.to_u32(List.length<>(obj.bag))
-   let qtd_field = 
-     if U32.eql(qtd, 0u) then "Nothing to show for now"
-     else String.flatten(["Qtd boss defeated: ", boss_def])
-   let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
-   let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
-   let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
-   let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
-   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-   let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-   let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,31u,0u), scr)
-   scr
+  let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
+  open obj:
+  let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
+  let qtd = Nat.to_u32(List.length<>(obj.bag))
+  let qtd_field = 
+    if U32.eql(qtd, 0u) then "Nothing to show for now"
+    else String.flatten(["Qtd boss defeated: ", boss_def])
+  let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
+  let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
+  let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
+  let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
+  let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
+  let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
+  let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,31u,0u), scr)
+  scr
 
 // 0: neutral
 // 1: left, up
