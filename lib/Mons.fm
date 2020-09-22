@@ -788,6 +788,18 @@ Mons.Game.delete_adve_obj(
   let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
   Mons.Game.set_stt(Mons.Screen.game('.'), game)
   
+Mons.Game.move_hero_down(
+  usr: Word(160), 
+  hero_obj: Mons.Object, 
+  pos: Pos32, 
+  hero_idx: U32, 
+  game: Mons.Game): Mons.Game
+  let y = Pos32.get_y(pos)
+  let x = Pos32.get_x(pos)
+  let z = Pos32.get_z(pos)
+  let new_pos = Pos32.new(x,U32.add(y, 1u),z)
+  let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
+  Mons.Game.set_user_pos(usr, new_pos, game)
 
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
@@ -1223,7 +1235,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     | game =>
     // TODO remove - just testing dmg to hero to check heal eff
     if U16.eql(cmd, 'T') then 
-      // TEST - block the player from getting 0HP
       Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
 
     else if U16.eql(cmd, 'U') then
@@ -1296,18 +1307,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
               Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
         else 
-          // TODO: if defeated, adve continue on the map and is healed
-          // hero loses the current mon and show map
+          let adve_obj = Mons.Object.set_dmg(adve_obj, 0u) // adve heals all hp
           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          // let y = Pos32.get_y(pos)
-          // let x = Pos32.get_x(pos)
-          // let z = Pos32.get_z(pos)
-          // let new_pos = Pos32.new(x,y,z)
-          // let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
-          // let game = Mons.Game.set_user_pos(usr, new_pos, game)
-          // Mons.Game.set_stt(Mons.Screen.game('.'), game)
-          Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
+          let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
+          let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
+          Mons.Game.set_stt(Mons.Screen.game('.'), game)
       ;
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
@@ -1637,7 +1642,6 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
     let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), Mons.vox_mid)
     Image3D.push(pix_pos, pix_col, scr)
 
-// TODO: create a bg
 Mons.draw.battle_bg(adve_obj: Mons.Object, scr: Image3D): Image3D
   // TODO: check if adve is of type Grass, Ice, etc.
   open adve_obj:
@@ -1722,13 +1726,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-              else // TODO: lose battle not working
+              else
                 let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
                 let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
                 let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
                 let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
-                // scr
             scr
         else
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
@@ -1950,7 +1953,7 @@ Mons.start(online: Bool): App(Mons.Game)
         App.Action.state<>(Mons.Game.set_usr(event.addr, game)),
         App.Action.watch<>(Mons.App.room),
         // Sends a J to init our char. TODO: better initialization.
-        let chr = Mons.Input.char(Bool.true, 'j')
+        let chr = Mons.Input.char(Bool.true, '.')
         case Mons.Input.serialize(chr) as data:
         | App.Action.print<>(""); // unreachable
         | App.Action.post<>(Mons.App.room, data.value);
