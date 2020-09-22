@@ -1523,7 +1523,7 @@ Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
   let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
   let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-  let scr = Mons.draw.list(mons_names, 11u, Pos32.new(95u,31u,0u), scr)
+  let scr = Mons.draw.list(mons_names, 13u, Pos32.new(95u,30u,0u), scr)
   scr
 
 // 0: neutral
@@ -1534,7 +1534,7 @@ Mons.draw.bag_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
   let def_y = 42u
   let pos = 
     if U32.eql(mon_idx, 0u) then Pos32.new(160u,def_y,0u)
-    else Pos32.new(160u, U32.add(def_y, U32.mul(12u, mon_idx)), 0u)
+    else Pos32.new(160u, U32.add(def_y, U32.mul(15u, mon_idx)), 0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_row_mon_selected, pos, scr)
 
@@ -1550,7 +1550,9 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
 Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory_replace_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(80u,50u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   open obj:
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
