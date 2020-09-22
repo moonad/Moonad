@@ -1,0 +1,4 @@
+// z_index: 30
+// caractere: '
+Mons.Char_white.39: Image3D
+  Image3D.parse("7f7c1effffff7f7d1effffff")
