@@ -167,6 +167,7 @@ T Mons.Kind.const
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
 | Mons.Kind.const.WELL(model: Nat, slice: Nat);
 | Mons.Kind.const.FONTAIN(model: Nat, slice: Nat);
+| Mons.Kind.const.STATUE(model: Nat, slice: Nat);
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.SIGN_0;
 | Mons.Kind.const.SIGN_1;
@@ -708,6 +709,11 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)), rock_path ]},
     { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1)), rock_path ]},
     { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2)), rock_path ]},
+    { "E0", [ Mons.Kind.new_const(Mons.Kind.const.STATUE(0, 0)), rock_path ]},
+    { "E1", [ Mons.Kind.new_const(Mons.Kind.const.STATUE(0, 1)), rock_path ]},
+    { "E2", [ Mons.Kind.new_const(Mons.Kind.const.STATUE(1, 0)), rock_path ]},
+    { "E3", [ Mons.Kind.new_const(Mons.Kind.const.STATUE(1, 1)), rock_path ]},
+    { "E4", [ Mons.Kind.new_const(Mons.Kind.const.STATUE(2, 0)), rock_path ]},
     { "p1", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 0)), grass ]},//Marcio
     { "p2", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 1)), grass ]},//Marcio
     { "p3", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(1, 0)), grass ]},//Marcio
@@ -953,7 +959,7 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_default_battle_spr, [])
 
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "ZOIO",
+  Mons.Attr.new(Bool.false, Bool.false, 12u, 0u, "BOY",
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
@@ -1155,6 +1161,18 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else if Nat.eql(kin.slice, 1) then
           Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
         else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
+      else Mons.Attr.new_blockable([]);
+    | Mons.STATUE =>
+      if Nat.eql(kin.model, 0) then // estatua 1
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.statue_0_0])
+        else Mons.Attr.new_blockable([Mons.Assets.statue_0_1])
+      else if Nat.eql(kin.model, 1) then // estatua 2
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.statue_1_0])
+        else Mons.Attr.new_blockable([Mons.Assets.statue_1_1])
+      else if Nat.eql(kin.model, 2) then // estatua 3
+         Mons.Attr.new_blockable([Mons.Assets.statue_2_0])
       else Mons.Attr.new_blockable([]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
