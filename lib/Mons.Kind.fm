@@ -1,0 +1,375 @@
+T Mons.Kind
+| Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool);
+| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
+| Mons.Kind.Terrain(ele: Mons.Kind.terrain);
+
+T Mons.Kind.mons
+| Mons.Kind.mons.HERO;
+| Mons.Kind.mons.BATH;
+| Mons.Kind.mons.BEHOLDER;
+| Mons.Kind.mons.CRONI;
+| Mons.Kind.mons.ELLIOT;
+| Mons.Kind.mons.ESPECTRONUS;
+| Mons.Kind.mons.GAKI;
+| Mons.Kind.mons.GORR;
+| Mons.Kind.mons.LAMURIA;
+| Mons.Kind.mons.RAFIRE;
+| Mons.Kind.mons.VARGOULI;
+| Mons.Kind.mons.TUPITREE;
+| Mons.Kind.mons.LELA;
+| Mons.Kind.mons.MOSHY;
+| Mons.Kind.mons.POISOLICK;
+| Mons.Kind.mons.BUFF;
+| Mons.Kind.mons.LAUGH;
+| Mons.Kind.mons.COBE_ORN;
+| Mons.Kind.mons.SANDY;
+| Mons.Kind.mons.SLIME;
+| Mons.Kind.mons.MIMIC;
+| Mons.Kind.mons.SPARKY;
+| Mons.Kind.mons.DOOMFIRE;
+| Mons.Kind.mons.BEANSTRONG;
+| Mons.Kind.mons.NAMELESS;
+| Mons.Kind.mons.OCTOKING;
+| Mons.Kind.mons.INPUBU;
+| Mons.Kind.mons.EMERELDER;
+| Mons.Kind.mons.ZOIO;
+| Mons.Kind.mons.IGNITE;
+| Mons.Kind.mons.FROST;
+| Mons.Kind.mons.FRAB;
+| Mons.Kind.mons.ELECTROWL;
+| Mons.Kind.mons.NOCTUBRIGHT;
+
+T Mons.Kind.const
+| Mons.Kind.const.ROCK_PATH_C;
+| Mons.Kind.const.ROCK_PATH_M;
+| Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
+| Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
+| Mons.Kind.const.CHEST;
+| Mons.Kind.const.PATH_BLOCKER;
+| Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+
+T Mons.Kind.terrain
+| Mons.Kind.terrain.VOID;
+| Mons.Kind.terrain.GRASS;
+| Mons.Kind.terrain.GRASS_PLANT;
+| Mons.Kind.terrain.BUSH;
+| Mons.Kind.terrain.PLANT_0;
+| Mons.Kind.terrain.ELV_TERRAIN_00;
+| Mons.Kind.terrain.ELV_TERRAIN_01;
+| Mons.Kind.terrain.ELV_TERRAIN_02;
+| Mons.Kind.terrain.OCEAN(dir: Mons.Map.Dir);
+| Mons.Kind.terrain.TREE(model: Nat, slice: Nat);
+| Mons.Kind.terrain.SAND_0;
+| Mons.Kind.terrain.SAND_1;
+| Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
+| Mons.Kind.terrain.WATER1_M;
+
+
+Mons.Kind.get_mhp(kind: Mons.Kind): U32
+  case Mons.Kind.attr(kind) as attr:
+  | attr.mhp;
+
+Mons.Kind.get_battle_spr(kind: Mons.Kind, is_up: Bool): Image3D
+  case Mons.Kind.attr(kind) as attr:
+  | attr.battle_spr(is_up);
+
+Mons.Kind.get_name(kind: Mons.Kind): String 
+  case Mons.Kind.attr(kind) as attr:
+  | attr.name;
+
+Mons.Kind.get_battles(kind: Mons.Kind): Bool
+ case Mons.Kind.attr(kind) as attr:
+  | attr.battles; 
+
+Mons.Kind.get_blocks(kind: Mons.Kind): Bool
+ case Mons.Kind.attr(kind) as attr:
+  | attr.blocks;
+
+Mons.Kind.get_atk(kind: Mons.Kind): U32
+ case Mons.Kind.attr(kind) as attr:
+  | attr.atk; 
+
+Mons.Kind.get_skills(kind: Mons.Kind): List(Mons.Skill)
+ case Mons.Kind.attr(kind) as attr:
+  | attr.skills; 
+
+Mons.Kind.is_hero(kind: Mons.Kind): Bool
+  case kind:
+  | mons => 
+    case kind.ele:
+    | HERO        => Bool.true;
+    | BATH        => Bool.false;
+    | BEHOLDER    => Bool.false;
+    | CRONI       => Bool.false;
+    | ELLIOT      => Bool.false;
+    | ESPECTRONUS => Bool.false;
+    | GAKI        => Bool.false;
+    | GORR        => Bool.false;
+    | LAMURIA     => Bool.false;
+    | RAFIRE      => Bool.false;
+    | VARGOULI    => Bool.false;
+    | TUPITREE    => Bool.false;
+    | LELA        => Bool.false;
+    | MOSHY       => Bool.false;
+    | POISOLICK   => Bool.false;
+    | BUFF        => Bool.false;
+    | LAUGH       => Bool.false;
+    | COBE_ORN    => Bool.false;
+    | SANDY       => Bool.false;
+    | SLIME       => Bool.false;
+    | MIMIC       => Bool.false;
+    | SPARKY      => Bool.false;
+    | DOOMFIRE    => Bool.false;
+    | BEANSTRONG  => Bool.false;
+    | NAMELESS    => Bool.false;
+    | OCTOKING    => Bool.false;
+    | INPUBU      => Bool.false;
+    | EMERELDER   => Bool.false;
+    | ZOIO        => Bool.false;
+    | IGNITE      => Bool.false;
+    | FROST       => Bool.false;
+    | FRAB        => Bool.false;
+    | ELECTROWL   => Bool.false;
+    | NOCTUBRIGHT => Bool.false;;
+  | const   => Bool.false;
+  | terrain => Bool.false;
+
+Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
+
+Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false))
+
+Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
+
+Mons.Kind.new_mons(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
+    // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
+    Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
+
+Mons.Kind.new_boss(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true)),
+    Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
+
+Mons.Kind.water_with_kin(kin: Mons.Kind.mons): List(Mons.Object)
+  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
+    Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]
+
+Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
+  (x,y,obj_ani,obj_dir) spr
+
+Mons.Kind.set_pic(spr: List(Image3D)): Image3D
+  case spr:
+  | Mons.Assets.tile_chest_0;
+  | spr.head;
+
+// TODO: update default battle image
+Mons.Kind.set_default_battle_spr:  Bool -> Image3D
+  (is_up) Mons.Assets.battle_croni_u
+
+// blocks: Bool,
+// battles: Bool,
+// mhp: U32,
+// atk: U32
+// name: String
+// spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
+Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
+  case kin:
+  | Mons.Kind.mons => 
+    case kin.ele as kin:
+    | Mons.HERO => Mons.Attr.new_hero;
+    | Mons.BATH => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_bath_d_0], "BATH",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
+    | Mons.BEHOLDER => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
+    | Mons.CRONI => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_croni_d_0], "CRONI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
+    | Mons.ELLIOT => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_elliot_d_0], "ELLIOT",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
+    | Mons.ESPECTRONUS => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
+    | Mons.GAKI => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_gaki_d_0], "GAKI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
+    | Mons.GORR => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_gorr_d_0], "GORR",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
+    | Mons.LAMURIA => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_lamuria_d_0], "LAMURIA",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
+    | Mons.RAFIRE => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_rafire_d_0], "RAFIRE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
+    | Mons.VARGOULI => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_vargouli_d_0], "VARGOULI",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
+    | Mons.TUPITREE => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_tupitree_d_0], "TUPITREE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
+    | Mons.LELA => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_lela_d_0], "LELA",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
+    | Mons.MOSHY => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_moshy_d_0], "MOSHY",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
+    | Mons.POISOLICK => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d));
+    | Mons.BUFF => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_buff_d_0], "BUFF",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_buff_u, Mons.Assets.battle_buff_d));
+    | Mons.LAUGH => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_laugh_d_0], "LAUGH",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_laugh_u, Mons.Assets.battle_laugh_d));
+    | Mons.COBE_ORN => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_cobeorn_d_0], "COBE_ORN",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_cobeorn_u, Mons.Assets.battle_cobeorn_d));
+    | Mons.SANDY => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_sandy_d_0], "SANDY",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sandy_u, Mons.Assets.battle_sandy_d));
+    | Mons.SLIME => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_slime_d_0], "SLIME",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_slime_u, Mons.Assets.battle_slime_d));
+    | Mons.MIMIC => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_mimic_d_0], "MIMIC",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d));
+    | Mons.SPARKY => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_sparky_d_0], "SPARKY",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sparky_u, Mons.Assets.battle_sparky_d));
+    | Mons.DOOMFIRE => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_doomfire_d_0], "DOOMFIRE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_doomfire_u, Mons.Assets.battle_doomfire_d));
+    | Mons.BEANSTRONG => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_beanstrong_d_0], "BEANSTRONG",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beanstrong_u, Mons.Assets.battle_beanstrong_d));
+    | Mons.NAMELESS => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_nameless_d_0], "NAMELESS",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_nameless_u, Mons.Assets.battle_nameless_d));
+    | Mons.OCTOKING => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_octoking_d_0], "OCTOKING",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_octoking_u, Mons.Assets.battle_octoking_d));
+    | Mons.INGPUBU => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_ingpubu_d_0], "INGPUBU",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ingpubu_u, Mons.Assets.battle_ingpubu_d));
+    | Mons.EMERELDER => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d));
+    | Mons.ZOIO => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_zoio_d_0], "ZOIO",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d));
+    | Mons.IGNITE => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_ignite_d_0], "IGNITE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ignite_u, Mons.Assets.battle_ignite_d));
+    | Mons.FROST => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_frost_d_0], "FROST",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frost_u, Mons.Assets.battle_frost_d));
+    | Mons.FRAB => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_frab_d_0], "FRAB",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d));
+    | Mons.ELECTROWL => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_electrowl_u, Mons.Assets.battle_electrowl_d));
+    | Mons.NOCTUBRIGHT => Mons.Attr.new_battleable(
+      [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_noctubright_u, Mons.Assets.battle_noctubright_d));
+  ; // end mons
+  
+  | Mons.Kind.construction =>
+    case kin.ele as kin:
+    | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
+    | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
+    | Mons.HOUSE =>
+      if Nat.eql(kin.model, 0) then // Simple house
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
+        else if Nat.eql(kin.slice, 2) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
+        else if Nat.eql(kin.slice, 3) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
+        else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
+      else if Nat.eql(kin.model, 1) then // Tent
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.tent_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.tent_01])
+        else Mons.Attr.new_blockable([Mons.Assets.tent_02])
+      else Mons.Attr.new_blockable([]);
+    | Mons.CASTLE_00 =>
+      if Nat.eql(kin.model, 0) then
+        if Nat.eql(kin.slice, 0) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
+        else if Nat.eql(kin.slice, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
+        else if Nat.eql(kin.slice, 2) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
+        else if Nat.eql(kin.slice, 3) then
+          Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
+        else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
+      else Mons.Attr.new_blockable([]);
+    | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
+    | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+    | Mons.FENCE =>
+      if Nat.eql(kin.model, 0) then
+        case kin.dir:
+        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
+        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
+        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
+        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
+        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
+        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
+        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
+        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
+      else Mons.Attr.new_blockable([]);
+  ; // end of construction
+
+  | Mons.Kind.terrain => 
+    case kin.ele as kin:
+    | VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
+    | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
+    | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
+    | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
+    | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
+    | ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
+    | ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
+    | ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
+    | OCEAN => 
+      case kin.dir:
+        | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
+        | Mons.Map.Dir.up => Mons.Attr.new_blockable([Mons.Assets.ocean_u]);
+        | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
+        | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
+        | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
+    | TREE =>
+      if Nat.eql(kin.model, 0) then // Tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.tree_0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
+      if Nat.eql(kin.model, 1) then // Big tree
+        if Nat.eql(kin.slice, 0) then 
+          Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
+      else Mons.Attr.new_blockable([]);
+    | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
+    | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
+    | Mons.WATER => 
+      case kin.dir:
+      | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
+      | Mons.Map.Dir.expanded.up => Mons.Attr.new_neutral([Mons.Assets.water_0_u, Mons.Assets.water_0_10]); 
+      | Mons.Map.Dir.expanded.left => Mons.Attr.new_neutral([Mons.Assets.water_0_l]); 
+      | Mons.Map.Dir.expanded.down => Mons.Attr.new_neutral([Mons.Assets.water_0_d]); 
+      | Mons.Map.Dir.expanded.middle => Mons.Attr.new_neutral([Mons.Assets.water_0_m, Mons.Assets.water_0_10]);
+      | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_neutral([Mons.Assets.water_1_ru]); 
+      | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_neutral([Mons.Assets.water_1_rd]); 
+      | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
+      | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
+    | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
+  ; // end terrain
