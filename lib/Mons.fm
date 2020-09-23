@@ -519,14 +519,15 @@ Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
     let new_bag = List.drop<>(1, obj.bag)
     Mons.Object.set_bag(new_bag, obj)
 
-Mons.Object.delete_from_bag(idx: U32, obj: Mons.Object): Mons.Object
-  let idx = U32.to_nat(idx)
-  open obj:
-  let qtd = List.length<>(obj.bag)
-  if Nat.eql(qtd, 0) then obj
+Mons.Object.delete_from_bag(idx: U32, hero_obj: Mons.Object): Mons.Object
+  let idx_nat = U32.to_nat(idx)
+  open hero_obj:
+  let qtd = List.length<>(hero_obj.bag)
+  if Nat.eql(qtd, 0) then hero_obj
   else
-    let new_bag = List.delete_at<>(idx, obj.bag)
-    Mons.Object.set_bag(new_bag, obj)
+    let new_bag = List.delete_at<>(idx_nat, hero_obj.bag)
+    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj)
+    Mons.Object.set_mon(0u, hero_obj)
 
 Mons.Object.is_bag_full(obj: Mons.Object): Bool
   open obj:
@@ -804,20 +805,21 @@ Mons.Game.move_hero_down(
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
   open adve:
-  open hero:
   open Mons.Kind.attr(adve.kin) as adve_kin:
   let is_adve_alive = Bool.not(U32.eql(adve_kin.mhp, adve.dmg))
-  let qtd = List.length<>(hero.bag)
-  if Nat.eql(qtd, 0) then
-    open Mons.Kind.attr(hero.kin) as hero_kin:
-    let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
-    Bool.and(is_adve_alive, is_hero_alive)
-  else
-    let current_mon = Mons.Object.get_current_mon(hero)
-    open current_mon:
-    open Mons.Kind.attr(current_mon.kin) as mon_kin:
-    let is_mon_alive = Bool.not(U32.eql(mon_kin.mhp, current_mon.dmg))
-    Bool.and(is_adve_alive, is_mon_alive)
+  // let qtd = List.length<>(hero.bag)
+  // if Nat.eql(qtd, 0) then
+  // open Mons.Object.get_current_mon(hero) as cur_mon:
+  open hero:
+  open Mons.Kind.attr(hero.kin) as hero_or_mon_kin:
+  let is_hero_alive = Bool.not(U32.eql(hero_or_mon_kin.mhp, hero.dmg))
+  Bool.and(is_adve_alive, is_hero_alive)
+  // else
+  //   let current_mon = Mons.Object.get_current_mon(hero)
+  //   open current_mon:
+  //   open Mons.Kind.attr(current_mon.kin) as mon_kin:
+  //   let is_mon_alive = Bool.not(U32.eql(mon_kin.mhp, current_mon.dmg))
+  //   Bool.and(is_adve_alive, is_mon_alive)
   
 
 Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
@@ -1237,8 +1239,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       if Mons.Object.is_obj_defeated(hero_obj) then
         let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
         Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-      else
-        Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
+      else if Mons.Object.is_obj_defeated(curr_mon) then game
+      else Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
 
     else if U16.eql(cmd, 'U') then
       if is_battling then
@@ -1316,10 +1318,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
             Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        else // hero lost, restore life do avoid game over
+        else if Mons.Object.is_obj_defeated(hero_obj)
+        // hero lost, restore life do avoid game over
           let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else game
       ;
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
@@ -1355,7 +1359,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         // if stt.full_bag then // Update the current mon by the new one
           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-          let hero_obj = Mons.Object.set_mon(2u, hero_obj)
+          let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
@@ -1724,7 +1728,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let adve_txt = String.flatten([adve_attr.name, " ", U32.to_string(adve_chp), " HP"])
 
         if is_standing then
-          if Mons.Object.is_battling(adve_obj, hero_obj) then
+          if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
