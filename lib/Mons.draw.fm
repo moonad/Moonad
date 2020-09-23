@@ -9,6 +9,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     let hero_obj = Pair.fst<,>(hero_pair)
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
+    let dim = Mons.Game.dim(game)
     open hero_obj:
     open adve_obj:
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
@@ -34,7 +35,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 
         if is_standing then
           if Mons.Object.is_battling(adve_obj, hero_obj) then
-            let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, scr)
+            let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
@@ -43,10 +44,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             scr
           else
-            let scr = Mons.draw.capture_bg(adve_kind.ele, scr)
+            let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
-                let scr = Mons.draw.battle_win_bg(adve_kind.ele, scr)
+                if adve_kind.boss then
+                  let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
+                  let scr = Mons.draw.text("You unlocked the next level.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                  let scr = Mons.draw.text("[c] I'm ready!", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+                  Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+                else
+                let scr = Mons.draw.battle_win_bg(adve_kind.ele, dim, scr)
                 let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
@@ -148,7 +155,7 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
 Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory_replace_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(120u,80u,0u), scr)
   open obj:
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
@@ -250,16 +257,16 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 
 // SCREENS
 // -------
-Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, idx: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Map.get_battle_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = 
     if is_boss then
       Mons.draw.image(Mons.Assets.battle_boss, Pos32.new(120u,80u,0u), scr)
     else Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
   scr
 
-Mons.draw.capture_bg(adve_kind: Mons.Kind.mons, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
+Mons.draw.capture_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Map.get_battle_bg(idx), Pos32.new(120u,80u,0u), scr)
   let sct = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   scr
 
@@ -279,8 +286,8 @@ Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
   let scr = Mons.draw.text(name, Mons.font_white, pos_name, scr)
   scr
 
-Mons.draw.battle_win_bg(adve_kind: Mons.Kind.mons, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
+Mons.draw.battle_win_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(70u,90u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   scr

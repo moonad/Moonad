@@ -345,6 +345,23 @@ Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
+// Each theme will have 2 levels: one of Mons and other for the boss.
+// The boss will have a different background.
+// TODO: adjust images for each level;
+Mons.Map.background(idx: U32): Pair(Image3D, Image3D)
+  if U32.eql(idx, 0u) then
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+  else if U32.eql(idx, 1u) then
+    {Mons.Assets.battle_snow_bg, Mons.Assets.battle_snow_full_bg}
+  else
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+
+Mons.Map.get_battle_bg(idx: U32): Image3D
+  Pair.fst<,>(Mons.Map.background(idx))
+
+Mons.Map.get_full_bg(idx: U32): Image3D
+  Pair.snd<,>(Mons.Map.background(idx))
+
 Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open obj:
   open hero:
@@ -1172,11 +1189,11 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
         obj.dir;
   obj
 
-Mons.Game.dim(pos: Pos32, map: Mons.Map): U32
-  let obj_idx = Mons.Map.get_hero(pos, map)
-  let obj = Pair.fst<,>(obj_idx)
-  let idx = Pair.snd<,>(obj_idx)
-  idx
+Mons.Game.dim(game: Mons.Game): U32
+  let pos = Mons.Game.get_hero_pos(game)
+  case pos:
+  | 0u;
+  | Pos32.get_z(pos.value);
 
 // Moves an object towards a given direction
 Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
