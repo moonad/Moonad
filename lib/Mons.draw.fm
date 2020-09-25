@@ -28,10 +28,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
         let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
         let hero_txt = String.flatten([hero_mon_attr.name, " ", U32.to_string(hero_chp), " HP"])
+        let hero_type = Mons.Type.name(hero_mon_obj)
 
         let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
         let adve_btl_img = adve_attr.battle_spr(Bool.false);
         let adve_txt = String.flatten([adve_attr.name, " ", U32.to_string(adve_chp), " HP"])
+        let adve_type = Mons.Type.name(adve_obj)
 
         if is_standing then
           if Mons.Object.is_battling(adve_obj, hero_obj) then
@@ -42,6 +44,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.text("[J] heal(2)  | [T] self hit       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+            let scr = Mons.draw.text(adve_type, Mons.font_black, Pos32.new(75u,40u,0u), scr)
+            let scr = Mons.draw.text(hero_type, Mons.font_black, Pos32.new(180u,97u,0u), scr)
             scr
           else
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)

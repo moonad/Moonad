@@ -117,6 +117,12 @@ T Mons.Screen
   idx: U32, // idx of the Mon to be replaced
   full_bag: Bool);
 
+T Mons.Type
+| Mons.Type.normal;
+| Mons.Type.earth;
+| Mons.Type.fire;
+| Mons.Type.water;
+
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
   Pos32.new(128u, 128u, 0u) 
@@ -432,7 +438,7 @@ Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos)
 
 Mons.Object.hero: Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false))
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire))
 
 Mons.Object.is_battleable(obj: Mons.Object): Bool
   open obj:
@@ -440,6 +446,57 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
   | mons => Bool.true;
   | const => Bool.false;
   | terrain => Bool.false;
+
+// Calculate the damage received depending on the type of the Mon
+Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Object): U32
+  open source_obj:
+  case source_obj.kin as s_kind:
+  | mon =>
+    open target_obj:
+    case target_obj.kin as t_kind:
+    | mon => 
+      case s_kind.pri_type as s_type:
+      | s_normal => val; // t: normal, earth, fire, water = 1x
+      | s_earth => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => U32.mul(val, 2u); //2x
+        | t_water  => val; //1x
+      ;
+      | s_fire => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => U32.div(val, 2u); //0,5x
+        | t_water  => U32.div(val, 2u); //0,5x
+      ;
+      | s_water => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+      ;
+    ;
+    | construction => 0u;
+    | terrain => 0u;
+  ;
+  | construction => 0u;
+  | terrain => 0u;
+
+Mons.Type.name(obj: Mons.Object): String
+  open obj:
+  case obj.kin as kind:
+  | mon =>
+    case kind.pri_type as type:
+    | normal => "normal";
+    | earth => "earth";
+    | fire => "fire";
+    | water => "water";
+  ;
+  | construction => "none";
+  | terrain => "none";
 
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
@@ -493,41 +550,41 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
-    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER) },
-    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI) },
-    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT) },
-    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS) },
-    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI) },
-    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR) },
-    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA) },
-    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE) },
-    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI) },
-    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE) },
-    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA) },
-    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA)},
-    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK) },
-    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF) },
-    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH) },
-    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN) },
-    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY) },
-    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME) },
-    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC) },
-    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY) },
-    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE) },
-    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG) },
-    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS) },
-    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING) },
-    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO) },
-    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE) },
-    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST) },
-    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB) },
-    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL) },
-    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT) },
+    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.normal) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.water) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.fire) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.water) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI, Mons.Type.water) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR, Mons.Type.fire) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA, Mons.Type.water) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE, Mons.Type.fire) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI, Mons.Type.earth) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.earth) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.fire) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.earth) },
+    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
+    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water)},
+    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.water) },
+    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.fire) },
+    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.water) },
+    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.water) },
+    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY, Mons.Type.water) },
+    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME, Mons.Type.water) },
+    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.fire) },
+    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY, Mons.Type.earth) },
+    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE, Mons.Type.fire) },
+    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG, Mons.Type.earth) },
+    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.earth) },
+    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water) },
+    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.earth) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.earth) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.earth) },
+    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire) },
+    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.earth) },
+    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.earth) },
+    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.earth) },
+    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth) },
 
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
     { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
@@ -810,9 +867,13 @@ Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mo
 Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
   let source_obj = Mons.Map.get(pos, source, game.map)
+  let source_mon = Mons.Object.get_current_mon(source_obj)
   let target_obj = Mons.Map.get(pos, target, game.map)
-  case skill: 
-  | dummy_hit  => Mons.damage(target_obj, pos, target, 4u, game);
+  let target_mon = Mons.Object.get_current_mon(target_obj)
+  case skill:
+  | dummy_hit  =>
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.damage(target_obj, pos, target, val, game);
   | dummy_heal => Mons.heal(source_obj, pos, source, 2u, game);
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
@@ -1046,9 +1107,9 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bag([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
@@ -1057,7 +1118,7 @@ Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.G
 Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bos([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true, Mons.Type.earth))
   let hero_obj = Mons.Object.capture_boss(mon0_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
