@@ -122,6 +122,13 @@ T Mons.Type
 | Mons.Type.earth;
 | Mons.Type.fire;
 | Mons.Type.water;
+| Mons.Type.grass;
+| Mons.Type.electric;
+| Mons.Type.psychic;
+| Mons.Type.ice;
+| Mons.Type.light;
+| Mons.Type.darkness;
+
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -456,20 +463,44 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
     case target_obj.kin as t_kind:
     | mon => 
       case s_kind.pri_type as s_type:
-      | s_normal => val; // t: normal, earth, fire, water = 1x
+      | s_normal =>
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => val; // 1x
+        | t_water  => val; // 1x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x 
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); // 0,5x
+        | t_darkness => val; // 1x
+      ;
       | s_earth => 
         case t_kind.pri_type as t_type:
         | t_normal => val; // 1x
         | t_earth  => val; // 1x
         | t_fire   => U32.mul(val, 2u); //2x
         | t_water  => val; //1x
+        | t_grass  => U32.div(val, 2u); // 0,5x
+        | t_electric => U32.mul(val, 2u); // 2x
+        | t_psychic  => val;
+        | t_ice   => val;
+        | t_light => U32.mul(val, 2u); // 2x
+        | t_darkness => val;
       ;
       | s_fire => 
         case t_kind.pri_type as t_type:
         | t_normal => val; // 1x
         | t_earth  => val; // 1x
-        | t_fire   => U32.div(val, 2u); //0,5x
-        | t_water  => U32.div(val, 2u); //0,5x
+        | t_fire   => U32.div(val, 2u); // 0,5x
+        | t_water  => U32.div(val, 2u); // 0,5x
+        | t_grass  => U32.mul(val, 2u); // 2x
+        | t_electric => val;
+        | t_psychic  => val;
+        | t_ice   => U32.mul(val, 2u); // 2x
+        | t_light => U32.mul(val, 2u); // 2x
+        | t_darkness => val;
       ;
       | s_water => 
         case t_kind.pri_type as t_type:
@@ -477,6 +508,90 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
         | t_earth  => U32.mul(val, 2u); // 2x
         | t_fire   => U32.mul(val, 2u); // 2x
         | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_grass => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_electric => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => U32.div(val, 2u); //0,5x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_psychic=> 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => U32.div(val, 2u); //0,5x
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => val; // 1x
+      ;
+      | s_ice => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.mul(val, 2u); // 2x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => U32.div(val, 2u); //0,5x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_light => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => U32.mul(val, 2u); // 2x
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => U32.mul(val, 2u); // 2x
+      ;
+      | s_darkness => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val;
+        | t_electric => val;
+        | t_psychic  => U32.mul(val, 2u); // 2x
+        | t_ice   => val;
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => U32.div(val, 2u); //0,5x
       ;
     ;
     | construction => 0u;
@@ -494,6 +609,12 @@ Mons.Type.name(obj: Mons.Object): String
     | earth => "earth";
     | fire => "fire";
     | water => "water";
+    | grass  => "grass";
+    | electric => "electric";
+    | psychic  => "psychic";
+    | ice   => "ice";
+    | light => "light";
+    | darkness => "darkness";
   ;
   | construction => "none";
   | terrain => "none";
