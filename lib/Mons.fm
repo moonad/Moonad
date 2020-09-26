@@ -807,19 +807,10 @@ Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
   open adve:
   open Mons.Kind.attr(adve.kin) as adve_kin:
   let is_adve_alive = Bool.not(U32.eql(adve_kin.mhp, adve.dmg))
-  // let qtd = List.length<>(hero.bag)
-  // if Nat.eql(qtd, 0) then
-  // open Mons.Object.get_current_mon(hero) as cur_mon:
-  open hero:
-  open Mons.Kind.attr(hero.kin) as hero_or_mon_kin:
-  let is_hero_alive = Bool.not(U32.eql(hero_or_mon_kin.mhp, hero.dmg))
+  open Mons.Object.get_current_mon(hero) as hero_or_mon:
+  open Mons.Kind.attr(hero_or_mon.kin) as hero_or_mon_kin:
+  let is_hero_alive = Bool.not(U32.eql(hero_or_mon_kin.mhp, hero_or_mon.dmg))
   Bool.and(is_adve_alive, is_hero_alive)
-  // else
-  //   let current_mon = Mons.Object.get_current_mon(hero)
-  //   open current_mon:
-  //   open Mons.Kind.attr(current_mon.kin) as mon_kin:
-  //   let is_mon_alive = Bool.not(U32.eql(mon_kin.mhp, current_mon.dmg))
-  //   Bool.and(is_adve_alive, is_mon_alive)
   
 
 Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
@@ -1168,7 +1159,8 @@ Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): 
 
 Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
   let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
-  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+  if Mons.Object.is_obj_defeated(obj_updated) then game
+  else Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
 
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
