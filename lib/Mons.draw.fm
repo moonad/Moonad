@@ -1,3 +1,5 @@
+// TODO: add screen to finish turn:
+// Ex: hero used ... skill; adve used... skill; show hp lost or healed
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   open game:
@@ -40,8 +42,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
-            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+            let scr = Mons.draw.text("[J] heal(2)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             let scr = Mons.draw.text(adve_type, Mons.font_black, Pos32.new(75u,40u,0u), scr)
@@ -270,7 +272,7 @@ Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, idx: U32, scr: Ima
   scr
 
 Mons.draw.capture_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Map.get_battle_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let sct = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   scr
 
