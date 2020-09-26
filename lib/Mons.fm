@@ -117,149 +117,17 @@ T Mons.Screen
   idx: U32, // idx of the Mon to be replaced
   full_bag: Bool);
 
-T Mons.Kind
-| Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool);
-| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
-| Mons.Kind.Terrain(ele: Mons.Kind.terrain);
-
-T Mons.Kind.mons
-| Mons.Kind.mons.HERO;
-| Mons.Kind.mons.BATH;
-| Mons.Kind.mons.BEHOLDER;
-| Mons.Kind.mons.CRONI;
-| Mons.Kind.mons.ELLIOT;
-| Mons.Kind.mons.ESPECTRONUS;
-| Mons.Kind.mons.GAKI;
-| Mons.Kind.mons.GORR;
-| Mons.Kind.mons.LAMURIA;
-| Mons.Kind.mons.RAFIRE;
-| Mons.Kind.mons.VARGOULI;
-| Mons.Kind.mons.TUPITREE;
-| Mons.Kind.mons.LELA;
-| Mons.Kind.mons.MOSHY;
-| Mons.Kind.mons.POISOLICK;
-| Mons.Kind.mons.BUFF;
-| Mons.Kind.mons.LAUGH;
-| Mons.Kind.mons.COBE_ORN;
-| Mons.Kind.mons.SANDY;
-| Mons.Kind.mons.SLIME;
-| Mons.Kind.mons.MIMIC;
-| Mons.Kind.mons.SPARKY;
-| Mons.Kind.mons.DOOMFIRE;
-| Mons.Kind.mons.BEANSTRONG;
-| Mons.Kind.mons.NAMELESS;
-| Mons.Kind.mons.OCTOKING;
-| Mons.Kind.mons.INPUBU;
-| Mons.Kind.mons.EMERELDER;
-| Mons.Kind.mons.ZOIO;
-| Mons.Kind.mons.IGNITE;
-| Mons.Kind.mons.FROST;
-| Mons.Kind.mons.FRAB;
-| Mons.Kind.mons.ELECTROWL;
-| Mons.Kind.mons.NOCTUBRIGHT;
-
-
-T Mons.Kind.const
-| Mons.Kind.const.ROCK_PATH_C;
-| Mons.Kind.const.ROCK_PATH_M;
-| Mons.Kind.const.ROCK(model: Nat, slice: Nat);
-| Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
-| Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
-| Mons.Kind.const.WELL(model: Nat, slice: Nat);
-| Mons.Kind.const.FONTAIN(model: Nat, slice: Nat);
-| Mons.Kind.const.CHEST;
-| Mons.Kind.const.SIGN_0;
-| Mons.Kind.const.SIGN_1;
-| Mons.Kind.const.PATH_BLOCKER;
-| Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
-
-T Mons.Kind.terrain
-| Mons.Kind.terrain.VOID;
-| Mons.Kind.terrain.GRASS;
-| Mons.Kind.terrain.GRASS_PLANT;
-| Mons.Kind.terrain.BUSH;
-| Mons.Kind.terrain.PLANT_0;
-| Mons.Kind.terrain.ELV_TERRAIN_00;
-| Mons.Kind.terrain.ELV_TERRAIN_01;
-| Mons.Kind.terrain.ELV_TERRAIN_02;
-| Mons.Kind.terrain.OCEAN(dir: Mons.Map.Dir);
-| Mons.Kind.terrain.TREE(model: Nat, slice: Nat);
-| Mons.Kind.terrain.SAND_0;
-| Mons.Kind.terrain.SAND_1;
-| Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
-| Mons.Kind.terrain.WATER1_M;
-
-Mons.Kind.get_mhp(kind: Mons.Kind): U32
-  case Mons.Kind.attr(kind) as attr:
-  | attr.mhp;
-
-Mons.Kind.get_battle_spr(kind: Mons.Kind, is_up: Bool): Image3D
-  case Mons.Kind.attr(kind) as attr:
-  | attr.battle_spr(is_up);
-
-Mons.Kind.get_name(kind: Mons.Kind): String 
-  case Mons.Kind.attr(kind) as attr:
-  | attr.name;
-
-Mons.Kind.get_battles(kind: Mons.Kind): Bool
- case Mons.Kind.attr(kind) as attr:
-  | attr.battles; 
-
-Mons.Kind.get_blocks(kind: Mons.Kind): Bool
- case Mons.Kind.attr(kind) as attr:
-  | attr.blocks;
-
-Mons.Kind.get_atk(kind: Mons.Kind): U32
- case Mons.Kind.attr(kind) as attr:
-  | attr.atk; 
-
-Mons.Kind.get_skills(kind: Mons.Kind): List(Mons.Skill)
- case Mons.Kind.attr(kind) as attr:
-  | attr.skills; 
-
-
-// TODO make it better so it doesn't have to be updated
-// everytime a new Mon is added/removed 
-Mons.Kind.is_hero(kind: Mons.Kind): Bool
-  case kind:
-  | mons => 
-    case kind.ele:
-    | HERO        => Bool.true;
-    | BATH        => Bool.false;
-    | BEHOLDER    => Bool.false;
-    | CRONI       => Bool.false;
-    | ELLIOT      => Bool.false;
-    | ESPECTRONUS => Bool.false;
-    | GAKI        => Bool.false;
-    | GORR        => Bool.false;
-    | LAMURIA     => Bool.false;
-    | RAFIRE      => Bool.false;
-    | VARGOULI    => Bool.false;
-    | TUPITREE    => Bool.false;
-    | LELA        => Bool.false;
-    | MOSHY       => Bool.false;
-    | POISOLICK   => Bool.false;
-    | BUFF        => Bool.false;
-    | LAUGH       => Bool.false;
-    | COBE_ORN    => Bool.false;
-    | SANDY       => Bool.false;
-    | SLIME       => Bool.false;
-    | MIMIC       => Bool.false;
-    | SPARKY      => Bool.false;
-    | DOOMFIRE    => Bool.false;
-    | BEANSTRONG  => Bool.false;
-    | NAMELESS    => Bool.false;
-    | OCTOKING    => Bool.false;
-    | INPUBU      => Bool.false;
-    | EMERELDER   => Bool.false;
-    | ZOIO        => Bool.false;
-    | IGNITE      => Bool.false;
-    | FROST       => Bool.false;
-    | FRAB        => Bool.false;
-    | ELECTROWL   => Bool.false;
-    | NOCTUBRIGHT => Bool.false;;
-  | const   => Bool.false;
-  | terrain => Bool.false;
+T Mons.Type
+| Mons.Type.normal;
+| Mons.Type.earth;
+| Mons.Type.fire;
+| Mons.Type.water;
+| Mons.Type.grass;
+| Mons.Type.electric;
+| Mons.Type.psychic;
+| Mons.Type.ice;
+| Mons.Type.light;
+| Mons.Type.darkness;
 
 
 // Sprites are centered at 128x128
@@ -490,6 +358,23 @@ Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
+// Each theme will have 2 levels: one of Mons and other for the boss.
+// The boss will have a different background.
+// TODO: adjust images for each level;
+Mons.Map.background(idx: U32): Pair(Image3D, Image3D)
+  if U32.eql(idx, 0u) then
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+  else if U32.eql(idx, 1u) then
+    {Mons.Assets.battle_snow_bg, Mons.Assets.battle_snow_full_bg}
+  else
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+
+Mons.Map.get_battle_bg(idx: U32): Image3D
+  Pair.fst<,>(Mons.Map.background(idx))
+
+Mons.Map.get_full_bg(idx: U32): Image3D
+  Pair.snd<,>(Mons.Map.background(idx))
+
 Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open obj:
   open hero:
@@ -524,14 +409,15 @@ Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
     let new_bag = List.drop<>(1, obj.bag)
     Mons.Object.set_bag(new_bag, obj)
 
-Mons.Object.delete_from_bag(idx: U32, obj: Mons.Object): Mons.Object
-  let idx = U32.to_nat(idx)
-  open obj:
-  let qtd = List.length<>(obj.bag)
-  if Nat.eql(qtd, 0) then obj
+Mons.Object.delete_from_bag(idx: U32, hero_obj: Mons.Object): Mons.Object
+  let idx_nat = U32.to_nat(idx)
+  open hero_obj:
+  let qtd = List.length<>(hero_obj.bag)
+  if Nat.eql(qtd, 0) then hero_obj
   else
-    let new_bag = List.delete_at<>(idx, obj.bag)
-    Mons.Object.set_bag(new_bag, obj)
+    let new_bag = List.delete_at<>(idx_nat, hero_obj.bag)
+    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj)
+    Mons.Object.set_mon(0u, hero_obj)
 
 Mons.Object.is_bag_full(obj: Mons.Object): Bool
   open obj:
@@ -560,7 +446,7 @@ Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos)
 
 Mons.Object.hero: Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false))
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire))
 
 Mons.Object.is_battleable(obj: Mons.Object): Bool
   open obj:
@@ -569,32 +455,175 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
   | const => Bool.false;
   | terrain => Bool.false;
 
+// Calculate the damage received depending on the type of the Mon
+Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Object): U32
+  open source_obj:
+  case source_obj.kin as s_kind:
+  | mon =>
+    open target_obj:
+    case target_obj.kin as t_kind:
+    | mon => 
+      case s_kind.pri_type as s_type:
+      | s_normal =>
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => val; // 1x
+        | t_water  => val; // 1x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x 
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); // 0,5x
+        | t_darkness => val; // 1x
+      ;
+      | s_earth => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => U32.mul(val, 2u); //2x
+        | t_water  => val; //1x
+        | t_grass  => U32.div(val, 2u); // 0,5x
+        | t_electric => U32.mul(val, 2u); // 2x
+        | t_psychic  => val;
+        | t_ice   => val;
+        | t_light => U32.mul(val, 2u); // 2x
+        | t_darkness => val;
+      ;
+      | s_fire => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => val; // 1x
+        | t_fire   => U32.div(val, 2u); // 0,5x
+        | t_water  => U32.div(val, 2u); // 0,5x
+        | t_grass  => U32.mul(val, 2u); // 2x
+        | t_electric => val;
+        | t_psychic  => val;
+        | t_ice   => U32.mul(val, 2u); // 2x
+        | t_light => U32.mul(val, 2u); // 2x
+        | t_darkness => val;
+      ;
+      | s_water => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_grass => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_electric => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.div(val, 2u); //0,5x
+        | t_electric => U32.div(val, 2u); //0,5x
+        | t_psychic  => val; // 1x
+        | t_ice   => val; // 1x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_psychic=> 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => U32.div(val, 2u); //0,5x
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => val; // 1x
+      ;
+      | s_ice => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => U32.mul(val, 2u); // 2x
+        | t_electric => val; // 1x
+        | t_psychic  => val; // 1x
+        | t_ice   => U32.div(val, 2u); //0,5x
+        | t_light => val; // 1x
+        | t_darkness => val; // 1x
+      ;
+      | s_light => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val; // 1x
+        | t_electric => val; // 1x
+        | t_psychic  => U32.mul(val, 2u); // 2x
+        | t_ice   => val; // 1x
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => U32.mul(val, 2u); // 2x
+      ;
+      | s_darkness => 
+        case t_kind.pri_type as t_type:
+        | t_normal => val; // 1x
+        | t_earth  => U32.mul(val, 2u); // 2x
+        | t_fire   => U32.mul(val, 2u); // 2x
+        | t_water  => U32.div(val, 2u); //0,5x
+        | t_grass  => val;
+        | t_electric => val;
+        | t_psychic  => U32.mul(val, 2u); // 2x
+        | t_ice   => val;
+        | t_light => U32.div(val, 2u); //0,5x
+        | t_darkness => U32.div(val, 2u); //0,5x
+      ;
+    ;
+    | construction => 0u;
+    | terrain => 0u;
+  ;
+  | construction => 0u;
+  | terrain => 0u;
+
+Mons.Type.name(obj: Mons.Object): String
+  open obj:
+  case obj.kin as kind:
+  | mon =>
+    case kind.pri_type as type:
+    | normal => "normal";
+    | earth => "earth";
+    | fire => "fire";
+    | water => "water";
+    | grass  => "grass";
+    | electric => "electric";
+    | psychic  => "psychic";
+    | ice   => "ice";
+    | light => "light";
+    | darkness => "darkness";
+  ;
+  | construction => "none";
+  | terrain => "none";
+
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon
   Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [])
-
-Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
-
-Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false))
-
-Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
-
-Mons.Kind.new_mons(kin: Mons.Kind.mons): List(Mons.Object)
-  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
-    // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
-    Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
-
-Mons.Kind.new_boss(kin: Mons.Kind.mons): List(Mons.Object)
-  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true)),
-    Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS)]
-
-Mons.Kind.water_with_kin(kin: Mons.Kind.mons): List(Mons.Object)
-  [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false)),
-    Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
   case cond:
@@ -653,41 +682,41 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
-    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER) },
-    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI) },
-    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT) },
-    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS) },
-    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI) },
-    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR) },
-    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA) },
-    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE) },
-    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI) },
-    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE) },
-    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA) },
-    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA)},
-    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK) },
-    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF) },
-    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH) },
-    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN) },
-    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY) },
-    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME) },
-    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC) },
-    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY) },
-    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE) },
-    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG) },
-    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS) },
-    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING) },
-    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO) },
-    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE) },
-    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST) },
-    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB) },
-    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL) },
-    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT) },
+    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.normal) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.water) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.fire) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.water) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI, Mons.Type.water) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR, Mons.Type.fire) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA, Mons.Type.water) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE, Mons.Type.fire) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI, Mons.Type.earth) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.earth) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.fire) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.earth) },
+    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
+    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water)},
+    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.water) },
+    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.fire) },
+    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.water) },
+    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.water) },
+    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY, Mons.Type.water) },
+    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME, Mons.Type.water) },
+    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.fire) },
+    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY, Mons.Type.earth) },
+    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE, Mons.Type.fire) },
+    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG, Mons.Type.earth) },
+    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.earth) },
+    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water) },
+    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.earth) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.earth) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.earth) },
+    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire) },
+    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.earth) },
+    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.earth) },
+    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.earth) },
+    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth) },
 
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
     { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
@@ -845,20 +874,12 @@ Mons.Game.move_hero_down(
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
   open adve:
-  open hero:
   open Mons.Kind.attr(adve.kin) as adve_kin:
   let is_adve_alive = Bool.not(U32.eql(adve_kin.mhp, adve.dmg))
-  let qtd = List.length<>(hero.bag)
-  if Nat.eql(qtd, 0) then
-    open Mons.Kind.attr(hero.kin) as hero_kin:
-    let is_hero_alive = Bool.not(U32.eql(hero_kin.mhp, hero.dmg))
-    Bool.and(is_adve_alive, is_hero_alive)
-  else
-    let current_mon = Mons.Object.get_current_mon(hero)
-    open current_mon:
-    open Mons.Kind.attr(current_mon.kin) as mon_kin:
-    let is_mon_alive = Bool.not(U32.eql(mon_kin.mhp, current_mon.dmg))
-    Bool.and(is_adve_alive, is_mon_alive)
+  open Mons.Object.get_current_mon(hero) as hero_or_mon:
+  open Mons.Kind.attr(hero_or_mon.kin) as hero_or_mon_kin:
+  let is_hero_alive = Bool.not(U32.eql(hero_or_mon_kin.mhp, hero_or_mon.dmg))
+  Bool.and(is_adve_alive, is_hero_alive)
   
 
 Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
@@ -908,18 +929,6 @@ Mons.Game.hero_won_batle(
   let game = Mons.Game.update((hero_obj) hero_obj, hero_pos, hero_idx, game)
   game
 
-Mons.Kind.set_static_sprites(spr: List(Image3D)): U32 -> U32 -> U32 -> Mons.Dir -> List(Image3D)
-  (x,y,obj_ani,obj_dir) spr
-
-Mons.Kind.set_pic(spr: List(Image3D)): Image3D
-  case spr:
-  | Mons.Assets.tile_chest_0;
-  | spr.head;
-
-// TODO: update default battle image
-Mons.Kind.set_default_battle_spr:  Bool -> Image3D
-  (is_up) Mons.Assets.battle_croni_u
-
 // Mons.Attr with "battles" equals to Bool.true
 Mons.Attr.new_battleable(
   spr: List(Image3D),
@@ -966,286 +975,6 @@ Mons.Attr.new_hero: Mons.Attr
       Mons.dummy_skills 
   )
 
-// blocks: Bool,
-// battles: Bool,
-// mhp: U32,
-// atk: U32
-// name: String
-// spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
-Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
-  case kin:
-  | Mons.Kind.mons => 
-    case kin.ele as kin:
-    | Mons.HERO => Mons.Attr.new_hero;
-    | Mons.BATH => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_bath_d_0], "BATH",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
-    | Mons.BEHOLDER => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
-    | Mons.CRONI => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_croni_d_0], "CRONI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
-    | Mons.ELLIOT => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_elliot_d_0], "ELLIOT",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
-    | Mons.ESPECTRONUS => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
-    | Mons.GAKI => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_gaki_d_0], "GAKI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
-    | Mons.GORR => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_gorr_d_0], "GORR",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
-    | Mons.LAMURIA => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_lamuria_d_0], "LAMURIA",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
-    | Mons.RAFIRE => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_rafire_d_0], "RAFIRE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
-    | Mons.VARGOULI => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_vargouli_d_0], "VARGOULI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
-    | Mons.TUPITREE => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_tupitree_d_0], "TUPITREE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
-    | Mons.LELA => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_lela_d_0], "LELA",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
-    | Mons.MOSHY => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_moshy_d_0], "MOSHY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
-    | Mons.POISOLICK => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d));
-    | Mons.BUFF => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_buff_d_0], "BUFF",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_buff_u, Mons.Assets.battle_buff_d));
-    | Mons.LAUGH => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_laugh_d_0], "LAUGH",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_laugh_u, Mons.Assets.battle_laugh_d));
-    | Mons.COBE_ORN => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_cobeorn_d_0], "COBE_ORN",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_cobeorn_u, Mons.Assets.battle_cobeorn_d));
-    | Mons.SANDY => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_sandy_d_0], "SANDY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sandy_u, Mons.Assets.battle_sandy_d));
-    | Mons.SLIME => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_slime_d_0], "SLIME",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_slime_u, Mons.Assets.battle_slime_d));
-    | Mons.MIMIC => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_mimic_d_0], "MIMIC",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d));
-    | Mons.SPARKY => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_sparky_d_0], "SPARKY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sparky_u, Mons.Assets.battle_sparky_d));
-    | Mons.DOOMFIRE => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_doomfire_d_0], "DOOMFIRE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_doomfire_u, Mons.Assets.battle_doomfire_d));
-    | Mons.BEANSTRONG => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_beanstrong_d_0], "BEANSTRONG",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beanstrong_u, Mons.Assets.battle_beanstrong_d));
-    | Mons.NAMELESS => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_nameless_d_0], "NAMELESS",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_nameless_u, Mons.Assets.battle_nameless_d));
-    | Mons.OCTOKING => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_octoking_d_0], "OCTOKING",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_octoking_u, Mons.Assets.battle_octoking_d));
-    | Mons.INGPUBU => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_ingpubu_d_0], "INGPUBU",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ingpubu_u, Mons.Assets.battle_ingpubu_d));
-    | Mons.EMERELDER => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d));
-    | Mons.ZOIO => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_zoio_d_0], "ZOIO",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d));
-    | Mons.IGNITE => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_ignite_d_0], "IGNITE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ignite_u, Mons.Assets.battle_ignite_d));
-    | Mons.FROST => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_frost_d_0], "FROST",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frost_u, Mons.Assets.battle_frost_d));
-    | Mons.FRAB => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_frab_d_0], "FRAB",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d));
-    | Mons.ELECTROWL => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_electrowl_u, Mons.Assets.battle_electrowl_d));
-    | Mons.NOCTUBRIGHT => Mons.Attr.new_battleable(
-      [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_noctubright_u, Mons.Assets.battle_noctubright_d));
-  ; // end mons
-  
-  | Mons.Kind.construction =>
-    case kin.ele as kin:
-    | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
-    | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
-    | ROCK =>
-      if Nat.eql(kin.model, 0) then // rock0
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.rock_0_1])
-      else if Nat.eql(kin.model, 1) then // rock1
-         Mons.Attr.new_blockable([Mons.Assets.rock_1_0])
-      else if Nat.eql(kin.model, 2) then // rock2
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.rock_2_1])
-      else if Nat.eql(kin.model, 3) then // rock3
-         Mons.Attr.new_blockable([Mons.Assets.rock_3_0])
-      else if Nat.eql(kin.model, 4) then // rock4
-         Mons.Attr.new_blockable([Mons.Assets.rock_4_0])
-      else if Nat.eql(kin.model, 5) then // rock5
-         Mons.Attr.new_neutral([Mons.Assets.rock_5_0])
-      else if Nat.eql(kin.model, 6) then // rock6
-         Mons.Attr.new_blockable([Mons.Assets.rock_6_0])
-      else if Nat.eql(kin.model, 7) then // rock7
-         Mons.Attr.new_neutral([Mons.Assets.rock_7_0])
-      else if Nat.eql(kin.model, 8) then // rock8
-         Mons.Attr.new_neutral([Mons.Assets.rock_8_0])
-      else if Nat.eql(kin.model, 9) then // rock9
-         Mons.Attr.new_blockable([Mons.Assets.rock_9_0])
-      else Mons.Attr.new_blockable([]);    
-    | Mons.HOUSE =>
-      if Nat.eql(kin.model, 0) then // Simple house
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
-        else if Nat.eql(kin.slice, 2) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
-        else if Nat.eql(kin.slice, 3) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
-        else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
-      else if Nat.eql(kin.model, 1) then // Tent
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.tent_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.tent_01])
-        else Mons.Attr.new_blockable([Mons.Assets.tent_02])
-      else Mons.Attr.new_blockable([]);
-    | Mons.CASTLE_00 =>
-      if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
-        else if Nat.eql(kin.slice, 2) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
-        else if Nat.eql(kin.slice, 3) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
-        else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
-      else Mons.Attr.new_blockable([]);
-    | Mons.WELL =>
-      if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.well_01])
-        else Mons.Attr.new_blockable([Mons.Assets.well_02])
-      else Mons.Attr.new_blockable([]);
-    | Mons.FONTAIN =>
-      if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
-        else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
-      else Mons.Attr.new_blockable([]);
-    | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
-    | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
-    | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
-    | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
-    | Mons.FENCE =>
-      if Nat.eql(kin.model, 0) then
-        case kin.dir:
-        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
-        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
-        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
-        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
-        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
-        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
-        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
-        else if Nat.eql(kin.model, 1) then
-        case kin.dir:
-        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.rock_fence_r]); 
-        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_l]); 
-        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.rock_fence_m]);
-        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_ru]); 
-        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_ru]); 
-        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_lu]); 
-        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_lu]);        
-      else Mons.Attr.new_blockable([]);
-  ; // end of construction
-
-  | Mons.Kind.terrain => 
-    case kin.ele as kin:
-    | VOID => Mons.Attr.new_neutral([Mons.Assets.ocean_m]);
-    | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
-    | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
-    | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
-    | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
-    | ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
-    | ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
-    | ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
-    | OCEAN => 
-      case kin.dir:
-        | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
-        | Mons.Map.Dir.up => Mons.Attr.new_blockable([Mons.Assets.ocean_u]);
-        | Mons.Map.Dir.left => Mons.Attr.new_blockable([Mons.Assets.ocean_l]);
-        | Mons.Map.Dir.down => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);
-        | Mons.Map.Dir.middle => Mons.Attr.new_blockable([Mons.Assets.ocean_d]);;
-    | TREE =>
-      if Nat.eql(kin.model, 0) then // Tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.tree_0_00])
-        else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
-      if Nat.eql(kin.model, 1) then // Big tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
-        else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
-      if Nat.eql(kin.model, 2) then // Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_0_1])
-      if Nat.eql(kin.model, 3) then // Big Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigpine_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.bigpine_0_1])
-      if Nat.eql(kin.model, 4) then // Pine tree 2
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_2_1])
-      if Nat.eql(kin.model, 5) then // Big Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigpine_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.bigpine_2_1])
-      if Nat.eql(kin.model, 6) then // Dead Pine tree 1
-          Mons.Attr.new_blockable([Mons.Assets.deadpine_0])
-      if Nat.eql(kin.model, 7) then // Dead Pine tree 2
-          Mons.Attr.new_blockable([Mons.Assets.deadpine_1])
-      else Mons.Attr.new_blockable([]);
-    | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
-    | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
-    | Mons.WATER => 
-      case kin.dir:
-      | Mons.Map.Dir.expanded.right => Mons.Attr.new_neutral([Mons.Assets.water_0_r]); 
-      | Mons.Map.Dir.expanded.up => Mons.Attr.new_neutral([Mons.Assets.water_0_u, Mons.Assets.water_0_10]); 
-      | Mons.Map.Dir.expanded.left => Mons.Attr.new_neutral([Mons.Assets.water_0_l]); 
-      | Mons.Map.Dir.expanded.down => Mons.Attr.new_neutral([Mons.Assets.water_0_d]); 
-      | Mons.Map.Dir.expanded.middle => Mons.Attr.new_neutral([Mons.Assets.water_0_m, Mons.Assets.water_0_10]);
-      | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_neutral([Mons.Assets.water_1_ru]); 
-      | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_neutral([Mons.Assets.water_1_rd]); 
-      | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
-      | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
-    | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
-  ; // end terrain
-  
-
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
   | Pos32.add(pos, Pos32.new(1u, 0u, 0u));
@@ -1280,7 +1009,8 @@ Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): 
 
 Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
   let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
-  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+  if Mons.Object.is_obj_defeated(obj_updated) then game
+  else Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
 
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
@@ -1288,9 +1018,13 @@ Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mo
 Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
   let source_obj = Mons.Map.get(pos, source, game.map)
+  let source_mon = Mons.Object.get_current_mon(source_obj)
   let target_obj = Mons.Map.get(pos, target, game.map)
-  case skill: 
-  | dummy_hit  => Mons.damage(target_obj, pos, target, 4u, game);
+  let target_mon = Mons.Object.get_current_mon(target_obj)
+  case skill:
+  | dummy_hit  =>
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.damage(target_obj, pos, target, val, game);
   | dummy_heal => Mons.heal(source_obj, pos, source, 2u, game);
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
@@ -1351,8 +1085,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       if Mons.Object.is_obj_defeated(hero_obj) then
         let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
         Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-      else
-        Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
+      else if Mons.Object.is_obj_defeated(curr_mon) then game
+      else Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.Dummy_hit, game)
 
     else if U16.eql(cmd, 'U') then
       if is_battling then
@@ -1430,10 +1164,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
             Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        else // hero lost, restore life do avoid game over
+        else if Mons.Object.is_obj_defeated(hero_obj)
+        // hero lost, restore life do avoid game over
           let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else game
       ;
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
@@ -1469,7 +1205,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         // if stt.full_bag then // Update the current mon by the new one
           let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
           let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-          let hero_obj = Mons.Object.set_mon(2u, hero_obj)
+          let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
@@ -1524,9 +1260,9 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bag([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
@@ -1535,7 +1271,7 @@ Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.G
 Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bos([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true, Mons.Type.earth))
   let hero_obj = Mons.Object.capture_boss(mon0_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
@@ -1556,27 +1292,6 @@ Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
     Maybe.some<>(Mons.Dir.down)
   else
     Maybe.none<>
-
-// Given a tile (x, y) and an object, returns its global (x, y) positions
-Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
-  case obj:
-  | let ani = Mons.Object.get_ani(obj)
-    let dir = Mons.Object.get_dir(obj)
-    let g_x = U32.mul(t_x, 16u)
-    let g_y = U32.mul(t_y, 16u)
-    let g_x
-      = case dir:
-      | right => U32.sub(g_x, ani);
-      | up    => g_x;
-      | left  => U32.add(g_x, ani);
-      | down  => g_x;
-    let g_y
-      = case dir:
-      | right => g_y;
-      | up    => U32.add(g_y, ani);
-      | left  => g_y;
-      | down  => U32.sub(g_y, ani);
-    Pair.new<,>(g_x, g_y);
 
 //Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
   //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
@@ -1620,274 +1335,6 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
             let s_z = t_z
             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
-
-// Draw an inventory showing mons captured and their names
-Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
-  open obj:
-  let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
-  let qtd = Nat.to_u32(List.length<>(obj.bag))
-  let qtd_field = 
-    if U32.eql(qtd, 0u) then "Nothing to show for now"
-    else String.flatten(["Qtd boss defeated: ", boss_def])
-  let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
-  let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
-  let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
-  let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
-  let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-  let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-  let scr = Mons.draw.list(mons_names, 13u, Pos32.new(95u,30u,0u), scr)
-  scr
-
-// 0: neutral
-// 1: left, up
-// 2: right, down
-// To highlight a Mon name in inventory
-Mons.draw.bag_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
-  let def_y = 42u
-  let pos = 
-    if U32.eql(mon_idx, 0u) then Pos32.new(160u,def_y,0u)
-    else Pos32.new(160u, U32.add(def_y, U32.mul(15u, mon_idx)), 0u)
-  if U32.eql(qtd, 0u) then scr
-  else Mons.draw.image(Mons.Assets.inventory_row_mon_selected, pos, scr)
-
-// To highlight a Mon image in inventory 40u,50u
-Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
-  let def_y = 50u
-  let pos = 
-    if U32.eql(mon_idx, 0u) then Pos32.new(40u,def_y,0u)
-    else Pos32.new(40u, U32.add(def_y, U32.mul(35u, mon_idx)), 0u)
-  if U32.eql(qtd, 0u) then scr
-  else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
-
-// Draw an inventory showing mons captured, their names and options to
-// replace or skip the "mon capture"
-Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(80u,50u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-  open obj:
-  open adve_obj:
-  open Mons.Kind.attr(adve_obj.kin) as adve_attr:
-  let scr = Mons.draw.image(adve_attr.battle_spr(Bool.false), Pos32.new(180u,40u,0u), scr)
-  let scr = Mons.draw.image(adve_attr.pic, Pos32.new(180u,92u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, Pos32.new(180u,90u,0u), scr)
-  
-  let qtd = Nat.to_u32(List.length<>(obj.bag))
-  let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-  let scr = Mons.draw.list_image(mons_images, Bool.false, Pos32.new(30u,90u,0u), scr)
-  let scr = Mons.draw.bag_full_select(obj.mon, qtd, scr)
-  let scr = Mons.draw.text("Select a mon to replace or skip", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-  let scr = Mons.draw.text("[c] Replace  | [z] Skip     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-  scr
-
-// 0: neutral
-// 1: left, up
-// 2: right, down
-// To highlight a Mon image when replacing Mon
-Mons.draw.bag_full_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
-  let def_x = 30u
-  let pos = 
-    if U32.eql(mon_idx, 0u) then Pos32.new(def_x,90u,0u)
-    else  Pos32.new(U32.add(def_x, U32.mul(35u, mon_idx)),90u,0u)
-  if U32.eql(qtd, 0u) then scr
-  else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
-
-// Draw auxiliars
-// -------------
-Mons.draw.msg_screen.line_0: Pos32
-  Pos32.new(16u,128u,0u)
-
-Mons.draw.msg_screen.line_1: Pos32
-  Pos32.new(16u,144u,0u)
-
-Mons.draw.list(texts: List(String), spacing: U32, start_pos: Pos32, scr: Image3D): Image3D
-   let qtd = Nat.to_u32(List.length<>(texts))
-   Mons.draw.list.go(texts, spacing, start_pos, scr, 0u)
-
-Mons.draw.list.go(texts: List(String), spacing: U32, pos: Pos32, scr: Image3D, idx: U32): Image3D
-   let x = Pos32.get_x(pos)
-   let y = Pos32.get_y(pos)
-   let pos = Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
-   case texts:
-   | scr;
-   | let scr = Mons.draw.text(texts.head, Mons.font_black, pos, scr)
-     Mons.draw.list.go(texts.tail, spacing, pos, scr, U32.add(idx, 1u));
-
-// Draw images of Mons in the replace screen
-// TODO: UP and DOWn
-Mons.draw.list_image(images: List(Image3D), horizontal: Bool, start_pos: Pos32, scr: Image3D): Image3D
-   let qtd = Nat.to_u32(List.length<>(images))
-   Mons.draw.list_image.go(images, horizontal, start_pos, scr, 0u)
-
-Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, pos: Pos32, scr: Image3D, idx: U32): Image3D
-   let x = Pos32.get_x(pos)
-   let y = Pos32.get_y(pos)
-   case images:
-   | scr;
-   | let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
-     let pos_mon = Pos32.set_y(pos, U32.add(y, 2u))
-     if horizontal then
-        let scr = Mons.draw.image(images.head, pos_mon, scr)
-        let pos = Pos32.new(x,U32.add(U32.add(35u, idx), y),0u)
-        Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u))
-     else
-        let scr = Mons.draw.image(images.head, pos_mon, scr)
-        let pos = Pos32.new(U32.add(U32.add(35u, idx), x),y,0u)
-        Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u));
-
-// Draws an ASCII char to a position using 
-Mons.draw.char(chr: Char, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
-  case Mons.font.get_img(chr, font_map) as got:
-  | scr;
-  | let img = got.value
-    let img_len = Image3D.get_length(img)
-    let scr = for i : U32 = 0u .. img_len:
-      let vox_pos = Image3D.get_pos(i, img)
-      let pos = Pos32.sub(Pos32.add(chr_pos, vox_pos), Mons.vox_mid)
-      let col = Image3D.get_col(i, img)
-      Image3D.push(pos, col, scr)
-    scr;
-
-// Draws an ASCII text to a position
-Mons.draw.text(txt: String, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
-  for pair in List.indices.u32<>(String.to_list(txt)) with scr:
-    get i chr = pair
-    let add_pos = Pos32.new(U32.mul(i,6u), 0u, 0u)
-    Mons.draw.char(chr, font_map, Pos32.add(chr_pos, add_pos), scr)
-
-// Draws a sprite to a position
-Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
-  let len = Image3D.get_length(img)
-  for i : U32 = 0u .. len with scr:
-    let pix_pos = Image3D.get_pos(i, img)
-    let pix_col = Image3D.get_col(i, img)
-    let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), Mons.vox_mid)
-    Image3D.push(pix_pos, pix_col, scr)
-
-Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, scr: Image3D): Image3D
-  // TODO: check if adve is of type Grass, Ice, etc.
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_bg, Pos32.new(120u,80u,0u), scr)
-  let scr = 
-    if is_boss then
-      Mons.draw.image(Mons.Assets.battle_boss, Pos32.new(120u,80u,0u), scr)
-    else Mons.draw.image(Mons.Assets.battle_default, Pos32.new(120u,80u,0u), scr)
-  scr
-
-Mons.draw.capture_bg(adve_kind: Mons.Kind.mons, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
-  let sct = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-  scr
-
-
-Mons.draw.adve_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
-  let p_hp = U32.div(U32.mul(chp, 70u), mhp) // x = 66u: full hp
-  let pos_chp = Pos32.new(p_hp,21u,0u) 
-  let pos_name = Pos32.new(38u,21u,0u)
-  let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
-  let scr = Mons.draw.text(name, Mons.font_white, pos_name, scr)
-  scr
-
-Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, scr: Image3D): Image3D
-  let p_hp = U32.div(U32.mul(chp, 70u), mhp) 
-  let pos_chp = Pos32.new(U32.add(100u, p_hp),82u,0u) // x = 175u: full hp
-  let pos_name = Pos32.new(139u,82u,0u)
-  let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
-  let scr = Mons.draw.text(name, Mons.font_white, pos_name, scr)
-  scr
-
-Mons.draw.battle_win_bg(adve_kind: Mons.Kind.mons, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(70u,90u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-  scr
-
-// Draws the game to screen
-Mons.draw(game: Mons.Game, scr: Image3D): Image3D
-  open game:
-  let hero_pos = Mons.Game.get_hero_pos(game)
-  let scr = Image3D.clear(scr)
-  case hero_pos:
-  | scr;
-  | let hero_pair = Mons.Map.get_hero(hero_pos.value, game.map)
-    let hero_obj = Pair.fst<,>(hero_pair)
-    let hero_idx = Pair.snd<,>(hero_pair)
-    let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
-    open hero_obj:
-    open adve_obj:
-    let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
-    open hero_mon_obj:
-
-    case game.stt as stt:
-    | game =>
-      let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
-      let adve_attr = Mons.Kind.attr(adve_obj.kin)
-      let is_standing = Mons.Object.is_standing(hero_obj)
-      open hero_mon_attr:
-      open adve_attr:
-
-      case adve_obj.kin as adve_kind:
-      | mon => 
-        let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
-        let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
-        let hero_txt = String.flatten([hero_mon_attr.name, " ", U32.to_string(hero_chp), " HP"])
-
-        let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
-        let adve_btl_img = adve_attr.battle_spr(Bool.false);
-        let adve_txt = String.flatten([adve_attr.name, " ", U32.to_string(adve_chp), " HP"])
-
-        if is_standing then
-          if Mons.Object.is_battling(adve_obj, hero_obj) then
-            let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, scr)
-            let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
-            let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
-            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(4)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hit       ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-            let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
-            let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-            scr
-          else
-            let scr = Mons.draw.capture_bg(adve_kind.ele, scr)
-            let scr = 
-              if Mons.Object.is_obj_defeated(adve_obj) then
-                let scr = Mons.draw.battle_win_bg(adve_kind.ele, scr)
-                let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-                let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-                Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-              else
-                if Nat.eql(List.length<>(hero_obj.bag), 0) then
-                  let scr = Mons.draw.text("GAME OVER", Mons.font_black, Pos32.new(90u,80u,0u), scr)
-                  Mons.draw.text("[T] Restart",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-                else
-                  let scr = Mons.draw.text("You lost the battle and", Mons.font_white, Pos32.new(16u,26u,0u), scr)
-                  let scr = Mons.draw.text("your current Mon.", Mons.font_white, Pos32.new(16u,42u,0u), scr)
-                  let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-                  Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
-            scr
-        else
-          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-      ;
-      | cons =>
-        if Bool.and(is_standing, adve_kind.portal) then
-          let boss_def = Nat.to_u32(List.length<>(hero_obj.bos))
-          if U32.gtn(boss_def, hero_idx) then
-            let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-            Mons.draw.text("Press [c] to access next level", Mons.font_black, Pos32.new(30u,135u,0u), scr)
-          else
-            let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
-            let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            Mons.draw.text("first defeat the boss.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-        else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-      ;
-      | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-    ; // end case stt.game
-    | inventory => Mons.draw.bag(hero_obj, scr);
-
-    | capture => // pressed to capture mon
-      if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, scr) 
-      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-  ;    
 
 // Build sprites around the hero
 Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
@@ -1956,11 +1403,11 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
         obj.dir;
   obj
 
-Mons.Game.dim(pos: Pos32, map: Mons.Map): U32
-  let obj_idx = Mons.Map.get_hero(pos, map)
-  let obj = Pair.fst<,>(obj_idx)
-  let idx = Pair.snd<,>(obj_idx)
-  idx
+Mons.Game.dim(game: Mons.Game): U32
+  let pos = Mons.Game.get_hero_pos(game)
+  case pos:
+  | 0u;
+  | Pos32.get_z(pos.value);
 
 // Moves an object towards a given direction
 Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
