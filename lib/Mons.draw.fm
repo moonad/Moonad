@@ -87,7 +87,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       ;
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ; // end case stt.game
-    | inventory => Mons.draw.bag(hero_obj, scr);
+    | inventory => Mons.draw.bag(hero_obj, dim, scr);
 
     | capture => // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, scr) 
@@ -119,15 +119,18 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 // --------
 
 // Draw an inventory showing mons captured and their names
-Mons.draw.bag(obj: Mons.Object, scr: Image3D): Image3D
+Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Assets.battle_grass_full_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   open obj:
   let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   let qtd_field = 
     if U32.eql(qtd, 0u) then "Nothing to show for now"
-    else String.flatten(["Qtd boss defeated: ", boss_def])
+    else
+      let qtd_mons_game = U32.to_string(Pair.fst<,>(obj.cap))
+      let qtd_defeated = U32.to_string(Mons.Object.qtd_mons_defeated(obj))
+      String.flatten(["Captured: ", qtd_defeated, "/", qtd_mons_game])
   let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
   let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
   let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
@@ -154,7 +157,7 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
   let def_y = 50u
   let pos = 
     if U32.eql(mon_idx, 0u) then Pos32.new(40u,def_y,0u)
-    else Pos32.new(40u, U32.add(def_y, U32.mul(35u, mon_idx)), 0u)
+    else Pos32.new(40u, U32.add(def_y, U32.mul(34u, mon_idx)), 0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
 
@@ -211,7 +214,6 @@ Mons.draw.list.go(texts: List(String), spacing: U32, pos: Pos32, scr: Image3D, i
      Mons.draw.list.go(texts.tail, spacing, pos, scr, U32.add(idx, 1u));
 
 // Draw images of Mons in the replace screen
-// TODO: UP and DOWn
 Mons.draw.list_image(images: List(Image3D), horizontal: Bool, start_pos: Pos32, scr: Image3D): Image3D
    let qtd = Nat.to_u32(List.length<>(images))
    Mons.draw.list_image.go(images, horizontal, start_pos, scr, 0u)
@@ -222,14 +224,14 @@ Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, pos: Pos32, scr
    case images:
    | scr;
    | let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
-     let pos_mon = Pos32.set_y(pos, U32.add(y, 2u))
+    //  let pos_mon = Pos32.set_y(pos, U32.add(y, 2u))
      if horizontal then
-        let scr = Mons.draw.image(images.head, pos_mon, scr)
-        let pos = Pos32.new(x,U32.add(U32.add(35u, idx), y),0u)
+        let scr = Mons.draw.image(images.head, pos, scr)
+        let pos = Pos32.new(x,U32.add(U32.add(34u, idx), y),0u)
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u))
      else
-        let scr = Mons.draw.image(images.head, pos_mon, scr)
-        let pos = Pos32.new(U32.add(U32.add(35u, idx), x),y,0u)
+        let scr = Mons.draw.image(images.head, pos, scr)
+        let pos = Pos32.new(U32.add(U32.add(34u, idx), x),y,0u)
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u));
 
 // Draws an ASCII char to a position using 
