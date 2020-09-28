@@ -895,6 +895,7 @@ Mons.Game.hero_won_batle(
 
 // Mons.Attr with "battles" equals to Bool.true
 Mons.Attr.new_battleable(
+  pic: Image3D,
   spr: List(Image3D),
   name: String,
   battle_spr: Bool -> Image3D
@@ -902,7 +903,7 @@ Mons.Attr.new_battleable(
   Mons.Attr.new(
     Bool.false, Bool.true, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
-    Mons.Kind.set_pic(spr),
+    pic,
     battle_spr, Mons.dummy_skills)
 
 // Mons.Attr with "block" equals to Bool.true
@@ -934,7 +935,7 @@ Mons.Attr.new_hero: Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-        Mons.Kind.set_pic([Mons.Assets.boy_d_0]),
+        Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
       Mons.dummy_skills 
   )
