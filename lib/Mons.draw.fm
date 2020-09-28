@@ -127,7 +127,10 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   let qtd_field = 
     if U32.eql(qtd, 0u) then "Nothing to show for now"
-    else String.flatten(["Qtd boss defeated: ", boss_def])
+    else
+      let qtd_mons_game = U32.to_string(Pair.fst<,>(obj.cap))
+      let qtd_defeated = U32.to_string(Mons.Object.qtd_mons_defeated(obj))
+      String.flatten(["Captured: ", qtd_defeated, "/", qtd_mons_game])
   let scr = Mons.draw.text(qtd_field, Mons.font_black, Pos32.new(95u,25u,0u), scr)
   let scr = Mons.draw.bag_select(obj.mon, qtd, scr)
   let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
