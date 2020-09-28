@@ -471,7 +471,7 @@ Mons.Object.get_images(bag: List(Mons.Object)): List(Image3D)
     List.cons<Image3D>(mon_attr.pic, images)
 
 Mons.Object.hero: Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire))
+  Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, 1u))
 
 Mons.Object.is_battleable(obj: Mons.Object): Bool
   open obj:
@@ -697,41 +697,41 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
-    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.normal) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.water) },
-    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.fire) },
-    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.water) },
-    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
-    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI, Mons.Type.water) },
-    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR, Mons.Type.fire) },
-    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA, Mons.Type.water) },
-    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE, Mons.Type.fire) },
-    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI, Mons.Type.earth) },
-    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.earth) },
-    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.fire) },
-    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.earth) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water)},
-    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.water) },
-    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.fire) },
-    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.water) },
-    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.water) },
-    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY, Mons.Type.water) },
-    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME, Mons.Type.water) },
-    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.fire) },
-    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY, Mons.Type.earth) },
-    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE, Mons.Type.fire) },
-    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG, Mons.Type.earth) },
-    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.earth) },
-    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water) },
-    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.earth) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.earth) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.earth) },
-    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire) },
-    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.earth) },
-    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.earth) },
-    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.earth) },
-    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth) },
+    { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.normal, 2u) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.water, 2u) },
+    { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.fire, 2u) },
+    { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.water, 2u) },
+    { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
+    { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI, Mons.Type.water, 2u) },
+    { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR, Mons.Type.fire, 2u) },
+    { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u) },
+    { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE, Mons.Type.fire, 2u) },
+    { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI, Mons.Type.earth, 2u) },
+    { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.earth, 2u) },
+    { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.fire, 2u) },
+    { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.earth, 2u) },
+    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
+    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u)},
+    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.water, 2u) },
+    { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.fire, 0u) },
+    { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.water, 0u) },
+    { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.water, 2u) },
+    { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY, Mons.Type.water, 2u) },
+    { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME, Mons.Type.water, 2u) },
+    { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.fire, 2u) },
+    { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY, Mons.Type.earth, 2u) },
+    { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE, Mons.Type.fire, 2u) },
+    { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG, Mons.Type.earth, 2u) },
+    { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.earth, 2u) },
+    { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water, 0u) },
+    { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.earth, 2u) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.earth, 2u) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.earth, 2u) },
+    { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire, 2u) },
+    { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.earth, 2u) },
+    { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.earth, 2u) },
+    { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.earth, 2u) },
+    { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth, 2u) },
 
     { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
     { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
@@ -1089,41 +1089,13 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       else Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.hit_4, game)
 
     else if U16.eql(cmd, 'U') then
-      if is_battling then
-        let hero_skill = Mons.Game.get_skills_at(0, hero_obj)
-        let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-        let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-        let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
-        let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-        game
-      else game
+      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 0, game)
     else if U16.eql(cmd, 'I') then
-      if is_battling then
-        let hero_skill = Mons.Game.get_skills_at(1, hero_obj)
-        let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-        let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-        let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
-        let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-        game
-      else game
+      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 1, game)
     else if U16.eql(cmd, 'J') then
-      if is_battling then
-        let hero_skill = Mons.Game.get_skills_at(2, hero_obj)
-        let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-        let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-        let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
-        let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-        game
-      else game
+      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 2, game)
     else if U16.eql(cmd, 'K') then
-      if is_battling then
-        let hero_skill = Mons.Game.get_skills_at(3, hero_obj)
-        let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-        let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-        let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
-        let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-        game
-      else game
+      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 3, game)
     else if U16.eql(cmd, 'D') then
       Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
     else if U16.eql(cmd, 'W') then
@@ -1243,6 +1215,35 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     ;
   ;
 
+// TODO: probably similar to "exec turn"
+Mons.Game.exec_skills(
+  hero_obj: Mons.Object, 
+  adve_obj: Mons.Object,
+  pos: Pos32,
+  hero_idx: U32,
+  code_skill: Nat,
+  game: Mons.Game)
+  : Mons.Game
+  let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
+  if is_battling then
+    open hero_obj:
+    open adve_obj:
+    let adve_idx = 1u
+    let hero_agi = Mons.Kind.get_agi(hero_obj.kin)
+    let adve_agi = Mons.Kind.get_agi(adve_obj.kin)
+    let hero_skill = Mons.Game.get_skills_at(code_skill, hero_obj)
+    let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
+    let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
+    // TODO: still need to test
+    if Bool.or(U32.ltn(hero_agi, adve_agi), U32.eql(hero_agi, adve_agi)) then // hero attack first
+      let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+      Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
+    else 
+      let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+  else game
+
+
 // 0-U: hit, 1-I: hit, 2-J: heal, 3-K: hit
 // Reads the game and returns a code for the skills that the adve will use
 Mons.Game.adve_turn(hero_obj: Mons.Object, adve_obj: Mons.Object, game: Mons.Game): Nat
@@ -1316,9 +1317,9 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bag([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth, 2u))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire, 2u))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water, 2u))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
@@ -1327,7 +1328,7 @@ Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.G
 Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bos([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true, Mons.Type.earth))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true, Mons.Type.earth, 0u))
   let hero_obj = Mons.Object.capture_boss(mon0_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
