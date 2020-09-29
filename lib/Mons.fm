@@ -1156,16 +1156,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else if U16.eql(cmd, 'z') then // Free Mon
-      // case adve_obj.kin as kind:
-      // | mon =>
+      case adve_obj.kin as kind:
+      | mon =>
         if Mons.Object.is_obj_defeated(adve_obj) then
           let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
           Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        else game//;
-      // | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
-      // | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+        else game;
+      | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+      | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else game ;
 
