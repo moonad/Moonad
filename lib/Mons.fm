@@ -1388,6 +1388,16 @@ Mons.dir_to_set_pad(dir: Mons.Dir): Mons.Object -> Bool -> Mons.Object
 Mons.is_walk_cmd(cmd: Char): Bool
   List.elem<>(Char.eql, cmd, ['W','A','S','D','w','a','s','d'])
 
+Mons.Game.walk(cmd: Char, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  open game:
+  case Mons.key_to_dir(cmd) as maybe_dir:
+  | none => game; //unreachable
+  | some => 
+    let dir     = maybe_dir.value
+    let set_pad = Mons.dir_to_set_pad(dir)
+    let flag    = Char.is_upper(cmd)
+    Mons.Game.update((obj) set_pad(obj, flag), pos, idx, game);
+
 //Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
   //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
     //let ani = Mons.Object.get_ani(obj)
