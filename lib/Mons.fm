@@ -1080,6 +1080,8 @@ Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   let map = Mons.Map.del(pos, idx, game.map)
   Mons.Game.set_map(map, game)
 
+
+
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
@@ -1365,13 +1367,13 @@ Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.
 // S = [ 0,  1,  0]
 // * = [ 0,  0,  0]a
 Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
-  if U16.eql(key_code, 'A') then
+  if Bool.or(U16.eql(key_code, 'A'),U16.eql(key_code, 'a')) then
     Maybe.some<>(Mons.Dir.left)
-  else if U16.eql(key_code, 'D') then
+  else if Bool.or(U16.eql(key_code, 'D'), U16.eql(key_code, 'd')) then
     Maybe.some<>(Mons.Dir.right)
-  else if U16.eql(key_code, 'W') then
+  else if Bool.or(U16.eql(key_code, 'W'), U16.eql(key_code, 'w')) then
     Maybe.some<>(Mons.Dir.up)
-  else if U16.eql(key_code, 'S') then
+  else if Bool.or(U16.eql(key_code, 'S'), U16.eql(key_code, 's')) then
     Maybe.some<>(Mons.Dir.down)
   else
     Maybe.none<>
