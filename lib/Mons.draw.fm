@@ -90,7 +90,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | inventory => Mons.draw.bag(hero_obj, dim, scr);
 
     | capture => // pressed to capture mon
-      if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, scr) 
+      if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
   ;
 
@@ -163,8 +163,10 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
 
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
-Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(120u,80u,0u), scr)
+Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(65u,60u,0u), scr)
   open obj:
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
@@ -231,7 +233,7 @@ Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, pos: Pos32, scr
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u))
      else
         let scr = Mons.draw.image(images.head, pos, scr)
-        let pos = Pos32.new(U32.add(U32.add(34u, idx), x),y,0u)
+        let pos = Pos32.new(U32.add(U32.add(35u, idx), x),y,0u)
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u));
 
 // Draws an ASCII char to a position using 

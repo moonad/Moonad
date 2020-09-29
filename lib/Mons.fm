@@ -1071,7 +1071,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let curr_mon = Mons.Object.get_current_mon(hero_obj)
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
-    // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+    let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
     // let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
 
     open hero_obj:
@@ -1169,12 +1169,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else if U16.eql(cmd, 'z') then // Free Mon
-      if Mons.Object.is_obj_defeated(adve_obj) then
-        let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
-      else game
+      // case adve_obj.kin as kind:
+      // | mon =>
+        if Mons.Object.is_obj_defeated(adve_obj) then
+          let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
+          let game = Mons.Game.map_del(pos, adve_idx, game)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else game//;
+      // | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+      // | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else game ;
 
