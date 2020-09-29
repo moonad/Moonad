@@ -39,18 +39,9 @@ T Mons.Kind.mons
 | Mons.Kind.mons.ELECTROWL;
 | Mons.Kind.mons.NOCTUBRIGHT;
 
-//T Mons.Kind.const
-//| Mons.Kind.const.ROCK_PATH_C;
-//| Mons.Kind.const.ROCK_PATH_M;
-//| Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
-//| Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
-//| Mons.Kind.const.CHEST;
-//| Mons.Kind.const.PATH_BLOCKER;
-//| Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 T Mons.Kind.const
 | Mons.Kind.const.ROCK_PATH_C;
 | Mons.Kind.const.ROCK_PATH_M;
-| Mons.Kind.const.ROCK(model: Nat, slice: Nat);
 | Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
 | Mons.Kind.const.WELL(model: Nat, slice: Nat);
@@ -76,6 +67,7 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.SAND_1;
 | Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.Kind.terrain.WATER1_M;
+| Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
 
 
 Mons.Kind.get_mhp(kind: Mons.Kind): U32
@@ -303,32 +295,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     case kin.ele as kin:
     | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
     | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
-    | ROCK =>
-      if Nat.eql(kin.model, 0) then // rock0
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.rock_0_1])
-      else if Nat.eql(kin.model, 1) then // rock1
-         Mons.Attr.new_blockable([Mons.Assets.rock_1_0])
-      else if Nat.eql(kin.model, 2) then // rock2
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.rock_2_1])
-      else if Nat.eql(kin.model, 3) then // rock3
-         Mons.Attr.new_blockable([Mons.Assets.rock_3_0])
-      else if Nat.eql(kin.model, 4) then // rock4
-         Mons.Attr.new_blockable([Mons.Assets.rock_4_0])
-      else if Nat.eql(kin.model, 5) then // rock5
-         Mons.Attr.new_neutral([Mons.Assets.rock_5_0])
-      else if Nat.eql(kin.model, 6) then // rock6
-         Mons.Attr.new_blockable([Mons.Assets.rock_6_0])
-      else if Nat.eql(kin.model, 7) then // rock7
-         Mons.Attr.new_neutral([Mons.Assets.rock_7_0])
-      else if Nat.eql(kin.model, 8) then // rock8
-         Mons.Attr.new_neutral([Mons.Assets.rock_8_0])
-      else if Nat.eql(kin.model, 9) then // rock9
-         Mons.Attr.new_blockable([Mons.Assets.rock_9_0])
-      else Mons.Attr.new_blockable([]);
     | Mons.HOUSE =>
       if Nat.eql(kin.model, 0) then // Simple house
         if Nat.eql(kin.slice, 0) then
@@ -427,28 +393,28 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else Mons.Attr.new_blockable([Mons.Assets.tree_0_01])
       if Nat.eql(kin.model, 1) then // Big tree
         if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigtree0_00])
-        else Mons.Attr.new_blockable([Mons.Assets.bigtree0_01])
+          Mons.Attr.new_blockable([Mons.Assets.big_tree_0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.big_tree_0_01])
       if Nat.eql(kin.model, 2) then // Pine tree
         if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_0_1])
+          Mons.Attr.new_blockable([Mons.Assets.pine_0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.pine_0_01])
       if Nat.eql(kin.model, 3) then // Big Pine tree
         if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigpine_0_0])
-        else Mons.Attr.new_blockable([Mons.Assets.bigpine_0_1])
+          Mons.Attr.new_blockable([Mons.Assets.big_pine_0_00])
+        else Mons.Attr.new_blockable([Mons.Assets.big_pine_0_01])
       if Nat.eql(kin.model, 4) then // Pine tree 2
         if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_2_1])
+          Mons.Attr.new_blockable([Mons.Assets.pine_2_00])
+        else Mons.Attr.new_blockable([Mons.Assets.pine_2_01])
       if Nat.eql(kin.model, 5) then // Big Pine tree
         if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.bigpine_2_0])
-        else Mons.Attr.new_blockable([Mons.Assets.bigpine_2_1])
+          Mons.Attr.new_blockable([Mons.Assets.big_pine_2_00])
+        else Mons.Attr.new_blockable([Mons.Assets.big_pine_2_01])
       if Nat.eql(kin.model, 6) then // Dead Pine tree 1
-          Mons.Attr.new_blockable([Mons.Assets.deadpine_0])
+          Mons.Attr.new_blockable([Mons.Assets.dead_pine_0])
       if Nat.eql(kin.model, 7) then // Dead Pine tree 2
-          Mons.Attr.new_blockable([Mons.Assets.deadpine_1])
+          Mons.Attr.new_blockable([Mons.Assets.dead_pine_1])
       else Mons.Attr.new_blockable([]);
     | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
     | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
@@ -464,4 +430,30 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
       | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
     | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
+    | ROCK =>
+        if Nat.eql(kin.model, 0) then
+          if Nat.eql(kin.slice, 0) then
+            Mons.Attr.new_blockable([Mons.Assets.rock_0_00])
+          else Mons.Attr.new_blockable([Mons.Assets.rock_0_01])
+        else if Nat.eql(kin.model, 1) then
+          Mons.Attr.new_blockable([Mons.Assets.rock_1])
+        else if Nat.eql(kin.model, 2) then
+          if Nat.eql(kin.slice, 0) then
+            Mons.Attr.new_blockable([Mons.Assets.rock_2_00])
+          else Mons.Attr.new_blockable([Mons.Assets.rock_2_01])
+        else if Nat.eql(kin.model, 3) then
+          Mons.Attr.new_blockable([Mons.Assets.rock_3])
+        else if Nat.eql(kin.model, 4) then
+          Mons.Attr.new_blockable([Mons.Assets.rock_4])
+        else if Nat.eql(kin.model, 5) then
+          Mons.Attr.new_neutral([Mons.Assets.rock_5])
+        else if Nat.eql(kin.model, 6) then
+          Mons.Attr.new_blockable([Mons.Assets.rock_6])
+        else if Nat.eql(kin.model, 7) then
+          Mons.Attr.new_neutral([Mons.Assets.rock_7])
+        else if Nat.eql(kin.model, 8) then
+          Mons.Attr.new_neutral([Mons.Assets.rock_8])
+        else if Nat.eql(kin.model, 9) then
+          Mons.Attr.new_blockable([Mons.Assets.rock_9])
+        else Mons.Attr.new_blockable([]);
   ; // end terrain
