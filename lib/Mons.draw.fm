@@ -38,12 +38,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let adve_type = Mons.Type.name(adve_obj)
 
         if is_standing then
-          if Mons.Object.is_battling(adve_obj, hero_obj) then
+          if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[J] heal(3)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             let scr = Mons.draw.text(adve_type, Mons.font_black, Pos32.new(75u,40u,0u), scr)
