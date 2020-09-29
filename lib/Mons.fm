@@ -1130,22 +1130,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 2, game)
     else if U16.eql(cmd, 'K') then
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 3, game)
-    else if U16.eql(cmd, 'D') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'W') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'A') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'S') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'd') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 'w') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 'a') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 's') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
+    else if Mons.is_walk_cmd(cmd) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
 
     else if U16.eql(cmd, 'e') then // Open hero's bag
       if Bool.or(is_battling, end_battle) then game
