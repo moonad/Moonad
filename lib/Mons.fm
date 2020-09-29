@@ -1385,6 +1385,9 @@ Mons.dir_to_set_pad(dir: Mons.Dir): Mons.Object -> Bool -> Mons.Object
   | l => Mons.Object.set_pad_l;
   | d => Mons.Object.set_pad_d;
 
+Mons.is_walk_cmd(cmd: Char): Bool
+  List.elem<>(Char.eql, cmd, ['W','A','S','D','w','a','s','d'])
+
 //Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
   //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
     //let ani = Mons.Object.get_ani(obj)
