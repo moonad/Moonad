@@ -758,18 +758,18 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)), rock_path ]},
     { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1)), rock_path ]},
     { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2)), rock_path ]},
-    { "p1", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 0)), grass ]},
-    { "p2", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(0, 1)), grass ]},
-    { "p3", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(1, 0)), grass ]},
-    { "p4", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(2, 0)), grass ]},
-    { "p5", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(2, 1)), grass ]},
-    { "p6", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(3, 0)), grass ]},
-    { "p7", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(4, 0)), grass ]},
-    { ".p", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(5, 0)), grass ]},
-    { "p8", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(6, 0)), grass ]},
-    { "pp", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(7, 0)), grass ]},
-    { "po", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(8, 0)), grass ]},
-    { "p9", [ Mons.Kind.new_const(Mons.Kind.const.ROCK(9, 0)), grass ]},    
+    { "p1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 0)), grass ]},
+    { "p2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 1)), grass ]},
+    { "p3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(1, 0)), grass ]},
+    { "p4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(2, 0)), grass ]},
+    { "p5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(2, 1)), grass ]},
+    { "p6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(3, 0)), grass ]},
+    { "p7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(4, 0)), grass ]},
+    { ".p", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(5, 0)), grass ]},
+    { "p8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(6, 0)), grass ]},
+    { "pp", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(7, 0)), grass ]},
+    { "po", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(8, 0)), grass ]},
+    { "p9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(9, 0)), grass ]},    
     { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
     { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
@@ -897,13 +897,9 @@ Mons.Game.move_hero_down(
   Mons.Game.set_user_pos(usr, new_pos, game)
 
 // hero and adve have some hp
-Mons.Object.is_battling(adve: Mons.Object, hero: Mons.Object): Bool
-  open adve:
-  open Mons.Kind.attr(adve.kin) as adve_kin:
-  let is_adve_alive = Bool.not(U32.eql(adve_kin.mhp, adve.dmg))
-  open Mons.Object.get_current_mon(hero) as hero_or_mon:
-  open Mons.Kind.attr(hero_or_mon.kin) as hero_or_mon_kin:
-  let is_hero_alive = Bool.not(U32.eql(hero_or_mon_kin.mhp, hero_or_mon.dmg))
+Mons.Object.is_battling(adve: Mons.Object, hero_or_mon: Mons.Object): Bool
+  let is_adve_alive = Bool.not(Mons.Object.is_obj_defeated(adve))
+  let is_hero_alive = Bool.not(Mons.Object.is_obj_defeated(hero_or_mon))
   Bool.and(is_adve_alive, is_hero_alive)
   
 
@@ -1060,7 +1056,7 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   | hit_2 => 
     let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
     Mons.damage(target_obj, pos, target, val, game);
-  | heal => Mons.heal(source_obj, pos, source, 2u, game);
+  | heal => Mons.heal(source_obj, pos, source, 3u, game);
   | none => game;
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
@@ -1149,15 +1145,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if U16.eql(cmd, 's') then
       Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
 
-    // else if U16.eql(cmd, 'O') then //TODO remove
-    //     let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
-    //     let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
-    //     Mons.Game.set_user_pos(usr, new_pos, game)
-    // else if U16.eql(cmd, 'P') then //TODO remove
-    //     let new_pos = Pos32.sub(pos, Pos32.new(0u,0u,1u)) 
-    //     let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
-    //     Mons.Game.set_user_pos(usr, new_pos, game)
-      
     else if U16.eql(cmd, 'e') then // Open hero's bag
       if Bool.or(is_battling, end_battle) then game
       else 
@@ -1205,12 +1192,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else if U16.eql(cmd, 'z') then // Free Mon
-      if Mons.Object.is_obj_defeated(adve_obj) then
-        let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
-      else game
+      case adve_obj.kin as kind:
+      | mon =>
+        if Mons.Object.is_obj_defeated(adve_obj) then
+          let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
+          let game = Mons.Game.map_del(pos, adve_idx, game)
+          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+          Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        else game;
+      | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+      | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else game ;
 
@@ -1299,17 +1290,16 @@ Mons.Game.adve_turn(hero_obj: Mons.Object, adve_obj: Mons.Object, game: Mons.Gam
   if U32.gtn(U32.sub(hero_hp, adve_hp), 15u) then 2 // heal
   else if Bool.and(U32.gtn(hero_hp, 30u), U32.ltn(hero_hp, 25u)) then 2 // heal
 
-  else if U32.gte(U32.sub(adve_hp, hero_hp), 8u) then 3 // none
-  else if Bool.and(U32.gtn(qtd_mon_bag, 1u), U32.gtn(hero_hp, 30u)) then 3 // none
+  else if U32.gte(U32.sub(adve_hp, hero_hp), 8u) then 1 // none
+  else if Bool.and(U32.gtn(qtd_mon_bag, 1u), U32.gtn(hero_hp, 30u)) then 1 // none
   else if U32.eql(hero_hp, adve_hp) then 3 // none
+  else if Bool.and(Bool.not(U32.eql(U32.mod(pos_x, 2u), 0u)), U32.ltn(hero_hp, 15u)) then 3 // n
 
   else if U32.gtn(U32.sub(adve_hp, hero_hp), 15u) then 0 // heal
   else if Bool.and(U32.gtn(adve_hp, hero_hp), U32.gtn(hero_hp, 30u)) then 0 //hit
   else if U32.gtn(hero_hp, 20u) then 1 // hit
   
   else if Bool.and(U32.eql(U32.mod(pos_x, 2u), 0u), U32.ltn(hero_hp, 15u)) then 1 // hit
-  else if Bool.and(Bool.not(U32.eql(U32.mod(pos_x, 2u), 0u)), U32.ltn(hero_hp, 15u)) then 3 // n
-  
   else if U32.ltn(hero_hp, 5u) then 0
 
   else 0
