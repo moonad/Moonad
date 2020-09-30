@@ -39,6 +39,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 
         if is_standing then
           if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
+            if String.eql(adve_attr.name, "MAGE") then
+              // let scr =  Mons.draw.text("Welcome to Moongeon", Mons.font_white, Pos32.new(180u,40u,0u), scr)
+// let scr = Mons.draw.list(mons_names, 14u, Pos32.new(95u,29u,0u), scr)
+              let msg = [
+                "Few know, but in the eclipse,", 
+                "it's the period when the Moon", 
+                "reaches the peak of its power.",
+                "", "Welcome to Moongeon!"]
+              Mons.draw.list(msg, 14u, Mons.font_white, Pos32.new(60u,40u,0u), scr)
+            else
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
@@ -137,7 +147,7 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
   let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
-  let scr = Mons.draw.list(mons_names, 14u, Pos32.new(95u,29u,0u), scr)
+  let scr = Mons.draw.list(mons_names, 14u, Mons.font_black, Pos32.new(95u,29u,0u), scr)
   scr
 
 // 0: neutral
@@ -202,18 +212,18 @@ Mons.draw.msg_screen.line_0: Pos32
 Mons.draw.msg_screen.line_1: Pos32
   Pos32.new(16u,144u,0u)
 
-Mons.draw.list(texts: List(String), spacing: U32, start_pos: Pos32, scr: Image3D): Image3D
+Mons.draw.list(texts: List(String), spacing: U32, font_map: Mons.font, start_pos: Pos32, scr: Image3D): Image3D
    let qtd = Nat.to_u32(List.length<>(texts))
-   Mons.draw.list.go(texts, spacing, start_pos, scr, 0u)
+   Mons.draw.list.go(texts, spacing, font_map, start_pos, scr, 0u)
 
-Mons.draw.list.go(texts: List(String), spacing: U32, pos: Pos32, scr: Image3D, idx: U32): Image3D
+Mons.draw.list.go(texts: List(String), spacing: U32, font_map: Mons.font, pos: Pos32, scr: Image3D, idx: U32): Image3D
    let x = Pos32.get_x(pos)
    let y = Pos32.get_y(pos)
    let pos = Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
    case texts:
    | scr;
-   | let scr = Mons.draw.text(texts.head, Mons.font_black, pos, scr)
-     Mons.draw.list.go(texts.tail, spacing, pos, scr, U32.add(idx, 1u));
+   | let scr = Mons.draw.text(texts.head, font_map, pos, scr)
+     Mons.draw.list.go(texts.tail, spacing, font_map, pos, scr, U32.add(idx, 1u));
 
 // Draw images of Mons in the replace screen
 Mons.draw.list_image(images: List(Image3D), horizontal: Bool, start_pos: Pos32, scr: Image3D): Image3D

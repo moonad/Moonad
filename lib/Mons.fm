@@ -660,6 +660,8 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
     else 
      Mons.Map.code_to_tile.aux(code, cond.tail);
 
+// TODO: improve the usage of Mons.map_source.
+// Ex: every map will have their own assets. We can reuse codes depending on the map level
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String): List(Mons.Object)
   let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
