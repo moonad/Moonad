@@ -5,6 +5,7 @@ T Mons.Kind
 
 T Mons.Kind.mons
 | Mons.Kind.mons.HERO;
+| Mons.Kind.mons.MAGE;
 | Mons.Kind.mons.BATH;
 | Mons.Kind.mons.BEHOLDER;
 | Mons.Kind.mons.CRONI;
@@ -109,6 +110,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | mons => 
     case kind.ele:
     | HERO        => Bool.true;
+    | MAGE        => Bool.false;
     | BATH        => Bool.false;
     | BEHOLDER    => Bool.false;
     | CRONI       => Bool.false;
@@ -190,6 +192,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.Kind.mons => 
     case kin.ele as kin:
     | Mons.HERO => Mons.Attr.new_hero;
+    | Mons.MAGE => Mons.Attr.new_mage;
     | Mons.BATH => Mons.Attr.new_battleable(
       Mons.Assets.mons_bath_d_0, [Mons.Assets.mons_bath_d_0], "BATH",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));

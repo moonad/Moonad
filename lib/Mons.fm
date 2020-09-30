@@ -799,7 +799,10 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "fd", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_up)), grass ]},
     { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up)), grass ]},
     { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
-    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},    
+    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},
+    { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)}   
+
+    // { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth, 2u) },
   ])
 
 // Converts a string map source to an actual map
@@ -1000,6 +1003,14 @@ Mons.Attr.new_hero: Mons.Attr
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
       Mons.dummy_skills 
   )
+
+Mons.Attr.new_mage: Mons.Attr
+  Mons.Attr.new(
+    Bool.false, Bool.true, 40u, 0u, "MAGE",
+    Mons.Kind.set_static_sprites([Mons.Assets.mons_croni_d_0]),
+    Mons.Assets.mons_croni_d_0,
+    (is_up: Bool) Mons.Assets.battle_croni_d,
+    Mons.dummy_skills)
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
