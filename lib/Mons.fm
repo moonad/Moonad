@@ -1093,6 +1093,8 @@ Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   let map = Mons.Map.del(pos, idx, game.map)
   Mons.Game.set_map(map, game)
 
+
+
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
@@ -1141,22 +1143,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 2, game)
     else if U16.eql(cmd, 'K') then
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 3, game)
-    else if U16.eql(cmd, 'D') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'W') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'A') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'S') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.true), pos, hero_idx, game)
-    else if U16.eql(cmd, 'd') then
-      Mons.Game.update((obj) Mons.Object.set_pad_r(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 'w') then
-      Mons.Game.update((obj) Mons.Object.set_pad_u(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 'a') then
-      Mons.Game.update((obj) Mons.Object.set_pad_l(obj, Bool.false), pos, hero_idx, game)
-    else if U16.eql(cmd, 's') then
-      Mons.Game.update((obj) Mons.Object.set_pad_d(obj, Bool.false), pos, hero_idx, game)
+    else if Mons.is_walk_cmd(cmd) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
 
     else if U16.eql(cmd, 'e') then // Open hero's bag
       if Bool.or(is_battling, end_battle) then game
@@ -1378,16 +1366,36 @@ Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.
 // S = [ 0,  1,  0]
 // * = [ 0,  0,  0]a
 Mons.key_to_dir(key_code: U16): Maybe(Mons.Dir)
-  if U16.eql(key_code, 'A') then
+  if Bool.or(U16.eql(key_code, 'A'),U16.eql(key_code, 'a')) then
     Maybe.some<>(Mons.Dir.left)
-  else if U16.eql(key_code, 'D') then
+  else if Bool.or(U16.eql(key_code, 'D'), U16.eql(key_code, 'd')) then
     Maybe.some<>(Mons.Dir.right)
-  else if U16.eql(key_code, 'W') then
+  else if Bool.or(U16.eql(key_code, 'W'), U16.eql(key_code, 'w')) then
     Maybe.some<>(Mons.Dir.up)
-  else if U16.eql(key_code, 'S') then
+  else if Bool.or(U16.eql(key_code, 'S'), U16.eql(key_code, 's')) then
     Maybe.some<>(Mons.Dir.down)
   else
     Maybe.none<>
+
+Mons.dir_to_set_pad(dir: Mons.Dir): Mons.Object -> Bool -> Mons.Object
+  case dir:
+  | r => Mons.Object.set_pad_r;
+  | u => Mons.Object.set_pad_u;
+  | l => Mons.Object.set_pad_l;
+  | d => Mons.Object.set_pad_d;
+
+Mons.is_walk_cmd(cmd: Char): Bool
+  List.elem<>(Char.eql, cmd, ['W','A','S','D','w','a','s','d'])
+
+Mons.Game.walk(cmd: Char, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  open game:
+  case Mons.key_to_dir(cmd) as maybe_dir:
+  | none => game; //unreachable
+  | some => 
+    let dir     = maybe_dir.value
+    let set_pad = Mons.dir_to_set_pad(dir)
+    let flag    = Char.is_upper(cmd)
+    Mons.Game.update((obj) set_pad(obj, flag), pos, idx, game);
 
 //Mons.game_sprites.push_obj(t_x: U32, t_y: U32, obj: Mons.Object, sprs: List(Mons.Sprite)): List(Mons.Sprite)
   //for img in Mons.Object.get_images(t_x, t_y, obj) with sprs:
