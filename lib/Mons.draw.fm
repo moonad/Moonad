@@ -38,12 +38,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let adve_type = Mons.Type.name(adve_obj)
 
         if is_standing then
-          if Mons.Object.is_battling(adve_obj, hero_obj) then
+          if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
             let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(2)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+            let scr = Mons.draw.text("[J] heal(3)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             let scr = Mons.draw.text(adve_type, Mons.font_black, Pos32.new(75u,40u,0u), scr)
@@ -90,7 +90,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | inventory => Mons.draw.bag(hero_obj, dim, scr);
 
     | capture => // pressed to capture mon
-      if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, scr) 
+      if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
   ;
 
@@ -163,8 +163,10 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
 
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
-Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(120u,80u,0u), scr)
+Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(65u,60u,0u), scr)
   open obj:
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
