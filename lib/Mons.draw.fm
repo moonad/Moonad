@@ -136,7 +136,7 @@ Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let scr = Mons.draw.bag_select_image(obj.mon, qtd, scr)
   let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-  let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(40u,50u,0u), scr)
+  let scr = Mons.draw.list_image(mons_images, Bool.false, Pos32.new(40u,50u,0u), scr)
   let scr = Mons.draw.list(mons_names, 14u, Pos32.new(95u,29u,0u), scr)
   scr
 
@@ -171,12 +171,12 @@ Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
   let scr = Mons.draw.image(adve_attr.battle_spr(Bool.false), Pos32.new(180u,40u,0u), scr)
-  let scr = Mons.draw.image(adve_attr.pic, Pos32.new(180u,92u,0u), scr)
+  let scr = Mons.draw.image(adve_attr.pic, Pos32.new(180u,90u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, Pos32.new(180u,90u,0u), scr)
   
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
-  let scr = Mons.draw.list_image(mons_images, Bool.false, Pos32.new(30u,90u,0u), scr)
+  let scr = Mons.draw.list_image(mons_images, Bool.true, Pos32.new(30u,90u,0u), scr)
   let scr = Mons.draw.bag_full_select(obj.mon, qtd, scr)
   let scr = Mons.draw.text("Select a mon to replace or skip", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
   let scr = Mons.draw.text("[c] Replace  | [z] Skip     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
@@ -190,7 +190,7 @@ Mons.draw.bag_full_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
   let def_x = 30u
   let pos = 
     if U32.eql(mon_idx, 0u) then Pos32.new(def_x,90u,0u)
-    else  Pos32.new(U32.add(def_x, U32.mul(35u, mon_idx)),90u,0u)
+    else  Pos32.new(U32.add(def_x, U32.mul(34u, mon_idx)),90u,0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
 
@@ -226,15 +226,14 @@ Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, pos: Pos32, scr
    case images:
    | scr;
    | let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
-    //  let pos_mon = Pos32.set_y(pos, U32.add(y, 2u))
      if horizontal then
         let scr = Mons.draw.image(images.head, pos, scr)
-        let pos = Pos32.new(x,U32.add(U32.add(34u, idx), y),0u)
+        let pos = Pos32.new(U32.add(x, 34u),y,0u)
         Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u))
      else
         let scr = Mons.draw.image(images.head, pos, scr)
-        let pos = Pos32.new(U32.add(U32.add(34u, idx), x),y,0u)
-        Mons.draw.list_image.go(images.tail, horizontal, pos, scr, U32.add(idx, 1u));
+        let pos = Pos32.new(x, U32.add(y, 34u),0u)
+        Mons.draw.list_image.go(images.tail, horizontal, pos, scr,U32.add(idx, 1u));
 
 // Draws an ASCII char to a position using 
 Mons.draw.char(chr: Char, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D

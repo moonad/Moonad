@@ -1149,6 +1149,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
           else
             if Mons.Object.is_full_bag(hero_obj) then
+              let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
               Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.true), game)
             else
               let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
