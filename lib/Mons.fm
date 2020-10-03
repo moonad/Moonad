@@ -113,6 +113,8 @@ T Mons.Game
 );
 
 T Mons.Screen
+| Mons.Screen.introduction(step: U32); // step: number identifying the completion of scene
+| Mons.Screen.intro_select(idx: U32); // idx: used to choose a Mon
 | Mons.Screen.game(cmd: Char); // cmd: movement
 | Mons.Screen.inventory(idx: U32);
 | Mons.Screen.capture_mon(
@@ -1126,6 +1128,26 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
+    | introduction =>
+    // let initial_mons = Mons.Screen.initial_mons(hero_obj, pos, 0u, game)
+    // let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    if Mons.is_walk_cmd(cmd) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
+    else if U16.eql(cmd, 'c') then
+      if U32.eql(stt.step, 0u) then // go to Mon selection
+        let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
+        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+      if U32.eql(stt.step, 1u) then // initiate the game
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
+      else game
+    else game
+    ;
+    | Mons.Screen.intro_select => 
+      if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+      else // update current Mon using 'a' or 'd'
+        Mons.Object.change_curr_mon(
+          cmd, (cmd: U32) Mons.Screen.intro_select(cmd),
+          pos, hero_obj, hero_idx, game);
     | game =>
     // TODO remove - just testing dmg to hero to check heal eff
     if U16.eql(cmd, 'T') then
@@ -1351,6 +1373,12 @@ Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.G
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+
+Mons.Screen.initial_mons: List(Mons.Object)
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth, 2u))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire, 2u))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water, 2u))
+  [mon0_bag, mon1_bag, mon2_bag]
 
 Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
@@ -1621,7 +1649,7 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.game('.'));
+    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u));
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
   // Event handlers

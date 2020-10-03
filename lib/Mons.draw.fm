@@ -16,14 +16,29 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     open adve_obj:
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
     open hero_mon_obj:
-
+    // let adve_attr = 
+    open Mons.Kind.attr(adve_obj.kin) as adve_attr:
+    let is_standing = Mons.Object.is_standing(hero_obj)
     case game.stt as stt:
+    | introduction =>
+      if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
+        // TODO describe each step of the introduction
+        if U32.eql(stt.step, 0u) then
+          let msg = [
+            "Few know, but in the eclipse,", 
+            "it's the period when the Moon", 
+            "reaches the peak of its power.",
+            "", "Welcome to Moongeon!"]
+          Mons.draw.list(msg, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
+        // else if U32.eql(stt.step, 1u) then // show Mon
+        //   Mons.draw.initial_mons(stt.bag, stt.mon, scr)
+        else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    | intro_select => Mons.draw.initial_mons(hero_mon_obj, scr) ;
+  
     | game =>
       let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
-      let adve_attr = Mons.Kind.attr(adve_obj.kin)
-      let is_standing = Mons.Object.is_standing(hero_obj)
       open hero_mon_attr:
-      open adve_attr:
 
       case adve_obj.kin as adve_kind:
       | mon => 
@@ -39,16 +54,6 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
 
         if is_standing then
           if Mons.Object.is_battling(adve_obj, hero_mon_obj) then
-            if String.eql(adve_attr.name, "MAGE") then
-              // let scr =  Mons.draw.text("Welcome to Moongeon", Mons.font_white, Pos32.new(180u,40u,0u), scr)
-// let scr = Mons.draw.list(mons_names, 14u, Pos32.new(95u,29u,0u), scr)
-              let msg = [
-                "Few know, but in the eclipse,", 
-                "it's the period when the Moon", 
-                "reaches the peak of its power.",
-                "", "Welcome to Moongeon!"]
-              Mons.draw.list(msg, 14u, Mons.font_white, Pos32.new(60u,40u,0u), scr)
-            else
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, scr)
@@ -170,6 +175,18 @@ Mons.draw.bag_select_image(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
     else Pos32.new(40u, U32.add(def_y, U32.mul(34u, mon_idx)), 0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
+
+Mons.draw.initial_mons(obj: Mons.Object, scr: Image3D): Image3D
+  open obj:
+  let qtd = Nat.to_u32(List.length<>(obj.bag))
+  if U32.eql(qtd, 0u) then 
+    Mons.draw.text("nothing to show", Mons.font_white, Pos32.new(60u,50u,0u), scr)
+  else
+  let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
+  let scr = Mons.draw.list_image(mons_images, Bool.false, Pos32.new(60u,50u,0u), scr)
+  let scr = Mons.draw.bag_full_select(obj.mon, qtd, scr)
+  let scr = Mons.draw.text("Select a Mon to start", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
+  scr
 
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
