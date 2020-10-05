@@ -22,18 +22,25 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     case game.stt as stt:
     | introduction =>
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
-        // TODO describe each step of the introduction
         if U32.eql(stt.step, 0u) then
           let msg = [
             "Few know, but in the eclipse,", 
             "it's the period when the Moon", 
             "reaches the peak of its power.",
-            "", "Welcome to Moongeon!"]
+            "Welcome to Moongeon!", "",
+            "[c] I'm ready!"]
           Mons.draw.list(msg, Bool.false, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
-        // else if U32.eql(stt.step, 1u) then // show Mon
-        //   Mons.draw.initial_mons(stt.bag, stt.mon, scr)
+        else if U32.eql(stt.step, 1u) then // Follow to the game
+          let msg = [
+            "Use captured Mons to fight and", 
+            "press [e] to access your bag."
+            "Follow to the tower and reachs ", 
+            "its top to save the city.", "",
+            "[c] I'll do my best"]
+          Mons.draw.list(msg, Bool.false, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+
     | intro_select => Mons.draw.initial_mons(hero_obj, scr) ;
   
     | game =>
@@ -186,9 +193,9 @@ Mons.draw.initial_mons(obj: Mons.Object, scr: Image3D): Image3D
     let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
     let scr = Mons.draw.list(mons_names, Bool.false, 34u, Mons.font_white, Pos32.new(70u,0u,0u), scr)
     let scr = Mons.draw.list_image(mons_images, Bool.true, 34u, Pos32.new(40u,30u,0u), scr)
-    let scr = Mons.draw.v_selection(obj.mon, qtd, 34u, Pos32.new(40u,30u,0u), scr)
+    let scr = Mons.draw.mon_selected(obj.mon, qtd, Bool.false, 34u, Pos32.new(40u,30u,0u), scr)
     let scr = Mons.draw.text("Select a Mon to start", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
-    let scr = Mons.draw.text("[c] confirm   ", Mons.font_white, Mons.draw.msg_screen.line_1, scr)
+    let scr = Mons.draw.text("[c] Confirm   ", Mons.font_white, Mons.draw.msg_screen.line_1, scr)
     scr
 
 // Draw an inventory showing mons captured, their names and options to
@@ -207,7 +214,7 @@ Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
   let scr = Mons.draw.list_image(mons_images, Bool.false, 35u, Pos32.new(30u,90u,0u), scr)
-  let scr = Mons.draw.h_selection(obj.mon, qtd, 35u, Pos32.new(30u,90u,0u), scr)
+  let scr = Mons.draw.mon_selected(obj.mon, qtd, Bool.true, 35u, Pos32.new(30u,90u,0u), scr)
   let scr = Mons.draw.text("Select a mon to replace or skip", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
   let scr = Mons.draw.text("[c] Replace  | [z] Skip     ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
   scr
@@ -216,23 +223,25 @@ Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image
 // 1: left, up
 // 2: right, down
 // To highlight a Mon image when replacing Mon
-Mons.draw.h_selection(mon_idx: U32, qtd: U32, spacing: U32, pos: Pos32, scr: Image3D): Image3D
+Mons.draw.mon_selected(mon_idx: U32, qtd: U32, horizontal: Bool, spacing: U32, pos: Pos32, scr: Image3D): Image3D
   let x_pos = Pos32.get_x(pos)
   let y_pos = Pos32.get_y(pos)
   let pos = 
     if U32.eql(mon_idx, 0u) then Pos32.new(x_pos,y_pos,0u)
-    else Pos32.new(U32.add(x_pos, U32.mul(spacing, mon_idx)),y_pos,0u)
+    else 
+      if horizontal then Pos32.new(U32.add(x_pos, U32.mul(spacing, mon_idx)),y_pos,0u)
+      else Pos32.new(x_pos, U32.add(y_pos, U32.mul(spacing, mon_idx)), 0u)
   if U32.eql(qtd, 0u) then scr
   else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
 
-Mons.draw.v_selection(mon_idx: U32, qtd: U32, spacing: U32, pos: Pos32, scr: Image3D): Image3D
-  let x_pos = Pos32.get_x(pos)
-  let y_pos = Pos32.get_y(pos)
-  let pos = 
-    if U32.eql(mon_idx, 0u) then Pos32.new(x_pos,y_pos,0u)
-    else Pos32.new(x_pos, U32.add(y_pos, U32.mul(spacing, mon_idx)), 0u)
-  if U32.eql(qtd, 0u) then scr
-  else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
+// Mons.draw.v_selection(mon_idx: U32, qtd: U32, spacing: U32, pos: Pos32, scr: Image3D): Image3D
+//   let x_pos = Pos32.get_x(pos)
+//   let y_pos = Pos32.get_y(pos)
+//   let pos = 
+//     if U32.eql(mon_idx, 0u) then Pos32.new(x_pos,y_pos,0u)
+//     else Pos32.new(x_pos, U32.add(y_pos, U32.mul(spacing, mon_idx)), 0u)
+//   if U32.eql(qtd, 0u) then scr
+//   else Mons.draw.image(Mons.Assets.inventory_mon_selected, pos, scr)
 
 // Draw auxiliars
 // -------------
