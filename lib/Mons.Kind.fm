@@ -272,7 +272,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_ingpubu, [Mons.Assets.mons_ingpubu_d_0], "INGPUBU",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_ingpubu_u, Mons.Assets.battle_ingpubu_d));
     | Mons.EMERELDER => Mons.Attr.new_battleable(
-      Mons.Assets.mons_emerelder_d_0, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
+      Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d));
     | Mons.ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
@@ -287,10 +287,10 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.mons_frab_d_0, [Mons.Assets.mons_frab_d_0], "FRAB",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d));
     | Mons.ELECTROWL => Mons.Attr.new_battleable(
-      Mons.Assets.mons_electrowl_d_0, [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
+      Mons.Assets.pic_electrowl, [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_electrowl_u, Mons.Assets.battle_electrowl_d));
     | Mons.NOCTUBRIGHT => Mons.Attr.new_battleable(
-      Mons.Assets.mons_noctubright_d_0, [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
+      Mons.Assets.pic_noctubright, [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_noctubright_u, Mons.Assets.battle_noctubright_d));
   ; // end mons
   
