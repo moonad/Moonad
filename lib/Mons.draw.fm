@@ -51,18 +51,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       | mon => 
         let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
         let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
-        let hero_txt = String.flatten([hero_mon_attr.name, " "])
-        let hero_hp = String.flatten([U32.to_string(hero_chp),"/",
-          U32.to_string(hero_mon_attr.mhp),
-          Mons.draw.img_type(hero_mon_obj.kin)])
+        let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
+        let hero_hp = String.flatten([U32.to_string(hero_chp),"/", U32.to_string(hero_mon_attr.mhp)])
         let hero_type = Mons.Type.name(hero_mon_obj)
 
         let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
         let adve_btl_img = adve_attr.battle_spr(Bool.false);
-        let adve_txt = String.flatten([adve_attr.name, " "])
-        let adve_hp = String.flatten([U32.to_string(adve_chp),"/",
-          U32.to_string(adve_attr.mhp),
-          Mons.draw.img_type(adve_obj.kin)])
+        let adve_txt = String.flatten([adve_attr.name, " ", Mons.draw.img_type(adve_obj.kin)])
+        let adve_hp = String.flatten([U32.to_string(adve_chp),"/", U32.to_string(adve_attr.mhp)])
         let adve_type = Mons.Type.name(adve_obj)
 
         if is_standing then
@@ -334,7 +330,7 @@ Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, hero_hp: String, scr: Image3
   let pos_name = Pos32.new(139u,82u,0u)
   let scr = Mons.draw.image(Mons.Assets.battle_hp, pos_chp, scr)
   let scr = Mons.draw.text(name, Mons.font_white, pos_name, scr)
-  let scr = Mons.draw.text(hero_hp, Mons.font_black, Pos32.new(139u,96u,0u), scr)
+  let scr = Mons.draw.text(hero_hp, Mons.font_black, Pos32.new(139u,97u,0u), scr)
   scr
 
 Mons.draw.battle_win_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
