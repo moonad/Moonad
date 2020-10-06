@@ -1,0 +1,4 @@
+// z_index: 30
+// caractere: ②
+Mons.Char_black.earth: Image3D
+  Image3D.parse("7f7d1ed3783c807d1ed3783c7e7e1ec766437f7e1ee7cb55807e1ed3783c7d7f1eb64c3b7e7f1edab04d7f7f1ec766437e801ec766437f801edab04d80801eb64c3b7d811ec766437e811ee7cb557f811ec766437d821ed3783c7e821ec76643")

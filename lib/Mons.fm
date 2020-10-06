@@ -1143,20 +1143,21 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
     | introduction =>
-    let can_walk = U32.eql(stt.step, 0u)
-    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-      Mons.Game.walk(cmd, pos, hero_idx, game)
-    else if U16.eql(cmd, 'c') then
-      if U32.eql(stt.step, 0u) then // Go to Mon selection
-        let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
-        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-      if U32.eql(stt.step, 1u) then  // Initiate the game. The mage is removed from the scene.
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
-      else game
-    else game
+    // let can_walk = U32.eql(stt.step, 0u)
+    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+    //   Mons.Game.walk(cmd, pos, hero_idx, game)
+    // else if U16.eql(cmd, 'c') then
+    //   if U32.eql(stt.step, 0u) then // Go to Mon selection
+    //     let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
+    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+    //   if U32.eql(stt.step, 1u) then  // Initiate the game. The mage is removed from the scene.
+    //     let game = Mons.Game.map_del(pos, adve_idx, game)
+    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    //     Mons.Game.set_stt(Mons.Screen.game('.'), game)
+    //   else game
+    // else game
+      Mons.Game.set_stt(Mons.Screen.game('.'), game)
     ;
     | Mons.Screen.intro_select => 
       if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
