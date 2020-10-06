@@ -1,5 +1,5 @@
 // Creates a Map of [{key: Char, value: Image3D}]
-// Qtd characters: 95
+// Qtd characters: 104
 Mons.font_white: Mons.font
   let map = Map.new<Image3D>
   let map = Mons.font.set_img(100s, Mons.Char_white.100, map) // add d
@@ -97,4 +97,14 @@ Mons.font_white: Mons.font
   let map = Mons.font.set_img(97s, Mons.Char_white.97, map) // add a
   let map = Mons.font.set_img(98s, Mons.Char_white.98, map) // add b
   let map = Mons.font.set_img(99s, Mons.Char_white.99, map) // add c
+  let map = Mons.font.set_img(9312s, Mons.Char_black.normal, map) // add ①
+  let map = Mons.font.set_img(9313s, Mons.Char_black.earth, map) // add ②
+  let map = Mons.font.set_img(9314s, Mons.Char_black.fire, map) // add ③
+  let map = Mons.font.set_img(9315s, Mons.Char_black.water, map) // add ④
+  let map = Mons.font.set_img(9316s, Mons.Char_black.grass, map) // add ⑤
+  let map = Mons.font.set_img(9317s, Mons.Char_black.electric, map) // add ⑥
+  let map = Mons.font.set_img(9318s, Mons.Char_black.psychic, map) // add ⑦
+  let map = Mons.font.set_img(9319s, Mons.Char_black.ice, map) // add ⑧
+  let map = Mons.font.set_img(9320s, Mons.Char_black.light, map) // add ⑨
+  let map = Mons.font.set_img(9321s, Mons.Char_black.darkness, map) // add ⑩
   map

@@ -248,7 +248,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_sandy, [Mons.Assets.mons_sandy_d_0], "SANDY",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_sandy_u, Mons.Assets.battle_sandy_d));
     | Mons.SLIME => Mons.Attr.new_battleable(
-      Mons.Assets.mons_slime_d_0, [Mons.Assets.mons_slime_d_0], "SLIME",
+      Mons.Assets.pic_slime, [Mons.Assets.mons_slime_d_0], "SLIME",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_slime_u, Mons.Assets.battle_slime_d));
     | Mons.MIMIC => Mons.Attr.new_battleable(
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
@@ -284,7 +284,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_frost, [Mons.Assets.mons_frost_d_0], "FROST",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_frost_u, Mons.Assets.battle_frost_d));
     | Mons.FRAB => Mons.Attr.new_battleable(
-      Mons.Assets.mons_frab_d_0, [Mons.Assets.mons_frab_d_0], "FRAB",
+      Mons.Assets.pic_frab, [Mons.Assets.mons_frab_d_0], "FRAB",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d));
     | Mons.ELECTROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_electrowl, [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
