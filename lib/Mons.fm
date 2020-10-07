@@ -411,7 +411,7 @@ Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
       hero;
   | const => hero;
   | terrain => hero;
-  | interact => hero;
+  | inter => hero;
 
 Mons.Object.add_defeated_mon(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open obj:
@@ -425,7 +425,7 @@ Mons.Object.add_defeated_mon(obj: Mons.Object, hero: Mons.Object): Mons.Object
   ;
   | const => hero;
   | terrain => hero;
-  | interact => hero;
+  | inter => hero;
 
 Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
   open boss:
@@ -436,7 +436,7 @@ Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
     Mons.Object.set_bos(new_boss_bag, hero);
   | const => hero;
   | terrain => hero;
-  | interact => hero;
+  | inter => hero;
 
 Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
   open obj:
@@ -488,9 +488,9 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
   | mons => Bool.true;
   | const => Bool.false;
   | terrain => Bool.false;
-  | interact => Bool.false;
+  | inter => Bool.false;
 
-Mons.Object.update_interact(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
+Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
   open obj:
   Mons.Object.set_kin(obj, fun(obj.kin))
 
@@ -636,11 +636,11 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
     ;
     | construction => 0u;
     | terrain => 0u;
-    | interact => 0u;
+    | inter => 0u;
   ;
   | construction => 0u;
   | terrain => 0u;
-  | interact => 0u;
+  | inter => 0u;
 
 Mons.Type.name(obj: Mons.Object): String
   open obj:
@@ -660,7 +660,7 @@ Mons.Type.name(obj: Mons.Object): String
   ;
   | construction => "none";
   | terrain => "none";
-  | interact => 
+  | inter => 
     case kind.ele:
     | push_tool => "Push tool";
     ;
@@ -823,7 +823,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
     { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},
     { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
-    { "al", [ Mons.Kind.new_interact_tool(Mons.Kind.interact.PUSH_TOOL, Bool.false), rock_path ]} 
+    { "al", [ Mons.Kind.new_interactive_tool(Mons.Kind.inter.PUSH_TOOL, Bool.false), rock_path ]} 
     
   ])
 
@@ -957,7 +957,7 @@ Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
   ;
   | const    => Bool.false;
   | terrain  => Bool.false;
-  | interact => Bool.false;
+  | inter => Bool.false;
   
 Mons.Object.is_obj_defeated(obj: Mons.Object): Bool
   if U32.eql(Mons.Object.remaing_hp(obj), 0u) 
@@ -972,7 +972,7 @@ Mons.Object.remaing_hp(obj: Mons.Object): U32
     U32.sub(kind.mhp, obj.dmg);
   | const    => obj.dmg;
   | terrain  => obj.dmg;
-  | interact => obj.dmg;
+  | inter => obj.dmg;
 
 Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
   open obj:
@@ -1245,11 +1245,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else game
       ;
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
-      | interact => 
-        let interact_obj = Mons.Object.update_interact(adve_obj, Mons.Kind.swap_interact)
+      | inter => 
+        let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
         let game = Mons.Game.map_del(pos, adve_idx, game) // adve_idx: interact obj idx
         // This changes the adve_idx, in order to use it again, the player must move and return
-        let game = Mons.Game.map_push(pos, interact_obj, game) 
+        let game = Mons.Game.map_push(pos, inter_obj, game) 
         game
       ;
 
@@ -1264,7 +1264,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else game;
       | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
-      | interact => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+      | inter => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else game ;
 
