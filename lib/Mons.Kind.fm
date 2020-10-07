@@ -2,6 +2,7 @@ T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
 | Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
+| Mons.Kind.Interact(ele: Mons.Kind.interact, on: Bool);
 
 T Mons.Kind.mons
 | Mons.Kind.mons.HERO;
@@ -70,6 +71,8 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.WATER1_M;
 | Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
 
+T Mons.Kind.interact
+| Mons.Kind.interact.PUSH_TOOL;
 
 Mons.Kind.get_mhp(kind: Mons.Kind): U32
   case Mons.Kind.attr(kind) as attr:
@@ -104,6 +107,7 @@ Mons.Kind.get_agi(kind: Mons.Kind): U32
  | mons => kind.agi;
  | const  => 3u;
  | terrain => 3u;
+ | interact => 3u;
 
 Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
@@ -144,8 +148,9 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     | FRAB        => Bool.false;
     | ELECTROWL   => Bool.false;
     | NOCTUBRIGHT => Bool.false;;
-  | const   => Bool.false;
-  | terrain => Bool.false;
+  | const    => Bool.false;
+  | terrain  => Bool.false;
+  | interact => Bool.false;
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
@@ -155,6 +160,9 @@ Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
 
 Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
+
+Mons.Kind.new_interact_tool(kin: Mons.Kind.interact, stt: Bool): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Interact(kin, stt))
 
 Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
@@ -459,4 +467,12 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else if Nat.eql(kin.model, 9) then
           Mons.Attr.new_blockable([Mons.Assets.rock_9])
         else Mons.Attr.new_blockable([]);
-  ; // end terrain
+    ; // end terrain
+    
+    | INTERACT =>
+      case kin.ele as kin:
+      | PUSH_TOOL =>
+        if kin.on then Mons.Attr.new_neutral([Mons.Assets.push_tool_on])
+        else Mons.Attr.new_neutral([Mons.Assets.push_tool_off]);
+    ; // end interact
+    

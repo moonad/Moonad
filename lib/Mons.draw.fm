@@ -110,6 +110,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+      // TODO: add message about interaction
+      | interact => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ; // end case stt.game
     | inventory => Mons.draw.bag(hero_obj, dim, scr);
 
@@ -356,3 +358,4 @@ Mons.draw.img_type(kind: Mons.Kind): String
   ;
   | const => "";
   | terrain  => "";
+  | interact => "";
