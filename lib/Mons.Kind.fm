@@ -152,6 +152,14 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | terrain  => Bool.false;
   | interact => Bool.false;
 
+// Updates "on" property
+Mons.Kind.swap_interact(kind: Mons.Kind): Mons.Kind
+  case kind:
+  | mons => kind;
+  | const => kind;
+  | terrain => kind;
+  | interact => Mons.Kind.Interact(kind.ele, Bool.not(kind.on));
+
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
 
@@ -468,7 +476,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
           Mons.Attr.new_blockable([Mons.Assets.rock_9])
         else Mons.Attr.new_blockable([]);
     ; // end terrain
-    
+
     | INTERACT =>
       case kin.ele as kin:
       | PUSH_TOOL =>

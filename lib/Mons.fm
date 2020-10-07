@@ -207,6 +207,10 @@ Mons.Object.get_dmg(obj: Mons.Object): U32
 Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
   open obj: obj.kin
 
+// Sets an object's current kin
+Mons.Object.set_kin(obj: Mons.Object, kin: Mons.Kind): Mons.Object
+  open obj: Mons.Object.new(kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
   open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos, obj.cap)
@@ -485,6 +489,10 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
   | const => Bool.false;
   | terrain => Bool.false;
   | interact => Bool.false;
+
+Mons.Object.update_interact(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
+  open obj:
+  Mons.Object.set_kin(obj, fun(obj.kin))
 
 // Calculate the damage received depending on the type of the Mon
 Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Object): U32
@@ -1238,9 +1246,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       ;
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
       | interact => 
-        if kind.on then game
-          
-        else game
+        let interact_obj = Mons.Object.update_interact(adve_obj, Mons.Kind.swap_interact)
+        let game = Mons.Game.map_del(pos, adve_idx, game) // adve_idx: interact obj idx
+        // This changes the adve_idx, in order to use it again, the player must move and return
+        let game = Mons.Game.map_push(pos, interact_obj, game) 
+        game
       ;
 
     else if U16.eql(cmd, 'z') then // Free Mon
