@@ -662,7 +662,7 @@ Mons.Type.name(obj: Mons.Object): String
   | terrain => "none";
   | inter => 
     case kind.ele:
-    | push_tool => "Push tool";
+    | lever => "Lever";
     ;
 
 // Creates a new object with a given kind
@@ -823,7 +823,13 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
     { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},
     { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
-    { "al", [ Mons.Kind.new_interactive_tool(Mons.Kind.inter.PUSH_TOOL, Bool.false), rock_path ]} 
+
+    // Interactive objects
+    { "al", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.LEVER, 
+                Bool.false, 
+                Mons.Kind.inter_lever_eff
+              ), rock_path ]} 
     
   ])
 
@@ -1249,7 +1255,9 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
         let game = Mons.Game.map_del(pos, adve_idx, game) // adve_idx: interact obj idx
         // This changes the adve_idx, in order to use it again, the player must move and return
-        let game = Mons.Game.map_push(pos, inter_obj, game) 
+        let game = Mons.Game.map_push(pos, inter_obj, game)
+        open inter_obj:
+        let game = Mons.Kind.exec_eff(inter_obj.kin, game)
         game
       ;
 
@@ -1279,17 +1287,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     | capture => // accessed by pressing "c" after battle
       if U16.eql(cmd, 'c') then
-        // if stt.full_bag then // Update the current mon by the new one
-          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-          let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
-          let game = Mons.Game.map_del(pos, adve_idx, game)
-          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        // else
-        //   let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-        //   let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-        //   Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
+        let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+        let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
 
       else if U16.eql(cmd, 'z') then // Free Mon
         if Mons.Object.is_obj_defeated(adve_obj) then
