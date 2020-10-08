@@ -642,29 +642,6 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
   | terrain => 0u;
   | inter => 0u;
 
-Mons.Type.name(obj: Mons.Object): String
-  open obj:
-  case obj.kin as kind:
-  | mon =>
-    case kind.pri_type as type:
-    | normal => "normal";
-    | earth => "earth";
-    | fire => "fire";
-    | water => "water";
-    | grass  => "grass";
-    | electric => "electric";
-    | psychic  => "psychic";
-    | ice   => "ice";
-    | light => "light";
-    | darkness => "darkness";
-  ;
-  | construction => "none";
-  | terrain => "none";
-  | inter => 
-    case kind.ele:
-    | lever => "Lever";
-    ;
-
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
