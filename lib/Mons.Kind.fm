@@ -3,7 +3,7 @@ T Mons.Kind
 | Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 | Mons.Kind.Interactive(
-  ele: Mons.Kind.inter, 
+  ele: Mons.Kind.inter,
   on: Bool, 
   eff: Mons.Kind.inter -> Mons.Game -> Mons.Game); // an effect to change the map
 
@@ -75,7 +75,7 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
 
 T Mons.Kind.inter
-| Mons.Kind.inter.LEVER;
+| Mons.Kind.inter.LEVER(id: U32);
 
 Mons.Kind.get_mhp(kind: Mons.Kind): U32
   case Mons.Kind.attr(kind) as attr:
@@ -183,12 +183,12 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
     | let x = Pos32.get_x(hero_pos.value)
       let y = Pos32.get_y(hero_pos.value)
       let z = Pos32.get_z(hero_pos.value) // dim
-      // TODO: add object id to lever. A dim can have several objects, each one with
-      // a different eff and pos
       if U32.eql(z, 0u) then
-        let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0)
-        let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
-        Mons.Game.map_push(obj_pos, sign, game)
+        if U32.eql(kind.id, 0u) then // lever 0
+          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0)
+          let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
+          Mons.Game.map_push(obj_pos, sign, game)
+        else game
       else game
     ;
   ;
@@ -203,7 +203,7 @@ Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
 
 Mons.Kind.new_interactive_tool(
-  kin: Mons.Kind.inter, 
+  kin: Mons.Kind.inter,
   stt: Bool, 
   fun: Mons.Kind.inter -> Mons.Game -> Mons.Game)
   : Mons.Object

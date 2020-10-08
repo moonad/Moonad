@@ -826,7 +826,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
 
     // Interactive objects
     { "al", [ Mons.Kind.new_interactive_tool(
-                Mons.Kind.inter.LEVER, 
+                Mons.Kind.inter.LEVER(0u),
                 Bool.false, 
                 Mons.Kind.inter_lever_eff
               ), rock_path ]} 
