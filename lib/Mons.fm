@@ -1253,12 +1253,9 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
       | inter => 
         let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
-        let game = Mons.Game.map_del(pos, adve_idx, game) // adve_idx: interact obj idx
-        // This changes the adve_idx, in order to use it again, the player must move and return
-        let game = Mons.Game.map_push(pos, inter_obj, game)
+        let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
         open inter_obj:
-        let game = Mons.Kind.exec_eff(inter_obj.kin, game)
-        game
+        Mons.Kind.exec_eff(inter_obj.kin, game)
       ;
 
     else if U16.eql(cmd, 'z') then // Free Mon
