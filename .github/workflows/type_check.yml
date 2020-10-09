@@ -25,7 +25,7 @@ jobs:
 
     # Install dependency
     - name: Install formality-lang
-      run: npm i formality-lang0.4.119
+      run: npm i formality-lang@0.4.119
         
     - name: Check terms
       run: |
