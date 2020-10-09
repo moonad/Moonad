@@ -81,7 +81,7 @@ T Mons.Effect
 | Mons.Effect.sleep;
 | Mons.Effect.burn;
 | Mons.Effect.protect;
-| Mons.Effect.minimize(turns: Nat);
+| Mons.Effect.minimize(turns: U32);
 
 T Mons.Attr
 | Mons.Attr.new(
@@ -285,6 +285,73 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
 
 Mons.Object.is_standing(obj: Mons.Object): Bool
   U32.eql(Mons.Object.get_ani(obj),0u)
+
+Mons.Object.can_attack(obj: Mons.Object): Bool 
+  open obj: 
+  case List.find<>(Mons.Effect.is_sleep, obj.eff) as res:
+  | none => Bool.true;
+  | some => Bool.false;
+
+// T Mons.Effect 
+// | Mons.Effect.sleep;
+// | Mons.Effect.burn;
+// | Mons.Effect.protect;
+// | Mons.Effect.minimize(turns: Nat);
+Mons.Object.consume_effects(obj: Mons.Object): Mons.Object
+  ?Mons.Object.consume_effects 
+
+
+Mons.Effect.equals(eff1: Mons.Effect, eff2: Mons.Effect): Bool
+  case eff1:
+  | sleep => 
+    case eff2: 
+    | sleep    => Bool.true;
+    | burn     => Bool.false;
+    | protect  => Bool.false;
+    | minimize => Bool.false;;
+  | burn =>
+    case eff2: 
+    | sleep    => Bool.false;
+    | burn     => Bool.true;
+    | protect  => Bool.false;
+    | minimize => Bool.false;;
+  | protect => 
+    case eff2:
+    | sleep    => Bool.false;
+    | burn     => Bool.false;
+    | protect  => Bool.true;
+    | minimize => Bool.false;
+  ;
+  | minimize =>
+    case eff2: 
+    | sleep    => Bool.false;
+    | burn     => Bool.false;
+    | protect  => Bool.false;
+    | minimize => Bool.true;;
+
+Mons.Effect.is_sleep: Mons.Effect -> Bool
+  Mons.Effect.equals(Mons.Effect.sleep)
+
+Mons.Effect.is_burn: Mons.Effect -> Bool 
+  Mons.Effect.equals(Mons.Effect.burn)
+
+Mons.Effect.is_protect: Mons.Effect -> Bool 
+  Mons.Effect.equals(Mons.Effect.protect)
+
+// Note: even though there's a '0', the number is not used when checking
+//       for equality, see Mons.Effect.equals
+Mons.Effect.is_minimize: Mons.Effect -> Bool 
+  Mons.Effect.equals(Mons.Effect.minimize(0u))
+
+Mons.Effect.is_def_eff(eff: Mons.Effect): Bool 
+  Bool.or(Mons.Effect.is_minimize(eff), Mons.Effect.is_protect(eff))
+
+Mons.Effect.unused_minize(eff: Mons.Effect): Bool
+  case eff: 
+  | sleep    => Bool.false;
+  | burn     => Bool.false;
+  | protect  => Bool.false;
+  | minimize => U32.eql(eff.turns, 2u);
 
 Mons.walk_char_pack(
   t_x: U32,
@@ -1076,8 +1143,37 @@ Mons.update_mon_obj(
     Mons.Game.map_set(pos, idx, hero_obj, game)
 
 Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
-  let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+  open obj:
+  let is_def_eff = ((eff, idx) Mons.Effect.is_def_eff(eff)) :: Mons.Effect -> Nat -> Bool
+  let find_def = ((effs) List.ifind<>(effs, is_def_eff)) :: List(Mons.Effect) -> Maybe(Pair(Mons.Effect, Nat))
+  case find_def(obj.eff) as res:
+  | none => 
+    let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+    Mons.update_mon_obj(obj, obj_updated, pos, idx, game); 
+  | some =>
+    get eff eff_idx = res.value 
+    if Mons.Effect.is_minimize(eff) then 
+      //reduce dmg by 25%
+      let dmg = U32.sub(dmg, U32.div(dmg, 4u))
+      let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+      let eff_updated = 
+        if Mons.Effect.unused_minize(eff) then 
+          List.update_at<>(eff_idx, (x) Mons.Effect.minimize(1u), obj.eff) 
+        else 
+          List.delete_at<>(eff_idx, obj.eff) 
+      let obj_updated = Mons.Object.set_eff(eff_updated, obj_updated)
+        
+      Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+    else 
+      //reduce dmg by 50%
+      let dmg = U32.div(dmg, 2u)
+      let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+      let eff_updated = List.delete_at<>(eff_idx, obj.eff)
+      let obj_updated = Mons.Object.set_eff(eff_updated, obj_updated)
+      Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+  ;
+
+
 
 Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
   let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
@@ -1097,28 +1193,33 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   let skill_name = Mons.Skill.get_name(skill)
   let target_obj  = Mons.Map.get(pos, target, game.map)
   let target_mon  = Mons.Object.get_current_mon(target_obj)
-  case skill:
-  | hit_4  =>
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-    let game = Mons.damage(target_obj, pos, target, val, game)
-    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+  
+  if Mons.Object.can_attack(source_obj) then 
+    case skill:
+    | hit_4  =>
+      let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+      let game = Mons.damage(target_obj, pos, target, val, game)
+      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+      game 
+    ;  
+    | hit_2 => 
+      let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+      let game = Mons.damage(target_obj, pos, target, val, game)
+      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+      game 
+    ;
+    | heal => 
+      let game = Mons.heal(source_obj, pos, source, 3u, game)
+      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+      game 
+    ;
+    | none => 
+      game  
+      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+    ;
+  else 
     game 
-  ;  
-  | hit_2 => 
-    let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
-    let game = Mons.damage(target_obj, pos, target, val, game)
-    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-    game 
-  ;
-  | heal => 
-    let game = Mons.heal(source_obj, pos, source, 3u, game)
-    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-    game 
-  ;
-  | none => 
-    game  
-    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-  ;
+
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -1346,12 +1447,17 @@ Mons.Game.exec_skills(
     let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
     let adve_skill_name = Mons.Skill.get_name(adve_skill)
     // TODO: still need to test
+    // TODO: show first attack, for now only the second one is being shown
     if U32.lte(hero_agi, adve_agi) then // hero attack first
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(hero_attr.name, hero_skill_name), game)
       let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
 
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
       let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
+
+      //consume hero effs
+      //consume adve effs
+
       game 
     else 
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
@@ -1359,6 +1465,10 @@ Mons.Game.exec_skills(
 
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(hero_attr.name, hero_skill_name), game)
       let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+
+      //consume hero effs
+      //consume adve effs
+
       game 
   else game
 
