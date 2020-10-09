@@ -292,14 +292,11 @@ Mons.Object.can_attack(obj: Mons.Object): Bool
   | none => Bool.true;
   | some => Bool.false;
 
-// T Mons.Effect 
-// | Mons.Effect.sleep;
-// | Mons.Effect.burn;
-// | Mons.Effect.protect;
-// | Mons.Effect.minimize(turns: Nat);
-Mons.Object.consume_effects(obj: Mons.Object): Mons.Object
-  ?Mons.Object.consume_effects 
-
+Mons.Object.is_burning(obj: Mons.Object): Bool
+  open obj:
+  case List.find<>(Mons.Effect.is_burn, obj.eff):
+  | none => Bool.false;
+  | some => Bool.true;
 
 Mons.Effect.equals(eff1: Mons.Effect, eff2: Mons.Effect): Bool
   case eff1:
@@ -352,6 +349,7 @@ Mons.Effect.unused_minize(eff: Mons.Effect): Bool
   | burn     => Bool.false;
   | protect  => Bool.false;
   | minimize => U32.eql(eff.turns, 2u);
+
 
 Mons.walk_char_pack(
   t_x: U32,
@@ -1162,6 +1160,13 @@ Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): 
         else 
           List.delete_at<>(eff_idx, obj.eff) 
       let obj_updated = Mons.Object.set_eff(eff_updated, obj_updated)
+      // TODO: check how much dmg it should be
+      // apply burn eff
+      let obj_updated =
+        if Mons.Object.is_burning(obj_updated) then 
+          Mons.Object.hit(obj_updated, 1u)
+        else 
+          obj_updated 
         
       Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
     else 
@@ -1170,6 +1175,14 @@ Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): 
       let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
       let eff_updated = List.delete_at<>(eff_idx, obj.eff)
       let obj_updated = Mons.Object.set_eff(eff_updated, obj_updated)
+      // TODO: check how much dmg it should be
+      // apply burn eff
+      let obj_updated =
+        if Mons.Object.is_burning(obj_updated) then 
+          Mons.Object.hit(obj_updated, 1u)
+        else 
+          obj_updated 
+
       Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
   ;
 
@@ -1194,31 +1207,24 @@ Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Ga
   let target_obj  = Mons.Map.get(pos, target, game.map)
   let target_mon  = Mons.Object.get_current_mon(target_obj)
   
+  // mon is not asleep
   if Mons.Object.can_attack(source_obj) then 
     case skill:
     | hit_4  =>
       let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-      let game = Mons.damage(target_obj, pos, target, val, game)
-      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-      game 
+      Mons.damage(target_obj, pos, target, val, game)
     ;  
     | hit_2 => 
       let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
-      let game = Mons.damage(target_obj, pos, target, val, game)
-      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-      game 
+      Mons.damage(target_obj, pos, target, val, game)
     ;
-    | heal => 
-      let game = Mons.heal(source_obj, pos, source, 3u, game)
-      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-      game 
-    ;
-    | none => 
-      game  
-      // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
-    ;
+    | heal => Mons.heal(source_obj, pos, source, 3u, game);
+    | none => game;
   else 
-    game 
+    //remove sleep effect
+    let effs_updated = List.filter<>(Mons.Effect.is_sleep, source_mon.eff)
+    let source_mon = Mons.Object.set_eff(effs_updated, source_mon)
+    Mons.update_mon_obj(source_obj, source_mon, pos, source, game)
 
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
@@ -1455,9 +1461,6 @@ Mons.Game.exec_skills(
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
       let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
 
-      //consume hero effs
-      //consume adve effs
-
       game 
     else 
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
@@ -1466,10 +1469,8 @@ Mons.Game.exec_skills(
       let game = Mons.Game.set_stt(Mons.Screen.turn_skill(hero_attr.name, hero_skill_name), game)
       let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
 
-      //consume hero effs
-      //consume adve effs
-
       game 
+
   else game
 
 // Mons.Game.exec_turn(skills: List())
