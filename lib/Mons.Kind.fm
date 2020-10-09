@@ -45,7 +45,7 @@ T Mons.Kind.mons
 | Mons.Kind.mons.NOCTUBRIGHT;
 
 T Mons.Kind.const
-| Mons.Kind.const.ROCK_PATH_C;
+| Mons.Kind.const.ROCK_PATH_C; // TODO: if will still use it in a lvl, chage to terrain
 | Mons.Kind.const.ROCK_PATH_M;
 | Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
@@ -201,6 +201,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
       else game;
 
     | move => // an object that the hero can push
+      // TODO: make hero walk to movable_obj_pos
       let movable_obj_pos = Mons.Object.get_adjacent_pos(hero_pos, hero_obj.dir, map)
       if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, map) then
         let obj = Mons.Kind.new_interactive_tool(kind, Bool.true, Mons.Kind.inter_lever_eff)

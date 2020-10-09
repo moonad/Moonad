@@ -272,6 +272,8 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj:
   U32.eql(obj.ani, 0u)
 
+// Related to moving an object
+// ------
 // Get the first pos which the hero is facing
 Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
   let x = Pos32.get_x(pos)
@@ -311,6 +313,7 @@ Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
 Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
   let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, map)
   Mons.Map.get_top(adjacent_pos, map)
+// -------
 
 Mons.Object.is_standing(obj: Mons.Object): Bool
   U32.eql(Mons.Object.get_ani(obj),0u)
@@ -846,12 +849,12 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
                 Mons.Kind.inter.LEVER(0u),
                 Bool.false, 
                 Mons.Kind.inter_lever_eff
-              ), rock_path ]},
+              ), grass ]},
     { "mv", [ Mons.Kind.new_interactive_tool(
                 Mons.Kind.inter.MOVE,
                 Bool.true, 
                 Mons.Kind.inter_lever_eff
-              ), rock_path ]} 
+              ), grass ]} 
     
   ])
 
@@ -1275,9 +1278,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
       | terrain => // Hero can only move objects if he is in a terrain
         if Mons.Object.hero_can_push_obj(pos, hero_obj.dir, game.map) then
-          // using Mons.Object.get_adjacent_obj to get obj here doesn't work. WTF
-          let adjacent_pos = Mons.Object.get_adjacent_pos(pos, hero_obj.dir, game.map)
-          let adjacent_obj = Mons.Map.get(adjacent_pos, 0u, game.map)
+          let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
           open adjacent_obj:
           Mons.Kind.exec_eff(adjacent_obj.kin, game)
         else Mons.Game.set_stt(Mons.Screen.game('.'), game);
