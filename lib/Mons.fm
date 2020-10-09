@@ -315,6 +315,13 @@ Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Obj
   Mons.Map.get_top(adjacent_pos, map)
 // -------
 
+Mons.Object.hero_initial_pos(actual_pos: Pos32): Pos32
+  // case actual_pos:
+  // | Mons.scr_mid;
+  let x = Pos32.get_x(actual_pos)
+    let y = Pos32.get_y(actual_pos)
+    Pos32.new(x, U32.add(y, 30u), 0u)
+
 Mons.Object.is_standing(obj: Mons.Object): Bool
   U32.eql(Mons.Object.get_ani(obj),0u)
 
@@ -963,6 +970,19 @@ Mons.Game.move_hero_down(
   let x = Pos32.get_x(pos)
   let z = Pos32.get_z(pos)
   let new_pos = Pos32.new(x,U32.add(y, 1u),z)
+  let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
+  Mons.Game.set_user_pos(usr, new_pos, game)
+
+Mons.Game.hero_inital_position(
+  usr: Word(160), 
+  hero_obj: Mons.Object, 
+  pos: Pos32, 
+  hero_idx: U32, 
+  game: Mons.Game): Mons.Game
+  let y = Pos32.get_y(pos)
+  let x = Pos32.get_x(pos)
+  let z = Pos32.get_z(pos)
+  let new_pos = Pos32.new(x,U32.add(y, 38u),z)
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
   Mons.Game.set_user_pos(usr, new_pos, game)
 
@@ -1721,7 +1741,12 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u));
+    let game = Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u))
+    // let hero_info = Mons.Map.get_hero(Mons.scr_mid, game_map)
+    // let hero_obj = Pair.fst<,>(hero_info)
+    // let hero_idx = Pair.snd<,>(hero_info)
+    // let game = Mons.Game.hero_inital_position(game_usr, hero_obj, Mons.scr_mid, hero_idx, game)
+    game;
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
   // Event handlers
@@ -1763,7 +1788,16 @@ Mons.start(online: Bool): App(Mons.Game)
       | init => [
         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
         let game = Mons.Game.set_usr(event.addr, game)
-        let game = Mons.Game.cmd('j', event.addr, game) // inits hero
+        let game = Mons.Game.cmd('d', event.addr, game) // inits hero
+        open game:
+        let pos = 
+        case Mons.Game.get_hero_pos(game) as pos:
+        | Mons.scr_mid;
+        | pos.value;
+        let hero_info = Mons.Map.get_hero(pos, game.map)
+        let hero_obj = Pair.fst<,>(hero_info)
+        let hero_idx = Pair.snd<,>(hero_info)
+        let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game))];
