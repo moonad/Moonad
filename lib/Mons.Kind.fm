@@ -2,6 +2,10 @@ T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
 | Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
+| Mons.Kind.Interactive(
+  ele: Mons.Kind.inter,
+  on: Bool, 
+  eff: Mons.Kind.inter -> Mons.Game -> Mons.Game); // an effect to change the map
 
 T Mons.Kind.mons
 | Mons.Kind.mons.HERO;
@@ -41,7 +45,7 @@ T Mons.Kind.mons
 | Mons.Kind.mons.NOCTUBRIGHT;
 
 T Mons.Kind.const
-| Mons.Kind.const.ROCK_PATH_C;
+| Mons.Kind.const.ROCK_PATH_C; // TODO: if will still use it in a lvl, chage to terrain
 | Mons.Kind.const.ROCK_PATH_M;
 | Mons.Kind.const.HOUSE(model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
@@ -70,6 +74,9 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.WATER1_M;
 | Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
 
+T Mons.Kind.inter
+| Mons.Kind.inter.LEVER(id: U32);
+| Mons.Kind.inter.MOVE;
 
 Mons.Kind.get_mhp(kind: Mons.Kind): U32
   case Mons.Kind.attr(kind) as attr:
@@ -104,6 +111,7 @@ Mons.Kind.get_agi(kind: Mons.Kind): U32
  | mons => kind.agi;
  | const  => 3u;
  | terrain => 3u;
+ | inter => 3u;
 
 Mons.Kind.is_hero(kind: Mons.Kind): Bool
   case kind:
@@ -144,8 +152,65 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     | FRAB        => Bool.false;
     | ELECTROWL   => Bool.false;
     | NOCTUBRIGHT => Bool.false;;
-  | const   => Bool.false;
-  | terrain => Bool.false;
+  | const    => Bool.false;
+  | terrain  => Bool.false;
+  | inter => Bool.false;
+
+// Swap "on" property
+Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
+  case kind:
+  | mons => kind;
+  | const => kind;
+  | terrain => kind;
+  | inter => Mons.Kind.Interactive(kind.ele, Bool.not(kind.on), kind.eff);
+
+// Executes an effect in a game
+Mons.Kind.exec_eff(kind: Mons.Kind, game: Mons.Game): Mons.Game
+  case kind:
+  | mons => game;
+  | const => game;
+  | terrain => game;
+  | inter => 
+    if kind.on then kind.eff(kind.ele, game)
+    else game
+  ;
+
+// An effect to work with lever kind
+Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
+  case Mons.Game.get_hero_pos(game) as hero_pos:
+  | game;
+  | let hero_pos = hero_pos.value
+    let x = Pos32.get_x(hero_pos)
+    let y = Pos32.get_y(hero_pos)
+    let z = Pos32.get_z(hero_pos) // dim
+    open game:
+    let map = game.map
+    let hero_pair = Mons.Map.get_hero(hero_pos, map)
+    let hero_obj  = Pair.fst<,>(hero_pair)
+    let hero_idx  = Pair.snd<,>(hero_pair)
+    let obj_idx = 0u
+    open hero_obj:
+    case kind:
+    | lever => 
+      if U32.eql(z, 0u) then
+        if U32.eql(kind.id, 0u) then // lever 0
+          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0)
+          let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
+          Mons.Game.map_push(obj_pos, sign, game)
+        else game
+      else game;
+
+    | move => // an object that the hero can push
+      // TODO: make hero walk to movable_obj_pos
+      let movable_obj_pos = Mons.Object.get_adjacent_pos(hero_pos, hero_obj.dir, map)
+      if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, map) then
+        let obj = Mons.Kind.new_interactive_tool(kind, Bool.true, Mons.Kind.inter_lever_eff)
+        let new_pos = Mons.Object.get_adjacent_pos(movable_obj_pos, hero_obj.dir, map)
+        let game = Mons.Game.map_del(movable_obj_pos, obj_idx, game)
+        Mons.Game.map_push(new_pos, obj, game)
+      else game
+    ;
+  ;
 
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
@@ -155,6 +220,13 @@ Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
 
 Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
+
+Mons.Kind.new_interactive_tool(
+  kin: Mons.Kind.inter,
+  stt: Bool, 
+  fun: Mons.Kind.inter -> Mons.Game -> Mons.Game)
+  : Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Interactive(kin, stt, fun))
 
 Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
@@ -459,4 +531,13 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else if Nat.eql(kin.model, 9) then
           Mons.Attr.new_blockable([Mons.Assets.rock_9])
         else Mons.Attr.new_blockable([]);
-  ; // end terrain
+    ; // end terrain
+
+    | INTERACTIVE =>
+      case kin.ele as kin:
+      | lever =>
+        if kin.on then Mons.Attr.new_neutral([Mons.Assets.push_tool_on])
+        else Mons.Attr.new_neutral([Mons.Assets.push_tool_off]);
+      | move => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
+    ; // end inter
+    
