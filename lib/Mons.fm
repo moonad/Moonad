@@ -207,6 +207,10 @@ Mons.Object.get_dmg(obj: Mons.Object): U32
 Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
   open obj: obj.kin
 
+// Sets an object's current kin
+Mons.Object.set_kin(obj: Mons.Object, kin: Mons.Kind): Mons.Object
+  open obj: Mons.Object.new(kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
   open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos, obj.cap)
@@ -267,6 +271,49 @@ Mons.Object.is_walking(obj: Mons.Object): Bool
 Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj:
   U32.eql(obj.ani, 0u)
+
+// Related to moving an object
+// ------
+// Get the first pos which the hero is facing
+Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
+  let x = Pos32.get_x(pos)
+  let y = Pos32.get_y(pos)
+  let z = Pos32.get_z(pos) // dim
+  case dir:
+  | r => Pos32.new(U32.add(x, 1u), y, z);
+  | u => Pos32.new(x, U32.sub(y, 1u), z);
+  | l => Pos32.new(U32.sub(x, 1u), y, z);
+  | d => Pos32.new(x, U32.add(y, 1u), z);
+
+// pos: actual position of the object
+// dir: direction which will move forward
+Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
+  let obj_adjacent_pos = Mons.Object.get_adjacent_obj(pos, dir, map)
+  open obj_adjacent_pos:
+  case obj_adjacent_pos.kin as kind:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain => Bool.true;
+  | inter => Bool.false;
+
+// Indicates if the hero can push the object he is facing
+Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
+  let adjacent_obj = Mons.Object.get_adjacent_obj(pos, dir, map)
+  open adjacent_obj:
+  case adjacent_obj.kin as kind:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain => Bool.false;
+  | inter =>
+    case kind.ele:
+    | lever => Bool.true;
+    | move  => Bool.true;
+  ;
+
+Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
+  let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, map)
+  Mons.Map.get_top(adjacent_pos, map)
+// -------
 
 Mons.Object.is_standing(obj: Mons.Object): Bool
   U32.eql(Mons.Object.get_ani(obj),0u)
@@ -407,6 +454,7 @@ Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
       hero;
   | const => hero;
   | terrain => hero;
+  | inter => hero;
 
 Mons.Object.add_defeated_mon(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open obj:
@@ -420,6 +468,7 @@ Mons.Object.add_defeated_mon(obj: Mons.Object, hero: Mons.Object): Mons.Object
   ;
   | const => hero;
   | terrain => hero;
+  | inter => hero;
 
 Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
   open boss:
@@ -430,6 +479,7 @@ Mons.Object.capture_boss(boss: Mons.Object, hero: Mons.Object): Mons.Object
     Mons.Object.set_bos(new_boss_bag, hero);
   | const => hero;
   | terrain => hero;
+  | inter => hero;
 
 Mons.Object.pop_from_bag(obj: Mons.Object): Mons.Object
   open obj:
@@ -481,6 +531,11 @@ Mons.Object.is_battleable(obj: Mons.Object): Bool
   | mons => Bool.true;
   | const => Bool.false;
   | terrain => Bool.false;
+  | inter => Bool.false;
+
+Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
+  open obj:
+  Mons.Object.set_kin(obj, fun(obj.kin))
 
 // Calculate the damage received depending on the type of the Mon
 Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Object): U32
@@ -624,28 +679,11 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
     ;
     | construction => 0u;
     | terrain => 0u;
+    | inter => 0u;
   ;
   | construction => 0u;
   | terrain => 0u;
-
-Mons.Type.name(obj: Mons.Object): String
-  open obj:
-  case obj.kin as kind:
-  | mon =>
-    case kind.pri_type as type:
-    | normal => "normal";
-    | earth => "earth";
-    | fire => "fire";
-    | water => "water";
-    | grass  => "grass";
-    | electric => "electric";
-    | psychic  => "psychic";
-    | ice   => "ice";
-    | light => "light";
-    | darkness => "darkness";
-  ;
-  | construction => "none";
-  | terrain => "none";
+  | inter => 0u;
 
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
@@ -804,9 +842,20 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up)), grass ]},
     { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
     { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},
-    { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)}   
+    { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
 
-    // { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.earth, 2u) },
+    // Interactive objects
+    { "al", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.LEVER(0u),
+                Bool.false, 
+                Mons.Kind.inter_lever_eff
+              ), grass ]},
+    { "mv", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.MOVE,
+                Bool.true, 
+                Mons.Kind.inter_lever_eff
+              ), grass ]} 
+    
   ])
 
 // Converts a string map source to an actual map
@@ -937,8 +986,9 @@ Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
     let hero_status = Mons.Object.is_obj_defeated(hero)
     Bool.or(adve_status, hero_status)  
   ;
-  | const => Bool.false;
-  | terrain => Bool.false;
+  | const    => Bool.false;
+  | terrain  => Bool.false;
+  | inter => Bool.false;
   
 Mons.Object.is_obj_defeated(obj: Mons.Object): Bool
   if U32.eql(Mons.Object.remaing_hp(obj), 0u) 
@@ -951,8 +1001,9 @@ Mons.Object.remaing_hp(obj: Mons.Object): U32
   | mons => 
     open Mons.Kind.attr(obj.kin) as kind:
     U32.sub(kind.mhp, obj.dmg);
-  | const => obj.dmg;
-  | terrain => obj.dmg;
+  | const    => obj.dmg;
+  | terrain  => obj.dmg;
+  | inter => obj.dmg;
 
 Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
   open obj:
@@ -1143,37 +1194,32 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
     | introduction =>
-    let can_walk = U32.eql(stt.step, 0u)
-    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-      Mons.Game.walk(cmd, pos, hero_idx, game)
-    else if U16.eql(cmd, 'c') then
-      if U32.eql(stt.step, 0u) then // Go to Mon selection
-        let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
-        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-      if U32.eql(stt.step, 1u) then  // Initiate the game. The mage is removed from the scene.
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.'), game)
-      else game
-    else game
+    // let can_walk = U32.eql(stt.step, 0u)
+    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+    //   Mons.Game.walk(cmd, pos, hero_idx, game)
+    // else if U16.eql(cmd, 'c') then
+    //   if U32.eql(stt.step, 0u) then // Go to Mon selection
+    //     let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
+    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+    //   if U32.eql(stt.step, 1u) then  // Initiate the game. The mage is removed from the scene.
+    //     let game = Mons.Game.map_del(pos, adve_idx, game)
+    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    //     Mons.Game.set_stt(Mons.Screen.game('.'), game)
+    //   else game
+    // else game
+    Mons.Game.set_stt(Mons.Screen.game('.'), game)
     ;
+
     | Mons.Screen.intro_select => 
       if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
       else // update current Mon using 'a' or 'd'
         Mons.Object.change_curr_mon(
           cmd, (cmd: U32) Mons.Screen.intro_select(cmd),
           pos, hero_obj, hero_idx, game);
-    | game =>
-    // TODO remove - just testing dmg to hero to check heal eff
-    if U16.eql(cmd, 'T') then
-      if Mons.Object.is_obj_defeated(hero_obj) then
-        let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
-        Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-      else if Mons.Object.is_obj_defeated(curr_mon) then game
-      else Mons.cast(pos, hero_idx, hero_idx, Mons.Skill.hit_4, game)
 
-    else if U16.eql(cmd, 'U') then
+    | game =>
+    if U16.eql(cmd, 'U') then
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 0, game)
     else if U16.eql(cmd, 'I') then
       Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 1, game)
@@ -1189,8 +1235,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       else 
         Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
 
-    // --------- End battle
-    else if U16.eql(cmd, 'c') then // Action to capture a Mon
+    else if U16.eql(cmd, 'c') then
       case adve_obj.kin as kind:
       | mon =>
         if Mons.Object.is_obj_defeated(adve_obj) then
@@ -1220,6 +1265,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               Mons.Game.set_stt(Mons.Screen.game('.'), game)
         else game
       ;
+
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
         let can_use_portal = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
@@ -1229,7 +1275,20 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           Mons.Game.set_user_pos(usr, new_pos, game)
         else game
       ;
-      | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+
+      | terrain => // Hero can only move objects if he is in a terrain
+        if Mons.Object.hero_can_push_obj(pos, hero_obj.dir, game.map) then
+          let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
+          open adjacent_obj:
+          Mons.Kind.exec_eff(adjacent_obj.kin, game)
+        else Mons.Game.set_stt(Mons.Screen.game('.'), game);
+
+      | inter => 
+        let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
+        let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
+        open inter_obj:
+        Mons.Kind.exec_eff(inter_obj.kin, game)
+      ;
 
     else if U16.eql(cmd, 'z') then // Free Mon
       case adve_obj.kin as kind:
@@ -1242,6 +1301,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else game;
       | const => Mons.Game.set_stt(Mons.Screen.game('.'), game);
       | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+      | inter => Mons.Game.set_stt(Mons.Screen.game('.'), game);
 
     else game ;
 
@@ -1256,17 +1316,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     | capture => // accessed by pressing "c" after battle
       if U16.eql(cmd, 'c') then
-        // if stt.full_bag then // Update the current mon by the new one
-          let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
-          let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-          let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
-          let game = Mons.Game.map_del(pos, adve_idx, game)
-          let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          Mons.Game.set_stt(Mons.Screen.game('.'), game)
-        // else
-        //   let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
-        //   let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-        //   Mons.Game.set_stt(Mons.Screen.game('.'), game)
+        let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
+        let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
+        let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
 
       else if U16.eql(cmd, 'z') then // Free Mon
         if Mons.Object.is_obj_defeated(adve_obj) then
