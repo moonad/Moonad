@@ -42,38 +42,44 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   }
 
 //// Returns the element at given position, backwards.
-//List.at_last<A: Type>(index: Nat, list: List(A)): Maybe(A)
-  //List.at<A>(index, List.reverse<>(list))
+List.at_last<A: Type>(index: Nat, list: List(A)): Maybe(A)
+  List.at<A>(index, List.reverse<>(list))
 
 //// The bind function of the list Monad.
-//List.bind<A: Type,B: Type>(xs: List(A), f: A -> List(B)): List(B)
-  //List.flatten<>(List.map<,>(f)(xs))
+List.bind<A: Type,B: Type>(xs: List(A), f: A -> List(B)): List(B)
+  List.flatten<>(List.map<,>(f)(xs))
 
-//List.chunk<A: Type>(n: Nat, xs: List(A)): Maybe(List(A))
-  //case n:
-  //| Maybe.some<>(List.nil<>);
-  //| case xs:
-    //| Maybe.none<>;
-    //| Maybe.bind<,>(List.chunk<>(n.pred,xs.tail))
-      //| (x) Maybe.some<>(List.cons<>(xs.head,x));;;
+List.chunk<A: Type>(n: Nat, xs: List(A)): Maybe(List(A))
+  case n {
+    zero: Maybe.some<>(List.nil<>),
+    succ: case xs {
+      nil : Maybe.none<>,
+      cons: Maybe.bind<,>(List.chunk<>(n.pred,xs.tail))
+            | (x) Maybe.some<>(List.cons<>(xs.head,x));
+    }
+  }
 
-//List.chunks_of<A: Type>(len: Nat, xs: List(A)): List(List(A))
-  //List.chunks_of.go<>(len, xs, len, List.nil<>)
+List.chunks_of<A: Type>(len: Nat, xs: List(A)): List(List(A))
+  List.chunks_of.go<>(len, xs, len, List.nil<>)
 
-//List.chunks_of.go<A: Type>(
-  //len   : Nat,     // length of each chunk
-  //list  : List(A), // list to be split
-  //need  : Nat,     // number of vals to complete chunk
-  //chunk : List(A)  // current chunk
-//) : List(List(A))
-  //case list:
-  //| List.cons<>(List.reverse<>(chunk), List.nil<>);
-  //| case need:
-    //| let head = List.reverse<>(chunk)
-      //let tail = List.chunks_of.go<>(len, list, len, List.nil<>)
-      //List.cons<>(head, tail);
-    //| let chunk = List.cons<>(list.head, chunk)
-      //List.chunks_of.go<>(len, list.tail, need.pred, chunk);;
+List.chunks_of.go<A: Type>(
+  len   : Nat,     // length of each chunk
+  list  : List(A), // list to be split
+  need  : Nat,     // number of vals to complete chunk
+  chunk : List(A)  // current chunk
+) : List(List(A))
+  case list {
+    nil : List.cons<>(List.reverse<>(chunk), List.nil<>),
+    cons: case need {
+      zero: 
+        let head = List.reverse<>(chunk)
+        let tail = List.chunks_of.go<>(len, list, len, List.nil<>)
+        List.cons<>(head, tail),
+      succ: 
+        let chunk = List.cons<>(list.head, chunk)
+        List.chunks_of.go<>(len, list.tail, need.pred, chunk)
+    }
+  }
 
 //// Proof that List.cons(f(x)) & List.map(f, xs) commute
 //List.commute_cons_map<A: Type, B: Type>(a :A, ls: List(A), f: A -> B)
@@ -85,12 +91,13 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   //| _;
   //: Equal(_, List.cons<>(f(a), List.map<,>(f, ls.self)), List.map<,>(f, List.cons<>(a, ls.self)));
 
-//// Concatenates two lists.
-//List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
-  //case as:
-  //| bs;
-  //| List.cons<>(as.head, List.concat<>(as.tail,bs));
-
+// Concatenates two lists.
+List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
+  case as {
+    nil : bs,
+    cons: List.cons<>(as.head, List.concat<>(as.tail,bs))
+  }
+ 
 //// A theorem that a list made with List.cons is not the empty list
 //List.cons_isnt_empty<A: Type>(
   //x:A,
@@ -108,104 +115,122 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   //def P = ((x) case x: | Empty; | Unit;) :: List(A) -> Type
   //(e) Equal.rewrite<List(A), List.cons<A>(x,xs), List.nil<A>,P>(e, Unit.new)
 
-//// removes an element from the list at given index
-//List.delete_at<A: Type>(idx: Nat, list: List(A)): List(A)
-  //case idx:
-  //| List.tail<A>(list);
-  //| case list:
-    //| list;
-    //| List.cons<A>(list.head, List.delete_at<A>(idx.pred, list.tail));;
+// removes an element from the list at given index
+List.delete_at<A: Type>(idx: Nat, list: List(A)): List(A)
+  case idx {
+    zero: List.tail<A>(list),
+    succ: case list {
+      nil : list,
+      cons: List.cons<A>(list.head, List.delete_at<A>(idx.pred, list.tail))
+    }
+  }
+// removes an element from the list at given index
+List.delete_at.u32<A: Type>(idx: U32, list: List(A)): List(A)
+  if U32.eql(idx, 0u) then
+    List.tail<A>(list)
+  else
+    case list {
+      nil : list,
+      cons: List.cons<A>(list.head, List.delete_at.u32<A>(U32.sub(idx,1u), list.tail))
+    }
 
-//// removes an element from the list at given index
-//List.delete_at.u32<A: Type>(idx: U32, list: List(A)): List(A)
-  //if U32.eql(idx, 0u) then
-    //List.tail<A>(list)
-  //else
-    //case list:
-    //| list;
-    //| List.cons<A>(list.head, List.delete_at.u32<A>(U32.sub(idx,1u), list.tail));
+// removes an element from the list with a user-supplied equality predicate
+List.delete_by<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): List(A)
+  case as {
+    nil : List.nil<>,
+    cons: case p(a, as.head) {
+      true : List.delete_by<>(p, a, as.tail),
+      false: List.cons<>(as.head, List.delete_by<>(p, a, as.tail))
+    }
+  }
 
-//// removes an element from the list with a user-supplied equality predicate
-//List.delete_by<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): List(A)
-  //case as:
-  //| List.nil<>;
-  //| case p(a, as.head):
-    //| List.delete_by<>(p, a, as.tail);
-    //| List.cons<>(as.head, List.delete_by<>(p, a, as.tail));;
+// Removes the first elements of a list.
+List.drop<A: Type>(n: Nat, xs: List(A)):  List(A)
+  case n {
+    zero: xs,
+    succ: case xs {
+      nil : List.nil<>,
+      cons: List.drop<>(n.pred,xs.tail)
+    }
+  }
 
-//// Removes the first elements of a list.
-//List.drop<A: Type>(n: Nat, xs: List(A)):  List(A)
-  //case n:
-  //| xs;
-  //| case xs:
-    //| List.nil<>;
-    //| List.drop<>(n.pred,xs.tail);;
+List.drop_until<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  List.drop_while<>((c) Bool.not(f(c)), xs)
 
-//List.drop_until<A: Type>(f: A -> Bool, xs: List(A)): List(A)
-  //List.drop_while<>((c) Bool.not(f(c)), xs)
+// Remove elements while a condition is true
+List.drop_while<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: case f(xs.head) {
+      true : List.drop_while<>(f,xs.tail),
+      false: xs
+    }
+  }
 
-//// Remove elements while a condition is true
-//List.drop_while<A: Type>(f: A -> Bool, xs: List(A)): List(A)
-  //case xs:
-  //| List.nil<>;
-  //| case f(xs.head):
-    //| List.drop_while<>(f,xs.tail);
-    //| xs;;
+// checks if an element occurs in the list with a user-supplied equality predicate
+List.elem<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): Bool 
+  case as {
+    nil : Bool.false,
+    cons: case p(a, as.head) {
+      true : Bool.true,
+      false: List.elem<A>(p, a, as.tail)
+    }
+  }
 
-//// checks if an element occurs in the list with a user-supplied equality predicate
-//List.elem<A: Type>(p: A -> A -> Bool, a: A, as: List(A)): Bool 
-  //case as:
-  //| Bool.false;
-  //| case p(a, as.head):
-    //| Bool.true;
-    //| List.elem<A>(p, a, as.tail);;
+// Removes all elements that do not satisfy a condition.
+List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: case f(xs.head) {
+      true : List.cons<>(xs.head,List.filter<>(f, xs.tail)),
+      false: List.filter<>(f, xs.tail)
+    }
+  }
 
-//// Removes all elements that do not satisfy a condition.
-//List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
-  //case xs:
-  //| List.nil<>;
-  //| case f(xs.head):
-    //| List.cons<>(xs.head,List.filter<>(f, xs.tail));
-    //| List.filter<>(f, xs.tail);;
+//Finds the first occurrence that satisfies a condition
+List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
+  case xs {
+    nil : Maybe.none<>,
+    cons: case cond(xs.head) {
+      true : Maybe.some<>(xs.head),
+      false: List.find<>(cond)(xs.tail)
+    }
+  }
 
-////Finds the first occurrence that satisfies a condition
-//List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
-  //case xs:
-  //| Maybe.none<>;
-  //| case cond(xs.head):
-    //| Maybe.some<>(xs.head);
-    //| List.find<>(cond)(xs.tail);;
+// Finds the last element that satisfies a condition and its index.
+List.find_last<A: Type>(xs: List(A), f: A -> Nat -> Bool): Maybe(Pair(A)(Nat))
+  List.find_last.go<A>(xs,f,Nat.zero,Maybe.none<>)
 
-//// Finds the last element that satisfies a condition and its index.
-//List.find_last<A: Type>(xs: List(A), f: A -> Nat -> Bool): Maybe(Pair(A)(Nat))
-  //List.find_last.go<A>(xs,f,Nat.zero,Maybe.none<>)
+List.find_last.go<A: Type>(
+  xs: List(A),
+  f: A -> Nat -> Bool,
+  n: Nat,
+  res: Maybe(Pair(A,Nat))
+): Maybe(Pair(A,Nat))
+  case xs {
+    nil : res,
+    cons:
+      let res = case f(xs.head,n) {
+        true : Maybe.some<>(Pair.new<,>(xs.head,n)),
+        false: res
+      }
+      List.find_last.go<>(xs.tail,f,Nat.succ(n),res)
+  }
 
-//List.find_last.go<A: Type>(
-  //xs: List(A),
-  //f: A -> Nat -> Bool,
-  //n: Nat,
-  //res: Maybe(Pair(A,Nat))
-//): Maybe(Pair(A,Nat))
-  //case xs:
-  //| res;
-  //| let res = case f(xs.head,n):
-      //| Maybe.some<>(Pair.new<,>(xs.head,n));
-      //| res;
-    //List.find_last.go<>(xs.tail,f,Nat.succ(n),res);
+// Flattens a list of lists into a single list.
+List.flatten<A: Type>(xs: List(List(A))): List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: List.concat<>(xs.head, List.flatten<>(xs.tail))
+  }
 
-//// Flattens a list of lists into a single list.
-//List.flatten<A: Type>(xs: List(List(A))): List(A)
-  //case xs:
-  //| List.nil<>;
-  //| List.concat<>(xs.head, List.flatten<>(xs.tail));
-
-
-//// Converts a list to its non-inductive Church encoding
-//List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
-  //<P> (nil, cons)
-  //case list:
-  //| nil;
-  //| cons(list.head, List.fold<A>(list.tail)<P>(nil, cons));
+// Converts a list to its non-inductive Church encoding
+List.fold<A: Type>(list: List(A)): <P: Type> -> P -> (A -> P -> P) -> P
+  <P> (nil, cons)
+  case list {
+    nil : nil,
+    cons: cons(list.head, List.fold<A>(list.tail)<P>(nil, cons))
+  }
 
 //List.fold1<A: Type>(xs: List(A))<ne: List.not_empty<A>(xs)>
   //: <P: Type> -> P -> (A -> P -> P) -> P
@@ -215,19 +240,22 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   //| Empty.absurd<>(ne);
   //| List.fold<>(xs)<P>(nil,cons);
 
-//// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
-//List.fold_zip<A: Type, B: Type>(as: List(A), bs: List(B))<C: Type>(fn: A -> B -> C, nil: C, cons: C -> C -> C): C
-  //case as:
-  //| nil;
-  //| case bs:
-    //| nil;
-    //| cons(fn(as.head, bs.head), List.fold_zip<A,B>(as.tail,bs.tail)<C>(fn, nil, cons));;
+// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
+List.fold_zip<A: Type, B: Type>(as: List(A), bs: List(B))<C: Type>(fn: A -> B -> C, nil: C, cons: C -> C -> C): C
+  case as {
+    nil : nil,
+    cons: case bs {
+      nil : nil,
+      cons: cons(fn(as.head, bs.head), List.fold_zip<A,B>(as.tail,bs.tail)<C>(fn, nil, cons))
+    }
+  }
 
-//// Folds over a list, left associative
-//List.foldl<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
-  //case xs:
-  //| b;
-  //| List.foldl<,>(f(xs.head,b),f,xs.tail);
+// Folds over a list, left associative
+List.foldl<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
+  case xs {
+    nil : b,
+    cons: List.foldl<,>(f(xs.head,b), f, xs.tail)
+}
 
 //List.foldl1<A: Type>(f: A -> A -> A, xs: List(A), ne: List.not_empty<A>(xs)): A
   //case xs:
@@ -235,84 +263,94 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   //| Empty.absurd<>(ne);
   //| List.foldl<A,A>(xs.head,f,xs.tail);
 
-//// Folds over a list, right associative
-//List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
-  //List.fold<A>(xs)<B>(b,f)
+// Folds over a list, right associative
+List.foldr<A: Type,B: Type>(b: B, f: A -> B -> B, xs: List(A)): B
+  List.fold<A>(xs)<B>(b,f)
 
-//// Folds over a list, left associative
-//List.for<A: Type>(xs: List(A))<B: Type>(b: B, f: A -> B -> B): B
-  //case xs:
-  //| b;
-  //| List.for<A>(xs.tail)<B>(f(xs.head,b),f);
+// Folds over a list, left associative
+List.for<A: Type>(xs: List(A))<B: Type>(b: B, f: A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.for<A>(xs.tail)<B>(f(xs.head,b),f)
+  }
 
-//// The functor instance for list
-//List.functor: Functor(List)
-  //Functor.new<List>(List.map)
+// // The functor instance for list
+// List.functor: Functor(List)
+//   Functor.new<List>(List.map)
 
 //// Proof that List.functor conforms to the functor laws
 //List.functor.verified: VerifiedFunctor(List, List.functor)
   //VerifiedFunctor.new<List, List.functor>(List.map.id, List.map.comp)
 
-//// May get the head of a list
-//List.head<A: Type>(xs: List(A)): Maybe(A)
-  //case xs:
-  //| Maybe.none<>;
-  //| Maybe.some<>(xs.head);
+// May get the head of a list
+List.head<A: Type>(xs: List(A)): Maybe(A)
+  case xs {
+    nil : Maybe.none<>,
+    cons: Maybe.some<>(xs.head)
+  }
 
-//// May get the head of a list
-//List.head_with_default<A: Type>(default: A, xs: List(A)): A
-  //case xs:
-  //| default;
-  //| xs.head;
+// May get the head of a list
+List.head_with_default<A: Type>(default: A, xs: List(A)): A
+  case xs {
+    nil : default,
+    cons: xs.head
+  }
 
-//// Finds the first element that satisfies a condition and its index.
-//List.ifind<A: Type>(xs: List(A), f: A -> Nat -> Bool): Maybe(Pair(A,Nat))
-  //List.ifind.go<A>(xs,f,Nat.zero)
+// Finds the first element that satisfies a condition and its index.
+List.ifind<A: Type>(xs: List(A), f: A -> Nat -> Bool): Maybe(Pair(A,Nat))
+  List.ifind.go<A>(xs,f,Nat.zero)
 
-//List.ifind.go<A: Type>(xs: List(A), f: A -> Nat -> Bool, i: Nat): Maybe(Pair(A,Nat))
-  //case xs:
-  //| Maybe.none<>;
-  //| case f(xs.head,i):
-    //| Maybe.some<>(Pair.new<,>(xs.head)(i));
-    //| List.ifind.go<>(xs.tail,f,Nat.succ(i));;
+List.ifind.go<A: Type>(xs: List(A), f: A -> Nat -> Bool, i: Nat): Maybe(Pair(A,Nat))
+  case xs {
+    nil : Maybe.none<>,
+    cons: case f(xs.head,i) {
+      true : Maybe.some<>(Pair.new<,>(xs.head)(i)),
+      false: List.ifind.go<>(xs.tail,f,Nat.succ(i))
+    }
+  }
 
-//// Folds over a list with an index, right associative
-//List.ifoldr.u32<A: Type,B: Type>(b: B, f: U32 -> A -> B -> B, xs: List(A)): B
-  //case xs:
-  //| b;
-  //| f(0u, xs.head, List.ifoldr.u32<,>(b, (i) f(U32.add(1u, i)), xs.tail));
+// Folds over a list with an index, right associative
+List.ifoldr.u32<A: Type,B: Type>(b: B, f: U32 -> A -> B -> B, xs: List(A)): B
+  case xs {
+    nil : b,
+    cons: f(0u, xs.head, List.ifoldr.u32<,>(b, (i) f(U32.add(1u, i)), xs.tail))
+  }
 
-//// Folds over a list, left associative
-//List.ifor<A: Type>(xs: List(A))<B: Type>(b: B, f: Nat -> A -> B -> B): B
-  //case xs:
-  //| b;
-  //| List.ifor<A>(xs.tail)<B>(f(0,xs.head,b), (n) f(Nat.succ(n)));
+// Folds over a list, left associative
+List.ifor<A: Type>(xs: List(A))<B: Type>(b: B, f: Nat -> A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.ifor<A>(xs.tail)<B>(f(0,xs.head,b), (n) f(Nat.succ(n)))
+  }
 
-//// Folds over a list, left associative
-//List.ifor.u32<A: Type>(xs: List(A))<B: Type>(b: B, f: U32 -> A -> B -> B): B
-  //case xs:
-  //| b;
-  //| List.ifor.u32<A>(xs.tail)<B>(f(0u,xs.head,b), (n) f(U32.add(n,1u)));
+// Folds over a list, left associative
+List.ifor.u32<A: Type>(xs: List(A))<B: Type>(b: B, f: U32 -> A -> B -> B): B
+  case xs {
+    nil : b,
+    cons: List.ifor.u32<A>(xs.tail)<B>(f(0u,xs.head,b), (n) f(U32.add(n,1u)))
+  }
 
-//// Map over a list with the index
-//List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List(A)): List(B)
-  //case xs:
-  //| List.nil<>;
-  //| List.cons<>(f(0,xs.head),List.imap<,>((n) f(Nat.succ(n)),xs.tail));
+// Map over a list with the index
+List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List(A)): List(B)
+  case xs {
+    nil : List.nil<>,
+    cons: List.cons<>(f(0,xs.head),List.imap<,>((n) f(Nat.succ(n)),xs.tail))
+  }
 
-//// Map over a list with the index
-//List.imap.u32<A: Type,B: Type>(f: U32 -> A -> B, xs: List(A)): List(B)
-  //case xs:
-  //| List.nil<>;
-  //| List.cons<>(f(0u, xs.head),List.imap.u32<,>((n) f(U32.add(1u, n)), xs.tail));
+// Map over a list with the index
+List.imap.u32<A: Type,B: Type>(f: U32 -> A -> B, xs: List(A)): List(B)
+  case xs {
+    nil : List.nil<>,
+    cons: List.cons<>(f(0u, xs.head),List.imap.u32<,>((n) f(U32.add(1u, n)), xs.tail))
+  }
 
-//// Adds the index of each element in a list
-//List.indices<A: Type>(xs: List(A)): List(Pair(Nat,A))
-  //List.imap<A,Pair(Nat,A)>((i,x) {i,x}, xs)
+// Adds the index of each element in a list
+List.indices<A: Type>(xs: List(A)): List(Pair(Nat,A))
+  List.imap<A,Pair(Nat,A)>((i,x) {i,x}, xs)
 
-//// Adds the index of each element in a list
-//List.indices.u32<A: Type>(xs: List(A)): List(Pair(U32,A))
-  //List.imap<A,Pair(U32,A)>((i,x) {Nat.to_u32(i),x}, xs)
+// Adds the index of each element in a list
+List.indices.u32<A: Type>(xs: List(A)): List(Pair(U32,A))
+  List.imap<A,Pair(U32,A)>((i,x) {Nat.to_u32(i),x}, xs)
 
 //// Get the all elements of a nonempty list except the last one
 //List.init<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : List(A)
@@ -326,26 +364,28 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
       //def xne = Equal.rewrite<_,_,_,(x) List.not_empty<A>(x)>(e,cne)
       //List.cons<>(xs.head,List.init<>(xs.tail,xne));;
 
-//List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
-  //let spanned = List.span<>(Nat.lte(n), ns)
-  //get xs ys   = spanned
-  //List.concat<>(xs, List.cons<>(n, ys))
+// List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
+//   let spanned = List.span<>(Nat.lte(n), ns)
+//   get xs ys   = spanned
+//   List.concat<>(xs, List.cons<>(n, ys))
 
-//// concrete implementation of insertion sort for nats
-//List.insert_sort_nat(ns: List(Nat)): List(Nat)
-  //List.foldr<,>(List.nil<>, List.insert_sort_nat.aux, ns)
+// // concrete implementation of insertion sort for nats
+// List.insert_sort_nat(ns: List(Nat)): List(Nat)
+//   List.foldr<,>(List.nil<>, List.insert_sort_nat.aux, ns)
 
-//// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-//List.intercalate<A: Type>(sep: List(A), xs: List(List(A))): List(A)
-  //List.flatten<A>(List.intersperse<List(A)>(sep,xs))
+// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+List.intercalate<A: Type>(sep: List(A), xs: List(List(A))): List(A)
+  List.flatten<A>(List.intersperse<List(A)>(sep,xs))
 
-//// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-//List.intersperse<A: Type>(sep: A, xs: List(A)): List(A)
-  //case xs:
-  //| List.nil<>;
-  //| case xs.tail:
-    //| List.pure<>(xs.head);
-    //| List.cons<>(xs.head,List.cons<>(sep,List.intersperse<A>(sep,xs.tail)));;
+// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+List.intersperse<A: Type>(sep: A, xs: List(A)): List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: case xs.tail {
+      nil : List.pure<>(xs.head),
+      cons: List.cons<>(xs.head,List.cons<>(sep,List.intersperse<A>(sep,xs.tail)))
+    }
+  }
 
 //// Get the last element of a nonempty list
 //List.last<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
@@ -359,25 +399,27 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
       //def xne = Equal.rewrite<_,_,_,(x) List.not_empty<A>(x)>(e,cne)
       //List.last<>(xs.tail,xne);;
 
-//// Computes the length of the list.
-//List.length<A: Type>(xs: List(A)): Nat
-  //List.length.go<>(xs, 0)
+// Computes the length of the list.
+List.length<A: Type>(xs: List(A)): Nat
+  List.length.go<>(xs, 0)
 
-//// Computes the length of the list.
-//List.length.go<A: Type>(xs: List(A), n: Nat): Nat
-  //case xs:
-  //| n;
-  //| List.length.go<A>(xs.tail, Nat.succ(n));
+// Computes the length of the list.
+List.length.go<A: Type>(xs: List(A), n: Nat): Nat
+  case xs {
+    nil : n,
+    cons: List.length.go<A>(xs.tail, Nat.succ(n))
+  }
 
-//// Computes the length of the list.
-//List.length.u32<A: Type>(xs: List(A)): U32
-  //List.length.u32.go<>(xs, 0u)
+// Computes the length of the list.
+List.length.u32<A: Type>(xs: List(A)): U32
+  List.length.u32.go<>(xs, 0u)
 
-//// Computes the length of the list.
-//List.length.u32.go<A: Type>(xs: List(A), n: U32): U32
-  //case xs:
-  //| n;
-  //| List.length.u32.go<A>(xs.tail, U32.add(1u, n));
+// Computes the length of the list.
+List.length.u32.go<A: Type>(xs: List(A), n: U32): U32
+  case xs {
+    nil : n,
+    cons: List.length.u32.go<A>(xs.tail, U32.add(1u, n))
+  }
 
 //List.map.comp<A: Type, B: Type, C: Type>(ls: List(A), g: (B -> C), h: (A -> B))
   //: Equal(List(C),
@@ -391,11 +433,12 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
                 //Function.comp<,,>(List.map<,>(g), List.map<,>(h), ls.tail), List.cons<>(Function.comp<,,>(g, h, ls.head))>(tail_eq);
   //: Equal(_, List.map<,>(Function.comp<,,>(g, h), ls.self), Function.comp<,,>(List.map<,>(g), List.map<,>(h))(ls.self));
 
-//// Applies a function to all elements of the list.
-//List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
-  //case as:
-  //| List.nil<>;
-  //| List.cons<>(f(as.head),List.map<,>(f,as.tail));
+// Applies a function to all elements of the list.
+List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
+  case as {
+    nil : List.nil<>,
+    cons: List.cons<>(f(as.head),List.map<,>(f,as.tail))
+  }
 
 //List.map.id<A: Type>(ls: List(A)): Equal(List(A), List.map<A, A>(Function.id<A>, ls), ls)
   //case ls:
@@ -407,77 +450,90 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
                 //List.cons<>(ls.head)>(tail_eq);
   //: Equal(_, List.map<,>(Function.id<>, ls.self), ls.self);
 
-//// The monad instance for list
-//List.monad: Monad(List)
-  //Monad.new<List>(List.bind, List.pure)
+// The monad instance for list
+List.monad: Monad(List)
+  Monad.new<List>(List.bind, List.pure)
 
-//// A proposition that a list is not the empty list
-//List.not_empty<A: Type>(xs: List(A)) : Type
-  //case xs:
-  //| Empty;
-  //| Unit;
+// A proposition that a list is not the empty list
+List.not_empty<A: Type>(xs: List(A)) : Type
+  case xs {
+    nil : Empty,
+    cons: Unit
+  }
 
-//List.null<A: Type>(xs: List(A)) : Bool
-  //case xs:
-  //| Bool.true;
-  //| Bool.false;
+List.null<A: Type>(xs: List(A)) : Bool
+  case xs {
+    nil : Bool.true,
+    cons: Bool.false
+  }
 
-//// Is any element true?
-//List.or(list: List(Bool)): Bool
-  //List.any<>((x) x)(list)
+// Is any element true?
+List.or(list: List(Bool)): Bool
+  List.any<>((x) x)(list)
 
-//List.product(xs: List(Nat)) : Nat
-  //List.product.go(xs, Nat.zero)
+List.product(xs: List(Nat)) : Nat
+  List.product.go(xs, Nat.zero)
 
-//List.product.go(xs: List(Nat), n: Nat) : Nat
-  //case xs:
-  //| Nat.zero;
-  //| List.product.go(xs.tail,Nat.mul(xs.head,n));
+List.product.go(xs: List(Nat), n: Nat) : Nat
+  case xs {
+    nil : Nat.zero,
+    cons: List.product.go(xs.tail,Nat.mul(xs.head,n))
+  }
 
-//// A list with only one element.
-//List.pure<A : Type>(x : A) : List(A)
-  //List.cons<A>(x)(List.nil<A>)
+// A list with only one element.
+List.pure<A : Type>(x : A) : List(A)
+  List.cons<A>(x)(List.nil<A>)
 
-//List.range(n: Nat): List(Nat)
-  //List.range.go(n, List.nil<>)
+List.range(n: Nat): List(Nat)
+  List.range.go(n, List.nil<>)
 
-//List.range.go(n: Nat, xs: List(Nat)): List(Nat)
-  //case n:
-  //| xs;
-  //| List.range.go(n.pred, List.cons<>(n, xs));
+List.range.go(n: Nat, xs: List(Nat)): List(Nat)
+  case n {
+    zero: xs,
+    succ: List.range.go(n.pred, List.cons<>(n, xs))
+  }
 
-//// Reverse the order of the elements of the list
-//List.reverse<A: Type>(xs: List(A)) : List(A)
-  //List.reverse.go<>(xs,List.nil<>)
+// Reverse the order of the elements of the list
+List.reverse<A: Type>(xs: List(A)) : List(A)
+  List.reverse.go<>(xs,List.nil<>)
 
-//List.reverse.go<A: Type>(xs: List(A), res: List(A)): List(A)
-  //case xs:
-  //| res;
-  //| List.reverse.go<>(xs.tail,List.cons<>(xs.head,res));
+List.reverse.go<A: Type>(xs: List(A), res: List(A)): List(A)
+  case xs {
+    nil : res,
+    cons: List.reverse.go<>(xs.tail,List.cons<>(xs.head,res))
+  }
 
-//// turn a builder into a List
-//List.run_builder<A: Type>(lb: List.Builder(A)): List(A)
-  //lb(List.nil<>)
+// turn a builder into a List
+List.run_builder<A: Type>(lb: List.Builder(A)): List(A)
+  lb(List.nil<>)
 
-//// Print a list
-//List.show<A: Type>(f: A -> String, xs: List(A)): String
-  //String.flatten(["[",String.intercalate(",", List.map<,>(f,xs)),"]"])
+// Print a list
+List.show<A: Type>(f: A -> String, xs: List(A)): String
+  String.flatten(["[",String.intercalate(",", List.map<,>(f,xs)),"]"])
 
-//List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
-  //case xs:
-  //| Pair.new<,>(List.nil<>,List.nil<>);
-  //| case f(xs.head):
-    //| get y z = List.span<>(f,xs.tail)
-      //Pair.new<,>(List.cons<>(xs.head,y),z);
-    //| Pair.new<,>(List.nil<>,xs);;
+// TODO: check type error
+// List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
+//   case xs {
+//     nil : {List.nil<>, List.nil<>},
+//     cons: case f(xs.head) {
+//       true: 
+//         get y z = List.span<>(f,xs.tail)
+//         Pair.new<,>(List.cons<>(xs.head,y),z),
+//       false: { List.nil<>, xs } 
+//     }
+//   }
 
-//List.split_at<A: Type>(n : Nat, xs: List(A)) : Pair(List(A),List(A))
-  //case xs:
-  //| Pair.new<,>(List.nil<>, List.nil<>);
-  //| case n:
-    //| Pair.new<,>(List.nil<>, xs);
-    //| get fst snd = List.split_at<>(n.pred, xs.tail)
-      //Pair.new<,>(List.cons<>(xs.head, fst), snd);;
+List.split_at<A: Type>(n : Nat, xs: List(A)) : Pair(List(A),List(A))
+  case xs {
+    nil : { List.nil<>, List.nil<> },
+    cons: case n {
+      zero: { List.nil<>, xs },
+      succ:
+        case List.split_at<>(n.pred, xs.tail) as res {
+          pair: { List.cons<>(xs.head, res.fst), res.snd }
+        }
+    }
+  }
 
 //List.subsequences<A: Type>(xs: List(A)): List(List(A))
   //List.cons<>(List.nil<>,List.subsequences.go<>(xs))
@@ -500,11 +556,12 @@ List.at<A: Type>(index: Nat, list: List(A)): Maybe(A)
   //| Nat.zero;
   //| List.sum.go(xs.tail,Nat.add(xs.head,n));
 
-//// Get the tail of a nonempty list
-//List.tail<A: Type>(xs: List(A)): List(A)
-  //case xs:
-  //| [];
-  //| xs.tail;
+// Get the tail of a nonempty list
+List.tail<A: Type>(xs: List(A)): List(A)
+  case xs {
+    nil : [],
+    cons: xs.tail
+  }
 
 //// Returns the first elements of a list, discards the rest.
 //List.take<A: Type>(n: Nat, xs: List(A)): List(A)
