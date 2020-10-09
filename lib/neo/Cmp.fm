@@ -1,41 +1,46 @@
+// Comparisons
+type Cmp {
+  ltn,
+  eql,
+  gtn,
+}
+
 // n == m
-Cmp.as_eql(cmp: Cmp): Bool
-  case cmp:
-  | Bool.false;
-  | Bool.true;
-  | Bool.false;
+as_eql(cmp: Cmp): Bool
+  case cmp {
+    ltn: false,
+    eql: true,
+    gtn: false,
+  }
 
 // n >= m
-Cmp.as_gte(cmp: Cmp): Bool
-  case cmp:
-  | Bool.false;
-  | Bool.true;
-  | Bool.true;
+as_gte(cmp: Cmp): Bool
+  case cmp {
+    ltn: false,
+    eql: true,
+    gtn: true,
+  }
 
 // n > m
-Cmp.as_gtn(cmp: Cmp): Bool
-  case cmp:
-  | Bool.false;
-  | Bool.false;
-  | Bool.true;
+as_gtn(cmp: Cmp): Bool
+  case cmp {
+    ltn: false,
+    eql: false,
+    gtn: true,
+  }
 
 // n <= m
-Cmp.as_lte(cmp: Cmp): Bool
-  case cmp:
-  | Bool.true;
-  | Bool.true;
-  | Bool.false;
+as_lte(cmp: Cmp): Bool
+  case cmp {
+    ltn: true,
+    eql: true,
+    gtn: false,
+  }
 
 // n < m
-Cmp.as_ltn(cmp: Cmp): Bool
-  case cmp:
-  | Bool.true;
-  | Bool.false;
-  | Bool.false;
-
-// Comparisons
-T Cmp
-| Cmp.ltn;
-| Cmp.eql;
-| Cmp.gtn;
-
+as_ltn(cmp: Cmp): Bool
+  case cmp {
+    ltn: true,
+    eql: false,
+    gtn: false,
+  }
