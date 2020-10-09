@@ -287,14 +287,12 @@ Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
 
 // pos: actual position of the object
 // dir: direction which will move forward
-Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
-  let obj_adjacent_pos = Mons.Object.get_adjacent_obj(pos, dir, map)
-  open obj_adjacent_pos:
-  case obj_adjacent_pos.kin as kind:
-  | mons => Bool.false;
-  | const => Bool.false;
-  | terrain => Bool.true;
-  | inter => Bool.false;
+Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Bool
+  open game:
+  let adjacent_objs = Mons.Object.get_adjacent_obj_list(pos, dir, game)
+  // If have only 1 element, is the plain terrain hehe
+  if Nat.eql(List.length<>(adjacent_objs), 1) then Bool.true
+  else Bool.false
 
 // Indicates if the hero can push the object he is facing
 Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
@@ -313,6 +311,12 @@ Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
 Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
   let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, map)
   Mons.Map.get_top(adjacent_pos, map)
+
+Mons.Object.get_adjacent_obj_list(pos: Pos32, dir: Mons.Dir, game: Mons.Game): List(Mons.Object)
+  open game:
+  let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, game.map)
+  Mons.Game.get_tile(adjacent_pos, game)
+
 // -------
 
 Mons.Object.hero_initial_pos(actual_pos: Pos32): Pos32

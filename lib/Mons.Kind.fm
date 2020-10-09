@@ -192,7 +192,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
     open hero_obj:
     case kind:
     | lever => 
-      if U32.eql(z, 0u) then
+      if U32.eql(z, 1u) then // lvl 1
         if U32.eql(kind.id, 0u) then // lever 0
           let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0)
           let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
@@ -203,7 +203,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
     | move => // an object that the hero can push
       // TODO: make hero walk to movable_obj_pos
       let movable_obj_pos = Mons.Object.get_adjacent_pos(hero_pos, hero_obj.dir, map)
-      if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, map) then
+      if Mons.Object.can_move_forward(movable_obj_pos, hero_obj.dir, game) then
         let obj = Mons.Kind.new_interactive_tool(kind, Bool.true, Mons.Kind.inter_lever_eff)
         let new_pos = Mons.Object.get_adjacent_pos(movable_obj_pos, hero_obj.dir, map)
         let game = Mons.Game.map_del(movable_obj_pos, obj_idx, game)
