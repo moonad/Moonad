@@ -5,88 +5,86 @@ type Bool {
 }
 
 // Returns the opposite Bool.
-not(a: Bool):  Bool
+Bool.not(a: Bool):  Bool
   case a {
-    true: false,
-    false: true,
+    true: Bool.false,
+    false: Bool.true,
   }
 
-
 // Returns true if both bools are true.
-and(a: Bool, b: Bool): Bool
+Bool.and(a: Bool, b: Bool): Bool
   case a {
     true: b,
-    false: false,
+    false: Bool.false,
   }
 
 // Returns true if any of the bools is true.
-or(a: Bool, b: Bool): Bool
+Bool.or(a: Bool, b: Bool): Bool
   case a {
-    true: true,
+    true: Bool.true,
     false: b,
   }
 
 // Are both booleans equal?
-eql(a: Bool, b: Bool): Bool
+Bool.eql(a: Bool, b: Bool): Bool
   case a {
     true: b,
-    false: not(b),
+    false: Bool.not(b),
   }
 
 // If-then-else
-if<A: Type>(cond: Bool, true_case: A, false_case: A): A
+Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
   case cond {
     true: true_case,
     false: false_case,
   }
 
 // Boolean negation, fusible
-notf(a: Bool): Bool
+Bool.notf(a: Bool): Bool
   <P> (t, f)
   case a {
     true: f,
     false: t,
-  } : P(notf(a.self))
+  } : P(Bool.notf(a.self))
 
 // Ensures a Bool is true
-IsTrue(b: Bool): Type
+Bool.IsTrue(b: Bool): Type
   case b {
     true: Unit,
     false: Empty,
   }
 
 // Ensures a Bool is false.
-IsFalse(b: Bool): Type
+Bool.IsFalse(b: Bool): Type
   case b {
     true: Empty,
     false: Unit,
   }
 
 // Proof that not(not(b)) == b
-double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+Bool.double_negation(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
   case b {
-    true: refl<_, true>,
-    false: refl<_, false>,
-  } : Equal(Bool, not(not(b.self)), b.self)
-
+    true: Equal.refl<_, Bool.true>,
+    false: Equal.refl<_, Bool.false>,
+  } : Equal(Bool, Bool.not(Bool.not(b.self)), b.self)
 
 // Proof that false != true
-false_isnt_true: Not(Equal(Bool, false, true))
-  def P(b : Bool)
+Bool.false_isnt_true: Not(Equal(Bool, Bool.false, Bool.true))
+  def P(b: Bool)
     case b {
       true: Empty,
       false: Unit,
     }
-  (false_is_true) Equal.rewrite<_,_,_,P>(false_is_true, unit)
+  (false_is_true) Equal.rewrite<_,_,_,P>(false_is_true, Unit.new)
 
 // Proof that true != false
-true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
+Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
   def P(b : Bool)
     case b {
       true: Unit,
       false: Empty,
     }
-  (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, unit)
+  (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.unit)
 
 //// Converts to a string
 //Bool.show(b: Bool): String

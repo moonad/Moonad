@@ -1,193 +1,194 @@
-Map.Row(A : Type,key: Bits, x: A, xs: Map(A)) : Type
-  case Map.get<A>(key,xs) as v:
-  | Empty;
-  | Equal(A,x,v.value);
-
-Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
-  case map:
-  | Map.new<>;
-  | case key:
-    | Map.tie<>(Maybe.none<>,map.lft,map.rgt);
-    | Map.delete<>(key.pred,map.lft);
-    | Map.delete<>(key.pred,map.rgt);;
-
-Map.disj<A: Type>(a: Map(A), b: Map(A)): Bool
-  case a: | Bool.true; |
-  case b: | Bool.true; |
-  let v = case a.val: | Bool.true;
-        | case b.val: | Bool.true;
-        | Bool.false;;
-  Bool.and(v,Bool.and(Map.disj<>(a.lft,b.lft), Map.disj<>(a.rgt,b.rgt)));;
-
 // A Map from bitstrings to values.
-T Map<A: Type>
-| Map.new;
-| Map.tie(val: Maybe(A), lft: Map(A), rgt: Map(A));
+type Map<A: Type> {
+  tip,
+  tie(val: Maybe(A), lft: Map(A), rgt: Map(A)),
+}
 
-// Converts a map to its non-inductive Church encoding
-Map.fold<A: Type>(map: Map(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
-  <P> (new, tie)
-  case map:
-  | new;
-  | tie(map.val,
-    Map.fold<A>(map.lft)<P>(new, tie),
-    Map.fold<A>(map.rgt)<P>(new, tie));
+//Map.Row(A : Type,key: Bits, x: A, xs: Map(A)) : Type
+  //case Map.get<A>(key,xs) as v:
+  //| Empty;
+  //| Equal(A,x,v.value);
 
-Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))) : Map(B)
-  case xs:
-  | Map.new<>;
-  | get k v = xs.head
-    Map.set<>(f(k),v,Map.from_list<,>(f,xs.tail));
+//Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
+  //case map:
+  //| Map.new<>;
+  //| case key:
+    //| Map.tie<>(Maybe.none<>,map.lft,map.rgt);
+    //| Map.delete<>(key.pred,map.lft);
+    //| Map.delete<>(key.pred,map.rgt);;
 
-// Returns the element stored at a given key, if any.
-// Example: Map.get<Nat>(my_key, my_map)
-Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
-  case bits:
-  | case map:
-    | Maybe.none<>;
-    | map.val;;
-  | case map:
-    | Maybe.none<>;
-    | Map.get<>(bits.pred, map.lft);;
-  | case map:
-    | Maybe.none<>;
-    | Map.get<>(bits.pred, map.rgt);;
+//Map.disj<A: Type>(a: Map(A), b: Map(A)): Bool
+  //case a: | Bool.true; |
+  //case b: | Bool.true; |
+  //let v = case a.val: | Bool.true;
+        //| case b.val: | Bool.true;
+        //| Bool.false;;
+  //Bool.and(v,Bool.and(Map.disj<>(a.lft,b.lft), Map.disj<>(a.rgt,b.rgt)));;
 
-// Returns the element stored at a given key and a copy of the map.
-Map.lookup<A: Type>(bits: Bits, val: A, map: Map(A)): Pair(A, Map(A))
-  case bits:
-  | case map:
-    | let map = Map.tie<A>(Maybe.some<A>(val), Map.new<A>, Map.new<A>)
-      Pair.new<A><Map(A)>(val, map);
-    | let value = Maybe.extract<A>(map.val, val)
-      let map = Map.tie<A>(Maybe.some<A>(value), map.lft, map.rgt)
-      Pair.new<A><Map(A)>(value, map);;
-  | case map:
-    | get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
-      Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, p.snd, Map.new<A>));
-    | get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.lft)
-      Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, p.snd, map.rgt));;
-  | case map:
-    | get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
-      Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, Map.new<A>, p.snd));
-    | get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.rgt)
-      Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, map.lft, p.snd));;
+//// Converts a map to its non-inductive Church encoding
+//Map.fold<A: Type>(map: Map(A)): <P: Type> -> P -> (Maybe(A) -> P -> P -> P) -> P
+  //<P> (new, tie)
+  //case map:
+  //| new;
+  //| tie(map.val,
+    //Map.fold<A>(map.lft)<P>(new, tie),
+    //Map.fold<A>(map.rgt)<P>(new, tie));
 
-Map.map<A: Type, B: Type>(fn: A -> B, map: Map(A)): Map(B)
-  case map:
-  | Map.new<>;
-  | let val = case map.val:  
-      | Maybe.none<>;
-      | Maybe.some<>(fn(map.val.value));
-    let lft = Map.map<A,B>(fn, map.lft)
-    let rgt = Map.map<A,B>(fn, map.rgt)
-    Map.tie<>(val, lft, rgt);
+//Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))) : Map(B)
+  //case xs:
+  //| Map.new<>;
+  //| get k v = xs.head
+    //Map.set<>(f(k),v,Map.from_list<,>(f,xs.tail));
 
-// general merge function
-Map.merge<A: Type,B: Type,C: Type>(
-  a_not_b : Bits -> A -> Maybe(C),
-  b_not_a : Bits -> B -> Maybe(C),
-  a_and_b : Bits -> A -> B -> Maybe(C),
-  a: Map(A),
-  b: Map(B)
-) : Map(C)
-  Map.merge.go<,,>(a_not_b,b_not_a,a_and_b,Bits.nil,a,b)
+//// Returns the element stored at a given key, if any.
+//// Example: Map.get<Nat>(my_key, my_map)
+//Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
+  //case bits:
+  //| case map:
+    //| Maybe.none<>;
+    //| map.val;;
+  //| case map:
+    //| Maybe.none<>;
+    //| Map.get<>(bits.pred, map.lft);;
+  //| case map:
+    //| Maybe.none<>;
+    //| Map.get<>(bits.pred, map.rgt);;
 
-Map.merge.go<A: Type,B: Type,C: Type>(
-  f: Bits -> A -> Maybe(C),
-  g: Bits -> B -> Maybe(C),
-  h: Bits -> A -> B -> Maybe(C),
-  key: Bits,
-  a: Map(A),
-  b: Map(B)
-) : Map(C)
-  case a:
-  | case b:
-    | Map.new<>;
-    | let val = case b.val as bv: | Maybe.none<>; | g(key,bv.value);
-      Map.tie<>(val,
-        Map.merge.go<,,>(f,g,h,Bits.0(key),Map.new<>,b.lft),
-        Map.merge.go<,,>(f,g,h,Bits.1(key),Map.new<>,b.rgt));;
-  | case b:
-    | let val = case a.val as av: | Maybe.none<>; | f(key,av.value);
-      Map.tie<>(val,
-        Map.merge.go<,,>(f,g,h,Bits.0(key),a.lft,Map.new<>),
-        Map.merge.go<,,>(f,g,h,Bits.1(key),a.rgt,Map.new<>));
-    | let val = case a.val as av:
-        | case b.val as bv: | Maybe.none<>;    | g(key,bv.value);;
-        | case b.val as bv: | f(key,av.value); | h(key,av.value,bv.value);;
-      Map.tie<>(val,
-        Map.merge.go<,,>(f,g,h,Bits.0(key),a.lft,b.lft),
-        Map.merge.go<,,>(f,g,h,Bits.1(key),a.rgt,b.rgt));;
+//// Returns the element stored at a given key and a copy of the map.
+//Map.lookup<A: Type>(bits: Bits, val: A, map: Map(A)): Pair(A, Map(A))
+  //case bits:
+  //| case map:
+    //| let map = Map.tie<A>(Maybe.some<A>(val), Map.new<A>, Map.new<A>)
+      //Pair.new<A><Map(A)>(val, map);
+    //| let value = Maybe.extract<A>(map.val, val)
+      //let map = Map.tie<A>(Maybe.some<A>(value), map.lft, map.rgt)
+      //Pair.new<A><Map(A)>(value, map);;
+  //| case map:
+    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
+      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, p.snd, Map.new<A>));
+    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.lft)
+      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, p.snd, map.rgt));;
+  //| case map:
+    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
+      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, Map.new<A>, p.snd));
+    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.rgt)
+      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, map.lft, p.snd));;
 
-// Modifies the element at a given key, returns it and a copy of the map.
-// This used to be important on linear back-ends, but it isn't linear anymore.
-// TODO: use `with` to make this function linear again.
-Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), Maybe(A))
-  case bits:
-  | case map:
-    | let map = Map.new<>
-      let val = Maybe.none<>
-      Pair.new<><>(map, val);
-    | case map.val:
-      | let map = Map.tie<>(Maybe.none<>, map.lft, map.rgt)
-        let val = Maybe.none<>
-        Pair.new<><>(map, val);
-      | get p.fst p.snd = cpy(map.val.value)
-        let map = Map.tie<>(Maybe.some<>(p.fst), map.lft, map.rgt)
-        let val = Maybe.some<>(p.snd)
-        Pair.new<><>(map, val);;;
-  | case map:
-    | let map = Map.new<>
-      let val = Maybe.none<>
-      Pair.new<><>(map, val);
-    | get p.fst p.snd = Map.query<>(cpy, bits.pred, map.lft)
-      let map = Map.tie<>(map.val, p.fst, map.rgt)
-      let val = p.snd
-      Pair.new<><>(map, val);;
-  | case map:
-    | let map = Map.new<>
-      let val = Maybe.none<>
-      Pair.new<><>(map, val);
-    | get p.fst p.snd = Map.query<>(cpy, bits.pred, map.rgt)
-      let map = Map.tie<>(map.val, map.lft, p.fst)
-      let val = p.snd
-      Pair.new<><>(map, val);;
+//Map.map<A: Type, B: Type>(fn: A -> B, map: Map(A)): Map(B)
+  //case map:
+  //| Map.new<>;
+  //| let val = case map.val:  
+      //| Maybe.none<>;
+      //| Maybe.some<>(fn(map.val.value));
+    //let lft = Map.map<A,B>(fn, map.lft)
+    //let rgt = Map.map<A,B>(fn, map.rgt)
+    //Map.tie<>(val, lft, rgt);
 
-// Inserts a (key,val) pair in a map.
-// Example: Map.get<Nat>(my_key, my_val, my_map)
-Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
-  case bits:
-  | case map:
-    | Map.tie<>(Maybe.some<>(val), Map.new<>, Map.new<>);
-    | Map.tie<>(Maybe.some<>(val), map.lft, map.rgt);;
-  | case map:
-    | Map.tie<>(Maybe.none<>, Map.set<>(bits.pred, val, Map.new<>), Map.new<>);
-    | Map.tie<>(map.val, Map.set<>(bits.pred, val, map.lft), map.rgt);;
-  | case map:
-    | Map.tie<>(Maybe.none<>, Map.new<>, Map.set<>(bits.pred, val, Map.new<>));
-    | Map.tie<>(map.val, map.lft, Map.set<>(bits.pred, val, map.rgt));;
+//// general merge function
+//Map.merge<A: Type,B: Type,C: Type>(
+  //a_not_b : Bits -> A -> Maybe(C),
+  //b_not_a : Bits -> B -> Maybe(C),
+  //a_and_b : Bits -> A -> B -> Maybe(C),
+  //a: Map(A),
+  //b: Map(B)
+//) : Map(C)
+  //Map.merge.go<,,>(a_not_b,b_not_a,a_and_b,Bits.nil,a,b)
 
-Map.to_list<A: Type>(xs: Map(A)) : List(Pair(Bits,A))
-  Map.to_list.go<>(xs, Bits.nil)
+//Map.merge.go<A: Type,B: Type,C: Type>(
+  //f: Bits -> A -> Maybe(C),
+  //g: Bits -> B -> Maybe(C),
+  //h: Bits -> A -> B -> Maybe(C),
+  //key: Bits,
+  //a: Map(A),
+  //b: Map(B)
+//) : Map(C)
+  //case a:
+  //| case b:
+    //| Map.new<>;
+    //| let val = case b.val as bv: | Maybe.none<>; | g(key,bv.value);
+      //Map.tie<>(val,
+        //Map.merge.go<,,>(f,g,h,Bits.0(key),Map.new<>,b.lft),
+        //Map.merge.go<,,>(f,g,h,Bits.1(key),Map.new<>,b.rgt));;
+  //| case b:
+    //| let val = case a.val as av: | Maybe.none<>; | f(key,av.value);
+      //Map.tie<>(val,
+        //Map.merge.go<,,>(f,g,h,Bits.0(key),a.lft,Map.new<>),
+        //Map.merge.go<,,>(f,g,h,Bits.1(key),a.rgt,Map.new<>));
+    //| let val = case a.val as av:
+        //| case b.val as bv: | Maybe.none<>;    | g(key,bv.value);;
+        //| case b.val as bv: | f(key,av.value); | h(key,av.value,bv.value);;
+      //Map.tie<>(val,
+        //Map.merge.go<,,>(f,g,h,Bits.0(key),a.lft,b.lft),
+        //Map.merge.go<,,>(f,g,h,Bits.1(key),a.rgt,b.rgt));;
 
-Map.to_list.go<A: Type>(xs: Map(A),key: Bits) : List(Pair(Bits,A))
-  case xs:
-  | List.nil<>;
-  | def l = Map.to_list.go<>(xs.lft,Bits.0(key))
-    def r = Map.to_list.go<>(xs.rgt,Bits.1(key))
-    case xs.val:
-    | List.concat<>(l,r);
-    | def p = Pair.new<,>(Bits.reverse(key),xs.val.value)
-      List.cons<>(p,List.concat<>(l,r));;
+//// Modifies the element at a given key, returns it and a copy of the map.
+//// This used to be important on linear back-ends, but it isn't linear anymore.
+//// TODO: use `with` to make this function linear again.
+//Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), Maybe(A))
+  //case bits:
+  //| case map:
+    //| let map = Map.new<>
+      //let val = Maybe.none<>
+      //Pair.new<><>(map, val);
+    //| case map.val:
+      //| let map = Map.tie<>(Maybe.none<>, map.lft, map.rgt)
+        //let val = Maybe.none<>
+        //Pair.new<><>(map, val);
+      //| get p.fst p.snd = cpy(map.val.value)
+        //let map = Map.tie<>(Maybe.some<>(p.fst), map.lft, map.rgt)
+        //let val = Maybe.some<>(p.snd)
+        //Pair.new<><>(map, val);;;
+  //| case map:
+    //| let map = Map.new<>
+      //let val = Maybe.none<>
+      //Pair.new<><>(map, val);
+    //| get p.fst p.snd = Map.query<>(cpy, bits.pred, map.lft)
+      //let map = Map.tie<>(map.val, p.fst, map.rgt)
+      //let val = p.snd
+      //Pair.new<><>(map, val);;
+  //| case map:
+    //| let map = Map.new<>
+      //let val = Maybe.none<>
+      //Pair.new<><>(map, val);
+    //| get p.fst p.snd = Map.query<>(cpy, bits.pred, map.rgt)
+      //let map = Map.tie<>(map.val, map.lft, p.fst)
+      //let val = p.snd
+      //Pair.new<><>(map, val);;
 
-// combines two maps, preferring the left-hand map in case of duplicates entries
-Map.union<A: Type>(a: Map(A), b: Map(A)) : Map(A)
-  case a:
-  | b;
-  | case b:
-    | a;
-    | case a.val:
-      | Map.tie<>(b.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));
-      | Map.tie<>(a.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));;;
+//// Inserts a (key,val) pair in a map.
+//// Example: Map.get<Nat>(my_key, my_val, my_map)
+//Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
+  //case bits:
+  //| case map:
+    //| Map.tie<>(Maybe.some<>(val), Map.new<>, Map.new<>);
+    //| Map.tie<>(Maybe.some<>(val), map.lft, map.rgt);;
+  //| case map:
+    //| Map.tie<>(Maybe.none<>, Map.set<>(bits.pred, val, Map.new<>), Map.new<>);
+    //| Map.tie<>(map.val, Map.set<>(bits.pred, val, map.lft), map.rgt);;
+  //| case map:
+    //| Map.tie<>(Maybe.none<>, Map.new<>, Map.set<>(bits.pred, val, Map.new<>));
+    //| Map.tie<>(map.val, map.lft, Map.set<>(bits.pred, val, map.rgt));;
+
+//Map.to_list<A: Type>(xs: Map(A)) : List(Pair(Bits,A))
+  //Map.to_list.go<>(xs, Bits.nil)
+
+//Map.to_list.go<A: Type>(xs: Map(A),key: Bits) : List(Pair(Bits,A))
+  //case xs:
+  //| List.nil<>;
+  //| def l = Map.to_list.go<>(xs.lft,Bits.0(key))
+    //def r = Map.to_list.go<>(xs.rgt,Bits.1(key))
+    //case xs.val:
+    //| List.concat<>(l,r);
+    //| def p = Pair.new<,>(Bits.reverse(key),xs.val.value)
+      //List.cons<>(p,List.concat<>(l,r));;
+
+//// combines two maps, preferring the left-hand map in case of duplicates entries
+//Map.union<A: Type>(a: Map(A), b: Map(A)) : Map(A)
+  //case a:
+  //| b;
+  //| case b:
+    //| a;
+    //| case a.val:
+      //| Map.tie<>(b.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));
+      //| Map.tie<>(a.val, Map.union<>(a.lft,b.lft), Map.union<>(a.rgt,b.rgt));;;
 

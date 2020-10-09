@@ -4,16 +4,16 @@ type Either<A: Type, B: Type> {
   right(value: B),
 }
 
-bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C)): Either(A,C)
+Either.bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C)): Either(A,C)
   case e {
-    left: left<A, C>(e.value),
+    left: Either.left<A, C>(e.value),
     right: f(e.value),
   }
 
-map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
+Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
   case e {
-    left: left<A, C>(e.value),
-    right: right<A, C>(f(e.value)),
+    left: Either.left<A, C>(e.value),
+    right: Either.right<A, C>(f(e.value)),
   }
 
 // Either(A) functor

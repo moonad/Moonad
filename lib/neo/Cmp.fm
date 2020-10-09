@@ -6,41 +6,41 @@ type Cmp {
 }
 
 // n == m
-as_eql(cmp: Cmp): Bool
+Cmp.as_eql(cmp: Cmp): Bool
   case cmp {
-    ltn: false,
-    eql: true,
-    gtn: false,
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.false,
   }
 
 // n >= m
-as_gte(cmp: Cmp): Bool
+Cmp.as_gte(cmp: Cmp): Bool
   case cmp {
-    ltn: false,
-    eql: true,
-    gtn: true,
+    ltn: Bool.false,
+    eql: Bool.true,
+    gtn: Bool.true,
   }
 
 // n > m
-as_gtn(cmp: Cmp): Bool
+Cmp.as_gtn(cmp: Cmp): Bool
   case cmp {
-    ltn: false,
-    eql: false,
-    gtn: true,
+    ltn: Bool.false,
+    eql: Bool.false,
+    gtn: Bool.true,
   }
 
 // n <= m
-as_lte(cmp: Cmp): Bool
+Cmp.as_lte(cmp: Cmp): Bool
   case cmp {
-    ltn: true,
-    eql: true,
-    gtn: false,
+    ltn: Bool.true,
+    eql: Bool.true,
+    gtn: Bool.false,
   }
 
 // n < m
-as_ltn(cmp: Cmp): Bool
+Cmp.as_ltn(cmp: Cmp): Bool
   case cmp {
-    ltn: true,
-    eql: false,
-    gtn: false,
+    ltn: Bool.true,
+    eql: Bool.false,
+    gtn: Bool.false,
   }

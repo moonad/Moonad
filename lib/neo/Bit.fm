@@ -1,4 +1,4 @@
-T Bit
-| Bit.0;
-| Bit.1;
-
+type Bit {
+  0,
+  1,
+}

@@ -1,5 +1,5 @@
 type Empty {}
 
 // If we have an element of the empty type, then we can prove anything.
-absurd<P: Type>(x: Empty): P
+Empty.absurd<P: Type>(x: Empty): P
   case x {}

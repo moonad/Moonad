@@ -2,19 +2,19 @@ type Pair<A: Type, B: Type> {
   pair(fst: A, snd: B)
 }
 
-fst<A: Type, B: Type>(pair: Pair(A, B)): A
+Pair.fst<A: Type, B: Type>(pair: Pair(A, B)): A
   case pair {
     pair: pair.fst
   }
 
-snd<A: Type, B: Type>(pair: Pair(A, B)): B
+Pair.snd<A: Type, B: Type>(pair: Pair(A, B)): B
   case pair {
     pair: pair.snd
   }
 
-map<A: Type, B: Type, C: Type>(f: B -> C, p: Pair(A, B)): Pair(A, C)
+Pair.map<A: Type, B: Type, C: Type>(f: B -> C, p: Pair(A, B)): Pair(A, C)
   case p {
-    pair: pair<A, C>(p.fst, f(p.snd))
+    pair: Pair.pair<A, C>(p.fst, f(p.snd))
   }
 
 // Pair(A) functor

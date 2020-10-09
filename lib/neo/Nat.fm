@@ -4,34 +4,34 @@ type Nat {
 }
 
 // Nat addition
-add(n: Nat, m: Nat): Nat
+Nat.add(n: Nat, m: Nat): Nat
   case n {
     zero: m,
-    succ: succ(add(n.pred, m)),
+    succ: Nat.succ(Nat.add(n.pred, m)),
   }
 
 // (1 + a) + b == a + (1 + b)
-add_succ_theorem(n: Nat, m: Nat): Equal(Nat, add(n, succ(m)), succ(add(n, m)))
+Nat.add_succ_theorem(n: Nat, m: Nat): Equal(Nat, Nat.add(n, Nat.succ(m)), Nat.succ(Nat.add(n, m)))
   case n {
-    zero: refl<Nat, succ(m)>,
-    succ: Equal.apply<_,_,_,_,succ>(add_succ_theorem(n.pred, m)),
-  } : Equal(Nat, add(n.self, succ(m)), add(succ(n.self), m))
+    zero: Equal.refl<Nat, Nat.succ(m)>,
+    succ: Equal.apply<_,_,_,_,Nat.succ>(Nat.add_succ_theorem(n.pred, m)),
+  } : Equal(Nat, Nat.add(n.self, Nat.succ(m)), Nat.add(Nat.succ(n.self), m))
 
 // n + 0 == n
-add_zero_theorem(n: Nat): Equal(Nat, add(n, zero), n)
+Nat.add_zero_theorem(n: Nat): Equal(Nat, Nat.add(n, Nat.zero), n)
   case n {
-    zero: refl<Nat, zero>,
-    succ: apply<_,_,_,_,succ>(add_zero_theorem(n.pred)),
-  } : Equal(Nat, add(n.self, zero), n.self)
+    zero: Equal.refl<Nat, Nat.zero>,
+    succ: Equal.apply<_,_,_,_,Nat.succ>(Nat.add_zero_theorem(n.pred)),
+  } : Equal(Nat, Nat.add(n.self, Nat.zero), n.self)
 
-times<A: Type>(n: Nat, f: A -> A, x: A): A
+Nat.times<A: Type>(n: Nat, f: A -> A, x: A): A
   case n {
     zero: x,
-    succ: times<A>(n.pred, f, f(x)),
+    succ: Nat.times<A>(n.pred, f, f(x)),
   }
 
 // Compares two nats
-cmp(a: Nat, b: Nat): Cmp
+Nat.cmp(a: Nat, b: Nat): Cmp
   case a {
     zero: case b {
       zero: Cmp.eql,
@@ -39,29 +39,29 @@ cmp(a: Nat, b: Nat): Cmp
     },
     succ: case b {
       zero: Cmp.gtn,
-      succ: cmp(a.pred, b.pred),
+      succ: Nat.cmp(a.pred, b.pred),
     }
   }
 
 // Nat division
-//div(n: Nat, m: Nat): Nat
-  //Pair.fst<_,_>(div_mod(n, m))
+Nat.div(n: Nat, m: Nat): Nat
+  Pair.fst<_,_>(Nat.div_mod(n, m))
 
 // Nat division and modulus
-//div_mod(n: Nat, m: Nat): Pair(Nat, Nat)
-  //div_mod_go(n, m, Nat.zero)
+Nat.div_mod(n: Nat, m: Nat): Pair(Nat, Nat)
+  Nat.div_mod_go(n, m, Nat.zero)
 
 // Nat division and remainder (helper function)
-div_mod_go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
-  case sub_rem(n, m) as p {
-    left: div_mod_go(p.value, m, Nat.succ(d)),
-    right: pair<_,_>(d, n),
+Nat.div_mod_go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
+  case Nat.sub_rem(n, m) as p {
+    left: Nat.div_mod_go(p.value, m, Nat.succ(d)),
+    right: Pair.pair<_,_>(d, n),
   }
 
-double(n: Nat): Nat
+Nat.double(n: Nat): Nat
   case n {
-    zero: zero,
-    succ: succ(double(n.pred)),
+    zero: Nat.zero,
+    succ: Nat.succ(Nat.double(n.pred)),
   }
 
 //Nat.egcd.aux(a: Nat, b: Nat, x: Int, y: Int, u: Int, v: Int): Pair(Nat, Pair(Int, Int))
@@ -79,8 +79,8 @@ double(n: Nat): Nat
    //Nat.egcd.aux(a, b, Int.0, Int.1, Int.1, Int.0)
 
 // n == m
-nat_eql(n: Nat, m: Nat): Bool
-  Cmp.as_eql(cmp(n, m))
+Nat.eql(n: Nat, m: Nat): Bool
+  Cmp.as_eql(Nat.cmp(n, m))
 
 //Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
   //case a:
@@ -99,11 +99,11 @@ nat_eql(n: Nat, m: Nat): Bool
 
 //// Natural numbers
 
-for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
-  if nat_eql(from, til) then
-    state
-  else
-    for<S>(func(from, state), succ(from), til, func)
+//for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
+  //if eql(from, til) then
+    //state
+  //else
+    //for<S>(func(from, state), succ(from), til, func)
 
 //Nat.from_base(base: Nat, ds: List(Nat)) : Nat
   //Nat.from_base.go(base,List.reverse<>(ds),1,0)
@@ -234,12 +234,12 @@ for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
   ////   | Nat.sub(n.pred, m.pred);;
 
 // Nat subtraction and remainder
-sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
+Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
   case m {
     zero: Either.left<_,_>(n),
     succ: case n {
-      zero: Either.right<_,_>(succ(m.pred)),
-      succ: sub_rem(n.pred, m.pred),
+      zero: Either.right<_,_>(Nat.succ(m.pred)),
+      succ: Nat.sub_rem(n.pred, m.pred),
     }
   }
 
