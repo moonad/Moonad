@@ -528,33 +528,35 @@ List.split_at<A: Type>(n : Nat, xs: List(A)) : Pair(List(A),List(A))
     nil : { List.nil<>, List.nil<> },
     cons: case n {
       zero: { List.nil<>, xs },
-      succ:
-        case List.split_at<>(n.pred, xs.tail) as res {
-          pair: { List.cons<>(xs.head, res.fst), res.snd }
-        }
+      succ: case List.split_at<>(n.pred, xs.tail) as res {
+        pair: { List.cons<>(xs.head, res.fst), res.snd }
+      }
     }
   }
 
-//List.subsequences<A: Type>(xs: List(A)): List(List(A))
-  //List.cons<>(List.nil<>,List.subsequences.go<>(xs))
+List.subsequences<A: Type>(xs: List(A)): List(List(A))
+  List.cons<>(List.nil<>,List.subsequences.go<>(xs))
 
-//List.subsequences.go<A: Type>(xs: List(A)): List(List(A))
-  //case xs:
-  //| List.nil<>;
-  //| let f = ((ys,r) List.cons<>(ys,List.cons<>(List.cons<>(xs.head,ys),r)))
-        //:: List(A) -> List(List(A)) -> List(List(A))
-    //List.cons<>
-    //| List.pure<>(xs.head);
-    //| List.foldr<,>(List.nil<>,f,List.subsequences.go<>(xs.tail));;
+List.subsequences.go<A: Type>(xs: List(A)): List(List(A))
+  case xs {
+    nil : List.nil<>,
+    cons:
+      let f = ((ys,r) List.cons<>(ys,List.cons<>(List.cons<>(xs.head,ys),r)))
+           :: List(A) -> List(List(A)) -> List(List(A))
+      List.cons<>
+      | List.pure<>(xs.head);
+      | List.foldr<,>(List.nil<>,f,List.subsequences.go<>(xs.tail));
+  }
 
-//// Add the total of a list of natural numbers
-//List.sum(xs: List(Nat)) : Nat
-  //List.sum.go(xs, Nat.zero)
+// Add the total of a list of natural numbers
+List.sum(xs: List(Nat)) : Nat
+  List.sum.go(xs, Nat.zero)
 
-//List.sum.go(xs: List(Nat), n: Nat) : Nat
-  //case xs:
-  //| Nat.zero;
-  //| List.sum.go(xs.tail,Nat.add(xs.head,n));
+List.sum.go(xs: List(Nat), n: Nat) : Nat
+  case xs {
+    nil : Nat.zero,
+    cons: List.sum.go(xs.tail,Nat.add(xs.head,n))
+  }
 
 // Get the tail of a nonempty list
 List.tail<A: Type>(xs: List(A)): List(A)
@@ -563,80 +565,90 @@ List.tail<A: Type>(xs: List(A)): List(A)
     cons: xs.tail
   }
 
-//// Returns the first elements of a list, discards the rest.
-//List.take<A: Type>(n: Nat, xs: List(A)): List(A)
-  //case xs:
-  //| List.nil<>;
-  //| case n:
-    //| List.nil<>;
-    //| List.cons<>(xs.head,List.take<>(n.pred, xs.tail));;
+// Returns the first elements of a list, discards the rest.
+List.take<A: Type>(n: Nat, xs: List(A)): List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: case n {
+      zero: List.nil<>,
+      succ: List.cons<>(xs.head,List.take<>(n.pred, xs.tail))
+    }
+  }
 
-//List.take_while<A: Type>(f: A -> Bool, xs: List(A)) : List(A)
-  //case xs:
-  //| List.nil<>;
-  //| case f(xs.head):
-    //| List.cons<>(xs.head,List.take_while<>(f,xs.tail));
-    //| List.nil<>;;
+List.take_while<A: Type>(f: A -> Bool, xs: List(A)) : List(A)
+  case xs {
+    nil : List.nil<>,
+    cons: case f(xs.head) {
+      true : List.cons<>(xs.head,List.take_while<>(f,xs.tail)),
+      false: List.nil<>
+    }
+  }
 
-//// convert a list to a builder
-//List.to_builder<A: Type>(list: List(A)) : List.Builder(A)
-  //List.to_builder.go<>(list, List.Builder.new<>)
+// convert a list to a builder
+List.to_builder<A: Type>(list: List(A)) : List.Builder(A)
+  List.to_builder.go<>(list, List.Builder.new<>)
 
-//List.to_builder.go<A: Type>(list: List(A), lb: List.Builder(A)) : List.Builder(A)
-  //case list:
-  //| lb;
-  //| List.to_builder.go<>(list.tail)(List.Builder.snoc<>(list.head, lb));
+List.to_builder.go<A: Type>(list: List(A), lb: List.Builder(A)) : List.Builder(A)
+  case list {
+    nil : lb,
+    cons: List.to_builder.go<>(list.tail)(List.Builder.snoc<>(list.head, lb))
+  }
 
-//List.uncons<A: Type>(xs: List(A)): Maybe(Pair(A,List(A)))
-  //case xs:
-  //| Maybe.none<>;
-  //| Maybe.some<>(Pair.new<,>(xs.head,xs.tail));
+List.uncons<A: Type>(xs: List(A)): Maybe(Pair(A,List(A)))
+  case xs {
+    nil : Maybe.none<>,
+    cons: Maybe.some<>(Pair.new<,>(xs.head,xs.tail))
+  }
 
-//List.unfoldr<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A): List(B)
-  //List.unfoldr.go<A,B>(f, a, List.nil<B>)
+List.unfoldr<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A): List(B)
+  List.unfoldr.go<A,B>(f, a, List.nil<B>)
 
-//List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A, bs: List(B)): List(B)
-  //let res = f(a)
-  //case res:
-  //| List.nil<B>;
-  //| get fst snd = res.value 
-    //List.unfoldr.go<A,B>(f, fst, List.cons<B>(snd, bs));
+List.unfoldr.go<A: Type, B: Type>(f: A -> Maybe(Pair(A,B)), a: A, bs: List(B)): List(B)
+  case f(a) as res {
+    none: List.nil<B>,
+    some: case res.value as pair {
+      pair: List.unfoldr.go<A,B>(f, pair.fst, List.cons<B>(pair.snd, bs))
+    }
+  }
 
-//// Updates the element at given position
-//List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
-  //case list:
-  //| [];
-  //| case index:
-    //| List.cons<>(fn(list.head), list.tail);
-    //| List.cons<>(list.head, List.update_at<A>(index.pred, fn, list.tail));;
+// Updates the element at given position
+List.update_at<A: Type>(index: Nat, fn: A -> A, list: List(A)): List(A)
+  case list {
+    nil : [],
+    cons: case index {
+      zero: List.cons<>(fn(list.head), list.tail),
+      succ: List.cons<>(list.head, List.update_at<A>(index.pred, fn, list.tail))
+    }
+  }
 
-//// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
-//List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List(A), bs: List(B))
-  //: List(C)
-  //case as:
-  //| List.nil<>;
-  //| case bs:
-    //| List.nil<>;
-    //| List.cons<>(f(as.head,bs.head),List.zip_with<,,>(f,as.tail,bs.tail));;
-
+// Given two lists `xs` and `ys`, applies `f(xs[i],ys[i])` for all `i`.
+List.zip_with<A: Type, B: Type, C: Type>(f: A -> B -> C, as: List(A), bs: List(B))
+  : List(C)
+  case as {
+    nil : List.nil<>,
+    cons: case bs {
+      nil : List.nil<>,
+      cons: List.cons<>(f(as.head,bs.head),List.zip_with<,,>(f,as.tail,bs.tail))
+    }
+  }
 
 // concatenate two list builders
-//List.Builder.concat<A: Type>(a: List.Builder(A), b: List.Builder(A)): List.Builder(A)
-   //(x) a(b(x))
+List.Builder.concat<A: Type>(a: List.Builder(A), b: List.Builder(A)): List.Builder(A)
+   (x) a(b(x))
 
-//// prepend an element
-//List.Builder.cons<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
-  //(x) List.cons<>(c,lb(x))
+// prepend an element
+List.Builder.cons<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
+  (x) List.cons<>(c,lb(x))
 
-//// A lazy List constructor, useful for efficient concatenation
-//List.Builder(A: Type): Type
-  //List(A) -> List(A)
+// A lazy List constructor, useful for efficient concatenation
+List.Builder(A: Type): Type
+  List(A) -> List(A)
 
-//// construct a new builder (it's just the identity function)
-//List.Builder.new<A: Type> : List.Builder(A)
-  //(x) x
+// construct a new builder (it's just the identity function)
+List.Builder.new<A: Type> : List.Builder(A)
+  (x) x
 
-//// append an element
-//List.Builder.snoc<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
-  //(x) lb(List.cons<>(c,x))
+// append an element
+List.Builder.snoc<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
+  (x) lb(List.cons<>(c,x))
 
