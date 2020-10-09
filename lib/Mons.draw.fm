@@ -123,13 +123,13 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
         let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
         let hero_hp = String.flatten([U32.to_string(hero_chp),"/", U32.to_string(hero_mon_attr.mhp)])
-        let hero_type = Mons.Type.name(hero_mon_obj)
+        // let hero_type = Mons.Type.name(hero_mon_obj)
 
         let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
         let adve_btl_img = adve_attr.battle_spr(Bool.false);
         let adve_txt = String.flatten([adve_attr.name, " ", Mons.draw.img_type(adve_obj.kin)])
         let adve_hp = String.flatten([U32.to_string(adve_chp),"/", U32.to_string(adve_attr.mhp)])
-        let adve_type = Mons.Type.name(adve_obj)
+        // let adve_type = Mons.Type.name(adve_obj)
 
         let mon   = stt.mon 
         let skill = stt.skill 
@@ -145,6 +145,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       ;
       | cons => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);  
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+      | interactive => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ;
   ;
 
