@@ -1288,7 +1288,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
-        let can_use_portal = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
+        let lvl_mons = Bool.or(
+          Bool.not(U32.eql(U32.div(Mons.Game.dim(game), 2u), 0u)), 
+          U32.eql(Mons.Game.dim(game), 0u)) // TODO: Update to 1u when lvl 0 is ready
+        let defeated_boss = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
+        let can_use_portal = Bool.or(defeated_boss, lvl_mons)
         if can_use_portal then
           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
           let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
