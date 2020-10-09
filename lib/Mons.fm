@@ -272,6 +272,46 @@ Mons.Object.is_free_to_move(obj: Mons.Object): Bool
   open obj:
   U32.eql(obj.ani, 0u)
 
+// Get the first pos which the hero is facing
+Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
+  let x = Pos32.get_x(pos)
+  let y = Pos32.get_y(pos)
+  let z = Pos32.get_z(pos) // dim
+  case dir:
+  | r => Pos32.new(U32.add(x, 1u), y, z);
+  | u => Pos32.new(x, U32.sub(y, 1u), z);
+  | l => Pos32.new(U32.sub(x, 1u), y, z);
+  | d => Pos32.new(x, U32.add(y, 1u), z);
+
+// pos: actual position of the object
+// dir: direction which will move forward
+Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
+  let obj_adjacent_pos = Mons.Object.get_adjacent_obj(pos, dir, map)
+  open obj_adjacent_pos:
+  case obj_adjacent_pos.kin as kind:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain => Bool.true;
+  | inter => Bool.false;
+
+// Indicates if the hero can push the object he is facing
+Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
+  let adjacent_obj = Mons.Object.get_adjacent_obj(pos, dir, map)
+  open adjacent_obj:
+  case adjacent_obj.kin as kind:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain => Bool.false;
+  | inter =>
+    case kind.ele:
+    | lever => Bool.true;
+    | move  => Bool.true;
+  ;
+
+Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
+  let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, map)
+  Mons.Map.get_top(adjacent_pos, map)
+
 Mons.Object.is_standing(obj: Mons.Object): Bool
   U32.eql(Mons.Object.get_ani(obj),0u)
 
@@ -806,6 +846,11 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
                 Mons.Kind.inter.LEVER(0u),
                 Bool.false, 
                 Mons.Kind.inter_lever_eff
+              ), rock_path ]},
+    { "mv", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.MOVE,
+                Bool.true, 
+                Mons.Kind.inter_lever_eff
               ), rock_path ]} 
     
   ])
@@ -1187,8 +1232,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       else 
         Mons.Game.set_stt(Mons.Screen.inventory(0u), game)
 
-    // --------- End battle
-    else if U16.eql(cmd, 'c') then // Action to capture a Mon
+    else if U16.eql(cmd, 'c') then
       case adve_obj.kin as kind:
       | mon =>
         if Mons.Object.is_obj_defeated(adve_obj) then
@@ -1218,6 +1262,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               Mons.Game.set_stt(Mons.Screen.game('.'), game)
         else game
       ;
+
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
         let can_use_portal = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
@@ -1227,7 +1272,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           Mons.Game.set_user_pos(usr, new_pos, game)
         else game
       ;
-      | terrain => Mons.Game.set_stt(Mons.Screen.game('.'), game);
+
+      | terrain => // Hero can only move objects if he is in a terrain
+        if Mons.Object.hero_can_push_obj(pos, hero_obj.dir, game.map) then
+          // using Mons.Object.get_adjacent_obj to get obj here doesn't work. WTF
+          let adjacent_pos = Mons.Object.get_adjacent_pos(pos, hero_obj.dir, game.map)
+          let adjacent_obj = Mons.Map.get(adjacent_pos, 0u, game.map)
+          open adjacent_obj:
+          Mons.Kind.exec_eff(adjacent_obj.kin, game)
+        else Mons.Game.set_stt(Mons.Screen.game('.'), game);
+
       | inter => 
         let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
         let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
