@@ -1,4 +1,4 @@
 // logical negation
-Not(P : Type) : Type
+Not(P: Type): Type
   P -> Empty
 

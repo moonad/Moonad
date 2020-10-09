@@ -1,6 +1,7 @@
-T Unit
-| Unit.new;
+type Unit {
+  new
+}
 
-Unit.show(u: Unit): String
-  "Unit.new"
+//Unit.show(u: Unit): String
+  //"Unit.new"
 
