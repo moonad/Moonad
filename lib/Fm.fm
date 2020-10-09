@@ -22,7 +22,7 @@ T Fm.Core
 // A High Order Fm.Core term
 T Fm.HCore
 | Fm.HCore.ref(name: Fm.Name);
-| Fm.HCore.var(flip: Bool, indx: Nat);
+| Fm.HCore.var(indx: Nat);
 | Fm.HCore.typ;
 | Fm.HCore.all(name: Fm.Name, type: Fm.HCore, body: Fm.HCore -> Fm.HCore);
 | Fm.HCore.lam(name: Fm.Name, body: Fm.HCore -> Fm.HCore);
@@ -143,7 +143,7 @@ Fm.HCore.reduce(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
     | Fm.HCore.ref(term.name);
     | get term type = got.value
       term;;
-  | var => Fm.HCore.var(term.flip, term.indx);
+  | var => Fm.HCore.var(term.indx);
   | typ => Fm.HCore.typ;
   | all => Fm.HCore.all(term.name, term.type, term.body);
   | lam => Fm.HCore.lam(term.name, term.body);
@@ -163,7 +163,7 @@ Fm.HCore.normalize(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
   | ref =>
     Fm.HCore.ref(term.name);
   | var =>
-    Fm.HCore.var(term.flip, term.indx);
+    Fm.HCore.var(term.indx);
   | typ =>
     Fm.HCore.typ;
   | all =>
@@ -179,42 +179,42 @@ Fm.HCore.normalize(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
     Fm.HCore.app(func, argm);
 
 // Helper function
-Fm.HCore.serialize.go(term: Fm.HCore, depth: Nat, x: Bits): Bits
+Fm.HCore.serialize.go(term: Fm.HCore, depth: Nat, init: Nat, x: Bits): Bits
   case term:
   | ref =>
     let name = Bits.concat(Fm.Name.to_bits(term.name))
     Bits.0(Bits.0(Bits.0(name(x))));
   | var =>
-    if term.flip then
-      let name = Bits.concat(Nat.to_bits(Nat.pred(Nat.sub(depth,term.indx))))
+    let name = Bits.concat(Nat.to_bits(term.indx))
+    if Nat.gte(term.indx, init) then
       Bits.0(Bits.0(Bits.1(name(x))))
     else
-      let name = Bits.concat(Nat.to_bits(term.indx))
       Bits.0(Bits.1(Bits.0(name(x))));
   | typ =>
     Bits.0(Bits.1(Bits.1(x)));
   | all =>
-    let type = Fm.HCore.serialize.go(term.type, depth)
-    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(Bool.false,depth)), Nat.succ(depth))
+    let type = Fm.HCore.serialize.go(term.type, depth, init)
+    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(depth)), Nat.succ(depth), init)
     Bits.1(Bits.0(Bits.0(type(body(x)))));
   | lam =>
-    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(Bool.false,depth)), Nat.succ(depth))
+    let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(depth)), Nat.succ(depth), init)
     Bits.1(Bits.0(Bits.1(body(x))));
   | app =>
-    let func = Fm.HCore.serialize.go(term.func, depth)
-    let argm = Fm.HCore.serialize.go(term.argm, depth)
+    let func = Fm.HCore.serialize.go(term.func, depth, init)
+    let argm = Fm.HCore.serialize.go(term.argm, depth, init)
     Bits.1(Bits.1(Bits.0(func(argm(x)))));
 
 // Serializes a term to a representative bitstring
-Fm.HCore.serialize(term: Fm.HCore): Bits
-  Fm.HCore.serialize.go(term, 0, Bits.nil)
+Fm.HCore.serialize(term: Fm.HCore, depth: Nat): Bits
+  Fm.HCore.serialize.go(term, depth, depth, Bits.nil)
 
 // Determines if two terms are equal
 Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, vars: Nat, seen: Set): Bool
   let a1 = Fm.HCore.reduce(a, defs)
   let b1 = Fm.HCore.reduce(b, defs)
-  let ah = Fm.HCore.serialize(a1)
-  let bh = Fm.HCore.serialize(b1)
+  let lv = vars
+  let ah = Fm.HCore.serialize(a1, lv)
+  let bh = Fm.HCore.serialize(b1, lv)
   let id = Bits.concat(ah, bh)
   //use skp = Debug.log<>(String.concat("a1:", Fm.HCore.view(a1,[])))
   //use skp = Debug.log<>(String.concat("b1:", Fm.HCore.view(b1,[])))
@@ -234,10 +234,10 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, vars: Nat, seen: S
       | var => Bool.false;
       | typ => Bool.false;
       | all =>
-        let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
-        let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
-        let eq_type = Fm.HCore.equal(a1.type, b1.type, defs, vars, seen)
-        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(vars), seen)
+        let a1_body = a1.body(Fm.HCore.var(lv))
+        let b1_body = b1.body(Fm.HCore.var(lv))
+        let eq_type = Fm.HCore.equal(a1.type, b1.type, defs, lv, seen)
+        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
         Bool.and(eq_type, eq_body);
       | lam => Bool.false;
       | app => Bool.false;;
@@ -248,9 +248,9 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, vars: Nat, seen: S
       | typ => Bool.false;
       | all => Bool.false;
       | lam =>
-        let a1_body = a1.body(Fm.HCore.var(Bool.true, vars))
-        let b1_body = b1.body(Fm.HCore.var(Bool.true, vars))
-        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(vars), seen)
+        let a1_body = a1.body(Fm.HCore.var(lv))
+        let b1_body = b1.body(Fm.HCore.var(lv))
+        let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
         eq_body;
       | app => Bool.false;;
     | app =>
@@ -261,8 +261,8 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, vars: Nat, seen: S
       | all => Bool.false;
       | lam => Bool.false;
       | app =>
-        let eq_func = Fm.HCore.equal(a1.func, b1.func, defs, vars, seen)
-        let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, defs, vars, seen)
+        let eq_func = Fm.HCore.equal(a1.func, b1.func, defs, lv, seen)
+        let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, defs, lv, seen)
         Bool.and(eq_func, eq_argm);;
 
 // A context is a list of names and types
@@ -283,7 +283,7 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.H
     Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx));
   | typ => Maybe.some<>(Fm.HCore.typ);
   | all =>
-    let body_var = Fm.HCore.var(Bool.false, List.length<>(ctx))
+    let body_var = Fm.HCore.var(List.length<>(ctx))
     let body_ctx = List.cons<>({term.name,term.type}, ctx)
     do Maybe {
       Fm.HCore.check(term.type, Fm.HCore.typ, defs, ctx);
@@ -329,7 +329,7 @@ Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Cont
     | var => Maybe.none<>;
     | typ => Maybe.none<>;
     | all =>
-      let body_var = Fm.HCore.var(Bool.false, List.length<>(ctx))
+      let body_var = Fm.HCore.var(List.length<>(ctx))
       let body_typ = typv.body(body_var)
       let body_ctx = List.cons<>({term.name,typv.type}, ctx)
       Fm.HCore.check(term.body(body_var), body_typ, defs, body_ctx);
