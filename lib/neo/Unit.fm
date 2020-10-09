@@ -1,0 +1,6 @@
+T Unit
+| Unit.new;
+
+Unit.show(u: Unit): String
+  "Unit.new"
+

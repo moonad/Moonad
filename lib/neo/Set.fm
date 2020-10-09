@@ -1,0 +1,17 @@
+Set.del<A: Type>(key: Bits, set: Set): Set
+  Map.delete<Unit>(key, set)
+
+Set: Type
+  Map(Unit)
+
+Set.has(bits: Bits, set: Set): Bool
+  case Map.get<Unit>(bits, set):
+  | Bool.false;
+  | Bool.true;
+
+Set.new: Set
+  Map.new<Unit>
+
+Set.set(bits: Bits, set: Set): Set
+  Map.set<Unit>(bits, Unit.new, set)
+

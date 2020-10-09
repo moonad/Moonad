@@ -1,0 +1,50 @@
+Docs.0_plus_a_is_a(a: Nat): Equal(Nat, Nat.add(0, a), a)
+  Equal.to<Nat, a>
+
+// A proof that negating a bool twice returns the same bool:
+Docs.Bool.double_negation_theorem(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b:
+  | Equal.to<_, Bool.true>;
+  | Equal.to<_, Bool.false>;
+  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);
+
+// Extracting the first element of a list statically checked to be non-empty:
+Docs.List.head<A: Type>(xs: List(A), not_empty: List.not_empty<A>(xs)) : A
+  case xs:
+  with ne : List.not_empty<A>(xs.self) = not_empty;
+  | Empty.absurd<A>(ne);
+  | xs.head;
+
+// Adding all numbers of a list:
+Docs.List.sum(xs: List(Nat)) : Nat
+  case xs:
+  | Nat.zero;
+  | Nat.add(xs.head, Docs.List.sum(xs.tail));
+
+Docs.bool_test_0: IO(Unit)
+  IO.print(Bool.show(Bool.not(Bool.true)))
+
+Docs.bool_test_1: Bool
+  Bool.not(Bool.true)
+
+Docs.hello: IO(Unit)
+  IO.print("Hello, world!")
+
+Docs.nat_test: Nat
+  Nat.add(1, 3)
+
+Docs.not_not_is_b(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
+  case b:
+  | Equal.to<Bool, Bool.true>;
+  | Equal.to<Bool, Bool.false>;
+  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);
+
+Docs.true_is_true: Equal(Bool, Bool.true, Bool.true)
+  Equal.to<Bool, Bool.true>
+
+Docs.welcome: IO(Unit)
+  do IO {
+    var name = IO.prompt("What is your name?");
+    IO.print(String.concat("Welcome, ", name));
+  }
+

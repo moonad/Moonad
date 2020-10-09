@@ -1,0 +1,3 @@
+T Show                  ~ (str: String)
+| Show.msg(str: String) ~ (str);
+

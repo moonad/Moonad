@@ -1,0 +1,35 @@
+Module.Row(field: String, T: Type, m: Module) : Type
+  case Map.get<Export>(String.to_bits(field),m) as got:
+  | Empty;
+  | Equal(Type,T,Export.T(got.value));
+
+Module: Type
+  Map(Export)
+
+Module.from(defs: List(Pair(String, Export))): Module
+  Map.from_list<,>(String.to_bits,defs)
+
+Module.get(key: String, mod: Module): Module.type(key, mod)
+  case Map.get<Export>(String.to_bits(key), mod) as got:
+  | Unit.new;
+  | Export.value(got.value);
+  : case got.self:
+    | Unit;
+    | Export.T(got.self.value);;
+
+Module.new: Module
+  Map.new<Export>
+
+Module.set(key: String, val: Export, mod: Module): Module
+  Map.set<Export>(String.to_bits(key), val, mod)
+
+Module.to_list(m : Module) : List(Pair(Bits,Type))
+  def f  = ((p) get x y = p Pair.new<Bits,Type>(x,Export.T(y)))
+          :: Pair(Bits,Export) -> Pair(Bits,Type)
+  List.map<,>(f, Map.to_list<>(m))
+
+Module.type(key: String, mod: Module): Type
+  case Map.get<Export>(String.to_bits(key), mod) as got:
+  | Unit;
+  | Export.T(got.value);
+

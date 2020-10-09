@@ -1,0 +1,3 @@
+T Subset <A: Type> <B: A -> Type>
+| Subset.new(a: A)<b: B(a)>;
+

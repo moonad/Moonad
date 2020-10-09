@@ -1,0 +1,196 @@
+T CList.Dir
+| CList.Dir.Left;
+| CList.Dir.Right;
+
+// replaces the focus with the provided element, shifting
+// the previous focus to the left
+CList.add_left<A: Type>(a: A, cl: CList(A)): CList(A)
+  case cl:
+  | nil  => CList.singleton<>(a);
+  | ring => CList.ring<>(List.cons<>(cl.focus, cl.left), a, cl.right);
+
+// replaces the focus with the provided element, shifting
+// the previous focus to the right
+CList.add_right<A: Type>(a: A, cl: CList(A)): CList(A)
+  case cl:
+  | nil  => CList.singleton<>(a);
+  | ring => CList.ring<>(cl.left, a, List.cons<>(cl.focus, cl.right));
+
+CList.balance<A: Type>(cl: CList(A)): CList(A)
+  CList.from_list<>(CList.to_list<>(cl))
+
+CList.empty<A: Type> : CList(A)
+  CList.nil<A>
+
+CList.filter<A: Type>(p: A -> Bool, cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    let list     = CList.to_list<>(cl)
+    let filtered = List.filter<>(p, list) 
+    CList.from_list<>(filtered);
+
+//A Circular List 
+// left is kept in reverse order 
+// right is kept in order
+T CList <A: Type>
+| CList.nil;
+| CList.ring(left: List(A), focus: A, right: List(A));
+
+CList.focus<A: Type>(cl: CList(A)): Maybe(A)
+  case cl:
+  | nil  => Maybe.none<>;
+  | ring => Maybe.some<>(cl.focus);
+
+CList.foldr<A: Type, B: Type>(b: B, f: A -> B -> B, cl: CList(A)): B
+  let list = CList.to_list<>(cl)
+  List.foldr<,>(b, f, list)
+
+// creates a balanced circular list from a regular list
+CList.from_list<A: Type>(as: List(A)): CList(A)
+  case as:
+  | nil  => CList.nil<>;
+  | ring =>
+      let len = List.length<>(as)
+      let mid = Nat.div(len, 2)
+      let spl = List.split_at<>(mid, as.tail)
+      get fst_half snd_half = spl 
+      CList.ring<>(List.reverse<>(snd_half), as.head, fst_half);
+
+CList.is_empty<A: Type>(cl: CList(A)): Bool
+  case cl:
+  | nil  => Bool.true;
+  | ring => Bool.false;
+
+CList.left<A: Type>(cl: CList(A)): Maybe(List(A))
+  case cl:
+  | nil  => Maybe.none<>;
+  | ring => Maybe.some<>(cl.left);
+
+CList.length<A: Type>(cl: CList(A)): Nat
+  case cl:
+  | nil  => 0;
+  | ring => 
+      let left  = List.length<A>(cl.left)
+      let right = List.length<A>(cl.right)
+      Nat.add(1, Nat.add(left, right));
+
+CList.map<A: Type, B: Type>(f: A -> B, cl: CList(A)): CList(B)
+  case cl:
+  | nil  => CList.nil<>;
+  | ring => 
+      let left  = List.map<,>(f, cl.left)
+      let right = List.map<,>(f, cl.right)
+      let focus = f(cl.focus)
+      CList.ring<>(left, focus, right);
+
+// removes the focus, replacing it with an element from the left
+CList.remove_left<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.left:
+    | nil => 
+      case cl.right:
+      | nil  => CList.nil<>; //both right and left are empty
+      | cons =>              //left is empty, right is not
+        let  rev_right = List.reverse<>(cl.right)
+        case rev_right:
+        | nil  => CList.nil<>; //todo: replace with absurd?
+        | cons => CList.ring<>(rev_right.tail, rev_right.head, []);;;
+    | cons => CList.ring<>(cl.left.tail, cl.left.head, cl.right);;
+
+// removes the focus, replacing it with an element from the right
+CList.remove_right<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.right:
+    | nil => 
+      case cl.left:
+      | nil  => CList.nil<>; //both right and left are empty
+      | cons =>             //right is empty, left is not
+        let  rev_left = List.reverse<>(cl.left)
+        case rev_left:
+        | nil  => CList.nil<>; //todo: replace with absurd
+        | cons => CList.ring<>([], rev_left.head, rev_left.tail);;;
+    | cons => CList.ring<>(cl.left, cl.right.head, cl.right.tail);;
+
+CList.right<A: Type>(cl: CList(A)): Maybe(List(A))
+  case cl:
+  | nil  => Maybe.none<>;
+  | ring => Maybe.some<>(cl.right);
+
+// single anti-clockwise rotation
+CList.rotate_left<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.left:
+    | nil  => 
+      case cl.right:
+      //we have a singleton, nothing changes
+      | nil  => cl; 
+      // left is empty, right is not
+      | cons => 
+        let  right = List.reverse<>(cl.right)
+        case right:
+        //todo: how to avoid this redundant case? we know right isn't empty
+        | nil  => cl;  
+        | cons => 
+          let new_left  = right.tail 
+          let new_focus = right.head 
+          let new_right = [cl.focus]
+          CList.ring<>(new_left, new_focus, new_right);;;
+    // left is not empty
+    | cons => 
+      let new_left  = cl.left.tail 
+      let new_focus = cl.left.head 
+      let new_right = List.cons<>(cl.focus, cl.right)
+      CList.ring<>(new_left, new_focus, new_right);; 
+
+CList.rotate_n<A: Type>(dir: CList.Dir, n: Nat, cl: CList(A)): CList(A)
+  case dir:
+  | left  => Nat.apply<>(n, CList.rotate_left<>, cl);
+  | right => Nat.apply<>(n, CList.rotate_right<>, cl);
+
+// single clockwise rotation 
+CList.rotate_right<A: Type>(cl: CList(A)): CList(A)
+  case cl:
+  | nil  => cl;
+  | ring => 
+    case cl.right:
+    | nil  => 
+      case cl.left:
+      //we have a singleton, nothing changes
+      | nil  => cl;
+      //right is empty, left is not
+      | cons => 
+        let  left = List.reverse<>(cl.left)
+        //todo: how to avoid this redundant case? we know left isn't empty
+        case left:
+        | nil  => cl;
+        | cons => 
+          let new_left  = [cl.focus]
+          let new_focus = left.head 
+          let new_right = left.tail 
+          CList.ring<>(new_left, new_focus, new_right);;;
+    // right is not empty      
+    | cons => 
+      let new_left  = List.cons<>(cl.focus, cl.left)
+      let new_focus = cl.right.head
+      let new_right = cl.right.tail
+      CList.ring<>(new_left, new_focus, new_right);;
+
+CList.singleton<A: Type>(a: A): CList(A)
+  CList.ring<>([], a, [])
+
+// converts a circular list into a regular one with the head as the focus
+CList.to_list<A: Type>(cl: CList(A)): List(A)
+  case cl:
+  | nil  => List.nil<>;
+  | ring => 
+      let left  = List.reverse<>(cl.left)
+      let right = List.cons<>(cl.focus, cl.right)
+      List.concat<>(right, left); 
+
