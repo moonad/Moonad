@@ -16,8 +16,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     open adve_obj:
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
     open hero_mon_obj:
-    // let adve_attr = 
     open Mons.Kind.attr(adve_obj.kin) as adve_attr:
+    open Mons.Kind.attr(hero_mon_obj.kin) as hero_mon_attr:
     let is_standing = Mons.Object.is_standing(hero_obj)
     case game.stt as stt:
     | introduction =>
@@ -44,8 +44,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | intro_select => Mons.draw.initial_mons(hero_obj, scr) ;
   
     | game =>
-      let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
-      open hero_mon_attr:
+      // let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
+      // open hero_mon_attr:
 
       case adve_obj.kin as adve_kind:
       | mon => 
@@ -116,6 +116,38 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | capture => // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    
+    | turn_skill => 
+      // TODO clean up this repetition
+      case adve_obj.kin as adve_kind:
+      | mon => 
+        let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
+        let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
+        let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
+        let hero_hp = String.flatten([U32.to_string(hero_chp),"/", U32.to_string(hero_mon_attr.mhp)])
+        let hero_type = Mons.Type.name(hero_mon_obj)
+
+        let adve_chp = U32.sub(adve_attr.mhp, adve_obj.dmg)
+        let adve_btl_img = adve_attr.battle_spr(Bool.false);
+        let adve_txt = String.flatten([adve_attr.name, " ", Mons.draw.img_type(adve_obj.kin)])
+        let adve_hp = String.flatten([U32.to_string(adve_chp),"/", U32.to_string(adve_attr.mhp)])
+        let adve_type = Mons.Type.name(adve_obj)
+
+        let mon   = stt.mon 
+        let skill = stt.skill 
+
+        let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
+        let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, hero_hp, scr)
+        let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
+        let scr = Mons.draw.text(String.flatten([mon, " used ", skill, " !"]), Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+        let scr = Mons.draw.text("[c]", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+        let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
+        let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+        scr
+      ;
+      | cons => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);  
+      | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    ;
   ;
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions

@@ -61,7 +61,8 @@ T Mons.Object
   bag: List(Mons.Object), // store normal Mons
   mon: U32, // idx of the current Mon. Default 0u
   bos: List(Mons.Object), // store Mons that are boss
-  cap: Pair(U32, List(Mons.Object)) // store the quantity of Mons and a copy of the captured during game
+  cap: Pair(U32, List(Mons.Object)), // store the quantity of Mons and a copy of the captured during game
+  eff: List(Mons.Effect)
 );
 
 // TODO add more skills
@@ -75,6 +76,12 @@ T Mons.Skill
 Mons.dummy_skills: List(Mons.Skill)
   [ Mons.Skill.hit_4, Mons.Skill.hit_2,
    Mons.Skill.heal, Mons.Skill.none ]
+
+T Mons.Effect 
+| Mons.Effect.sleep;
+| Mons.Effect.burn;
+| Mons.Effect.protect;
+| Mons.Effect.minimize(turns: Nat);
 
 T Mons.Attr
 | Mons.Attr.new(
@@ -120,6 +127,7 @@ T Mons.Screen
 | Mons.Screen.capture_mon(
   idx: U32, // idx of the Mon to be replaced
   full_bag: Bool);
+| Mons.Screen.turn_skill(mon: String, skill: String); // who attacked and what skill was used
 
 T Mons.Type
 | Mons.Type.normal;
@@ -173,7 +181,7 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 // The void tile
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {33u, []})
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {33u, []}, [])
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -181,7 +189,7 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.eff)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -189,7 +197,7 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.eff)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -197,7 +205,7 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.eff)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -209,7 +217,7 @@ Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos, obj.cap)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.eff)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -229,19 +237,26 @@ Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
 
 Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   open obj:
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos, obj.cap)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos, obj.cap, obj.eff)
 
 Mons.Object.set_mon(idx: U32, obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx, obj.bos, obj.cap)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx, obj.bos, obj.cap, obj.eff)
 
 Mons.Object.set_bos(bos: List(Mons.Object), obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, bos, obj.cap)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, bos, obj.cap, obj.eff)
 
 Mons.Object.set_cap(cap: Pair(U32, List(Mons.Object)), obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, cap)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, cap, obj.eff)
+
+Mons.Object.get_eff(obj: Mons.Object): List(Mons.Effect)
+  open obj: obj.eff
+
+Mons.Object.set_eff(new_eff: List(Mons.Effect), obj: Mons.Object): Mons.Object
+  open obj:
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, new_eff)
 
 Mons.Object.qtd_mons_defeated(obj: Mons.Object): U32
   open obj:
@@ -650,7 +665,7 @@ Mons.Type.name(obj: Mons.Object): String
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {33u, []})
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {33u, []}, [])
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
   case cond:
@@ -1074,19 +1089,36 @@ Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mo
 // target : index of the object which is receiving the effect 
 Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
-  let source_obj = Mons.Map.get(pos, source, game.map)
-  let source_mon = Mons.Object.get_current_mon(source_obj)
-  let target_obj = Mons.Map.get(pos, target, game.map)
-  let target_mon = Mons.Object.get_current_mon(target_obj)
+  let source_obj  = Mons.Map.get(pos, source, game.map)
+  let source_mon  = Mons.Object.get_current_mon(source_obj)
+  open source_mon:
+  open Mons.Kind.attr(source_mon.kin) as source_mon_attr: 
+  use skp = Debug.log<>(source_mon_attr.name)
+  let skill_name = Mons.Skill.get_name(skill)
+  let target_obj  = Mons.Map.get(pos, target, game.map)
+  let target_mon  = Mons.Object.get_current_mon(target_obj)
   case skill:
   | hit_4  =>
     let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-    Mons.damage(target_obj, pos, target, val, game);
+    let game = Mons.damage(target_obj, pos, target, val, game)
+    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+    game 
+  ;  
   | hit_2 => 
     let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
-    Mons.damage(target_obj, pos, target, val, game);
-  | heal => Mons.heal(source_obj, pos, source, 3u, game);
-  | none => game;
+    let game = Mons.damage(target_obj, pos, target, val, game)
+    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+    game 
+  ;
+  | heal => 
+    let game = Mons.heal(source_obj, pos, source, 3u, game)
+    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+    game 
+  ;
+  | none => 
+    game  
+    // Mons.Game.set_stt(Mons.Screen.turn_skill(source_mon_attr.name, skill_name), game)
+  ;
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -1280,6 +1312,12 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           cmd, (cmd: U32) Mons.Screen.capture_mon(cmd, Bool.true),
           pos, hero_obj, hero_idx, game)
     ;
+    | turn_skill => 
+      if U16.eql(cmd, 'c') then 
+        Mons.Game.set_stt(Mons.Screen.game('.'), game)
+      else 
+        game
+    ;
   ;
 
 // TODO: probably similar to "exec turn"
@@ -1295,20 +1333,36 @@ Mons.Game.exec_skills(
   if is_battling then
     open hero_obj:
     open adve_obj:
+    let hero_attr = Mons.Kind.attr(hero_obj.kin)
+    let adve_attr = Mons.Kind.attr(adve_obj.kin)
+    open hero_attr:
+    open adve_attr:
     let adve_idx = 1u
     let hero_agi = Mons.Kind.get_agi(hero_obj.kin)
     let adve_agi = Mons.Kind.get_agi(adve_obj.kin)
     let hero_skill = Mons.Game.get_skills_at(code_skill, hero_obj)
+    let hero_skill_name = Mons.Skill.get_name(hero_skill)
     let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
     let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
+    let adve_skill_name = Mons.Skill.get_name(adve_skill)
     // TODO: still need to test
-    if Bool.or(U32.ltn(hero_agi, adve_agi), U32.eql(hero_agi, adve_agi)) then // hero attack first
+    if U32.lte(hero_agi, adve_agi) then // hero attack first
+      let game = Mons.Game.set_stt(Mons.Screen.turn_skill(hero_attr.name, hero_skill_name), game)
       let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-      Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-    else 
+
+      let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
       let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-      Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+      game 
+    else 
+      let game = Mons.Game.set_stt(Mons.Screen.turn_skill(adve_attr.name, adve_skill_name), game)
+      let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
+
+      let game = Mons.Game.set_stt(Mons.Screen.turn_skill(hero_attr.name, hero_skill_name), game)
+      let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+      game 
   else game
+
+// Mons.Game.exec_turn(skills: List())
 
 
 // 0-U: hit, 1-I: hit, 2-J: heal, 3-K: hit
