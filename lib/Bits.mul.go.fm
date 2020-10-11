@@ -1,0 +1,5 @@
+Bits.mul.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b:
+  | bits;
+  | Bits.mul.go(Bits.0(a), b.pred, bits);
+  | Bits.mul.go(Bits.0(a), b.pred, Bits.add(a, bits));
