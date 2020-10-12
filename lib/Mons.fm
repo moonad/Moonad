@@ -287,14 +287,12 @@ Mons.Object.get_adjacent_pos(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Pos32
 
 // pos: actual position of the object
 // dir: direction which will move forward
-Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
-  let obj_adjacent_pos = Mons.Object.get_adjacent_obj(pos, dir, map)
-  open obj_adjacent_pos:
-  case obj_adjacent_pos.kin as kind:
-  | mons => Bool.false;
-  | const => Bool.false;
-  | terrain => Bool.true;
-  | inter => Bool.false;
+Mons.Object.can_move_forward(pos: Pos32, dir: Mons.Dir, game: Mons.Game): Bool
+  open game:
+  let adjacent_objs = Mons.Object.get_adjacent_obj_list(pos, dir, game)
+  // If have only 1 element, is the plain terrain hehe
+  if Nat.eql(List.length<>(adjacent_objs), 1) then Bool.true
+  else Bool.false
 
 // Indicates if the hero can push the object he is facing
 Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
@@ -313,6 +311,12 @@ Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
 Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
   let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, map)
   Mons.Map.get_top(adjacent_pos, map)
+
+Mons.Object.get_adjacent_obj_list(pos: Pos32, dir: Mons.Dir, game: Mons.Game): List(Mons.Object)
+  open game:
+  let adjacent_pos = Mons.Object.get_adjacent_pos(pos, dir, game.map)
+  Mons.Game.get_tile(adjacent_pos, game)
+
 // -------
 
 Mons.Object.is_standing(obj: Mons.Object): Bool
@@ -762,9 +766,9 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.grass, 2u) },
     { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.darkness, 2u) },
     { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.grass, 2u) },
-    { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
-    { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u)},
-    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.water, 2u) },
+    // { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
+    // { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u)},
+    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 2u) },
     { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.grass, 0u) },
     { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.psychic, 0u) },
     { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.darkness, 2u) },
@@ -963,6 +967,20 @@ Mons.Game.move_hero_down(
   let x = Pos32.get_x(pos)
   let z = Pos32.get_z(pos)
   let new_pos = Pos32.new(x,U32.add(y, 1u),z)
+  let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
+  Mons.Game.set_user_pos(usr, new_pos, game)
+
+// Position for lvl 1. Whill he always start in the same position?
+Mons.Game.hero_inital_position(
+  usr: Word(160), 
+  hero_obj: Mons.Object, 
+  pos: Pos32, 
+  hero_idx: U32, 
+  game: Mons.Game): Mons.Game
+  let y = Pos32.get_y(pos)
+  let x = Pos32.get_x(pos)
+  let z = Pos32.get_z(pos)
+  let new_pos = Pos32.new(x,U32.add(y, 38u),z)
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
   Mons.Game.set_user_pos(usr, new_pos, game)
 
@@ -1268,7 +1286,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
       | construction =>
         let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
-        let can_use_portal = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
+        let lvl_mons = Bool.or(
+          Bool.not(U32.eql(U32.div(Mons.Game.dim(game), 2u), 0u)), 
+          U32.eql(Mons.Game.dim(game), 0u)) // TODO: Update to 1u when lvl 0 is ready
+        let defeated_boss = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
+        let can_use_portal = Bool.or(defeated_boss, lvl_mons)
         if can_use_portal then
           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
           let game    = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)  
@@ -1721,7 +1743,8 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u));
+    let game = Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u))
+    game;
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
   // Event handlers
@@ -1763,7 +1786,16 @@ Mons.start(online: Bool): App(Mons.Game)
       | init => [
         App.Action.resize<>(Mons.scr_w, Mons.scr_h),
         let game = Mons.Game.set_usr(event.addr, game)
-        let game = Mons.Game.cmd('j', event.addr, game) // inits hero
+        let game = Mons.Game.cmd('d', event.addr, game) // inits hero
+        open game:
+        let pos = 
+        case Mons.Game.get_hero_pos(game) as pos:
+        | Mons.scr_mid;
+        | pos.value;
+        let hero_info = Mons.Map.get_hero(pos, game.map)
+        let hero_obj = Pair.fst<,>(hero_info)
+        let hero_idx = Pair.snd<,>(hero_info)
+        let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game))];
