@@ -81,15 +81,16 @@ List.chunks_of.go<A: Type>(
     }
   }
 
-//// Proof that List.cons(f(x)) & List.map(f, xs) commute
-//List.commute_cons_map<A: Type, B: Type>(a :A, ls: List(A), f: A -> B)
-  //: Equal(List(B),
-          //List.cons<B>(f(a), List.map<A, B>(f, ls)),
-          //List.map<A, B>(f, List.cons<A>(a, ls)))
-  //case ls:
-  //| _;
-  //| _;
-  //: Equal(_, List.cons<>(f(a), List.map<,>(f, ls.self)), List.map<,>(f, List.cons<>(a, ls.self)));
+// Proof that List.cons(f(x)) & List.map(f, xs) commute
+List.commute_cons_map<A: Type, B: Type>(a :A, ls: List(A), f: A -> B)
+  : Equal(List(B),
+          List.cons<B>(f(a), List.map<A, B>(f, ls)),
+          List.map<A, B>(f, List.cons<A>(a, ls)))
+  case ls {
+    nil : Equal.refl<_,_>,
+    cons: Equal.refl<_,_>
+  } : Equal(_, List.cons<>(f(a), List.map<,>(f, ls.self)), List.map<,>(f, List.cons<>(a, ls.self)))
+  
 
 // Concatenates two lists.
 List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
@@ -98,23 +99,23 @@ List.concat<A: Type>(as: List(A), bs: List(A)): List(A)
     cons: List.cons<>(as.head, List.concat<>(as.tail,bs))
   }
  
-//// A theorem that a list made with List.cons is not the empty list
-//List.cons_isnt_empty<A: Type>(
-  //x:A,
-  //xs: List(A)
-//): List.not_empty<A>(List.cons<A>(x,xs))
-  //def y = List.cons<A>(x,xs)
+// A theorem that a list made with List.cons is not the empty list
+// List.cons_isnt_empty<A: Type>(
+//   x:A,
+//   xs: List(A)
+// ): List.not_empty<A>(List.cons<A>(x,xs))
+//   def y = List.cons<A>(x,xs)
   //case y:
   //with e : Equal(List(A),y,y.self) = Equal.to<List(A),y>;
   //| Empty.absurd<>(List.cons_isnt_nil<A>(x,xs,e));
   //| Unit.new;
 
-//// A theorem that List.cons isn't List.nil
-//List.cons_isnt_nil<A: Type>(x:A, xs: List(A))
-  //: Not(Equal(List(A),List.cons<A>(x,xs), List.nil<A>))
-  //def P = ((x) case x: | Empty; | Unit;) :: List(A) -> Type
-  //(e) Equal.rewrite<List(A), List.cons<A>(x,xs), List.nil<A>,P>(e, Unit.new)
-
+// A theorem that List.cons isn't List.nil
+List.cons_isnt_nil<A: Type>(x:A, xs: List(A))
+  : Not(Equal(List(A),List.cons<A>(x,xs), List.nil<A>))
+  def P ((x) case x { nil: Empty, cons: Unit }) :: List(A) -> Type 
+  (e) Equal.rewrite<List(A), List.cons<A>(x,xs), List.nil<A>,P>(e, Unit.unit)
+  
 // removes an element from the list at given index
 List.delete_at<A: Type>(idx: Nat, list: List(A)): List(A)
   case idx {
@@ -274,13 +275,13 @@ List.for<A: Type>(xs: List(A))<B: Type>(b: B, f: A -> B -> B): B
     cons: List.for<A>(xs.tail)<B>(f(xs.head,b),f)
   }
 
-// // The functor instance for list
-// List.functor: Functor(List)
-//   Functor.new<List>(List.map)
+// The functor instance for list
+List.functor: Functor(List)
+  Functor.new<List>(List.map)
 
-//// Proof that List.functor conforms to the functor laws
-//List.functor.verified: VerifiedFunctor(List, List.functor)
-  //VerifiedFunctor.new<List, List.functor>(List.map.id, List.map.comp)
+// Proof that List.functor conforms to the functor laws
+// List.functor.verified: VerifiedFunctor(List, List.functor)
+//   VerifiedFunctor.new<List, List.functor>(List.map.id, List.map.comp)
 
 // May get the head of a list
 List.head<A: Type>(xs: List(A)): Maybe(A)
@@ -364,14 +365,15 @@ List.indices.u32<A: Type>(xs: List(A)): List(Pair(U32,A))
       //def xne = Equal.rewrite<_,_,_,(x) List.not_empty<A>(x)>(e,cne)
       //List.cons<>(xs.head,List.init<>(xs.tail,xne));;
 
-// List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
-//   let spanned = List.span<>(Nat.lte(n), ns)
-//   get xs ys   = spanned
-//   List.concat<>(xs, List.cons<>(n, ys))
+List.insert_sort_nat.aux(n: Nat, ns: List(Nat)): List(Nat)
+  case List.span<>(Nat.lte(n), ns) as spanned {
+    pair:  List.concat<>(spanned.fst, List.cons<>(n, spanned.snd))
+  }
+  
 
-// // concrete implementation of insertion sort for nats
-// List.insert_sort_nat(ns: List(Nat)): List(Nat)
-//   List.foldr<,>(List.nil<>, List.insert_sort_nat.aux, ns)
+// concrete implementation of insertion sort for nats
+List.insert_sort_nat(ns: List(Nat)): List(Nat)
+  List.foldr<,>(List.nil<>, List.insert_sort_nat.aux, ns)
 
 // insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
 List.intercalate<A: Type>(sep: List(A), xs: List(List(A))): List(A)
@@ -511,17 +513,18 @@ List.run_builder<A: Type>(lb: List.Builder(A)): List(A)
 List.show<A: Type>(f: A -> String, xs: List(A)): String
   String.flatten(["[",String.intercalate(",", List.map<,>(f,xs)),"]"])
 
-// TODO: check type error
-// List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
-//   case xs {
-//     nil : {List.nil<>, List.nil<>},
-//     cons: case f(xs.head) {
-//       true: 
-//         get y z = List.span<>(f,xs.tail)
-//         Pair.new<,>(List.cons<>(xs.head,y),z),
-//       false: { List.nil<>, xs } 
-//     }
-//   }
+List.span<A: Type>(f: A -> Bool, xs: List(A)): Pair(List(A),List(A))
+  case xs {
+    nil : {List.nil<>, List.nil<>},
+    cons: case f(xs.head) {
+      true: 
+        case List.span<>(f, xs.tail) as spanned {
+          pair: { List.cons<>(xs.head, spanned.fst), spanned.snd }
+        },
+
+      false: { List.nil<>, xs } 
+    }
+  }
 
 List.split_at<A: Type>(n : Nat, xs: List(A)) : Pair(List(A),List(A))
   case xs {
