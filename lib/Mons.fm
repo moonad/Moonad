@@ -79,7 +79,6 @@ Mons.dummy_skills: List(Mons.Skill)
 T Mons.Attr
 | Mons.Attr.new(
   blocks: Bool,
-  battles: Bool,
   mhp: U32,
   atk: U32,
   name: String,
@@ -88,20 +87,10 @@ T Mons.Attr
   battle_spr: (is_up: Bool) -> Image3D,
   skills: List(Mons.Skill)
 );
-// TODO add:
-// def: U32,
-// spr: (x: U32) -> (y: U32) -> List(Image3D),
-// ...)
 
 // A 2d map of game tiles
 Mons.Map: Type
   Map(List(Mons.Object))
-
-//let map = Map.new<>
-//let objs = [graminha, arbusto, heroi]
-//let map = Map.set(Pos32.to_bits(Pos32.new(2000u,2000u,0u)), objs, map)
-//map
-
 
 // The global game state
 T Mons.Game
@@ -427,23 +416,6 @@ Mons.Map.del(pos: Pos32, idx: U32, map: Mons.Map): Mons.Map
   let objs = List.delete_at.u32<>(idx, objs)
   Mons.Map.set_list(pos, objs, map)
 
-// Each theme will have 2 levels: one of Mons and other for the boss.
-// The boss will have a different background.
-// TODO: adjust images for each level;
-Mons.Map.background(idx: U32): Pair(Image3D, Image3D)
-  if U32.eql(idx, 0u) then
-    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
-  else if U32.eql(idx, 1u) then
-    {Mons.Assets.battle_snow_bg, Mons.Assets.battle_snow_full_bg}
-  else
-    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
-
-Mons.Map.get_battle_bg(idx: U32): Image3D
-  Pair.fst<,>(Mons.Map.background(idx))
-
-Mons.Map.get_full_bg(idx: U32): Image3D
-  Pair.snd<,>(Mons.Map.background(idx))
-
 Mons.Object.push_to_bag(obj: Mons.Object, hero: Mons.Object): Mons.Object
   open obj:
   open hero:
@@ -529,13 +501,13 @@ Mons.Object.get_images(bag: List(Mons.Object)): List(Image3D)
 Mons.Object.hero: Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, 1u))
 
-Mons.Object.is_battleable(obj: Mons.Object): Bool
-  open obj:
-  case obj.kin as mon:
-  | mons => Bool.true;
-  | const => Bool.false;
-  | terrain => Bool.false;
-  | inter => Bool.false;
+// Mons.Object.is_battleable(obj: Mons.Object): Bool
+//   open obj:
+//   case obj.kin as mon:
+//   | mons => Bool.true;
+//   | const => Bool.false;
+//   | terrain => Bool.false;
+//   | inter => Bool.false;
 
 Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): Mons.Object
   open obj:
@@ -704,8 +676,6 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
     else 
      Mons.Map.code_to_tile.aux(code, cond.tail);
 
-// TODO: improve the usage of Mons.map_source.
-// Ex: every map will have their own assets. We can reuse codes depending on the map level
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
@@ -1028,11 +998,11 @@ Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
   | inter => Bool.false;
   
 Mons.Object.is_obj_defeated(obj: Mons.Object): Bool
-  if U32.eql(Mons.Object.remaing_hp(obj), 0u) 
+  if U32.eql(Mons.Object.remainig_hp(obj), 0u) 
   then Bool.true 
   else Bool.false
 
-Mons.Object.remaing_hp(obj: Mons.Object): U32
+Mons.Object.remainig_hp(obj: Mons.Object): U32
   open obj:
   case obj.kin as kind:
   | mons => 
@@ -1071,7 +1041,7 @@ Mons.Attr.new_battleable(
   battle_spr: Bool -> Image3D
   ): Mons.Attr
   Mons.Attr.new(
-    Bool.false, Bool.true, 40u, 0u, name,
+    Bool.false, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
     pic,
     battle_spr, Mons.dummy_skills)
@@ -1079,7 +1049,7 @@ Mons.Attr.new_battleable(
 // Mons.Attr with "block" equals to Bool.true
 Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
-    Bool.true, Bool.false, 0u, 0u, "",
+    Bool.true, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
     Mons.Kind.set_pic(spr),
     Mons.Kind.set_default_battle_spr, [])
@@ -1087,13 +1057,13 @@ Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
 // Mons.Attr with "block" and "batlles" equals to Bool.false
 Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
-    Bool.false, Bool.false, 0u, 0u, "",
+    Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
     Mons.Kind.set_pic(spr),
     Mons.Kind.set_default_battle_spr, [])
 
 Mons.Attr.new_hero: Mons.Attr
-  Mons.Attr.new(Bool.false, Bool.false, 40u, 0u, "HERO",
+  Mons.Attr.new(Bool.false, 40u, 0u, "HERO",
     (x,y,obj_ani,obj_dir) 
       Mons.walk_char_pack(
         x, y, obj_ani, obj_dir,
@@ -1112,7 +1082,7 @@ Mons.Attr.new_hero: Mons.Attr
 
 Mons.Attr.new_mage: Mons.Attr
   Mons.Attr.new(
-    Bool.false, Bool.true, 40u, 0u, "MAGE",
+    Bool.false, 40u, 0u, "MAGE",
     Mons.Kind.set_static_sprites([Mons.Assets.mons_croni_d_0]),
     Mons.Assets.mons_croni_d_0,
     (is_up: Bool) Mons.Assets.battle_croni_d,
@@ -1413,8 +1383,8 @@ Mons.Game.adve_turn(hero_obj: Mons.Object, adve_obj: Mons.Object, game: Mons.Gam
   open game:
   open hero_obj:
   open adve_obj:
-  let adve_hp = Mons.Object.remaing_hp(adve_obj)
-  let hero_hp = Mons.Object.remaing_hp(hero_obj)
+  let adve_hp = Mons.Object.remainig_hp(adve_obj)
+  let hero_hp = Mons.Object.remainig_hp(hero_obj)
   let qtd_mon_bag = Nat.to_u32(List.length<>(hero_obj.bag))
   let hero_pos = Mons.Game.get_hero_pos(game)
   let pos_x = 

@@ -91,10 +91,6 @@ Mons.Kind.get_name(kind: Mons.Kind): String
   case Mons.Kind.attr(kind) as attr:
   | attr.name;
 
-Mons.Kind.get_battles(kind: Mons.Kind): Bool
- case Mons.Kind.attr(kind) as attr:
-  | attr.battles; 
-
 Mons.Kind.get_blocks(kind: Mons.Kind): Bool
  case Mons.Kind.attr(kind) as attr:
   | attr.blocks;
