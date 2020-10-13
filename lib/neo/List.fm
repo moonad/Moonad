@@ -557,7 +557,7 @@ List.sum(xs: List(Nat)) : Nat
 
 List.sum.go(xs: List(Nat), n: Nat) : Nat
   case xs {
-    nil : Nat.zero,
+    nil : n,
     cons: List.sum.go(xs.tail,Nat.add(xs.head,n))
   }
 
