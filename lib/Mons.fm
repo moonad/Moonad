@@ -707,10 +707,28 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 // TODO: improve the usage of Mons.map_source.
 // Ex: every map will have their own assets. We can reuse codes depending on the map level
 // Converts a tile code (ex: ".g") into a list of obs
-Mons.Map.code_to_tile(code: String): List(Mons.Object)
+Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
   let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false))
 
+  if U32.eql(dim, 0u) then // lvl 0 - city destroied
+    let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
+    Mons.Map.code_to_tile.aux(code,[
+      // Mons
+      { "m0", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
+      { "m1", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 2u)},
+      { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
+      { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
+      // Construction
+      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
+      // Terrain
+      { ".g", [ grass ]},
+      { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
+      { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
+      { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
+      { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]}
+    ]) 
+  else // lvl 1 - Mons type "normal" 
   Mons.Map.code_to_tile.aux(code,[
     { ".g", [ grass ]},
     { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -754,7 +772,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
 
     { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.grass, 2u) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
+    // { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
     { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.darkness, 2u) },
     { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.ice, 2u) },
     { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.darkness, 2u) },
@@ -768,7 +786,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.grass, 2u) },
     // { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
     // { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u)},
-    { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 2u) },
+    // { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 2u) },
     { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.grass, 0u) },
     { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.psychic, 0u) },
     { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.darkness, 2u) },
@@ -816,7 +834,7 @@ Mons.Map.code_to_tile(code: String): List(Mons.Object)
     { "pp", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(7, 0)), grass ]},
     { "po", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(8, 0)), grass ]},
     { "p9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(9, 0)), grass ]},    
-    { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
+    // { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
     { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
     { "s0", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_0), grass ]},
@@ -879,7 +897,7 @@ Mons.Map.build(code: List(List(String))): Mons.Map
         let ini = U32.to_nat(U32.mul(i,2u)) // slice start index
         let end = U32.to_nat(U32.add(U32.mul(i,2u),2u)) // slice end index
         let sli = String.slice(ini, end, row) // slice with tile code
-        Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli), map);;   
+        Mons.Map.set_list(pos, Mons.Map.code_to_tile(sli, z), map);;   
 
 // Get the game user
 Mons.Game.get_usr(game: Mons.Game): Word(160)

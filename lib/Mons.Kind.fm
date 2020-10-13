@@ -446,7 +446,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
 
   | Mons.Kind.terrain => 
     case kin.ele as kin:
-    | VOID => Mons.Attr.new_neutral([Mons.Assets.void]);
+    | VOID => Mons.Attr.new_blockable([Mons.Assets.void]);
     | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
     | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
     | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
