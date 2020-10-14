@@ -692,6 +692,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // Construction
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)) ]},
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -1648,14 +1649,49 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   else
     Mons.Game.map_set(pos, idx, obj, game)
 
+// Para cada objeto que tem animação, pegar a posição dele e atualizar o sprite
+
+// Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
+//   open game:
+//   let map = game.map
+//   let obj_idx = Mons.Map.get_hero(pos, map)
+//   let obj = Pair.fst<,>(obj_idx)
+//   let idx = Pair.snd<,>(obj_idx)
+   
 // For each tick, updates the game state
 // TODO: tick objects other than hero
-Mons.Game.tick(game: Mons.Game): Mons.Game
+Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
   open game:
   for user_pos in Map.to_list<>(game.pos) with game:
     get key pos = user_pos
     let user = Word.from_bits(160, key)
-    Mons.Game.tick_user(user, pos, game)
+    let game = Mons.Game.tick_user(user, pos, game)
+    let tick = Nat.to_u64(300)
+    // Debug.log<>(tick)
+    if U64.gtn(time, tick) 
+    then Mons.test.add_obj(pos, game)
+    else 
+    game
+
+// Mons.Game.animate(obj: Mons.Object, pos: Pos32, idx: U32,game: Mons.Game): Mons.Game
+//   open obj:
+//   open Mons.Kind.attr(obj.kin) as attr:
+//   let ani = // each sprite has durantion of 16 ticks
+//     if U32.eql(obj.ani, 0u) then
+//       let qtd_spr = List.length<>(attr.spr)
+//       U32.mul(qtd_spr, 16u)
+//     else U32.sub(obj.ani, 1u)
+//   let obj = Mons.Object.set_ani(obj, ani)
+//   Mons.Game.map_set(pos, idx, obj, game)
+
+// How to set a pos for objects based on the map and not hero_pos?
+Mons.test.add_obj(hero_pos: Pos32, game: Mons.Game): Mons.Game
+  let x = Pos32.get_x(hero_pos)
+  let y = Pos32.get_y(hero_pos)
+  let z = Pos32.get_z(hero_pos) // dim
+  let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0))
+  let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
+  Mons.Game.map_push(obj_pos, fountain, game)
 
 // All valid inputs and its code
 Mons.Input.list: List(Pair(Char, Bits))
@@ -1752,7 +1788,7 @@ Mons.start(online: Bool): App(Mons.Game)
         | App.Action.post<>(Mons.App.room, data.value);
       ];
       | tick => [
-        App.Action.state<>(Mons.Game.tick(game)),
+        App.Action.state<>(Mons.Game.tick(game, event.time)),
       ];
       | xkey => // send input to server
         let chr = Mons.Input.char(event.down, event.code)
@@ -1787,7 +1823,7 @@ Mons.start(online: Bool): App(Mons.Game)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
         App.Action.state<>(game),
       ];
-      | tick => [App.Action.state<>(Mons.Game.tick(game))];
+      | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
       | xkey => [
         open game:
         let chr = Mons.Input.char(event.down, event.code)
