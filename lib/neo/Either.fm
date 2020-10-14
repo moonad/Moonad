@@ -13,7 +13,6 @@ Either.bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C)): Eit
 Either.monad<A: Type>: Monad(Either(A))
   Monad.monad<Either(A)>(Either.bind<A>, Either.right<A>)
 
-
 Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
   case e {
     left: Either.left<A, C>(e.value),

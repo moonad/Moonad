@@ -55,7 +55,7 @@ Nat.div_mod(n: Nat, m: Nat): Pair(Nat, Nat)
 Nat.div_mod_go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
   case Nat.sub_rem(n, m) as p {
     left: Nat.div_mod_go(p.value, m, Nat.succ(d)),
-    right: Pair.pair<_,_>(d, n),
+    right: Pair.new<_,_>(d, n),
   }
 
 Nat.double(n: Nat): Nat
@@ -64,174 +64,188 @@ Nat.double(n: Nat): Nat
     succ: Nat.succ(Nat.double(n.pred)),
   }
 
-//Nat.egcd.aux(a: Nat, b: Nat, x: Int, y: Int, u: Int, v: Int): Pair(Nat, Pair(Int, Int))
-  //case a:
-  //| Pair.new<,>(b, Pair.new<,>(x, y));
-  //| let q = Nat.div(b, a)
-    //let r = Nat.mod(b, a)
-    //let m = Int.sub(x, Int.mul(u, Int.from_nat(q)))
-    //let n = Int.sub(y, Int.mul(v, Int.from_nat(q)))
-    //Nat.egcd.aux(r, a, u, v, m, n);
-
-//// Extended Euclidian algorithm. Given natural numbers a, b, computes GCD(a,b) and
-//// Bezout's coefficients; that is, integers x, y such that a*x + b*y = GCD(a,b)
-//Nat.egcd(a: Nat, b: Nat): Pair(Nat, Pair(Int, Int))
-   //Nat.egcd.aux(a, b, Int.0, Int.1, Int.1, Int.0)
+Nat.egcd.aux(a: Nat, b: Nat, x: Int, y: Int, u: Int, v: Int): Pair(Nat, Pair(Int, Int))
+  case a {
+    zero: { b, { x, y } }, 
+    succ:
+      let q = Nat.div(b, a)
+      let r = Nat.mod(b, a)
+      let m = Int.sub(x, Int.mul(u, Int.from_nat(q)))
+      let n = Int.sub(y, Int.mul(v, Int.from_nat(q)))
+      Nat.egcd.aux(r, a, u, v, m, n)
+  }
+  
+// Extended Euclidian algorithm. Given natural numbers a, b, computes GCD(a,b) and
+// Bezout's coefficients; that is, integers x, y such that a*x + b*y = GCD(a,b)
+Nat.egcd(a: Nat, b: Nat): Pair(Nat, Pair(Int, Int))
+   Nat.egcd.aux(a, b, Int.0, Int.1, Int.1, Int.0)
 
 // n == m
 Nat.eql(n: Nat, m: Nat): Bool
   Cmp.as_eql(Nat.cmp(n, m))
 
-//Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
-  //case a:
-  //| case b:
-    //| Either.left<,>(Equal.to<Nat,0>);
-    //| Either.right<,>(Nat.zero_not_succ(b.pred));
-    //: Either(0 == b.self, Not(0 == b.self));;
-  //| case b:
-    //| Either.right<,>(Nat.succ_not_zero(a.pred));
-    //| case Nat.equal(a.pred, b.pred) as rec:
-      //| Either.left<,>(Equal.apply<Nat, Nat, a.pred, b.pred, Nat.succ>(rec.value));
-      //| Either.right<,>((eq) rec.value(Nat.succ_inj(a.pred, b.pred, eq)));
-      //: Either(Nat.succ(a.pred) == Nat.succ(b.pred), Not(Nat.succ(a.pred) == Nat.succ(b.pred)));;
-    //: Either(Nat.succ(a.pred) == b.self, Not(Nat.succ(a.pred) == b.self));;
-  //: Either(a.self == b, Not(a.self == b));
+Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
+  case a {
+    zero: case b {
+      zero: Either.left<,>(Equal.to<Nat,0>),
+      succ: Either.right<,>(Nat.zero_not_succ(b.pred))
+      } : Either(0 == b.self, Not(0 == b.self)),
+    
+    succ: case b {
+      zero: Either.right<,>(Nat.succ_not_zero(a.pred)),
+      succ: case Nat.equal(a.pred, b.pred) as rec {
+        left : Either.left<,>(Equal.apply<Nat, Nat, a.pred, b.pred, Nat.succ>(rec.value)),
+        right: Either.right<,>((eq) rec.value(Nat.succ_inj(a.pred, b.pred, eq)))
+      } : Either(Nat.succ(a.pred) == Nat.succ(b.pred), Not(Nat.succ(a.pred) == Nat.succ(b.pred)))
+    } : Either(Nat.succ(a.pred) == b.self, Not(Nat.succ(a.pred) == b.self))
+  } : Either(a.self == b, Not(a.self == b))
+
 
 //// Natural numbers
 
-//for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
-  //if eql(from, til) then
-    //state
-  //else
-    //for<S>(func(from, state), succ(from), til, func)
+Nat.for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
+  if Nat.eql(from, til) then
+    state
+  else
+    Nat.for<S>(func(from, state), Nat.succ(from), til, func)
 
-//Nat.from_base(base: Nat, ds: List(Nat)) : Nat
-  //Nat.from_base.go(base,List.reverse<>(ds),1,0)
+Nat.from_base(base: Nat, ds: List(Nat)) : Nat
+  Nat.from_base.go(base,List.reverse<>(ds),1,0)
 
-//Nat.from_base.go(b: Nat, ds: List(Nat), p: Nat, res : Nat) : Nat
-  //case ds:
-  //| res;
-  //| Nat.from_base.go(b,ds.tail,Nat.mul(b,p), Nat.add(Nat.mul(ds.head,p),res));
+Nat.from_base.go(b: Nat, ds: List(Nat), p: Nat, res : Nat) : Nat
+  case ds {
+    nil : res,
+    cons: Nat.from_base.go(b,ds.tail,Nat.mul(b,p), Nat.add(Nat.mul(ds.head,p),res))
+  }
 
-//// n >= m
-//Nat.gte(n: Nat, m: Nat): Bool
-  //Cmp.as_gte(Nat.cmp(n, m))
+// n >= m
+Nat.gte(n: Nat, m: Nat): Bool
+  Cmp.as_gte(Nat.cmp(n, m))
 
-//// n > m
-//Nat.gtn(n: Nat, m: Nat): Bool
-  //Cmp.as_gtn(Nat.cmp(n, m))
+// n > m
+Nat.gtn(n: Nat, m: Nat): Bool
+  Cmp.as_gtn(Nat.cmp(n, m))
 
-//Nat.half(n: Nat): Nat
-  //case n:
-  //| Nat.zero;
-  //| case n.pred:
-    //| Nat.zero;
-    //| Nat.succ(Nat.half(n.pred.pred));;
+Nat.half(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: case n.pred {
+      zero: Nat.zero,
+      succ: Nat.succ(Nat.half(n.pred.pred))
+    }
+  }
 
-//Nat.induction(n: Nat): <P: Nat -> Type> -> (z: P(Nat.zero)) -> (s: ((m:Nat) -> P(m) -> P(Nat.succ(m)))) -> P(n)
-  //<P> (z) (s) n<P>(z, (pred) s(pred, Nat.induction(pred)<P>(z, s)))
+Nat.induction(n: Nat): <P: Nat -> Type> -> (z: P(Nat.zero)) -> (s: ((m:Nat) -> P(m) -> P(Nat.succ(m)))) -> P(n)
+  <P> (z) (s) n<P>(z, (pred) s(pred, Nat.induction(pred)<P>(z, s)))
 
-//Nat.is_zero(n: Nat): Bool
-  //case n:
-  //| Bool.true;
-  //| Bool.false;
+Nat.is_zero(n: Nat): Bool
+  case n {
+    zero: Bool.true,
+    succ: Bool.false
+  }
+  
+// n <= m
+Nat.lte(n: Nat, m: Nat): Bool
+  Cmp.as_lte(Nat.cmp(n, m))
 
-//// n <= m
-//Nat.lte(n: Nat, m: Nat): Bool
-  //Cmp.as_lte(Nat.cmp(n, m))
+// n < m
+Nat.ltn(n: Nat, m: Nat): Bool
+  Cmp.as_ltn(Nat.cmp(n, m))
 
-//// n < m
-//Nat.ltn(n: Nat, m: Nat): Bool
-  //Cmp.as_ltn(Nat.cmp(n, m))
+Nat.min(a: Nat, b: Nat): Nat
+  case a {
+    zero: 0,
+    succ: case b {
+      zero: 0,
+      succ: Nat.succ(Nat.min(a.pred, b.pred))
+    }
+  }
+  
+// Nat modulus
+Nat.mod(n: Nat, m: Nat): Nat
+  Pair.snd<_,_>(Nat.div_mod(n, m))
 
-//Nat.min(a: Nat): Nat -> Nat
-  //case a:
-  //| (b) 0;
-  //| (b)
-    //case b:
-    //| 0;
-    //| Nat.succ(Nat.min(a.pred, b.pred));;
+// Nat multiplication
+Nat.mul(n: Nat, m: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: Nat.add(m, Nat.mul(n.pred, m))
+  }
 
-//// Nat modulus
-//Nat.mod(n: Nat, m: Nat): Nat
-  //Pair.snd<_,_>(Nat.div_mod(n, m))
+Nat.mul_var: (n: Nat) -> Variadic(n, Nat, Nat)
+  Variadic.foldr<,>(Nat.mul, 1)
 
-//// Nat multiplication
-//Nat.mul(n: Nat, m: Nat): Nat
-  //case n:
-  //| Nat.zero;
-  //| Nat.add(m, Nat.mul(n.pred, m));
+Nat.odd(n: Nat): Bool
+  Nat.eql(Nat.mod(n, 2), 1)
 
-//Nat.mul_var: (n: Nat) -> Variadic(n, Nat, Nat)
-  //Variadic.foldr<,>(Nat.mul, 1)
+//TODO: error on misformatted Nat
+Nat.parse_decimal(str: String): Nat
+  Nat.parse_decimal.go(str, Nat.zero)
 
-//Nat.odd(n: Nat): Bool
-  //Nat.eql(Nat.mod(n, 2), 1)
+Nat.parse_decimal.go(str: String, res: Nat): Nat
+  case str {
+    nil : res,
+    cons:
+      let dig = Nat.sub(U16.to_nat(str.head), 48)
+      let res = Nat.add(dig, Nat.mul(10, res))
+      Nat.parse_decimal.go(str.tail, res)
+  }
 
-////TODO: error on misformatted Nat
-//Nat.parse_decimal(str: String): Nat
-  //Nat.parse_decimal.go(str, Nat.zero)
+Nat.parse_hex(str: String): Nat
+  Nat.parse_hex.go(str, Nat.zero)
 
-//Nat.parse_decimal.go(str: String, res: Nat): Nat
-  //case str:
-  //| res;
-  //| let dig = Nat.sub(U16.to_nat(str.head), 48)
-    //let res = Nat.add(dig, Nat.mul(10, res))
-    //Nat.parse_decimal.go(str.tail, res);
+Nat.parse_hex.go(str: String, res: Nat): Nat
+  case str {
+    nil : res,
+    cons: 
+      let dig = Char.hex_value(str.head)
+      let res = Nat.add(dig, Nat.mul(16, res))
+      Nat.parse_hex.go(str.tail, res)
+  }
+ 
+Nat.pow(base: Nat, exp: Nat) : Nat
+  case exp {
+    zero: 1,
+    succ: Nat.mul(base,Nat.pow(base,exp.pred))
+  }
 
-//Nat.parse_hex(str: String): Nat
-  //Nat.parse_hex.go(str, Nat.zero)
+// Nat predecessor
+Nat.pred(n: Nat): Nat
+  case n {
+    zero: Nat.zero,
+    succ: n.pred
+  }
 
-//Nat.parse_hex.go(str: String, res: Nat): Nat
-  //case str:
-  //| res;
-  //| let dig = Char.hex_value(str.head)
-    //let res = Nat.add(dig, Nat.mul(16, res))
-    //Nat.parse_hex.go(str.tail, res);
+Nat.show(n: Nat): String
+  Nat.to_string_base(10,n)
 
-//Nat.pow(base: Nat, exp: Nat) : Nat
-  //case exp:
-  //| 1;
-  //| Nat.mul(base,Nat.pow(base,exp.pred));
+Nat.show_digit(base: Nat, n: Nat) : Char
+  let m = Nat.mod(n,base)
+  def base64 =
+    ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+    ,'G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V'
+    ,'W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l'
+    ,'m','n','o','p','q','r','s','t','u','v','w','x','y','z','+','/'
+    ]
+  if Bool.and(Nat.gtn(base,0),Nat.lte(base,64)) then 
+    case List.at<>(m,base64) as c {
+      none: '#',
+      some: c.value
+    }
+  else '#'
 
-//// Nat predecessor
-//Nat.pred(n: Nat): Nat
-  //case n:
-  //| Nat.zero;
-  //| n.pred;
+Nat.square(a: Nat): Nat
+  Nat.mul(a, a)
 
-//Nat.show(n: Nat): String
-  //Nat.to_string_base(10,n)
-
-//Nat.show_digit(base: Nat, n: Nat) : Char
-  //let m = Nat.mod(n,base)
-  //def base64 =
-    //['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
-    //,'G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V'
-    //,'W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l'
-    //,'m','n','o','p','q','r','s','t','u','v','w','x','y','z','+','/'
-    //]
-  //if Bool.and(Nat.gtn(base,0),Nat.lte(base,64)) then 
-    //case List.at<>(m,base64) as c:
-    //| '#';
-    //| c.value;
-  //else '#'
-
-//Nat.square(a: Nat): Nat
-  //Nat.mul(a, a)
-
-//// Nat subtraction
-//Nat.sub(n: Nat, m: Nat): Nat
-  //case n:
-  //| 0;
-  //| case m:
-    //| n;
-    //| Nat.sub(n.pred, m.pred);;
-  //// case m:
-  //// | n;
-  //// | case n:
-  ////   | Nat.zero;
-  ////   | Nat.sub(n.pred, m.pred);;
+// Nat subtraction
+Nat.sub(n: Nat, m: Nat): Nat
+  case n {
+    zero: 0,
+    succ: case m {
+      zero: n,
+      succ: Nat.sub(n.pred, m.pred)
+    }
+  }
 
 // Nat subtraction and remainder
 Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
@@ -243,92 +257,100 @@ Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
     }
   }
 
-//Nat.succ_inj(a: Nat, b: Nat, eq: Nat.succ(a) == Nat.succ(b)): a == b
-  //Equal.apply<Nat, Nat, Nat.succ(a), Nat.succ(b), Nat.pred>(eq)
+Nat.succ_inj(a: Nat, b: Nat, eq: Nat.succ(a) == Nat.succ(b)): a == b
+  Equal.apply<Nat, Nat, Nat.succ(a), Nat.succ(b), Nat.pred>(eq)
 
-//Nat.succ_isnt_zero<n: Nat>: Not(Equal(Nat, Nat.succ(n), Nat.zero))
-  //def P(n : Nat)
-    //case n:
-    //| Empty;
-    //| Unit;
-  //def p_succ
-    //Unit.new
-  //(succ_is_zero)
-    //Equal.rewrite<_,_,_,P>(succ_is_zero, p_succ)
+Nat.succ_isnt_zero<n: Nat>: Not(Equal(Nat, Nat.succ(n), Nat.zero))
+  def P(n : Nat)
+    case n {
+      zero: Empty,
+      succ: Unit
+    }
+  def p_succ
+    Unit.new
+  (succ_is_zero)
+    Equal.rewrite<_,_,_,P>(succ_is_zero, p_succ)
 
-//Nat.succ_not_zero(a: Nat): Not(Nat.succ(a) == 0)
-  //(eq)
-  //def P = (x) case x: | Empty; | Unit;
-  //Equal.rewrite<Nat, Nat.succ(a), 0, P>(eq, Unit.new)
+Nat.succ_not_zero(a: Nat): Not(Nat.succ(a) == 0)
+  (eq)
+  def P = (x) case x { zero: Empty, succ: Unit }
+  Equal.rewrite<Nat, Nat.succ(a), 0, P>(eq, Unit.new)
 
-//Nat.sum(n: Nat): Nat
-  //Nat.sum.go(n, Nat.zero)
+Nat.sum(n: Nat): Nat
+  Nat.sum.go(n, Nat.zero)
 
-//Nat.sum.go(n: Nat , r: Nat): Nat //loop//
-  //case n:
-  //| r;
-  //| Nat.sum.go(n.pred, Nat.add(n, r));
+Nat.sum.go(n: Nat , r: Nat): Nat //loop//
+  case n {
+    zero: r,
+    succ: Nat.sum.go(n.pred, Nat.add(n, r))
+  }
 
-//Nat.to_base(base: Nat, nat: Nat): List(Nat)
-  //Nat.to_base.go(base, nat, List.nil<Nat>)
+Nat.to_base(base: Nat, nat: Nat): List(Nat)
+  Nat.to_base.go(base, nat, List.nil<Nat>)
 
-//Nat.to_base.go(base: Nat, nat: Nat, res: List(Nat)): List(Nat) //loop//
-  //get d m = Nat.div_mod(nat, base)
-  //case d:
-  //| List.cons<>(m,res);
-  //| Nat.to_base.go(base,d,List.cons<>(m,res));
+Nat.to_base.go(base: Nat, nat: Nat, res: List(Nat)): List(Nat) //loop//
+  case Nat.div_mod(nat, base) as div_mod {
+    new: case div_mod.fst {
+      zero: List.cons<>(div_mod.snd, res),
+      succ: Nat.to_base.go(base, div_mod.fst, List.cons<>(div_mod.snd, res))
+    } 
+  }
 
-//Nat.to_bits(n: Nat): Bits
-  //case n:
-  //| Bits.nil;
-  //| Bits.inc(Nat.to_bits(n.pred));
+Nat.to_bits(n: Nat): Bits
+  case n {
+    zero: Bits.nil,
+    succ: Bits.inc(Nat.to_bits(n.pred))
+  }
 
-//Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
-  //Nat.to_f64(s, a, b)
+Nat.to_f64(s: Bool, a: Nat, b: Nat): F64
+  Nat.to_f64(s, a, b)
 
-//Nat.to_string(n: Nat): String
-  //case n:
-  //| String.cons(Char.parse("z"), String.nil);
-  //| String.cons(Char.parse("s"), Nat.to_string(n.pred));
+Nat.to_string(n: Nat): String
+  case n {
+    zero: String.cons(Char.parse("z"), String.nil),
+    succ: String.cons(Char.parse("s"), Nat.to_string(n.pred))
+  }
 
-//Nat.to_string_base(base: Nat, nat: Nat): String
-  //List.foldr<Nat, String>
-  //| String.nil;
-  //| (n) (str) String.cons(Nat.show_digit(base,n), str);
-  //| Nat.to_base(base, nat);
+Nat.to_string_base(base: Nat, nat: Nat): String
+  List.foldr<Nat, String>
+  | String.nil;
+  | (n) (str) String.cons(Nat.show_digit(base,n), str);
+  | Nat.to_base(base, nat);
 
-//Nat.to_string_unary(n: Nat): String
-  //case n:
-  //| String.nil;
-  //| String.cons('1', Nat.to_string_unary(n.pred));
+Nat.to_string_unary(n: Nat): String
+  case n {
+    zero: String.nil,
+    succ: String.cons('1', Nat.to_string_unary(n.pred))
+  }
 
-//Nat.to_u16(n: Nat): U16
-  //Nat.apply<U16>(n, U16.inc, U16.0)
+Nat.to_u16(n: Nat): U16
+  Nat.apply<U16>(n, U16.inc, U16.0)
 
-//Nat.to_u256(n: Nat): U256
-  //Nat.apply<U256>(n,U256.inc, U256.0)
+Nat.to_u256(n: Nat): U256
+  Nat.apply<U256>(n,U256.inc, U256.0)
 
-//Nat.to_u32(n: Nat): U32
-  //Nat.apply<U32>(n, U32.inc, U32.0)
+Nat.to_u32(n: Nat): U32
+  Nat.apply<U32>(n, U32.inc, U32.0)
 
-//Nat.to_u64(n: Nat): U64
-  //Nat.apply<U64>(n, U64.inc, U64.0)
+Nat.to_u64(n: Nat): U64
+  Nat.apply<U64>(n, U64.inc, U64.0)
 
-//Nat.to_u8(n: Nat): U8
-  //Nat.apply<U8>(n, U8.inc, U8.0)
+Nat.to_u8(n: Nat): U8
+  Nat.apply<U8>(n, U8.inc, U8.0)
 
-//Nat.zero_isnt_succ<n: Nat>: Not(Equal(Nat, Nat.zero, Nat.succ(n)))
-  //def P(n : Nat)
-    //case n:
-    //| Unit;
-    //| Empty;
-  //def p_zero
-    //Unit.new
-  //(zero_is_succ)
-    //Equal.rewrite<_,_,_,P>(zero_is_succ, p_zero)
+Nat.zero_isnt_succ<n: Nat>: Not(Equal(Nat, Nat.zero, Nat.succ(n)))
+  def P(n : Nat)
+    case n {
+      zero: Unit,
+      succ: Empty
+    }
+  def p_zero
+    Unit.new 
+  (zero_is_succ)
+    Equal.rewrite<_,_,_,P>(zero_is_succ, p_zero)
 
-//Nat.zero_not_succ(a: Nat): Not(0 == Nat.succ(a))
-  //(eq)
-  //def P = (x) case x: | Unit; | Empty;
-  //Equal.rewrite<Nat, 0, Nat.succ(a), P>(eq, Unit.new)
+Nat.zero_not_succ(a: Nat): Not(0 == Nat.succ(a))
+  (eq)
+  def P = (x) case x { zero: Unit, succ: Empty }
+  Equal.rewrite<Nat, 0, Nat.succ(a), P>(eq, Unit.new)
 
