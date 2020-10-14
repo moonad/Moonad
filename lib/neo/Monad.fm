@@ -1,5 +1,5 @@
 type Monad<M: Type -> Type> {
-  monad(
+  new(
     bind: <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B),
     pure: <A: Type> -> A -> M(A)
   )
@@ -7,6 +7,10 @@ type Monad<M: Type -> Type> {
 
 Monad.pure<M: Type -> Type>(m: Monad(M)): <A: Type> -> A -> M(A)
   case m {
-    monad: m.pure
+    new: m.pure
   }
 
+Monad.bind<M: Type -> Type>(m: Monad(M)): <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B)
+  case m {
+    new: m.bind
+  }
