@@ -1,3 +1,7 @@
+type U256 {
+  new(a: Word(256))
+}
+
 U256.0: U256
   U256.new(Word.zero(256))
 
@@ -15,9 +19,6 @@ U256.eql(a: U256, b: U256): Bool
   get a_val = a
   get b_val = b
   Word.eql<>(a_val, b_val)
-
-T U256
-| U256.new(a: Word(256));
 
 U256.gte(a: U256, b: U256): Bool
   get a_val = a

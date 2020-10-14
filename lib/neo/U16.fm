@@ -1,3 +1,7 @@
+type U16 {
+  new(a: Word(16))
+}
+
 U16.0: U16
   U16.new(Word.zero(16))
 
@@ -30,9 +34,6 @@ U16.eql(a: U16, b: U16): Bool
   get a_val = a
   get b_val = b 
   Word.eql<>(a_val, b_val)
-
-T U16
-| U16.new(a: Word(16));
 
 // a >= b
 U16.gte(a: U16, b: U16): Bool
