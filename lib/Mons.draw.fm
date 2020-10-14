@@ -143,7 +143,7 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 // Draw an inventory showing mons captured and their names
 Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
-  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   open obj:
   let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
   let qtd = Nat.to_u32(List.length<>(obj.bag))
@@ -177,7 +177,7 @@ Mons.draw.bag_select(mon_idx: U32, qtd: U32, scr: Image3D): Image3D
 // Draw an inventory showing mons captured, their names and options to
 // replace or skip the "mon capture"
 Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(65u,60u,0u), scr)
   open obj:
@@ -301,7 +301,7 @@ Mons.draw.initial_mons(obj: Mons.Object, scr: Image3D): Image3D
     scr
 
 Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, idx: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Map.get_battle_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.draw.get_battle_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = 
     if is_boss then
       Mons.draw.image(Mons.Assets.battle_boss, Pos32.new(120u,80u,0u), scr)
@@ -309,7 +309,7 @@ Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, idx: U32, scr: Ima
   scr
 
 Mons.draw.capture_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let sct = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   scr
 
@@ -332,10 +332,27 @@ Mons.draw.hero_hp(chp: U32, mhp: U32, name: String, hero_hp: String, scr: Image3
   scr
 
 Mons.draw.battle_win_bg(adve_kind: Mons.Kind.mons, idx: U32, scr: Image3D): Image3D
-  let scr = Mons.draw.image(Mons.Map.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.battle_win, Pos32.new(70u,90u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   scr
+
+// Each theme will have 2 levels: one of Mons and other for the boss.
+// The boss will have a different background.
+// TODO: adjust images for each level;
+Mons.draw.background(idx: U32): Pair(Image3D, Image3D)
+  if U32.eql(idx, 0u) then
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+  else if U32.eql(idx, 1u) then
+    {Mons.Assets.battle_snow_bg, Mons.Assets.battle_snow_full_bg}
+  else
+    {Mons.Assets.battle_grass_bg, Mons.Assets.battle_grass_full_bg}
+
+Mons.draw.get_battle_bg(idx: U32): Image3D
+  Pair.fst<,>(Mons.draw.background(idx))
+
+Mons.draw.get_full_bg(idx: U32): Image3D
+  Pair.snd<,>(Mons.draw.background(idx))
 
 Mons.draw.img_type(kind: Mons.Kind): String
   case kind:
