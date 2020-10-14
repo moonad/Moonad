@@ -57,8 +57,8 @@ Fm.NameSet: Type
   Set
 
 // An empty map
-Fm.Map.tip<A: Type>: Fm.Map(A)
-  Map.tip<A>
+Fm.Map.new<A: Type>: Fm.Map(A)
+  Map.new<A>
 
 // An empty NameSet
 Fm.NameSet.new: Fm.NameSet
@@ -116,30 +116,30 @@ Fm.Core.to_high.go(term: Fm.Core, refs: Fm.Map(Fm.HCore)): Fm.HCore
 
 // Converts a term to high order
 Fm.Core.to_high(term: Fm.Core): Fm.HCore
-  Fm.Core.to_high.go(term, Fm.Map.tip<>)
+  Fm.Core.to_high.go(term, Fm.Map.new<>)
 
 // Coverts a term to high order
 Fm.HCore.to_low.go(term: Fm.HCore, nset: Fm.NameSet, names: List(Fm.Name)): Fm.Core
   case term {
     ref: Fm.Core.var(term.name),
     var: case List.at_last<>(term.indx, names) as got {
-      none: Fm.HCore.var(Fm.Name.read("_")),
-      some: Fm.HCore.var(got.value),
+      none: Fm.Core.var(Fm.Name.read("_")),
+      some: Fm.Core.var(got.value),
     },
-    typ: Fm.HCore.typ,
+    typ: Fm.Core.typ,
     all: 
       def type = Fm.HCore.to_low.go(term.type, nset, names)
       get name nset = Fm.NameSet.fresh(term.name, nset)
       def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
-      Fm.HCore.all(name, type, body),
+      Fm.Core.all(name, type, body),
     lam:
       get name nset = Fm.NameSet.fresh(term.name, nset)
       def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
-      Fm.HCore.lam(name, body),
+      Fm.Core.lam(name, body),
     app:
       def func = Fm.HCore.to_low.go(term.func, nset, names)
       def argm = Fm.HCore.to_low.go(term.argm, nset, names)
-      Fm.HCore.app(func, argm)
+      Fm.Core.app(func, argm)
   }
 
 //// Converts a term to low order

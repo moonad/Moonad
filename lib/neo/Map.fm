@@ -53,7 +53,7 @@ Map.from_list<A: Type, B: Type>(f: A -> Bits, xs: List(Pair(A,B))) : Map(B)
   case xs {
     nil : Map.new<>,
     cons: case xs.head as p {
-      pair: Map.set<>(f(p.fst), p.snd, Map.from_list<,>(f, xs.tail))
+      new: Map.set<>(f(p.fst), p.snd, Map.from_list<,>(f, xs.tail))
     }
   }
 
@@ -190,7 +190,7 @@ Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), 
         let val = Maybe.none<>
         Pair.new<><>(map, val),
       some: case cpy(map.val.value) as p {
-        pair:
+        new:
           let map = Map.tie<>(Maybe.some<>(p.fst), map.lft, map.rgt)
           let val = Maybe.some<>(p.snd)
           Pair.new<><>(map, val)
@@ -203,7 +203,7 @@ Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), 
       let val = Maybe.none<>
       Pair.new<><>(map, val),
     tie: case Map.query<>(cpy, bits.pred, map.lft) as p {
-      pair:
+      new:
         let map = Map.tie<>(map.val, p.fst, map.rgt)
         let val = p.snd
         Pair.new<><>(map, val)
@@ -215,7 +215,7 @@ Map.query<A: Type>(cpy: A -> Pair(A, A), bits: Bits, map: Map(A)): Pair(Map(A), 
       let val = Maybe.none<>
       Pair.new<><>(map, val),
     tie: case Map.query<>(cpy, bits.pred, map.rgt) as p {
-      pair:
+      new:
         let map = Map.tie<>(map.val, map.lft, p.fst)
         let val = p.snd
         Pair.new<><>(map, val)
