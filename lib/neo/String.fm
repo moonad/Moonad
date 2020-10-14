@@ -1,447 +1,448 @@
-// concatenate two string builders
-String.Builder.concat(a: String.Builder, b: String.Builder): String.Builder
-   (x) a(b(x))
-
-// prepend an character
-String.Builder.cons(c: Char, lb: String.Builder) : String.Builder
-  (x) String.cons(c,lb(x))
-
-// A lazy String constructor, useful for efficient concatenation
-String.Builder: Type
-  String -> String
-
-// construct a new builder (it's just the identity function)
-String.Builder.new : String.Builder
-  (x) x
-
-// append a character
-String.Builder.snoc(c: Char, lb: String.Builder) : String.Builder
-  (x) lb(String.cons(c,x))
-
-// Appends character to the end of the string.
-String.append(as: String, a: Char): String
-  case as:
-  | String.pure(a);
-  | String.cons(as.head,String.append(as.tail, a));
-
-// The bind function of the string Monad.
-String.bind(xs: String, f: Char -> String): String
-  case xs:
-  | String.nil;
-  | String.concat(f(xs.head), String.bind(xs.tail,f));
-
-String.chunks_of(len: Nat, xs: String): List(String)
-  String.chunks_of.go(len, xs, len, String.nil)
-
-String.chunks_of.go(
-  len   : Nat,    // length of each chunk
-  str   : String, // list to be split
-  need  : Nat,    // number of vals to complete chunk
-  chunk : String  // current chunk
-) : List(String)
-  case str:
-  | List.cons<>(String.reverse(chunk), List.nil<>);
-  | case need:
-    | let head = String.reverse(chunk)
-      let tail = String.chunks_of.go(len, str, len, String.nil)
-      List.cons<>(head, tail);
-    | let chunk = String.cons(str.head, chunk)
-      String.chunks_of.go(len, str.tail, need.pred, chunk);;
-
-// Concatenates two strings.
-String.concat(as: String, bs: String): String
-  case as:
-  | bs;
-  | String.cons(as.head, String.concat(as.tail,bs));
-
-// Concatenate any number of strings
-String.concat_var: (n: Nat) -> Variadic(n, String, String)
-  Variadic.foldr<,>(String.concat, String.nil)
-
-// A theorem that a string made with String.cons is not the empty string
-String.cons_isnt_empty(x: Char, xs: String): String.not_empty(String.cons(x,xs))
-  def y = String.cons(x,xs)
-  case y:
-  with e : Equal(String,y,y.self) = Equal.to<String,y>;
-  | Empty.absurd<>(String.cons_isnt_nil(x,xs,e));
-  | Unit.new;
-
-// A theorem that String.cons isn't String.nil
-String.cons_isnt_nil(x:Char, xs: String)
-  : Not(Equal(String,String.cons(x,xs), String.nil))
-  def P = String.not_empty
-  (e) Equal.rewrite<String, String.cons(x,xs), String.nil,P>(e, Unit.new)
-
-// Concatenate any number of chars
-String.cons_var: (n: Nat) -> Variadic(n, Char, String)
-  Variadic.foldr<,>(String.cons, String.nil)
-
-// Removes the first characters of a string.
-String.drop(n: Nat, xs: String):  String
-  case n:
-  | xs;
-  | case xs:
-    | String.nil;
-    | String.drop(n.pred,xs.tail);;
-
-String.drop_until(f: Char -> Bool, xs: String): String
-  String.drop_while((c) Bool.not(f(c)), xs)
-
-// Remove characters while a condition is true
-String.drop_while(f: Char -> Bool, xs: String): String
-  case xs:
-  | String.nil;
-  | case f(xs.head):
-    | String.drop_while(f,xs.tail);
-    | xs;;
-
-// Check if a String ends with another String
-String.ends_with(xs: String, match: String): Bool
-  let xs_reserved = String.reverse(xs)
-  let match_reversed = String.reverse(match)
-  String.starts_with(xs_reserved, match_reversed)
-
-String.eql(a: String, b: String): Bool
-  case a:
-  | case b: | Bool.true; | Bool.false;;
-  | case b:
-    | Bool.false;
-    | Bool.and(U16.eql(a.head,b.head),String.eql(a.tail,b.tail));;
-
-// Removes all characters that do not satisfy a condition.
-String.filter(f: Char -> Bool, xs: String): String
-  case xs:
-  | String.nil;
-  | case f(xs.head):
-    | String.cons(xs.head,String.filter(f, xs.tail));
-    | String.filter(f, xs.tail);;
-
-// Flattens a string of strings into a single string.
-String.flatten(xs: List(String)): String
-  case xs:
-  | String.nil;
-  | String.concat(xs.head, String.flatten(xs.tail));
-  : String;
-
 // A monomorphic specialization of List(Char) for performance/compilation
-T String
-| String.nil;
-| String.cons(head: Char, tail: String);
+type String {
+  nil,
+  cons(head: Char, tail: String),
+}
 
-// Folds over a string, right associative
-String.fold(xs: String) : <P: Type> -> P -> (Char -> P -> P) -> P
-  <P> (nil, cons)
-  case xs:
-  | nil;
-  | cons(xs.head, String.fold(xs.tail)<P>(nil, cons));
+// concatenate two string builders
+//String.Builder.concat(a: String.Builder, b: String.Builder): String.Builder
+   //(x) a(b(x))
 
-String.from_list(xs: List(Char)) : String
-  case xs:
-  | String.nil;
-  | String.cons(xs.head,String.from_list(xs.tail));
+//// prepend an character
+//String.Builder.cons(c: Char, lb: String.Builder) : String.Builder
+  //(x) String.cons(c,lb(x))
 
-// Get the head of a nonempty string
-String.head(xs: String): Maybe(Char)
-  case xs:
-  | Maybe.none<>;
-  | Maybe.some<>(xs.head);
+//// A lazy String constructor, useful for efficient concatenation
+//String.Builder: Type
+  //String -> String
 
-// Map over a string with the index
-String.imap(f: Nat -> Char -> Char, xs: String): String
-  case xs:
-  | String.nil;
-  | String.cons(f(0,xs.head),String.imap((n) f(Nat.succ(n)),xs.tail));
+//// construct a new builder (it's just the identity function)
+//String.Builder.new : String.Builder
+  //(x) x
 
-// Check if "xs" includes "match"
-String.includes(xs: String, match: String): Bool
-  case String.starts_with(xs, match):
-  | Bool.true;
-  | case String.includes.go(xs, match):
-    | Bool.false;
-    | Bool.true;
-  ;
+//// append a character
+//String.Builder.snoc(c: Char, lb: String.Builder) : String.Builder
+  //(x) lb(String.cons(c,x))
 
-// Search for a Substring
-// if finds it, returns the tail containg the "match" String
-String.includes.go(xs: String, match: String): String
-  case xs:
-  | String.nil;
-  | case String.starts_with(xs.tail, match):
-    | xs.tail;
-    | String.includes.go(xs.tail, match);
-  ;
+//// Appends character to the end of the string.
+//String.append(as: String, a: Char): String
+  //case as:
+  //| String.pure(a);
+  //| String.cons(as.head,String.append(as.tail, a));
 
-// Get the all characters of a nonempty string except the last one
-String.init(xs: String, not_empty: String.not_empty(xs)) : String
-  case xs:
-  with ne : String.not_empty(xs.self) = not_empty;
-  | Empty.absurd<>(ne);
-  | case xs.tail:
-    with e : Equal(_, xs.tail.self,xs.tail) = Equal.to<String,xs.tail>;
-    | String.nil;
-    | def cne = String.cons_isnt_empty(xs.tail.head,xs.tail.tail)
-      def xne = Equal.rewrite<_,_,_,(x) String.not_empty(x)>(e,cne)
-      String.cons(xs.head,String.init(xs.tail,xne));;
+//// The bind function of the string Monad.
+//String.bind(xs: String, f: Char -> String): String
+  //case xs:
+  //| String.nil;
+  //| String.concat(f(xs.head), String.bind(xs.tail,f));
 
-// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-String.intercalate(sep: String, xs: List(String)): String
-  String.flatten(List.intersperse<>(sep,xs))
+//String.chunks_of(len: Nat, xs: String): List(String)
+  //String.chunks_of.go(len, xs, len, String.nil)
 
-// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-String.intersperse(sep: Char, xs: String): String
-  case xs:
-  | String.nil;
-  | case xs.tail:
-    | String.pure(xs.head);
-    | String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)));;
+//String.chunks_of.go(
+  //len   : Nat,    // length of each chunk
+  //str   : String, // list to be split
+  //need  : Nat,    // number of vals to complete chunk
+  //chunk : String  // current chunk
+//) : List(String)
+  //case str:
+  //| List.cons<>(String.reverse(chunk), List.nil<>);
+  //| case need:
+    //| let head = String.reverse(chunk)
+      //let tail = String.chunks_of.go(len, str, len, String.nil)
+      //List.cons<>(head, tail);
+    //| let chunk = String.cons(str.head, chunk)
+      //String.chunks_of.go(len, str.tail, need.pred, chunk);;
 
-// Get the last character of a nonempty string
-String.last(xs: String, not_empty: String.not_empty(xs)) : Char
-  case xs:
-  with ne : String.not_empty(xs.self) = not_empty;
-  | Empty.absurd<>(ne);
-  | case xs.tail:
-    with e : Equal(_, xs.tail.self,xs.tail) = Equal.to<String,xs.tail>;
-    | xs.head;
-    | def cne = String.cons_isnt_empty(xs.tail.head,xs.tail.tail)
-      def xne = Equal.rewrite<_,_,_,(x) String.not_empty(x)>(e,cne)
-      String.last(xs.tail,xne);;
+//// Concatenates two strings.
+//String.concat(as: String, bs: String): String
+  //case as:
+  //| bs;
+  //| String.cons(as.head, String.concat(as.tail,bs));
 
-// Computes the length of the string.
-String.length(xs: String): Nat
-  String.length.go(xs, 0)
+//// Concatenate any number of strings
+//String.concat_var: (n: Nat) -> Variadic(n, String, String)
+  //Variadic.foldr<,>(String.concat, String.nil)
 
-String.length.go(xs: String, n: Nat): Nat
-  case xs:
-  | n;
-  | String.length.go(xs.tail, Nat.succ(n));
+//// A theorem that a string made with String.cons is not the empty string
+//String.cons_isnt_empty(x: Char, xs: String): String.not_empty(String.cons(x,xs))
+  //def y = String.cons(x,xs)
+  //case y:
+  //with e : Equal(String,y,y.self) = Equal.to<String,y>;
+  //| Empty.absurd<>(String.cons_isnt_nil(x,xs,e));
+  //| Unit.new;
 
-// Computes the length of the string as a U32.
-String.length32(xs: String): U32
-  String.length32.go(xs, U32.0)
+//// A theorem that String.cons isn't String.nil
+//String.cons_isnt_nil(x:Char, xs: String)
+  //: Not(Equal(String,String.cons(x,xs), String.nil))
+  //def P = String.not_empty
+  //(e) Equal.rewrite<String, String.cons(x,xs), String.nil,P>(e, Unit.new)
 
-String.length32.go(xs: String, n: U32): U32
-  case xs:
-  | n;
-  | String.length32.go(xs.tail, U32.inc(n));
+//// Concatenate any number of chars
+//String.cons_var: (n: Nat) -> Variadic(n, Char, String)
+  //Variadic.foldr<,>(String.cons, String.nil)
 
-// Applies a function to all characters of the string.
-String.map(f: Char -> Char, as: String): String
-  case as:
-  | String.nil;
-  | String.cons(f(as.head),String.map(f,as.tail));
+//// Removes the first characters of a string.
+//String.drop(n: Nat, xs: String):  String
+  //case n:
+  //| xs;
+  //| case xs:
+    //| String.nil;
+    //| String.drop(n.pred,xs.tail);;
 
-// A proposition that a string is not the empty string
-String.not_empty(xs: String) : Type
-  case xs:
-  | Empty;
-  | Unit;
+//String.drop_until(f: Char -> Bool, xs: String): String
+  //String.drop_while((c) Bool.not(f(c)), xs)
 
-String.null(xs: String) : Bool
-  case xs:
-  | Bool.true;
-  | Bool.false;
+//// Remove characters while a condition is true
+//String.drop_while(f: Char -> Bool, xs: String): String
+  //case xs:
+  //| String.nil;
+  //| case f(xs.head):
+    //| String.drop_while(f,xs.tail);
+    //| xs;;
 
-// A string with only one character.
-String.pure(x : Char) : String
-  String.cons(x)(String.nil)
+//// Check if a String ends with another String
+//String.ends_with(xs: String, match: String): Bool
+  //let xs_reserved = String.reverse(xs)
+  //let match_reversed = String.reverse(match)
+  //String.starts_with(xs_reserved, match_reversed)
 
-// Remove "match" from the beginning of "xs"
-String.remove_start_with(xs: String, match: String): String
-  case xs: 
-  | String.nil;
-  | case String.starts_with(xs, match):
-    | String.remove_start_with.go(xs, match);
-    | xs;
-  ;
+//String.eql(a: String, b: String): Bool
+  //case a:
+  //| case b: | Bool.true; | Bool.false;;
+  //| case b:
+    //| Bool.false;
+    //| Bool.and(U16.eql(a.head,b.head),String.eql(a.tail,b.tail));;
 
-// Removes "match" from the beginning of the String and returns the tail
-String.remove_start_with.go(xs: String, match: String): String
-  case match:
-  | xs;
-  | case xs:
-    | String.nil; //xs < match
-    | case Char.eql(match.head, xs.head):
-      | String.remove_start_with.go(xs.tail, match.tail);
-      | xs.tail;
-    ;
-  ;
+//// Removes all characters that do not satisfy a condition.
+//String.filter(f: Char -> Bool, xs: String): String
+  //case xs:
+  //| String.nil;
+  //| case f(xs.head):
+    //| String.cons(xs.head,String.filter(f, xs.tail));
+    //| String.filter(f, xs.tail);;
 
-// Repeats a String for "n" times
-String.repeat(xs: String, n: Nat): String
-  case n: 
-  | String.nil;
-  | String.concat(xs, String.repeat(xs, n.pred));
+//// Flattens a string of strings into a single string.
+//String.flatten(xs: List(String)): String
+  //case xs:
+  //| String.nil;
+  //| String.concat(xs.head, String.flatten(xs.tail));
+  //: String;
 
-// Reverse the order of the characters of the string
-String.reverse(xs: String) : String
-  String.reverse.go(xs,String.nil)
+//// Folds over a string, right associative
+//String.fold(xs: String) : <P: Type> -> P -> (Char -> P -> P) -> P
+  //<P> (nil, cons)
+  //case xs:
+  //| nil;
+  //| cons(xs.head, String.fold(xs.tail)<P>(nil, cons));
 
-String.reverse.go(xs: String, res: String): String
-  case xs:
-  | res;
-  | String.reverse.go(xs.tail,String.cons(xs.head,res));
+//String.from_list(xs: List(Char)) : String
+  //case xs:
+  //| String.nil;
+  //| String.cons(xs.head,String.from_list(xs.tail));
 
-// turn a builder into a String
-String.run_builder(lb: String.Builder): String
-  lb(String.nil)
+//// Get the head of a nonempty string
+//String.head(xs: String): Maybe(Char)
+  //case xs:
+  //| Maybe.none<>;
+  //| Maybe.some<>(xs.head);
 
-// Print a string
-String.show(xs: String): String
-  String.flatten(["\"",xs,"\""])
+//// Map over a string with the index
+//String.imap(f: Nat -> Char -> Char, xs: String): String
+  //case xs:
+  //| String.nil;
+  //| String.cons(f(0,xs.head),String.imap((n) f(Nat.succ(n)),xs.tail));
 
-String.slice(i: Nat, j: Nat, xs: String): String
-  String.take(Nat.sub(j, i), String.drop(i, xs))
+//// Check if "xs" includes "match"
+//String.includes(xs: String, match: String): Bool
+  //case String.starts_with(xs, match):
+  //| Bool.true;
+  //| case String.includes.go(xs, match):
+    //| Bool.false;
+    //| Bool.true;
+  //;
 
-String.span(f: Char -> Bool, xs: String): Pair(String,String)
-  case xs:
-  | Pair.new<,>(String.nil,String.nil);
-  | case f(xs.head):
-    | get y z = String.span(f,xs.tail)
-      Pair.new<,>(String.cons(xs.head,y),z);
-    | Pair.new<,>(String.nil,xs);;
+//// Search for a Substring
+//// if finds it, returns the tail containg the "match" String
+//String.includes.go(xs: String, match: String): String
+  //case xs:
+  //| String.nil;
+  //| case String.starts_with(xs.tail, match):
+    //| xs.tail;
+    //| String.includes.go(xs.tail, match);
+  //;
 
-// Splits a String given a separator ("using")
-// Returns the list of substrings
-String.split(xs: String, using: String): List(String)
-  case xs:
-  | nil => [String.nil];
-  | cons => case String.starts_with(xs, using):
-    | true => case using:
-      | nil => List.cons<String>(String.cons(xs.head, String.nil), String.split(xs.tail, using));
-      | cons => List.cons<String>("", String.split(String.drop(String.length(using), xs), using));
-      ;
-    | false =>
-      case String.split(xs.tail, using) as split:
-      | nil => List.nil<>;  // FIXME: mark this impossible
-      | cons => List.cons<>(String.cons(xs.head, split.head),  split.tail);
-      ;
-    ;
+//// Get the all characters of a nonempty string except the last one
+//String.init(xs: String, not_empty: String.not_empty(xs)) : String
+  //case xs:
+  //with ne : String.not_empty(xs.self) = not_empty;
+  //| Empty.absurd<>(ne);
+  //| case xs.tail:
+    //with e : Equal(_, xs.tail.self,xs.tail) = Equal.to<String,xs.tail>;
+    //| String.nil;
+    //| def cne = String.cons_isnt_empty(xs.tail.head,xs.tail.tail)
+      //def xne = Equal.rewrite<_,_,_,(x) String.not_empty(x)>(e,cne)
+      //String.cons(xs.head,String.init(xs.tail,xne));;
 
-String.split.test.0 : The(_, [""])
-  The.value<>(String.split("", ""))
+//// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+//String.intercalate(sep: String, xs: List(String)): String
+  //String.flatten(List.intersperse<>(sep,xs))
 
-String.split.test.1 : The(_, [""])
-  The.value<>(String.split("", "xyz"))
+//// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
+//String.intersperse(sep: Char, xs: String): String
+  //case xs:
+  //| String.nil;
+  //| case xs.tail:
+    //| String.pure(xs.head);
+    //| String.cons(xs.head,String.cons(sep,String.intersperse(sep,xs.tail)));;
 
-String.split.test.2 : The(_, ["", "c"])
-  The.value<>(String.split("abc", "ab"))
+//// Get the last character of a nonempty string
+//String.last(xs: String, not_empty: String.not_empty(xs)) : Char
+  //case xs:
+  //with ne : String.not_empty(xs.self) = not_empty;
+  //| Empty.absurd<>(ne);
+  //| case xs.tail:
+    //with e : Equal(_, xs.tail.self,xs.tail) = Equal.to<String,xs.tail>;
+    //| xs.head;
+    //| def cne = String.cons_isnt_empty(xs.tail.head,xs.tail.tail)
+      //def xne = Equal.rewrite<_,_,_,(x) String.not_empty(x)>(e,cne)
+      //String.last(xs.tail,xne);;
 
-String.split.test.3 : The(_, ["a", "b", "c", ""])
-  The.value<>(String.split("abc", ""))
+//// Computes the length of the string.
+//String.length(xs: String): Nat
+  //String.length.go(xs, 0)
 
-String.split.test.4 : The(_, ["a", "c"])
- The.value<>(String.split("abc", "b"))
+//String.length.go(xs: String, n: Nat): Nat
+  //case xs:
+  //| n;
+  //| String.length.go(xs.tail, Nat.succ(n));
 
-String.split.test.4.1 : The(_, ["", "c"])
- The.value<>(String.split("bc", "b"))
+//// Computes the length of the string as a U32.
+//String.length32(xs: String): U32
+  //String.length32.go(xs, U32.0)
 
-String.split.test.5 : The(_, ["a", ""])
-  The.value<>(String.split("abc", "bc"))
+//String.length32.go(xs: String, n: U32): U32
+  //case xs:
+  //| n;
+  //| String.length32.go(xs.tail, U32.inc(n));
 
-String.split.test.6 : The(_, ["", ""])
-  The.value<>(String.split("abc", "abc"))
+//// Applies a function to all characters of the string.
+//String.map(f: Char -> Char, as: String): String
+  //case as:
+  //| String.nil;
+  //| String.cons(f(as.head),String.map(f,as.tail));
 
-String.split.test.7 : The(_, ["", "", ""])
-  The.value<>(String.split("abcabc", "abc"))
+//// A proposition that a string is not the empty string
+//String.not_empty(xs: String) : Type
+  //case xs:
+  //| Empty;
+  //| Unit;
 
-String.split.example8.1 : _
-  String.split("abcxabcy", "abc")
+//String.null(xs: String) : Bool
+  //case xs:
+  //| Bool.true;
+  //| Bool.false;
+
+//// A string with only one character.
+//String.pure(x : Char) : String
+  //String.cons(x)(String.nil)
+
+//// Remove "match" from the beginning of "xs"
+//String.remove_start_with(xs: String, match: String): String
+  //case xs: 
+  //| String.nil;
+  //| case String.starts_with(xs, match):
+    //| String.remove_start_with.go(xs, match);
+    //| xs;
+  //;
+
+//// Removes "match" from the beginning of the String and returns the tail
+//String.remove_start_with.go(xs: String, match: String): String
+  //case match:
+  //| xs;
+  //| case xs:
+    //| String.nil; //xs < match
+    //| case Char.eql(match.head, xs.head):
+      //| String.remove_start_with.go(xs.tail, match.tail);
+      //| xs.tail;
+    //;
+  //;
+
+//// Repeats a String for "n" times
+//String.repeat(xs: String, n: Nat): String
+  //case n: 
+  //| String.nil;
+  //| String.concat(xs, String.repeat(xs, n.pred));
+
+//// Reverse the order of the characters of the string
+//String.reverse(xs: String) : String
+  //String.reverse.go(xs,String.nil)
+
+//String.reverse.go(xs: String, res: String): String
+  //case xs:
+  //| res;
+  //| String.reverse.go(xs.tail,String.cons(xs.head,res));
+
+//// turn a builder into a String
+//String.run_builder(lb: String.Builder): String
+  //lb(String.nil)
+
+//// Print a string
+//String.show(xs: String): String
+  //String.flatten(["\"",xs,"\""])
+
+//String.slice(i: Nat, j: Nat, xs: String): String
+  //String.take(Nat.sub(j, i), String.drop(i, xs))
+
+//String.span(f: Char -> Bool, xs: String): Pair(String,String)
+  //case xs:
+  //| Pair.new<,>(String.nil,String.nil);
+  //| case f(xs.head):
+    //| get y z = String.span(f,xs.tail)
+      //Pair.new<,>(String.cons(xs.head,y),z);
+    //| Pair.new<,>(String.nil,xs);;
+
+//// Splits a String given a separator ("using")
+//// Returns the list of substrings
+//String.split(xs: String, using: String): List(String)
+  //case xs:
+  //| nil => [String.nil];
+  //| cons => case String.starts_with(xs, using):
+    //| true => case using:
+      //| nil => List.cons<String>(String.cons(xs.head, String.nil), String.split(xs.tail, using));
+      //| cons => List.cons<String>("", String.split(String.drop(String.length(using), xs), using));
+      //;
+    //| false =>
+      //case String.split(xs.tail, using) as split:
+      //| nil => List.nil<>;  // FIXME: mark this impossible
+      //| cons => List.cons<>(String.cons(xs.head, split.head),  split.tail);
+      //;
+    //;
+
+//String.split.test.0 : The(_, [""])
+  //The.value<>(String.split("", ""))
+
+//String.split.test.1 : The(_, [""])
+  //The.value<>(String.split("", "xyz"))
+
+//String.split.test.2 : The(_, ["", "c"])
+  //The.value<>(String.split("abc", "ab"))
+
+//String.split.test.3 : The(_, ["a", "b", "c", ""])
+  //The.value<>(String.split("abc", ""))
+
+//String.split.test.4 : The(_, ["a", "c"])
+ //The.value<>(String.split("abc", "b"))
+
+//String.split.test.4.1 : The(_, ["", "c"])
+ //The.value<>(String.split("bc", "b"))
+
+//String.split.test.5 : The(_, ["a", ""])
+  //The.value<>(String.split("abc", "bc"))
+
+//String.split.test.6 : The(_, ["", ""])
+  //The.value<>(String.split("abc", "abc"))
+
+//String.split.test.7 : The(_, ["", "", ""])
+  //The.value<>(String.split("abcabc", "abc"))
+
+//String.split.example8.1 : _
+  //String.split("abcxabcy", "abc")
  
-String.split.test.8 : The(_, ["", "x", "y"])
-   The.value<>(String.split.example8.1)
+//String.split.test.8 : The(_, ["", "x", "y"])
+   //The.value<>(String.split.example8.1)
 
-String.split.test.9 : _
-  (String.split("fooxbar", "x"))
+//String.split.test.9 : _
+  //(String.split("fooxbar", "x"))
 
-String.split_at(n : Nat, xs: String) : Pair(String,String)
-  Pair.new<,>(String.take(n,xs),String.drop(n,xs))
+//String.split_at(n : Nat, xs: String) : Pair(String,String)
+  //Pair.new<,>(String.take(n,xs),String.drop(n,xs))
 
-// Check if "xs" starts with "match"
-String.starts_with(xs: String, match: String): Bool
-  case match:
-  | nil => Bool.true;
-  | cons => case xs:
-    | nil => Bool.false;
-    | cons => case Char.eql(match.head, xs.head):
-      | true => String.starts_with(xs.tail, match.tail);
-      | false => Bool.false;
-    ;
-  ;
+//// Check if "xs" starts with "match"
+//String.starts_with(xs: String, match: String): Bool
+  //case match:
+  //| nil => Bool.true;
+  //| cons => case xs:
+    //| nil => Bool.false;
+    //| cons => case Char.eql(match.head, xs.head):
+      //| true => String.starts_with(xs.tail, match.tail);
+      //| false => Bool.false;
+    //;
+  //;
  
-String.starts_with.test.0: The(_, Bool.true)
-  The.value<>(String.starts_with("x", ""))
+//String.starts_with.test.0: The(_, Bool.true)
+  //The.value<>(String.starts_with("x", ""))
 
-String.starts_with.test.1: The(_, Bool.false)
-  The.value<>(String.starts_with("", "x"))
+//String.starts_with.test.1: The(_, Bool.false)
+  //The.value<>(String.starts_with("", "x"))
 
-String.starts_with.test.2: The(_, Bool.true)
-  The.value<>(String.starts_with("x", "x"))
+//String.starts_with.test.2: The(_, Bool.true)
+  //The.value<>(String.starts_with("x", "x"))
 
-String.starts_with.test.3: The(_, Bool.true)
-  The.value<>(String.starts_with("xy", "x"))
+//String.starts_with.test.3: The(_, Bool.true)
+  //The.value<>(String.starts_with("xy", "x"))
 
-String.starts_with.test.4: The(_, Bool.false)
-  The.value<>(String.starts_with("x", "xy"))
+//String.starts_with.test.4: The(_, Bool.false)
+  //The.value<>(String.starts_with("x", "xy"))
 
-String.starts_with.test.5: The(_, Bool.true)
-  The.value<>(String.starts_with("xy", "xy"))
+//String.starts_with.test.5: The(_, Bool.true)
+  //The.value<>(String.starts_with("xy", "xy"))
 
-String.starts_with.test.6: The(_, Bool.true)
-  The.value<>(String.starts_with("xyz", "xy"))
+//String.starts_with.test.6: The(_, Bool.true)
+  //The.value<>(String.starts_with("xyz", "xy"))
 
-String.starts_with.test.7: The(_, Bool.false)
-  The.value<>(String.starts_with("xy", "xyz"))
+//String.starts_with.test.7: The(_, Bool.false)
+  //The.value<>(String.starts_with("xy", "xyz"))
 
-String.starts_with.test.8: The(_, Bool.false)
-  The.value<>(String.starts_with("xy!", "xyz"))
+//String.starts_with.test.8: The(_, Bool.false)
+  //The.value<>(String.starts_with("xy!", "xyz"))
 
-// Get the tail of a nonempty string
-String.tail(xs: String, not_empty: String.not_empty(xs)) : String
-  case xs:
-  with ne : String.not_empty(xs.self) = not_empty;
-  | Empty.absurd<>(ne);
-  | xs.tail;
+//// Get the tail of a nonempty string
+//String.tail(xs: String, not_empty: String.not_empty(xs)) : String
+  //case xs:
+  //with ne : String.not_empty(xs.self) = not_empty;
+  //| Empty.absurd<>(ne);
+  //| xs.tail;
 
-// Returns the first characters of a string, discards the rest.
-String.take(n: Nat, xs: String): String
-  case xs:
-  | String.nil;
-  | case n:
-    | String.nil;
-    | String.cons(xs.head,String.take(n.pred, xs.tail));;
+//// Returns the first characters of a string, discards the rest.
+//String.take(n: Nat, xs: String): String
+  //case xs:
+  //| String.nil;
+  //| case n:
+    //| String.nil;
+    //| String.cons(xs.head,String.take(n.pred, xs.tail));;
 
-String.take_n.aux(n: Nat, str: String, res: String): Maybe(Pair(String, String))
-  case res:
-  | case n:
-    | Maybe.some<>(Pair.new<,>(str, String.nil));
-    | Maybe.none<Pair(String, String)>;;
-  | case n:
-    | Maybe.some<>(Pair.new<String, String>(str, res));
-    | String.take_n.aux(n.pred, String.cons(res.head, str), res.tail);;
+//String.take_n.aux(n: Nat, str: String, res: String): Maybe(Pair(String, String))
+  //case res:
+  //| case n:
+    //| Maybe.some<>(Pair.new<,>(str, String.nil));
+    //| Maybe.none<Pair(String, String)>;;
+  //| case n:
+    //| Maybe.some<>(Pair.new<String, String>(str, res));
+    //| String.take_n.aux(n.pred, String.cons(res.head, str), res.tail);;
 
-String.take_n(n: Nat, str: String): Maybe(Pair(String, String))
-  case String.take_n.aux(n, String.nil, str) as m:
-  | Maybe.none<Pair(String, String)>;
-  | get x y = m.value
-    Maybe.some<>(Pair.new<,>(String.reverse(x), y));
+//String.take_n(n: Nat, str: String): Maybe(Pair(String, String))
+  //case String.take_n.aux(n, String.nil, str) as m:
+  //| Maybe.none<Pair(String, String)>;
+  //| get x y = m.value
+    //Maybe.some<>(Pair.new<,>(String.reverse(x), y));
 
-String.to_bits(str: String): Bits
-  case str:
-  | Bits.nil;
-  | Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail));
+//String.to_bits(str: String): Bits
+  //case str:
+  //| Bits.nil;
+  //| Bits.concat(U16.to_bits(str.head))(String.to_bits(str.tail));
 
-// convert a string to a builder
-String.to_builder(string: String) : String.Builder
-  String.to_builder.go(string, String.Builder.new)
+//// convert a string to a builder
+//String.to_builder(string: String) : String.Builder
+  //String.to_builder.go(string, String.Builder.new)
 
-String.to_builder.go(string: String, lb: String.Builder) : String.Builder
-  case string:
-  | lb;
-  | String.to_builder.go(string.tail)(String.Builder.snoc(string.head, lb));
+//String.to_builder.go(string: String, lb: String.Builder) : String.Builder
+  //case string:
+  //| lb;
+  //| String.to_builder.go(string.tail)(String.Builder.snoc(string.head, lb));
 
-String.to_list(str: String): List(Char)
-  case str:
-  | List.nil<>;
-  | List.cons<>(str.head)(String.to_list(str.tail));
+//String.to_list(str: String): List(Char)
+  //case str:
+  //| List.nil<>;
+  //| List.cons<>(str.head)(String.to_list(str.tail));
 

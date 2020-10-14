@@ -65,9 +65,9 @@ Maybe.map<A: Type, B: Type>(f: A -> B, m: Maybe(A)): Maybe(B)
   //| _;
   //: Equal(_, Maybe.map<,>(Function.id<>, ma.self), ma.self);
 
-//// the monad instance for Maybe
-//Maybe.monad: Monad(Maybe)
-  //Monad.new<Maybe>(Maybe.bind, Maybe.pure)
+// the monad instance for Maybe
+Maybe.monad: Monad(Maybe)
+  Monad.new<Maybe>(Maybe.bind, Maybe.some)
 
 //Maybe.pure<A: Type>(a: A): Maybe(A)
   //Maybe.some<A>(a)

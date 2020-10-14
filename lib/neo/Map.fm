@@ -9,13 +9,15 @@ type Map<A: Type> {
   //| Empty;
   //| Equal(A,x,v.value);
 
-//Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
-  //case map:
-  //| Map.new<>;
-  //| case key:
-    //| Map.tie<>(Maybe.none<>,map.lft,map.rgt);
-    //| Map.delete<>(key.pred,map.lft);
-    //| Map.delete<>(key.pred,map.rgt);;
+Map.delete<A: Type>(key: Bits, map: Map(A)) : Map(A)
+  case map {
+    tip: Map.tip<>,
+    tie: case key {
+      nil: Map.tie<>(Maybe.none<>,map.lft,map.rgt),
+      0: Map.delete<>(key.pred,map.lft),
+      1: Map.delete<>(key.pred,map.rgt),
+    }
+  }
 
 //Map.disj<A: Type>(a: Map(A), b: Map(A)): Bool
   //case a: | Bool.true; |
@@ -40,39 +42,53 @@ type Map<A: Type> {
   //| get k v = xs.head
     //Map.set<>(f(k),v,Map.from_list<,>(f,xs.tail));
 
-//// Returns the element stored at a given key, if any.
-//// Example: Map.get<Nat>(my_key, my_map)
-//Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
-  //case bits:
-  //| case map:
-    //| Maybe.none<>;
-    //| map.val;;
-  //| case map:
-    //| Maybe.none<>;
-    //| Map.get<>(bits.pred, map.lft);;
-  //| case map:
-    //| Maybe.none<>;
-    //| Map.get<>(bits.pred, map.rgt);;
+// Returns the element stored at a given key, if any.
+// Example: Map.get<Nat>(my_key, my_map)
+Map.get<A: Type>(bits: Bits, map: Map(A)): Maybe(A)
+  case bits {
+    nil: case map {
+      tip: Maybe.none<>,
+      tie: map.val,
+    },
+    0: case map {
+      tip: Maybe.none<>,
+      tie: Map.get<>(bits.pred, map.lft),
+    },
+    1: case map {
+      tip: Maybe.none<>,
+      tie: Map.get<>(bits.pred, map.rgt),
+    },
+  }
 
-//// Returns the element stored at a given key and a copy of the map.
-//Map.lookup<A: Type>(bits: Bits, val: A, map: Map(A)): Pair(A, Map(A))
-  //case bits:
-  //| case map:
-    //| let map = Map.tie<A>(Maybe.some<A>(val), Map.new<A>, Map.new<A>)
-      //Pair.new<A><Map(A)>(val, map);
-    //| let value = Maybe.extract<A>(map.val, val)
-      //let map = Map.tie<A>(Maybe.some<A>(value), map.lft, map.rgt)
-      //Pair.new<A><Map(A)>(value, map);;
-  //| case map:
-    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
-      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, p.snd, Map.new<A>));
-    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.lft)
-      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, p.snd, map.rgt));;
-  //| case map:
-    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.new<A>)
-      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, Map.new<A>, p.snd));
-    //| get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.rgt)
-      //Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, map.lft, p.snd));;
+// Returns the element stored at a given key and a copy of the map.
+Map.lookup<A: Type>(bits: Bits, val: A, map: Map(A)): Pair(A, Map(A))
+  case bits {
+    nil: case map {
+      tip:
+        let map = Map.tie<A>(Maybe.some<A>(val), Map.tip<A>, Map.tip<A>)
+        Pair.new<A><Map(A)>(val, map),
+      tie:
+        let value = Maybe.extract<A>(map.val, val)
+        let map = Map.tie<A>(Maybe.some<A>(value), map.lft, map.rgt)
+        Pair.new<A><Map(A)>(value, map),
+      },
+    0: case map {
+      tip:
+        get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.tip<A>)
+        Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, p.snd, Map.tip<A>)),
+      tie:
+        get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.lft)
+        Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, p.snd, map.rgt)),
+    },
+    1: case map {
+      tip:
+        get p.fst p.snd = Map.lookup<A>(bits.pred, val, Map.tip<A>)
+        Pair.new<A><Map(A)>(p.fst, Map.tie<A>(Maybe.none<A>, Map.tip<A>, p.snd)),
+      tie:
+        get p.fst p.snd = Map.lookup<A>(bits.pred, val, map.rgt)
+        Pair.new<A><Map(A)>(p.fst, Map.tie<A>(map.val, map.lft, p.snd)),
+    }
+  }
 
 //Map.map<A: Type, B: Type>(fn: A -> B, map: Map(A)): Map(B)
   //case map:
@@ -155,19 +171,23 @@ type Map<A: Type> {
       //let val = p.snd
       //Pair.new<><>(map, val);;
 
-//// Inserts a (key,val) pair in a map.
-//// Example: Map.get<Nat>(my_key, my_val, my_map)
-//Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
-  //case bits:
-  //| case map:
-    //| Map.tie<>(Maybe.some<>(val), Map.new<>, Map.new<>);
-    //| Map.tie<>(Maybe.some<>(val), map.lft, map.rgt);;
-  //| case map:
-    //| Map.tie<>(Maybe.none<>, Map.set<>(bits.pred, val, Map.new<>), Map.new<>);
-    //| Map.tie<>(map.val, Map.set<>(bits.pred, val, map.lft), map.rgt);;
-  //| case map:
-    //| Map.tie<>(Maybe.none<>, Map.new<>, Map.set<>(bits.pred, val, Map.new<>));
-    //| Map.tie<>(map.val, map.lft, Map.set<>(bits.pred, val, map.rgt));;
+// Inserts a (key,val) pair in a map.
+// Example: Map.get<Nat>(my_key, my_val, my_map)
+Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
+  case bits {
+    nil: case map {
+      tip: Map.tie<>(Maybe.some<>(val), Map.tip<>, Map.tip<>),
+      tie: Map.tie<>(Maybe.some<>(val), map.lft, map.rgt),
+    },
+    0: case map {
+      tip: Map.tie<>(Maybe.none<>, Map.set<>(bits.pred, val, Map.tip<>), Map.tip<>),
+      tie: Map.tie<>(map.val, Map.set<>(bits.pred, val, map.lft), map.rgt),
+    }
+    1: case map {
+      tip: Map.tie<>(Maybe.none<>, Map.tip<>, Map.set<>(bits.pred, val, Map.tip<>)),
+      tie: Map.tie<>(map.val, map.lft, Map.set<>(bits.pred, val, map.rgt)),
+    }
+  }
 
 //Map.to_list<A: Type>(xs: Map(A)) : List(Pair(Bits,A))
   //Map.to_list.go<>(xs, Bits.nil)

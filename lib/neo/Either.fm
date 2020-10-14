@@ -6,15 +6,20 @@ type Either<A: Type, B: Type> {
 
 Either.bind<A: Type, B: Type, C: Type>(e: Either(A,B), f: B -> Either(A,C)): Either(A,C)
   case e {
-    left: Either.left<A, C>(e.value),
+    left: Either.left<_,_>(e.value),
     right: f(e.value),
   }
+
+Either.monad<A: Type>: Monad(Either(A))
+  Monad.monad<Either(A)>(Either.bind<A>, Either.right<A>)
+
 
 Either.map<A: Type, B: Type, C: Type>(f: B -> C, e: Either(A, B)): Either(A, C)
   case e {
     left: Either.left<A, C>(e.value),
     right: Either.right<A, C>(f(e.value)),
   }
+
 
 // Either(A) functor
 // =================
