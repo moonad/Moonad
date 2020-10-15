@@ -1,3 +1,7 @@
+type U32 {
+  new(a: Word(32))
+}
+
 U32.0: U32
   U32.new(Word.zero(32))
 
@@ -26,9 +30,6 @@ U32.eql(a: U32, b: U32): Bool
   get a_val = a 
   get b_val = b 
   Word.eql<>(a_val, b_val)
-
-T U32
-| U32.new(a: Word(32));
 
 U32.for<S: Type>(state: S, from: U32, til: U32, func: U32 -> S -> S): S
   if U32.eql(from, til) then

@@ -1,3 +1,7 @@
+type U64 {
+  new(a: Word(64))
+}
+
 U64.0: U64
   U64.new(Word.zero(64))
 
@@ -22,8 +26,7 @@ U64.eql(a: U64, b: U64): Bool
   get b_val = b
   Word.eql<>(a_val, b_val)
 
-T U64
-| U64.new(a: Word(64));
+
 
 // a >= b
 U64.gte(a: U64, b: U64): Bool

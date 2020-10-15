@@ -19,7 +19,7 @@ U16.and(a: U16, b: U16): U16
 U16.btw(a: U16, b: U16, c: U16): Bool
   Bool.and(U16.lte(a, b), U16.lte(b, c))
 
-//U16.concat(a: U16, b: U16): U32
+// U16.concat(a: U16, b: U16): U32
   //get a_val = a
   //get b_val = b 
   //U32.new(Word.concat<><>(a_val, b_val))
