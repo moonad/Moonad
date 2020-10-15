@@ -24,10 +24,10 @@ Nat.add_zero_theorem(n: Nat): Equal(Nat, Nat.add(n, Nat.zero), n)
     succ: Equal.apply<_,_,_,_,Nat.succ>(Nat.add_zero_theorem(n.pred)),
   } : Equal(Nat, Nat.add(n.self, Nat.zero), n.self)
 
-Nat.times<A: Type>(n: Nat, f: A -> A, x: A): A
+Nat.apply<A: Type>(n: Nat, f: A -> A, x: A): A
   case n {
     zero: x,
-    succ: Nat.times<A>(n.pred, f, f(x)),
+    succ: Nat.apply<A>(n.pred, f, f(x)),
   }
 
 // Compares two nats
@@ -87,10 +87,9 @@ Nat.eql(n: Nat, m: Nat): Bool
 Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
   case a {
     zero: case b {
-      zero: Either.left<,>(Equal.to<Nat,0>),
+      zero: Either.left<,>(Equal.refl<Nat,0>),
       succ: Either.right<,>(Nat.zero_not_succ(b.pred))
       } : Either(0 == b.self, Not(0 == b.self)),
-    
     succ: case b {
       zero: Either.right<,>(Nat.succ_not_zero(a.pred)),
       succ: case Nat.equal(a.pred, b.pred) as rec {
@@ -99,9 +98,6 @@ Nat.equal(a: Nat, b: Nat): Either(a == b, Not(a == b))
       } : Either(Nat.succ(a.pred) == Nat.succ(b.pred), Not(Nat.succ(a.pred) == Nat.succ(b.pred)))
     } : Either(Nat.succ(a.pred) == b.self, Not(Nat.succ(a.pred) == b.self))
   } : Either(a.self == b, Not(a.self == b))
-
-
-//// Natural numbers
 
 Nat.for<S: Type>(state: S, from: Nat, til: Nat, func: Nat -> S -> S): S
   if Nat.eql(from, til) then
@@ -323,20 +319,20 @@ Nat.to_string_unary(n: Nat): String
     succ: String.cons('1', Nat.to_string_unary(n.pred))
   }
 
+//Nat.to_u8(n: Nat): U8
+  //Nat.apply<U8>(n, U8.inc, U8.0)
+
 Nat.to_u16(n: Nat): U16
   Nat.apply<U16>(n, U16.inc, U16.0)
 
-Nat.to_u256(n: Nat): U256
-  Nat.apply<U256>(n,U256.inc, U256.0)
+//Nat.to_u32(n: Nat): U32
+  //Nat.apply<U32>(n, U32.inc, U32.0)
 
-Nat.to_u32(n: Nat): U32
-  Nat.apply<U32>(n, U32.inc, U32.0)
+//Nat.to_u64(n: Nat): U64
+  //Nat.apply<U64>(n, U64.inc, U64.0)
 
-Nat.to_u64(n: Nat): U64
-  Nat.apply<U64>(n, U64.inc, U64.0)
-
-Nat.to_u8(n: Nat): U8
-  Nat.apply<U8>(n, U8.inc, U8.0)
+//Nat.to_u256(n: Nat): U256
+  //Nat.apply<U256>(n,U256.inc, U256.0)
 
 Nat.zero_isnt_succ<n: Nat>: Not(Equal(Nat, Nat.zero, Nat.succ(n)))
   def P(n : Nat)

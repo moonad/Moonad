@@ -1,5 +1,5 @@
 type U16 {
-  new(a: Word(16))
+  new(value: Word(16))
 }
 
 U16.0: U16
@@ -19,10 +19,10 @@ U16.and(a: U16, b: U16): U16
 U16.btw(a: U16, b: U16, c: U16): Bool
   Bool.and(U16.lte(a, b), U16.lte(b, c))
 
-U16.concat(a: U16, b: U16): U32
-  get a_val = a
-  get b_val = b 
-  U32.new(Word.concat<><>(a_val, b_val))
+// U16.concat(a: U16, b: U16): U32
+  //get a_val = a
+  //get b_val = b 
+  //U32.new(Word.concat<><>(a_val, b_val))
 
 U16.div(a: U16, b: U16): U16
   get a_val = a
@@ -31,9 +31,9 @@ U16.div(a: U16, b: U16): U16
 
 // a == b
 U16.eql(a: U16, b: U16): Bool
-  get a_val = a
-  get b_val = b 
-  Word.eql<>(a_val, b_val)
+  open a
+  open b
+  Word.eql<>(a.value, b.value)
 
 // a >= b
 U16.gte(a: U16, b: U16): Bool
@@ -78,8 +78,8 @@ U16.or(a: U16, b: U16): U16
   get b_val = b 
   U16.new(Word.or<>(a_val, b_val))  
 
-U16.parse_hex(str: String): U16
-  U16.new(Word.from_bits(16, Bits.parse_hex(str)))
+//U16.parse_hex(str: String): U16
+  //U16.new(Word.from_bits(16, Bits.parse_hex(str)))
 
 U16.pow(a: U16, b: U16): U16
   get a_val = a
@@ -109,13 +109,13 @@ U16.to_nat(a: U16): Nat
 U16.to_string(n: U16): String
   Nat.to_string_base(10, U16.to_nat(n))
 
-U16.to_u32(a: U16): U32
-  get a_val = a 
-  U32.new(Word.trim<16>(32, a_val))
-  
-U16.to_word(val: U16): Word(16)
-  get a_val = val 
-  a_val 
+//U16.to_u32(a: U16): U32
+  //open a
+  //U32.new(Word.trim<16>(32, a.value))
+
+U16.to_word(a: U16): Word(16)
+  open a
+  a.value
 
 U16.xor(a: U16, b: U16): U16
   get a_val = a
