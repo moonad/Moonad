@@ -1547,7 +1547,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           for img in sprites with sprs:
             let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
-            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // << here
+            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // sprites are updated here
             let s_z = t_z
             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
@@ -1619,6 +1619,13 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
         obj.dir;
   obj
 
+Mons.Object.tick2(obj: Mons.Object): Mons.Object
+  open obj:
+  Mons.Object.set_ani(obj)
+    | if U32.gtn(obj.ani, 0u)
+      then U32.sub(obj.ani, 2u)
+      else U32.mul(4u, 2u); // fountain has 4 sprites
+
 Mons.Game.dim(game: Mons.Game): U32
   let pos = Mons.Game.get_hero_pos(game)
   case pos:
@@ -1651,12 +1658,23 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
 
 // Para cada objeto que tem animação, pegar a posição dele e atualizar o sprite
 
-// Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
-//   open game:
-//   let map = game.map
-//   let obj_idx = Mons.Map.get_hero(pos, map)
-//   let obj = Pair.fst<,>(obj_idx)
-//   let idx = Pair.snd<,>(obj_idx)
+// Gets the objects that can animate and update its tick
+Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let map = game.map
+  let obj_idx = Mons.Map.get_hero(hero_pos, map)
+  // let hero_obj = Pair.fst<,>(obj_idx)
+  let idx = Pair.snd<,>(obj_idx)
+  
+  let x = Pos32.get_x(hero_pos)
+  let y = Pos32.get_y(hero_pos)
+  let z = Pos32.get_z(hero_pos) // dim
+  let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z) // placeholder
+
+  let obj = Mons.Map.get_top(obj_pos, map)
+  let obj = Mons.Object.tick2(obj)
+  Mons.Game.map_set(hero_pos, idx, obj, game)
+
    
 // For each tick, updates the game state
 // TODO: tick objects other than hero
