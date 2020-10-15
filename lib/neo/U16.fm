@@ -110,12 +110,12 @@ U16.to_string(n: U16): String
   Nat.to_string_base(10, U16.to_nat(n))
 
 U16.to_u32(a: U16): U32
-  case a:
-  | U32.new(Word.trim<16>(32, a.a));
-
+  get a_val = a 
+  U32.new(Word.trim<16>(32, a_val))
+  
 U16.to_word(val: U16): Word(16)
-  open val:
-  val.a
+  get a_val = val 
+  a_val 
 
 U16.xor(a: U16, b: U16): U16
   get a_val = a
