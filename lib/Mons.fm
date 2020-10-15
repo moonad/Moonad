@@ -1547,7 +1547,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           for img in sprites with sprs:
             let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
-            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
+            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // << here
             let s_z = t_z
             let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
@@ -1668,9 +1668,9 @@ Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
     let game = Mons.Game.tick_user(user, pos, game)
     let tick = Nat.to_u64(300)
     // Debug.log<>(tick)
-    if U64.gtn(time, tick) 
-    then Mons.test.add_obj(pos, game)
-    else 
+    // if U64.gtn(time, tick) 
+    // then Mons.test.add_obj(pos, game)
+    // else 
     game
 
 // Mons.Game.animate(obj: Mons.Object, pos: Pos32, idx: U32,game: Mons.Game): Mons.Game
