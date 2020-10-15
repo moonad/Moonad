@@ -96,9 +96,10 @@ Mons.Map: Type
 T Mons.Game
 | Mons.Game.new(
   usr: Word(160), // player name
-  pos: Map(Pos32), // player positions
+  pos: Map(Pos32), // players positions
   map: Mons.Map, // the game map
-  stt: Mons.Screen // the current state of the game
+  stt: Mons.Screen, // the current state of the game
+  ani: List(Pair(Mons.Object, Pos32)) // objects that can animate
 );
 
 T Mons.Screen
@@ -122,6 +123,21 @@ T Mons.Type
 | Mons.Type.light;
 | Mons.Type.darkness;
 
+Mons.Game.animated_obj: List(Pair(Mons.Object, Pos32))
+  let initial_pos = Mons.scr_mid
+  let x = Pos32.get_x(initial_pos)
+  let y = Pos32.get_y(initial_pos)
+  let z = Pos32.get_z(initial_pos)
+  let objs = 
+    [{Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true), 
+      Pos32.new(U32.add(x, 3u), U32.add(y, 3u), z)}
+     ]
+  objs
+
+Mons.Game.add_animated_obj(game: Mons.Game): Mons.Game
+  for object in Mons.Game.animated_obj with game:
+    get obj pos = object
+    Mons.Game.map_push(pos, obj, game)
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -679,7 +695,7 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
-  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false))
+  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
 
   if U32.eql(dim, 0u) then // lvl 0 - city destroied
     let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
@@ -692,7 +708,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // Construction
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true) ]},
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -725,9 +741,9 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "T0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 0)), grass]},
     { "T1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 1)), grass ]},
-    { "/0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 0)), grass ]},
-    { "/1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 1)) ]},
-    { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2)), grass ]},
+    { "/0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 0), Bool.false), grass ]},
+    { "/1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 1), Bool.false) ]},
+    { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2), Bool.false), grass ]},
     { "B0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 0)), grass ]},
     { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
     { "P0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 0)), grass ]},
@@ -740,8 +756,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "P7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 1)), grass ]},
     { "P8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(6, 0)), grass ]},
     { "P9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(7, 0)), grass ]},    
-    { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C), grass ]},
-    { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M) ]},
+    { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C, Bool.false), grass ]},
+    { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M, Bool.false) ]},
 
     { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.grass, 2u) },
     // { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
@@ -779,21 +795,21 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.electric, 2u) },
     { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.water, 2u) },
 
-    { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0)), rock_path ]},
-    { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1)) ]},
-    { "K2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 2)) ]},
-    { "K3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 3)) ]},
-    { "K4", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 4)), rock_path ]},
-    { "C0", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 0)) rock_path ]},
-    { "C1", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 1)) rock_path ]},
-    { "C2", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 2)), rock_path ]},
-    { "C3", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 3)), rock_path ]},
-    { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4)), rock_path ]},
-    { "W0", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 0)), grass ]},
-    { "W1", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 1)), grass ]},
-    { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0)), rock_path ]},
-    { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1)), rock_path ]},
-    { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2)), rock_path ]},
+    { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0), Bool.false), rock_path ]},
+    { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1), Bool.false) ]},
+    { "K2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 2), Bool.false) ]},
+    { "K3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 3), Bool.false) ]},
+    { "K4", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 4), Bool.false), rock_path ]},
+    { "C0", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 0), Bool.false) rock_path ]},
+    { "C1", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 1), Bool.false) rock_path ]},
+    { "C2", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 2), Bool.false), rock_path ]},
+    { "C3", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 3), Bool.false), rock_path ]},
+    { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4), Bool.false), rock_path ]},
+    { "W0", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 0), Bool.false), grass ]},
+    { "W1", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 1), Bool.false), grass ]},
+    { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.false), rock_path ]},
+    { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1), Bool.false), rock_path ]},
+    { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2), Bool.false), rock_path ]},
     { "p1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 0)), grass ]},
     { "p2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 1)), grass ]},
     { "p3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(1, 0)), grass ]},
@@ -809,8 +825,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     // { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
     { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
     { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
-    { "s0", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_0), grass ]},
-    { "s1", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_1), grass ]},
+    { "s0", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_0, Bool.false), grass ]},
+    { "s1", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_1, Bool.false), grass ]},
     { "om", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]},
     { "on", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER1_M) ]},
     { "o0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right)), grass ]},
@@ -821,21 +837,21 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "o5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_up)), grass ]},
     { "o6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_down)), grass ]},
     { "o7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_down)), grass ]},
-    { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER) ]},
-    { "f0", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right)), grass ]},
-    { "f1", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.middle)), grass ]},
-    { "f2", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left)), grass ]},
-    { "f3", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_up)), grass ]},
-    { "f4", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_up)), grass ]},
-    { "f5", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_down)), grass ]},
-    { "f6", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_down)), grass ]},
-    { "fa", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right)), grass ]},
-    { "fb", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.middle)), grass ]},
-    { "fc", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left)), grass ]},
-    { "fd", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_up)), grass ]},
-    { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up)), grass ]},
-    { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down)), grass ]},
-    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down)), grass ]},
+    { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false) ]},
+    { "f0", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right), Bool.false), grass ]},
+    { "f1", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.middle), Bool.false), grass ]},
+    { "f2", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left), Bool.false), grass ]},
+    { "f3", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_up), Bool.false), grass ]},
+    { "f4", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_up), Bool.false), grass ]},
+    { "f5", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_down), Bool.false), grass ]},
+    { "f6", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_down), Bool.false), grass ]},
+    { "fa", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right), Bool.false), grass ]},
+    { "fb", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.middle), Bool.false), grass ]},
+    { "fc", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left), Bool.false), grass ]},
+    { "fd", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_up), Bool.false), grass ]},
+    { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up), Bool.false), grass ]},
+    { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down), Bool.false), grass ]},
+    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down), Bool.false), grass ]},
     { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
 
     // Interactive objects
@@ -877,10 +893,10 @@ Mons.Game.get_usr(game: Mons.Game): Word(160)
 
 // Set the game user
 Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(usr, game.pos, game.map, game.stt)
+  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.ani)
 
 Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(game.usr, game.pos, game.map, stt)
+  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.ani)
 
 // Gets an user's position
 Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
@@ -890,7 +906,7 @@ Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
 // Sets an user's position
 Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt)
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt, game.ani)
 
 // Gets the hero's position
 Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
@@ -899,7 +915,7 @@ Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, map, game.stt)
+  Mons.Game.new(game.usr, game.pos, map, game.stt, game.ani)
 
 Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -1550,10 +1566,11 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
             get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // sprites are updated here
             let s_z = t_z
             let spr = 
-              if Mons.Kind.is_hero(obj.kin) then Mons.Sprite.new(s_x, s_y, s_z, img)
-              else 
-                let cur_spr = Mons.Object.cur_sprite(ani, sprites)
-                Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
+              // if Mons.Kind.animate(obj.kin) then
+              //   let cur_spr = Mons.Object.cur_sprite(ani, sprites)
+              //   Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
+              // else 
+              Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
          
 
@@ -1662,8 +1679,6 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   else
     Mons.Game.map_set(pos, idx, obj, game)
 
-// Para cada objeto que tem animação, pegar a posição dele e atualizar o sprite
-
 // Gets the objects that can animate and update its tick
 Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
   open game:
@@ -1692,13 +1707,13 @@ Mons.Object.cur_sprite(ani: U32, sprites: List(Image3D)): Image3D
 // TODO: tick objects other than hero
 Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
   open game:
-  for obj_pos in Map.to_list<>(game.pos) with game:
+  for obj_pos in Map.to_list<>(game.pos) with game: // players
     get key pos = obj_pos
     let user = Word.from_bits(160, key)
     let game = Mons.Game.tick_user(user, pos, game)
-    // Tick a fountain
-    let game = Mons.Game.tick_objects(pos, game)
     game
+      // Tick a fountain
+    // let game = Mons.Game.tick_objects(pos, game)
 
 // Mons.Game.animate(obj: Mons.Object, pos: Pos32, idx: U32,game: Mons.Game): Mons.Game
 //   open obj:
@@ -1716,7 +1731,7 @@ Mons.test.add_obj(hero_pos: Pos32, game: Mons.Game): Mons.Game
   let x = Pos32.get_x(hero_pos)
   let y = Pos32.get_y(hero_pos)
   let z = Pos32.get_z(hero_pos) // dim
-  let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0))
+  let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true)
   let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
   Mons.Game.map_push(obj_pos, fountain, game)
 
@@ -1795,7 +1810,14 @@ Mons.start(online: Bool): App(Mons.Game)
   | let game_usr = Word.zero(160)
     let game_pos = Map.new<>
     let game_map = Mons.Map.build(Mons.map_source)
-    let game = Mons.Game.new(game_usr, game_pos, game_map, Mons.Screen.introduction(0u))
+    let game = Mons.Game.new(
+      game_usr, 
+      game_pos, 
+      game_map, 
+      Mons.Screen.introduction(0u),
+      Mons.Game.animated_obj
+    )
+    let game = Mons.Game.add_animated_obj(game)
     game;
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));
