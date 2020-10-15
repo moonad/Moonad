@@ -24,7 +24,7 @@ type String {
 //String.Builder.snoc(c: Char, lb: String.Builder) : String.Builder
   //(x) lb(String.cons(c,x))
 
-//// Appends character to the end of the string.
+// Appends character to the end of the string.
 //String.append(as: String, a: Char): String
   //case as:
   //| String.pure(a);
@@ -54,11 +54,12 @@ type String {
     //| let chunk = String.cons(str.head, chunk)
       //String.chunks_of.go(len, str.tail, need.pred, chunk);;
 
-//// Concatenates two strings.
-//String.concat(as: String, bs: String): String
-  //case as:
-  //| bs;
-  //| String.cons(as.head, String.concat(as.tail,bs));
+// Concatenates two strings.
+String.concat(as: String, bs: String): String
+  case as {
+    nil: bs,
+    cons: String.cons(as.head, String.concat(as.tail,bs)),
+  }
 
 //// Concatenate any number of strings
 //String.concat_var: (n: Nat) -> Variadic(n, String, String)

@@ -36,12 +36,12 @@ Fm.Map(A: Type): Type
 
 // A definition is a type, term pair
 type Fm.Core.Def {
-  def(term: Fm.Core, type: Fm.Core),
+  new(term: Fm.Core, type: Fm.Core),
 }
 
 // A definition is a type, term pair
 type Fm.HCore.Def {
-  def(term: Fm.HCore, type: Fm.HCore),
+  new(term: Fm.HCore, type: Fm.HCore),
 }
 
 // A map from Names to definitions
@@ -96,7 +96,7 @@ Fm.Core.to_high.go(term: Fm.Core, refs: Fm.Map(Fm.HCore)): Fm.HCore
   case term {
     var:
       case Fm.Map.get<>(term.name, refs) as got {
-        none: Fm.HCore.var(term.name, Nat.zero),
+        none: Fm.HCore.ref(term.name),
         some: got.value,
       },
     typ:
@@ -154,7 +154,7 @@ Fm.HCore.reduce(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
   case term {
     ref: case Fm.Map.get<>(term.name, defs) as got {
       none: Fm.HCore.ref(term.name),
-      some: case got.value { def: got.value.type },
+      some: case got.value { new: got.value.term },
     },
     var: Fm.HCore.var(term.name, term.indx),
     typ: Fm.HCore.typ,
@@ -273,10 +273,15 @@ Fm.Context: Type
 
 // Infers the type of a core term
 Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
-  //use skp = Debug.log<>(String.concat("- infer: ",Fm.HCore.view(term,ctx)))
+  use skp = Debug.log<>(String.concat("- infer: ",Fm.HCore.view(term,ctx)))
   case term {
     ref:
-      Maybe.none<>,
+      case Fm.Map.get<>(term.name, defs) as got {
+        none: Maybe.none<>,
+        some: case got.value {
+          new: Maybe.some<>(got.value.type)
+        }
+      },
     var:
       Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx)),
     typ:
@@ -297,21 +302,18 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.H
         some: 
           let func_typ = Fm.HCore.reduce(func_typ.value, defs)
           case func_typ {
-            ref: Maybe.none<>,
-            var: Maybe.none<>,
-            typ: Maybe.none<>,
             all: do Maybe {
               Fm.HCore.check(term.argm, func_typ.type, defs, ctx);
               return func_typ.body(term.argm);
             },
-            lam: Maybe.none<>,
-            app: Maybe.none<>,
+            _: Maybe.none<>,
           }
       }
   }
 
 // Checks the type of a core term
 Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Unit)
+  use skp = Debug.log<>(String.flatten(["- check: ",Fm.HCore.view(term,ctx)," :: ",Fm.HCore.view(type,ctx)]))
   case term {
     lam: 
       let typv = Fm.HCore.reduce(type, defs)
@@ -417,7 +419,7 @@ Fm.Core.show(term: Fm.Core): String
     lam:
       let name = Fm.Name.show(term.name)
       let body = Fm.Core.show(term.body)
-      String.flatten(["#",name," ",body]),
+      String.flatten(["@",name," ",body]),
     app:
       let func = Fm.Core.show(term.func)
       let argm = Fm.Core.show(term.argm)
@@ -426,8 +428,8 @@ Fm.Core.show(term: Fm.Core): String
 
 // Formality's Parser
 type Fm.Parser.Reply<T: Type> {
-  Fm.Parser.Reply.error(code: String, error: String),
-  Fm.Parser.Reply.value(code: String, value: T),
+  error(code: String, error: String),
+  value(code: String, value: T),
 }
 
 // Formality Core's parser type
@@ -539,7 +541,7 @@ Fm.Parser.Core.type: Fm.Parser(Fm.Core)
 Fm.Parser.Core.lambda: Fm.Parser(Fm.Core)
   do Fm.Parser {
     Fm.Parser.Core.spaces;
-    Fm.Parser.text("#");
+    Fm.Parser.text("@");
     var name = Fm.Parser.Core.name;
     var body = Fm.Parser.Core;
     return Fm.Core.lam(name, body);
@@ -576,7 +578,8 @@ Fm.Parser.Core.reference: Fm.Parser(Fm.Core)
   do Fm.Parser {
     Fm.Parser.Core.spaces;
     var name = Fm.Parser.Core.name;
-    return Fm.Core.ref(name);
+    //return Debug.log<>(Fm.Name.show(name), () Fm.Core.var(name));
+    return Fm.Core.var(name);
   }
 
 // Parses a core term
@@ -643,7 +646,7 @@ Fm.Core.Defs.show(defs: Fm.Core.Defs): String
     String.flatten([
       str,
       Fm.Name.show(Fm.Name.from_bits(name)),
-      " : ",
+      ": ",
       Fm.Core.show(def.type),
       "\n  ",
       Fm.Core.show(def.term),
@@ -662,23 +665,23 @@ Fm.Defs.errors(defs: Fm.Core.Defs): Nat
   for name_def in Map.to_list<>(defs) with errs:
     get name def = name_def
     use skp = Debug.log<>(String.flatten(["Checking ",Fm.Name.show(Fm.Name.from_bits(name)),"..."]))
-    let checked =
-      open def
-      Fm.HCore.check(def.term, def.type, defs, List.nil<>)
-    Nat.add(errs, case checked{ none: 1, some: 0, })
+    let checked = case def { new: Fm.HCore.check(def.term, def.type, defs, List.nil<>) }
+    Nat.add(errs, case checked { none: 1, some: 0, })
 
 Fm: _
-  let defs = Maybe.extract<>(Fm.Core.Defs.read("
+  let defs = Maybe.default<>(Fm.Map.new<>, Fm.Core.Defs.read("
     Nat: Type
       @(A: Type) @(z: A) @(s: @(x: A) A) A
 
     zero: Nat
-      #A #z #s z
+      @A @z @s z
 
     succ: @(n: Nat) Nat
-      #n #A #z #s (s (((n A) z) s))
-  "), Fm.Map.new<>);
-  IO.print(String.flatten([
-    Nat.to_string_base(10, Fm.Defs.errors(defs)),
-    " errors.",
-  ]))
+      @n @A @z @s (s (((n A) z) s))
+  "));
+  do IO {
+    IO.print("# Defs:\n");
+    IO.print(Fm.Core.Defs.show(defs));
+    IO.print("# Check:\n");
+    IO.print(String.flatten([Nat.to_string_base(10, Fm.Defs.errors(defs)), " errors."]));
+  }

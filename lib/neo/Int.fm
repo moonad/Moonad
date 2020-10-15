@@ -65,7 +65,7 @@ Int.neg(a: Int): Int
 Int.parse_decimal(str: String): Int
   case str {
     nil: Int.0,
-    cons: U16.eql(str.head, Char.parse("-"))<() Int>(
+    cons: U16.eql(str.head, '-')<() Int>(
       Int.new(0, Nat.parse_decimal(str.tail)),
       Int.new(Nat.parse_decimal(String.cons(str.head, str.tail)), 0)),
   }
@@ -73,7 +73,7 @@ Int.parse_decimal(str: String): Int
 Int.parse_hex(str: String): Int
   case str {
     nil: Int.0,
-    cons: case U16.eql(str.head, Char.parse("-")) {
+    cons: case U16.eql(str.head, '-') {
       true:
         let b = Nat.parse_hex(str.tail)
         Int.new(0, b),
@@ -98,6 +98,6 @@ Int.to_string_base(base: Nat, a: Int): String
   get a.x a.y = a
   case a.y {
     zero: Nat.to_string_base(base, a.x),
-    succ: String.cons(Char.parse("-"), Nat.to_string_base(base, a.y)),
+    succ: String.cons('-', Nat.to_string_base(base, a.y)),
   }
 
