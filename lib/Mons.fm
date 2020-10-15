@@ -1542,15 +1542,21 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           | List.reverse<>(got.value);
         for obj in objs with sprs:
           open obj:
-          open Mons.Kind.attr(obj.kin) as hero_attr:
-          let sprites = hero_attr.spr(t_x, t_y, obj.ani, obj.dir)
+          open Mons.Kind.attr(obj.kin) as obj_attr:
+          let sprites = obj_attr.spr(t_x, t_y, obj.ani, obj.dir)
           for img in sprites with sprs:
             let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
             get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // sprites are updated here
             let s_z = t_z
-            let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
+            let spr = 
+              if Mons.Kind.is_hero(obj.kin) then Mons.Sprite.new(s_x, s_y, s_z, img)
+              else 
+                let cur_spr = Mons.Object.cur_sprite(ani, sprites)
+                Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
             List.cons<>(spr, sprs);
+         
+
 
 // Build sprites around the hero
 Mons.Map.build_sprites(game: Mons.Game, scr: Image3D, hero_pos: Pos32, hero_obj: Mons.Object): Image3D
@@ -1623,8 +1629,8 @@ Mons.Object.tick2(obj: Mons.Object): Mons.Object
   open obj:
   Mons.Object.set_ani(obj)
     | if U32.gtn(obj.ani, 0u)
-      then U32.sub(obj.ani, 2u)
-      else U32.mul(4u, 2u); // fountain has 4 sprites
+      then U32.sub(obj.ani, 1u)
+      else U32.add(U32.mul(4u, 1u), 1u); // fountain has 4 sprites
 
 Mons.Game.dim(game: Mons.Game): U32
   let pos = Mons.Game.get_hero_pos(game)
@@ -1673,22 +1679,25 @@ Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
 
   let obj = Mons.Map.get_top(obj_pos, map)
   let obj = Mons.Object.tick2(obj)
-  Mons.Game.map_set(hero_pos, idx, obj, game)
+  Mons.Game.map_set(obj_pos, idx, obj, game)
 
-   
+Mons.Object.cur_sprite(ani: U32, sprites: List(Image3D)): Image3D
+  let len_sprite = List.length<>(sprites)
+  let ani_nat = U32.to_nat(ani)
+  case List.at<>(ani_nat, sprites) as spr:
+  | Mons.Assets.void;
+  | spr.value;
+
 // For each tick, updates the game state
 // TODO: tick objects other than hero
 Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
   open game:
-  for user_pos in Map.to_list<>(game.pos) with game:
-    get key pos = user_pos
+  for obj_pos in Map.to_list<>(game.pos) with game:
+    get key pos = obj_pos
     let user = Word.from_bits(160, key)
     let game = Mons.Game.tick_user(user, pos, game)
-    let tick = Nat.to_u64(300)
-    // Debug.log<>(tick)
-    // if U64.gtn(time, tick) 
-    // then Mons.test.add_obj(pos, game)
-    // else 
+    // Tick a fountain
+    let game = Mons.Game.tick_objects(pos, game)
     game
 
 // Mons.Game.animate(obj: Mons.Object, pos: Pos32, idx: U32,game: Mons.Game): Mons.Game
