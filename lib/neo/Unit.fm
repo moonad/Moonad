@@ -1,5 +1,5 @@
 type Unit {
-  unit
+  new
 }
 
 //Unit.show(u: Unit): String

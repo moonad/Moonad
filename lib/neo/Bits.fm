@@ -1,44 +1,31 @@
+type Bits {
+  nil,
+  0(pred: Bits),
+  1(pred: Bits),
+}
+
+Bits.inc(a: Bits): Bits
+  case a {
+    nil: Bits.1(Bits.nil),
+    0: Bits.1(a.pred),
+    1: Bits.0(Bits.inc(a.pred)),
+  }
+
 // Add two bitstrings.
 Bits.add(a: Bits, b: Bits): Bits
-  case b:
-  | nil => a;
-  | 0 =>
-    case a:
-    | nil => b;
-    | 0 => Bits.0(Bits.add(a.pred, b.pred));
-    | 1 => Bits.1(Bits.add(a.pred, b.pred));
-  ;
-  | 1 =>
-    case a:
-    | nil => b;
-    | 0 => Bits.1(Bits.add(a.pred, b.pred));
-    | 1 => Bits.0(Bits.add(Bits.inc(a.pred), b.pred));
-  ;
-
-Bits.add_.10: _
-  Bits.0(Bits.1(Bits.0(Bits.1(Bits.nil))))
-
-Bits.add_.3: _
-  Bits.1(Bits.1(Bits.nil))
-
-Bits.add_.1: _
-  Bits.1(Bits.nil)
-
-
-Bits.add_.test.0: The(U32, Nat.to_u32(0))
-  The.value<>(Bits.to_u32(Bits.add(Bits.nil, Bits.nil)))
-
-Bits.add_.test.13: The(U32, Nat.to_u32(13))
-  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.3)))
-
-Bits.add_.test.11: The(U32, Nat.to_u32(11))
-  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.1)))
-
-Bits.add_.test.6: The(U32, Nat.to_u32(4))
-  The.value<>(Bits.to_u32(Bits.add(Bits.add_.3, Bits.add_.1)))
-
-Bits.add_.test.20: The(U32, Nat.to_u32(20))
-  The.value<>(Bits.to_u32(Bits.add(Bits.add_.10, Bits.add_.10)))
+  case b {
+    nil: a,
+    0: case a {
+      nil: b,
+      0: Bits.0(Bits.add(a.pred, b.pred)),
+      1: Bits.1(Bits.add(a.pred, b.pred)),
+    },
+    1: case a {
+      nil: b,
+      0: Bits.1(Bits.add(a.pred, b.pred)),
+      1: Bits.0(Bits.add(Bits.inc(a.pred), b.pred))
+    }
+  }
 
 Bits.chunks_of(len: Nat, bits: Bits): List(Bits)
   Bits.chunks_of.go(len, bits, len, Bits.nil)
@@ -49,112 +36,126 @@ Bits.chunks_of.go(
   need  : Nat,  // number of vals to complete chunk
   chunk : Bits  // current chunk
 ) : List(Bits)
-  case bits:
-  | List.cons<>(Bits.reverse(chunk), List.nil<>);
-  | case need:
-    | let head = Bits.reverse(chunk)
-      let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
-      List.cons<>(head, tail);
-    | let chunk = Bits.0(chunk)
-      Bits.chunks_of.go(len, bits.pred, need.pred, chunk);;
-  | case need:
-    | let head = Bits.reverse(chunk)
-      let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
-      List.cons<>(head, tail);
-    | let chunk = Bits.1(chunk)
-      Bits.chunks_of.go(len, bits.pred, need.pred, chunk);;
+  case bits {
+    nil: List.cons<>(Bits.reverse(chunk), List.nil<>),
+    0: case need {
+      zero: 
+        let head = Bits.reverse(chunk)
+        let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
+        List.cons<>(head, tail),
+      succ:
+        let chunk = Bits.0(chunk)
+        Bits.chunks_of.go(len, bits.pred, need.pred, chunk)
+    },
+    1: case need {
+      zero:
+        let head = Bits.reverse(chunk)
+        let tail = Bits.chunks_of.go(len, bits, len, Bits.nil)
+        List.cons<>(head, tail),
+      succ:
+        let chunk = Bits.1(chunk)
+        Bits.chunks_of.go(len, bits.pred, need.pred, chunk)
+    }
+  }
 
 Bits.concat(a: Bits, b: Bits): Bits
-  case a:
-  | b;
-  | Bits.0(Bits.concat(a.pred, b));
-  | Bits.1(Bits.concat(a.pred, b));
+  case a {
+    nil: b,
+    0: Bits.0(Bits.concat(a.pred, b)),
+    1: Bits.1(Bits.concat(a.pred, b))
+  }
 
-// TODO
-// Divides two bitstrings.
+// TODO Divides two bitstrings.
 Bits.div(a: Bits, b: Bits): Bits
   Bits.div(a, b)
 
+// Compares two bits for equality
 Bits.eql(a: Bits, b: Bits): Bool
-  case a:
-  | case b:
-    | Bool.true;
-    | Bool.false;
-    | Bool.false;;
-  | case b:
-    | Bool.false;
-    | Bits.eql(a.pred, b.pred);
-    | Bool.false;;
-  | case b:
-    | Bool.false;
-    | Bool.false;
-    | Bits.eql(a.pred, b.pred);;
+  case a {
+    nil: case b {
+      nil: Bool.true,
+       0 : Bool.false,
+       1 : Bool.false,
+    },
+    0: case b {
+      nil: Bool.false,
+       0 : Bits.eql(a.pred, b.pred),
+       1 : Bool.false,
+    },
+    1: case b {
+      nil: Bool.false,
+       0 : Bool.false,
+       1 : Bits.eql(a.pred, b.pred),
+    }
+  }
 
-T Bits
-| Bits.nil;
-| Bits.0(pred: Bits);
-| Bits.1(pred: Bits);
-
+// Converts a Bits to a string
 Bits.from_string(str: String): Bits
-  case str:
-  | Bits.nil;
-  | case U16.eql(str.head, Char.parse("1")):
-    | Bits.1(Bits.from_string(str.tail));
-    | Bits.0(Bits.from_string(str.tail));
-    | Unit.new;;
-
-Bits.inc(a: Bits): Bits
-  case a:
-  | Bits.1(Bits.nil);
-  | Bits.1(a.pred);
-  | Bits.0(Bits.inc(a.pred));
+  case str {
+    nil : Bits.nil,
+    cons: case U16.eql(str.head, Char.parse("1")) {
+      true : Bits.1(Bits.from_string(str.tail)),
+      false: Bits.0(Bits.from_string(str.tail))
+    }
+  }
 
 Bits.length(xs: Bits): Nat
   Bits.length.go(xs, 0)
 
 Bits.length.go(xs: Bits, n: Nat): Nat
-  case xs:
-  | n;
-  | Bits.length.go(xs.pred, Nat.succ(n));
-  | Bits.length.go(xs.pred, Nat.succ(n));
+  case xs {
+    nil: n,
+     0 : Bits.length.go(xs.pred, Nat.succ(n)),
+     1 : Bits.length.go(xs.pred, Nat.succ(n))
+  }
 
-// TODO
-// Modulus of two Bitstrings.
+// TODO Modulus of two Bitstrings.
 Bits.mod(a: Bits, b: Bits): Bits
   Bits.mod(a, b)
 
-// TODO
 // Multiplies two bitstrings.
 Bits.mul(a: Bits, b: Bits): Bits
-  Bits.mul(a, b)
+  Bits.mul.go(a, b, Bits.nil)
+
+Bits.mul.go(a: Bits, b: Bits, bits: Bits): Bits
+  case b {
+    nil: bits,
+     0 : Bits.mul.go(Bits.0(a), b.pred, bits),
+     1 : Bits.mul.go(Bits.0(a), b.pred, Bits.add(a, bits))
+  }
 
 Bits.parse_hex: String -> Bits
   (str) Bits.parse_hex.tco(str)(Bits.nil)
 
 Bits.parse_hex.tco(str: String, res: Bits): Bits
-  case str:
-  | res;
-  | let b0000 = Bits.0(Bits.0(Bits.0(Bits.0(Bits.nil))))
-    let bhead = Nat.apply<Bits>(Char.hex_value(str.head), Bits.inc, b0000)
-    Bits.parse_hex.tco(str.tail, Bits.concat(bhead, res));
+  case str {
+    nil : res,
+    cons:
+      let b0000 = Bits.0(Bits.0(Bits.0(Bits.0(Bits.nil))))
+      let bhead = Nat.apply<Bits>(Char.hex_value(str.head), Bits.inc, b0000)
+      Bits.parse_hex.tco(str.tail, Bits.concat(bhead, res))
+  }
 
 // Reverses a bitstring.
 Bits.reverse(a: Bits): Bits
   Bits.reverse.tco(a, Bits.nil)
 
 Bits.reverse.tco(a: Bits, r: Bits): Bits
-  case a:
-  | r;
-  | Bits.reverse.tco(a.pred, Bits.0(r));
-  | Bits.reverse.tco(a.pred, Bits.1(r));
+  case a {
+    nil: r,
+     0 : Bits.reverse.tco(a.pred, Bits.0(r)),
+     1 : Bits.reverse.tco(a.pred, Bits.1(r))
+  }
 
 Bits.slice(len: Nat, bits: Bits): Bits
-  case len:
-  | Bits.nil;
-  | case bits:
-    | Bits.nil;
-    | Bits.0(Bits.slice(len.pred, bits.pred));
-    | Bits.1(Bits.slice(len.pred, bits.pred));;
+  case len {
+    zero: Bits.nil,
+    succ: case bits {
+      nil: Bits.nil,
+       0 : Bits.0(Bits.slice(len.pred, bits.pred)),
+       1 : Bits.1(Bits.slice(len.pred, bits.pred))
+    }
+  }
 
 // TODO
 // Subtracts two Bitstrings.
@@ -162,20 +163,45 @@ Bits.sub(a: Bits, b: Bits): Bits
   Bits.sub(a, b)
 
 Bits.to_nat(b: Bits): Nat
-  case b:
-  | 0;
-  | Nat.mul(2, Bits.to_nat(b.pred));
-  | Nat.succ(Nat.mul(2, Bits.to_nat(b.pred)));
+  case b {
+    nil: 0,
+     0 : Nat.mul(2, Bits.to_nat(b.pred)),
+     1 : Nat.succ(Nat.mul(2, Bits.to_nat(b.pred)))
+  }
 
 // Converts a bitstring to a string
 Bits.to_string(bits: Bits): String
-  case bits:
-  | "";
-  | String.concat("0", Bits.to_string(bits.pred));
-  | String.concat("1", Bits.to_string(bits.pred));
+  case bits {
+    nil: "",
+     0 : String.concat("0", Bits.to_string(bits.pred)),
+     1 : String.concat("1", Bits.to_string(bits.pred))
+  }
 
 // Converts a bitstring to a U32 value
 Bits.to_u32(bits: Bits): U32
   U32.new(Word.from_bits(32, bits))
-  
+
+Bits.add.10: _
+  Bits.0(Bits.1(Bits.0(Bits.1(Bits.nil))))
+
+Bits.add.3: _
+  Bits.1(Bits.1(Bits.nil))
+
+Bits.add.1: _
+  Bits.1(Bits.nil)
+
+Bits.add.test.0: The(U32, Nat.to_u32(0))
+  The.value<>(Bits.to_u32(Bits.add(Bits.nil, Bits.nil)))
+
+Bits.add.test.13: The(U32, Nat.to_u32(13))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add.10, Bits.add.3)))
+
+Bits.add.test.11: The(U32, Nat.to_u32(11))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add.10, Bits.add.1)))
+
+Bits.add.test.6: The(U32, Nat.to_u32(4))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add.3, Bits.add.1)))
+
+Bits.add.test.20: The(U32, Nat.to_u32(20))
+  The.value<>(Bits.to_u32(Bits.add(Bits.add.10, Bits.add.10)))
 

@@ -84,7 +84,7 @@ Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
       true: Unit,
       false: Empty,
     }
-  (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.unit)
+  (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.new)
 
 //// Converts to a string
 //Bool.show(b: Bool): String
