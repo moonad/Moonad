@@ -286,7 +286,7 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
 Mons.draw.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
   let len_sprite = List.length<>(sprites)
   let idl_nat = U32.to_nat(U32.sub(idl, 1u))
-  let idx = Nat.mod(Nat.div(idl_nat, 4), 4) // change sprite every 4 ticks
+  let idx = Nat.mod(Nat.div(idl_nat, 4), len_sprite)
   case List.at<>(idx, sprites) as spr:
   | Mons.Assets.void;
   | spr.value;

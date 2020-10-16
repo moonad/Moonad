@@ -457,7 +457,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | CRYSTAL => 
       Mons.Attr.new_neutral([
         Mons.Assets.crystal0, Mons.Assets.crystal1, Mons.Assets.crystal2,
-        Mons.Assets.crystal3, Mons.Assets.crystal4, Mons.Assets.crystal5
+        Mons.Assets.crystal3, Mons.Assets.crystal4, Mons.Assets.crystal5,
+        Mons.Assets.crystal6, Mons.Assets.crystal7
       ]);
   ; // end of construction
 

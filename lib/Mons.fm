@@ -735,7 +735,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
       { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // Construction
-      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
+      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), grass ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true) ]},
       // Terrain
       { ".g", [ grass ]},
@@ -1746,18 +1746,6 @@ Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
 //     else U32.sub(obj.ani, 1u)
 //   let obj = Mons.Object.set_ani(obj, ani)
 //   Mons.Game.map_set(pos, idx, obj, game)
-
-// How to set a pos for objects based on the map and not hero_pos?
-// Mons.test.add_obj(hero_pos: Pos32, game: Mons.Game): Mons.Game
-//   let x = Pos32.get_x(hero_pos)
-//   let y = Pos32.get_y(hero_pos)
-//   let z = Pos32.get_z(hero_pos) // dim
-//   let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true)
-//   // let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
-//   // let g_x = U32.mul(40u, 16u)
-//   // let g_y = U32.mul(40u, 16u)
-//   let obj_pos = Mons.image_to_global(80u, 80u, 38u, 71u, 0u)
-//   Mons.Game.map_push(obj_pos, fountain, game)
 
 // All valid inputs and its code
 Mons.Input.list: List(Pair(Char, Bits))
