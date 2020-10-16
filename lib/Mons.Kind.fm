@@ -154,6 +154,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | terrain  => Bool.false;
   | inter => Bool.false;
 
+// TODO: check kind has idle animation
 Mons.Kind.animate(kind: Mons.Kind): Bool
   case kind:
   | mons => Bool.false;

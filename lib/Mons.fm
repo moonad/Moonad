@@ -1585,8 +1585,8 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
             get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // sprites are updated here
             let s_z = t_z
             let spr = 
-              if Mons.Kind.animate(obj.kin) then
-                let cur_spr = Mons.Object.cur_sprite(obj.idl, sprites)
+              if Mons.Kind.animate(obj.kin) then // TODO: check if has idle
+                let cur_spr = Mons.draw.cur_sprite(obj.idl, sprites)
                 Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
               else 
               Mons.Sprite.new(s_x, s_y, s_z, img)
@@ -1663,10 +1663,11 @@ Mons.Object.tick(obj: Mons.Object): Mons.Object
 
 Mons.Object.tick_idle(obj: Mons.Object): Mons.Object
   open obj:
+  let len_idle = 4u // qtd of frames in idle. Using 4u for testing
   Mons.Object.set_idl
     | if U32.gtn(obj.idl, 0u)
       then U32.sub(obj.idl, 1u)
-      else U32.mul(4u, 1u); // fountain has 4 sprites
+      else U32.mul(len_idle, 4u); // fountain has 4 sprites
     | obj;
 
 Mons.Game.dim(game: Mons.Game): U32
@@ -1718,14 +1719,6 @@ Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
     let obj = Mons.Object.tick_idle(obj)
     Mons.Game.map_set(obj_pos, idx, obj, game)
   else game
-
-// Get the sprite at a given idx in a List of Sprites
-Mons.Object.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
-  let len_sprite = List.length<>(sprites)
-  let idl_nat = U32.to_nat(idl)
-  case List.at<>(idl_nat, sprites) as spr:
-  | Mons.Assets.void;
-  | spr.value;
 
 // For each tick, updates the game state
 // TODO: tick objects other than hero
