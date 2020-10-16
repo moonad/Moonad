@@ -1,6 +1,6 @@
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
-| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, animate: Bool);
+| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, is_idle: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 | Mons.Kind.Interactive(
   ele: Mons.Kind.inter,
@@ -57,6 +57,7 @@ T Mons.Kind.const
 | Mons.Kind.const.SIGN_1;
 | Mons.Kind.const.PATH_BLOCKER;
 | Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+| Mons.Kind.const.CRYSTAL;
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
@@ -154,11 +155,10 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | terrain  => Bool.false;
   | inter => Bool.false;
 
-// TODO: check kind has idle animation
-Mons.Kind.animate(kind: Mons.Kind): Bool
+Mons.Kind.animate_idle(kind: Mons.Kind): Bool
   case kind:
   | mons => Bool.false;
-  | const => kind.animate;
+  | const => kind.is_idle;
   | terrain => Bool.false;
   | inter => Bool.false;
 
@@ -454,6 +454,11 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_lu]); 
         | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_lu]);        
       else Mons.Attr.new_blockable([]);
+    | CRYSTAL => 
+      Mons.Attr.new_neutral([
+        Mons.Assets.crystal0, Mons.Assets.crystal1, Mons.Assets.crystal2,
+        Mons.Assets.crystal3, Mons.Assets.crystal4, Mons.Assets.crystal5
+      ]);
   ; // end of construction
 
   | Mons.Kind.terrain => 

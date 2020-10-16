@@ -100,7 +100,8 @@ T Mons.Game
   pos: Map(Pos32), // players positions
   map: Mons.Map, // the game map
   stt: Mons.Screen, // the current state of the game
-  ani: List(Pair(Mons.Object, Pos32)) // objects that can animate
+  ani: List(Pair(Mons.Object, Pos32)), // objects that can animate
+  tik: U32
 );
 
 T Mons.Screen
@@ -135,6 +136,7 @@ Mons.Game.animated_obj: List(Pair(Mons.Object, Pos32))
      ]
   objs
 
+// Add all animated objs to the map
 Mons.Game.add_animated_obj(game: Mons.Game): Mons.Game
   for object in Mons.Game.animated_obj with game:
     get obj pos = object
@@ -733,7 +735,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
       { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // Construction
-      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
+      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true) ]},
       // Terrain
       { ".g", [ grass ]},
@@ -919,10 +921,10 @@ Mons.Game.get_usr(game: Mons.Game): Word(160)
 
 // Set the game user
 Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.ani)
+  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.ani, game.tik)
 
 Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.ani)
+  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.ani, game.tik)
 
 // Gets an user's position
 Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
@@ -932,7 +934,8 @@ Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
 // Sets an user's position
 Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), game.map, game.stt, game.ani)
+  Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), 
+    game.map, game.stt, game.ani, game.tik)
 
 // Gets the hero's position
 Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
@@ -941,7 +944,11 @@ Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, map, game.stt, game.ani)
+  Mons.Game.new(game.usr, game.pos, map, game.stt, game.ani, game.tik)
+
+Mons.Game.set_tik(tik: U32, game: Mons.Game): Mons.Game
+  open game:
+  Mons.Game.new(game.usr, game.pos, game.map, game.stt, game.ani, tik)
 
 Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -1576,29 +1583,28 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         let t_x = U32.add(U32.sub(c_x, 8u), x)
         let t_y = U32.add(U32.sub(c_y, 6u), y)
         let t_z = c_z
-        let pos = Pos32.new(t_x, t_y, t_z)
+        let pos = Pos32.new(t_x, t_y, t_z) // tile position
         let got = Map.get<>(U32.to_bits(pos), game.map)
         let objs
           = case got:
           | [Mons.Object.void];
           | List.reverse<>(got.value);
-        for obj in objs with sprs:
+        for obj in objs with sprs: // every obj in the tile
           open obj:
           open Mons.Kind.attr(obj.kin) as obj_attr:
-          let sprites = obj_attr.spr(t_x, t_y, obj.ani, obj.dir)
-          for img in sprites with sprs:
+          let sprites = obj_attr.spr(t_x, t_y, obj.ani, obj.dir) // walk sprites
+          get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
+          let s_z = t_z
+          if Mons.Kind.animate_idle(obj.kin) then // TODO: check if is idle
+            let cur_spr = Mons.draw.cur_sprite(game.tik, sprites) // get the sprite
+            let spr = Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
+            List.cons<>(spr, sprs)
+          else
+          for img in sprites with sprs: // Get the walk sprites
             let ani = Mons.Object.get_ani(obj)
             let dir = Mons.Object.get_dir(obj)
-            get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj) // sprites are updated here
-            let s_z = t_z
-            let spr = 
-              if Mons.Kind.animate(obj.kin) then // TODO: check if has idle
-                let cur_spr = Mons.draw.cur_sprite(obj.idl, sprites)
-                Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
-              else 
-              Mons.Sprite.new(s_x, s_y, s_z, img)
+            let spr = Mons.Sprite.new(s_x, s_y, s_z, img)
             List.cons<>(spr, sprs);
-         
 
 
 // Build sprites around the hero
@@ -1707,28 +1713,11 @@ Mons.Game.tick_user(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   else
     Mons.Game.map_set(pos, idx, obj, game)
 
-// Gets the objects that can animate and update its tick
-Mons.Game.tick_objects(hero_pos: Pos32, game: Mons.Game): Mons.Game
+Mons.Game.tick_game(game: Mons.Game): Mons.Game
   open game:
-  let map = game.map
-  let obj_idx = Mons.Map.get_hero(hero_pos, map)
-  // let hero_obj = Pair.fst<,>(obj_idx)
-  let idx = Pair.snd<,>(obj_idx)
-  
-  let x = Pos32.get_x(hero_pos)
-  let y = Pos32.get_y(hero_pos)
-  let z = Pos32.get_z(hero_pos) // dim
-  let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z) // placeholder
+  Mons.Game.set_tik(U32.add(game.tik, 1u), game)
 
-  let obj = Mons.Map.get_top(obj_pos, map)
-  open obj:
-  if Mons.Kind.animate(obj.kin) then // Only tick objs that can animate
-    let obj = Mons.Object.tick_idle(obj)
-    Mons.Game.map_set(obj_pos, idx, obj, game)
-  else game
-
-// For each tick, updates the game state
-// TODO: tick objects other than hero
+// Tick player for idle and ticks the game
 Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
   open game:
   // Online mode, update all players
@@ -1742,7 +1731,7 @@ Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
     | Mons.scr_mid;
     | hero_pos.value;
   let game = Mons.Game.tick_user(game.usr, pos, game)
-  let game = Mons.Game.tick_objects(pos, game) // Tick a fountain 
+  let game = Mons.Game.tick_game(game)
   game
 
   
@@ -1850,7 +1839,8 @@ Mons.start(online: Bool): App(Mons.Game)
       game_pos, 
       game_map, 
       Mons.Screen.introduction(0u),
-      Mons.Game.animated_obj
+      Mons.Game.animated_obj,
+      0u
     )
     let game = Mons.Game.add_animated_obj(game)
     game;
