@@ -1,0 +1,2 @@
+U32.is_even(num: U32): Bool
+  U32.eql(U32.mod(num, 2u), 0u)

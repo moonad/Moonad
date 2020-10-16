@@ -282,6 +282,15 @@ Mons.draw.image(img: Image3D, pos: Pos32, scr: Image3D): Image3D
     let pix_pos = Pos32.sub(Pos32.add(pos, pix_pos), Mons.vox_mid)
     Image3D.push(pix_pos, pix_col, scr)
 
+// Get the sprite at a given idx in a List of Sprites
+Mons.draw.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
+  let len_sprite = List.length<>(sprites)
+  let idl_nat = U32.to_nat(U32.sub(idl, 1u))
+  let idx = Nat.mod(Nat.div(idl_nat, 4), len_sprite)
+  case List.at<>(idx, sprites) as spr:
+  | Mons.Assets.void;
+  | spr.value;
+
 // SCREENS
 // -------
 // Draw the scene to select one of three Mons to start the game

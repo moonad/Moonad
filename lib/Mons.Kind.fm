@@ -1,6 +1,6 @@
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
-| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool);
+| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, has_idle: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 | Mons.Kind.Interactive(
   ele: Mons.Kind.inter,
@@ -57,6 +57,7 @@ T Mons.Kind.const
 | Mons.Kind.const.SIGN_1;
 | Mons.Kind.const.PATH_BLOCKER;
 | Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
+| Mons.Kind.const.CRYSTAL;
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
@@ -154,6 +155,13 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | terrain  => Bool.false;
   | inter => Bool.false;
 
+Mons.Kind.animate_idle(kind: Mons.Kind): Bool
+  case kind:
+  | mons => Bool.false;
+  | const => kind.has_idle;
+  | terrain => Bool.false;
+  | inter => Bool.false;
+
 // Swap "on" property
 Mons.Kind.swap_interactive(kind: Mons.Kind): Mons.Kind
   case kind:
@@ -192,7 +200,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
     | lever => 
       if U32.eql(z, 1u) then // lvl 1
         if U32.eql(kind.id, 0u) then // lever 0
-          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0)
+          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0, Bool.false)
           let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
           Mons.Game.map_push(obj_pos, sign, game)
         else game
@@ -213,11 +221,11 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
 
-Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false))
+Mons.Kind.new_const(kin: Mons.Kind.const, animate: Bool): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false, animate))
 
 Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true))
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true, Bool.true))
 
 Mons.Kind.new_interactive_tool(
   kin: Mons.Kind.inter,
@@ -408,13 +416,16 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else Mons.Attr.new_blockable([Mons.Assets.well_02])
       else Mons.Attr.new_blockable([]);
     | Mons.FONTAIN =>
-      if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
-        else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
-      else Mons.Attr.new_blockable([]);
+        Mons.Attr.new_blockable([
+          Mons.Assets.fountain_formality_0, Mons.Assets.fountain_formality_1,
+          Mons.Assets.fountain_formality_2, Mons.Assets.fountain_formality_3]);
+      // if Nat.eql(kin.model, 0) then
+      //   if Nat.eql(kin.slice, 0) then
+      //     Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_00])
+      //   else if Nat.eql(kin.slice, 1) then
+      //     Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
+      //   else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
+      // else Mons.Attr.new_blockable([]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
     | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
@@ -443,6 +454,12 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_lu]); 
         | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_lu]);        
       else Mons.Attr.new_blockable([]);
+    | CRYSTAL => 
+      Mons.Attr.new_neutral([
+        Mons.Assets.crystal0, Mons.Assets.crystal1, Mons.Assets.crystal2,
+        Mons.Assets.crystal3, Mons.Assets.crystal4, Mons.Assets.crystal5,
+        Mons.Assets.crystal6, Mons.Assets.crystal7
+      ]);
   ; // end of construction
 
   | Mons.Kind.terrain => 
