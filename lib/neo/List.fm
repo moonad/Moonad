@@ -442,6 +442,13 @@ List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
     cons: List.cons<>(f(as.head),List.map<,>(f,as.tail))
   }
 
+// Applies a function to all elements of the list.
+List.mapped<A: Type>(as: List(A))<B: Type>(f: A -> B): List(B)
+  case as {
+    nil : List.nil<>,
+    cons: List.cons<>(f(as.head),List.mapped<A>(as.tail)<B>(f))
+  }
+
 //List.map.id<A: Type>(ls: List(A)): Equal(List(A), List.map<A, A>(Function.id<A>, ls), ls)
   //case ls:
   //| Equal.to<_, List.map<,>(Function.id<>, List.nil<>)>;

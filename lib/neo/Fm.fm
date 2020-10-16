@@ -11,187 +11,114 @@ Fm.Letter: Type
 Fm.Name: Type
   List(Fm.Letter)
 
-// A Formality term (low-order)
-type Fm.Core {
-  var(name: Fm.Name),
-  typ,
-  all(name: Fm.Name, type: Fm.Core, body: Fm.Core),
-  lam(name: Fm.Name, body: Fm.Core),
-  app(func: Fm.Core, argm: Fm.Core),
-}
-
 // A Formality term (high-order)
-type Fm.HCore {
+type Fm.Core {
   var(name: Fm.Name, indx: Nat),
   ref(name: Fm.Name),
   typ,
-  all(name: Fm.Name, type: Fm.HCore, body: Fm.HCore -> Fm.HCore),
-  lam(name: Fm.Name, body: Fm.HCore -> Fm.HCore),
-  app(func: Fm.HCore, argm: Fm.HCore),
+  all(name: Fm.Name, xtyp: Fm.Core, body: Fm.Core -> Fm.Core),
+  lam(name: Fm.Name, body: Fm.Core -> Fm.Core),
+  app(func: Fm.Core, argm: Fm.Core),
 }
-
-// A map from Names to Formality definitions
-Fm.Map(A: Type): Type
-  Map(A)
 
 // A definition is a type, term pair
 type Fm.Core.Def {
   new(term: Fm.Core, type: Fm.Core),
 }
 
-// A definition is a type, term pair
-type Fm.HCore.Def {
-  new(term: Fm.HCore, type: Fm.HCore),
-}
-
 // A map from Names to definitions
 Fm.Core.Defs: Type
   Map(Fm.Core.Def)
 
-// A map from Names to definitions
-Fm.HCore.Defs: Type
-  Map(Fm.HCore.Def)
-
-// A Set of names
-Fm.NameSet: Type
-  Set
-
-// An empty map
-Fm.Map.new<A: Type>: Fm.Map(A)
-  Map.new<A>
-
-// An empty NameSet
-Fm.NameSet.new: Fm.NameSet
-  Set.new
+// A context is a list of (name : type) pairs
+Fm.Context: Type
+  List(Pair(Fm.Name, Fm.Core))
 
 // Gets a core term from a map by its name
-Fm.Map.get<A: Type>(name: Fm.Name, map: Fm.Map(A)): Maybe(A)
+Fm.deref<A: Type>(name: Fm.Name, map: Map(A)): Maybe(A)
   Map.get<A>(Fm.Name.to_bits(name), map)
 
 // Adds a name, core term pair to a map
-Fm.Map.set<A: Type>(name: Fm.Name, val: A, map: Fm.Map(A)): Map(A)
+Fm.def<A: Type>(name: Fm.Name, val: A, map: Map(A)): Map(A)
   Map.set<A>(Fm.Name.to_bits(name), val, map)
 
-// Prefix used by the Fm.NameSet.fresh function
-Fm.NameSet.fresh.prefix: Fm.Letter
-  let prefix = Word.nil
-  let prefix = Word.1<0>(prefix)
-  let prefix = Word.1<1>(prefix)
-  let prefix = Word.1<2>(prefix)
-  let prefix = Word.1<3>(prefix)
-  let prefix = Word.1<4>(prefix)
-  let prefix = Word.1<5>(prefix)
-  prefix
-
-// Adds a name to a NameSet, prefixing it to avoid capture
-Fm.NameSet.fresh(name: Fm.Name, nset: Fm.NameSet): Pair(Fm.Name, Fm.NameSet)
-  let key = Fm.Name.to_bits(name)
-  if Set.has(key, nset) then
-    Fm.NameSet.fresh(List.cons<>(Fm.NameSet.fresh.prefix, name), nset)
-  else
-    {name, Set.set(key, nset)}
-
-// Coverts a term to high order
-Fm.Core.to_high.go(term: Fm.Core, refs: Fm.Map(Fm.HCore)): Fm.HCore
-  case term {
-    var:
-      case Fm.Map.get<>(term.name, refs) as got {
-        none: Fm.HCore.ref(term.name),
-        some: got.value,
-      },
-    typ:
-      Fm.HCore.typ,
-    all: 
-      def type = Fm.Core.to_high.go(term.type, refs)
-      def body = (x) Fm.Core.to_high.go(term.body, Fm.Map.set<>(term.name,x,refs))
-      Fm.HCore.all(term.name, type, body),
-    lam:
-      def body = (x) Fm.Core.to_high.go(term.body, Fm.Map.set<>(term.name,x,refs))
-      Fm.HCore.lam(term.name, body),
-    app:
-      def func = Fm.Core.to_high.go(term.func, refs)
-      def argm = Fm.Core.to_high.go(term.argm, refs)
-      Fm.HCore.app(func, argm),
+// Finds a value in a context
+Fm.Context.find(name: Fm.Name, ctx: Fm.Context): Maybe(Fm.Core)
+  case ctx {
+    nil:
+      Maybe.none<>,
+    cons:
+      open ctx.head
+      if Fm.Name.eql(name, ctx.head.fst) then
+        Maybe.some<>(ctx.head.snd)
+      else
+        Fm.Context.find(name, ctx.tail)
   }
-
-// Converts a term to high order
-Fm.Core.to_high(term: Fm.Core): Fm.HCore
-  Fm.Core.to_high.go(term, Fm.Map.new<>)
-
-// Coverts a term to high order
-Fm.HCore.to_low.go(term: Fm.HCore, nset: Fm.NameSet, names: List(Fm.Name)): Fm.Core
+  
+// Binds named variables to their lambdas
+Fm.Core.bind(vars: Fm.Context, term: Fm.Core): Fm.Core 
   case term {
-    ref:
-      Fm.Core.var(term.name),
-    var:
-      case List.at_last<>(term.indx, names) as got {
-        none: Fm.Core.var(Fm.Name.read("_")),
-        some: Fm.Core.var(got.value),
-      },
-    typ:
-      Fm.Core.typ,
+    var: case Fm.Context.find(term.name, vars) as got {
+      none: Fm.Core.ref(term.name),
+      some: got.value,
+    },
     all: 
-      def type = Fm.HCore.to_low.go(term.type, nset, names)
-      get name nset = Fm.NameSet.fresh(term.name, nset)
-      def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
-      Fm.Core.all(name, type, body),
+      def xtyp = Fm.Core.bind(vars, term.xtyp)
+      def body = (x) Fm.Core.bind(List.cons<>({term.name,x},vars), term.body(x))
+      Fm.Core.all(term.name, xtyp, body),
     lam:
-      get name nset = Fm.NameSet.fresh(term.name, nset)
-      def body = Fm.HCore.to_low.go(term.body(Fm.HCore.ref(name)), nset, List.cons<>(name, names))
-      Fm.Core.lam(name, body),
+      def body = (x) Fm.Core.bind(List.cons<>({term.name,x},vars), term.body(x))
+      Fm.Core.lam(term.name, body),
     app:
-      def func = Fm.HCore.to_low.go(term.func, nset, names)
-      def argm = Fm.HCore.to_low.go(term.argm, nset, names)
-      Fm.Core.app(func, argm)
+      def func = Fm.Core.bind(vars, term.func)
+      def argm = Fm.Core.bind(vars, term.argm)
+      Fm.Core.app(func, argm),
+    _: term,
   }
-
-// Converts a term to low order
-Fm.HCore.to_low(term: Fm.HCore): Fm.Core
-  Fm.HCore.to_low.go(term, Fm.NameSet.new, List.nil<>)
 
 // Reduces a high order term to weak head normal form
-Fm.HCore.reduce(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
+Fm.Core.reduce(term: Fm.Core, defs: Fm.Core.Defs): Fm.Core
   case term {
-    ref: case Fm.Map.get<>(term.name, defs) as got {
-      none: Fm.HCore.ref(term.name),
+    ref: case Fm.deref<>(term.name, defs) as got {
+      none: Fm.Core.ref(term.name),
       some: case got.value { new: got.value.term },
     },
-    var: Fm.HCore.var(term.name, term.indx),
-    typ: Fm.HCore.typ,
-    all: Fm.HCore.all(term.name, term.type, term.body),
-    lam: Fm.HCore.lam(term.name, term.body),
+    var: Fm.Core.var(term.name, term.indx),
+    typ: Fm.Core.typ,
+    all: Fm.Core.all(term.name, term.xtyp, term.body),
+    lam: Fm.Core.lam(term.name, term.body),
     app:
-      let func = Fm.HCore.reduce(term.func, defs)
+      let func = Fm.Core.reduce(term.func, defs)
       case func {
-        lam: Fm.HCore.reduce(func.body(term.argm), defs),
+        lam: Fm.Core.reduce(func.body(term.argm), defs),
         _: term,
       }
   }
 
 // Normalizes a high order term
-Fm.HCore.normalize(term: Fm.HCore, defs: Fm.HCore.Defs): Fm.HCore
-  case Fm.HCore.reduce(term, defs) as term {
+Fm.Core.normalize(term: Fm.Core, defs: Fm.Core.Defs): Fm.Core
+  case Fm.Core.reduce(term, defs) as term {
     ref:
-      Fm.HCore.ref(term.name),
+      Fm.Core.ref(term.name),
     var:
-      Fm.HCore.var(term.name, term.indx),
+      Fm.Core.var(term.name, term.indx),
     typ:
-      Fm.HCore.typ,
+      Fm.Core.typ,
     all: 
-      def type = Fm.HCore.normalize(term.type, defs)
-      def body = (x) Fm.HCore.normalize(term.body(x), defs)
-      Fm.HCore.all(term.name, type, body),
+      def type = Fm.Core.normalize(term.xtyp, defs)
+      def body = (x) Fm.Core.normalize(term.body(x), defs)
+      Fm.Core.all(term.name, type, body),
     lam:
-      def body = (x) Fm.HCore.normalize(term.body(x), defs)
-      Fm.HCore.lam(term.name, body),
+      def body = (x) Fm.Core.normalize(term.body(x), defs)
+      Fm.Core.lam(term.name, body),
     app:
-      def func = Fm.HCore.normalize(term.func, defs)
-      def argm = Fm.HCore.normalize(term.argm, defs)
-      Fm.HCore.app(func, argm),
+      def func = Fm.Core.normalize(term.func, defs)
+      def argm = Fm.Core.normalize(term.argm, defs)
+      Fm.Core.app(func, argm),
   }
 
 // Helper function
-Fm.HCore.serialize.go(term: Fm.HCore, depth: Nat, init: Nat, x: Bits): Bits
+Fm.Core.serialize.go(term: Fm.Core, depth: Nat, init: Nat, x: Bits): Bits
   case term {
     ref:
       let name = Bits.concat(Fm.Name.to_bits(term.name))
@@ -205,28 +132,28 @@ Fm.HCore.serialize.go(term: Fm.HCore, depth: Nat, init: Nat, x: Bits): Bits
     typ:
       Bits.0(Bits.1(Bits.1(x))),
     all:
-      let type = Fm.HCore.serialize.go(term.type, depth, init)
-      let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(term.name, depth)), Nat.succ(depth), init)
+      let type = Fm.Core.serialize.go(term.xtyp, depth, init)
+      let body = Fm.Core.serialize.go(term.body(Fm.Core.var(term.name, depth)), Nat.succ(depth), init)
       Bits.1(Bits.0(Bits.0(type(body(x))))),
     lam:
-      let body = Fm.HCore.serialize.go(term.body(Fm.HCore.var(term.name, depth)), Nat.succ(depth), init)
+      let body = Fm.Core.serialize.go(term.body(Fm.Core.var(term.name, depth)), Nat.succ(depth), init)
       Bits.1(Bits.0(Bits.1(body(x)))),
     app:
-      let func = Fm.HCore.serialize.go(term.func, depth, init)
-      let argm = Fm.HCore.serialize.go(term.argm, depth, init)
+      let func = Fm.Core.serialize.go(term.func, depth, init)
+      let argm = Fm.Core.serialize.go(term.argm, depth, init)
       Bits.1(Bits.1(Bits.0(func(argm(x))))),
   }
 
 // Serializes a term to a representative bitstring
-Fm.HCore.serialize(term: Fm.HCore, depth: Nat): Bits
-  Fm.HCore.serialize.go(term, depth, depth, Bits.nil)
+Fm.Core.serialize(term: Fm.Core, depth: Nat): Bits
+  Fm.Core.serialize.go(term, depth, depth, Bits.nil)
 
 // Determines if two terms are equal
-Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, lv: Nat, seen: Set): Bool
-  let a1 = Fm.HCore.reduce(a, defs)
-  let b1 = Fm.HCore.reduce(b, defs)
-  let ah = Fm.HCore.serialize(a1, lv)
-  let bh = Fm.HCore.serialize(b1, lv)
+Fm.Core.equal(a: Fm.Core, b: Fm.Core, defs: Fm.Core.Defs, lv: Nat, seen: Set): Bool
+  let a1 = Fm.Core.reduce(a, defs)
+  let b1 = Fm.Core.reduce(b, defs)
+  let ah = Fm.Core.serialize(a1, lv)
+  let bh = Fm.Core.serialize(b1, lv)
   let id = Bits.concat(ah, bh)
   if Bool.or(Bits.eql(ah, bh), Set.has(id, seen)) then
     Bool.true
@@ -236,44 +163,36 @@ Fm.HCore.equal(a: Fm.HCore, b: Fm.HCore, defs: Fm.HCore.Defs, lv: Nat, seen: Set
       all:
         case b1 {
           all:
-            let a1_body = a1.body(Fm.HCore.var(a1.name, lv))
-            let b1_body = b1.body(Fm.HCore.var(b1.name, lv))
-            let eq_type = Fm.HCore.equal(a1.type, b1.type, defs, lv, seen)
-            let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
+            let a1_body = a1.body(Fm.Core.var(a1.name, lv))
+            let b1_body = b1.body(Fm.Core.var(b1.name, lv))
+            let eq_type = Fm.Core.equal(a1.xtyp, b1.xtyp, defs, lv, seen)
+            let eq_body = Fm.Core.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
             Bool.and(eq_type, eq_body),
           _: Bool.false,
         },
       lam:
         case b1 {
           lam:
-            let a1_body = a1.body(Fm.HCore.var(a1.name, lv))
-            let b1_body = b1.body(Fm.HCore.var(b1.name, lv))
-            let eq_body = Fm.HCore.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
+            let a1_body = a1.body(Fm.Core.var(a1.name, lv))
+            let b1_body = b1.body(Fm.Core.var(b1.name, lv))
+            let eq_body = Fm.Core.equal(a1_body, b1_body, defs, Nat.succ(lv), seen)
             eq_body,
           _: Bool.false,
         },
       app:
         case b1 {
           app:
-            let eq_func = Fm.HCore.equal(a1.func, b1.func, defs, lv, seen)
-            let eq_argm = Fm.HCore.equal(a1.argm, b1.argm, defs, lv, seen)
+            let eq_func = Fm.Core.equal(a1.func, b1.func, defs, lv, seen)
+            let eq_argm = Fm.Core.equal(a1.argm, b1.argm, defs, lv, seen)
             Bool.and(eq_func, eq_argm),
           _: Bool.false,
         },
       _: Bool.false
     }
 
-// A context is a list of names and types
-Fm.Context: Type
-  List(Pair(Fm.Name, Fm.HCore))
-  
-// Logs a term
-//Fm.HCore.view(x: Fm.HCore, ctx: Fm.Context): String
-  //Fm.Core.show(Fm.HCore.to_low.go(x, Fm.NameSet.new, List.map<,>((x) Pair.fst<,>(x), ctx)))
-
 // Infers the type of a core term
-Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.HCore)
-  use skp = Debug.log<>(String.concat("- infer: ",Fm.HCore.view(term,ctx)))
+Fm.Core.infer(term: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Fm.Core)
+  use skp = Debug.log<>(String.concat("- infer: ",Fm.Core.view(term,ctx)))
   case term {
     ref:
       case Fm.Map.get<>(term.name, defs) as got {
@@ -285,25 +204,25 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.H
     var:
       Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx)),
     typ:
-      Maybe.some<>(Fm.HCore.typ),
+      Maybe.some<>(Fm.Core.typ),
     all: 
-      let body_var = Fm.HCore.var(term.name, List.length<>(ctx))
-      let body_ctx = List.cons<>({term.name,term.type}, ctx)
+      let body_var = Fm.Core.var(term.name, List.length<>(ctx))
+      let body_ctx = List.cons<>({term.name,term.xtyp}, ctx)
       do Maybe {
-        Fm.HCore.check(term.type, Fm.HCore.typ, defs, ctx);
-        Fm.HCore.check(term.body(body_var), Fm.HCore.typ, defs, body_ctx);
-        return Fm.HCore.typ;
+        Fm.Core.check(term.xtyp, Fm.Core.typ, defs, ctx);
+        Fm.Core.check(term.body(body_var), Fm.Core.typ, defs, body_ctx);
+        return Fm.Core.typ;
       },
     lam:
       Maybe.none<>,
     app: 
-      case Fm.HCore.infer(term.func, defs, ctx) as func_typ {
+      case Fm.Core.infer(term.func, defs, ctx) as func_typ {
         none: Maybe.none<>,
         some: 
-          let func_typ = Fm.HCore.reduce(func_typ.value, defs)
+          let func_typ = Fm.Core.reduce(func_typ.value, defs)
           case func_typ {
             all: do Maybe {
-              Fm.HCore.check(term.argm, func_typ.type, defs, ctx);
+              Fm.Core.check(term.argm, func_typ.xtyp, defs, ctx);
               return func_typ.body(term.argm);
             },
             _: Maybe.none<>,
@@ -312,39 +231,31 @@ Fm.HCore.infer(term: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Fm.H
   }
 
 // Checks the type of a core term
-Fm.HCore.check(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Unit)
-  use skp = Debug.log<>(String.flatten(["- check: ",Fm.HCore.view(term,ctx)," :: ",Fm.HCore.view(type,ctx)]))
+Fm.Core.check(term: Fm.Core, type: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Unit)
+  use skp = Debug.log<>(String.flatten(["- check: ",Fm.Core.view(term,ctx)," :: ",Fm.Core.view(type,ctx)]))
   case term {
     lam: 
-      let typv = Fm.HCore.reduce(type, defs)
+      let typv = Fm.Core.reduce(type, defs)
       case typv {
         all:
-          let body_var = Fm.HCore.var(term.name, List.length<>(ctx))
+          let body_var = Fm.Core.var(term.name, List.length<>(ctx))
           let body_typ = typv.body(body_var)
-          let body_ctx = List.cons<>({term.name,typv.type}, ctx)
-          Fm.HCore.check(term.body(body_var), body_typ, defs, body_ctx),
+          let body_ctx = List.cons<>({term.name,typv.xtyp}, ctx)
+          Fm.Core.check(term.body(body_var), body_typ, defs, body_ctx),
         _: Maybe.none<>,
       },
-    _: Fm.HCore.check.test(term, type, defs, ctx),
+    _: 
+      let infr = Fm.Core.infer(term, defs, ctx);
+      case infr {
+        none: Maybe.none<>,
+        some:
+          let eqls = Fm.Core.equal(type, infr.value, defs, List.length<>(ctx), Set.new)
+          if eqls then
+            Maybe.some<>(Unit.new)
+          else
+            Maybe.none<>,
+      }
   }
-
-// Infers the type of a core term and checks if it is equal to type
-//Fm.HCore.check.test(term: Fm.HCore, type: Fm.HCore, defs: Fm.HCore.Defs, ctx: Fm.Context): Maybe(Unit)
-  //let infr = Fm.HCore.infer(term, defs, ctx);
-  //case infr:
-  //| none => Maybe.none<>;
-  //| some =>
-    //use skp = Debug.log<>(String.flatten([
-      //"- equal: "
-      //Fm.HCore.view(infr.value, ctx),
-      //" == ",
-      //Fm.HCore.view(type, ctx)
-    //]))
-    //let eqls = Fm.HCore.equal(type, infr.value, defs, List.length<>(ctx), Set.new)
-    //if eqls then
-      //Maybe.some<>(Unit.new)
-    //else
-      //Maybe.none<>;
 
 // Converts a Char to a Letter
 Fm.Letter.read(chr: Char): Maybe(Fm.Letter)
@@ -404,218 +315,146 @@ Fm.Letter.eql(a: Fm.Letter, b: Fm.Letter): Bool
 Fm.Name.eql(a: Fm.Name, b: Fm.Name): Bool
   List.fold_zip<,>(a,b)<Bool>(Fm.Letter.eql, Bool.true, Bool.and)
 
+// Logs a term
+Fm.Core.view(term: Fm.Core, ctx: Fm.Context): String
+  Fm.Core.show(term, List.mapped<>(ctx)<>((x) case x { new: x.fst }))
+
 // Converts a Fm.Core term to a String
-Fm.Core.show(term: Fm.Core): String
+Fm.Core.show(term: Fm.Core, names: List(Fm.Name)): String
   case term {
+    ref:
+      Fm.Name.show(term.name),
     var:
       Fm.Name.show(term.name),
     typ:
       "Type",
     all:
       let name = Fm.Name.show(term.name)
-      let type = Fm.Core.show(term.type)
-      let body = Fm.Core.show(term.body);
-      String.flatten(["@(",name,":",type,") ",body]),
+      let type = Fm.Core.show(term.xtyp, names)
+      let body = Fm.Core.show(term.body(Fm.Core.var(term.name, 0)), List.cons<>(term.name, names))
+      String.flatten(["(",name,":",type,") ",body]),
     lam:
       let name = Fm.Name.show(term.name)
-      let body = Fm.Core.show(term.body)
-      String.flatten(["@",name," ",body]),
+      let body = Fm.Core.show(term.body(Fm.Core.var(term.name, 0)), List.cons<>(term.name, names))
+      String.flatten(["(",name,") ",body]),
     app:
-      let func = Fm.Core.show(term.func)
-      let argm = Fm.Core.show(term.argm)
-      String.flatten(["(",func," ",argm,")"]),
+      let func = Fm.Core.show(term.func, names)
+      let argm = Fm.Core.show(term.argm, names)
+      String.flatten([func,"(",argm,")"]),
   }
 
-// Formality's Parser
-type Fm.Parser.Reply<T: Type> {
-  error(code: String, error: String),
-  value(code: String, value: T),
-}
-
-// Formality Core's parser type
-Fm.Parser(T: Type): Type
-  String -> Fm.Parser.Reply(T)
-
-// Parser monadic binder
-Fm.Parser.bind<A: Type, B: Type>(p: Fm.Parser(A), f: A -> Fm.Parser(B)): Fm.Parser(B)
-  (code) case p(code) as reply {
-    error: Fm.Parser.Reply.error<B>(reply.code, reply.error),
-    value: f(reply.value, reply.code),
-  }
-
-// Parser monadic injection
-Fm.Parser.pure<A: Type>(value: A): Fm.Parser(A)
-  (code) Fm.Parser.Reply.value<A>(code, value)
-
-// Perser monad
-Fm.Parser.monad: Monad(Fm.Parser)
-  Monad.new<Fm.Parser>(Fm.Parser.bind, Fm.Parser.pure)
-
-// Consumes a specific text, returns the remaining code
-Fm.Parser.text(text: String): Fm.Parser(Unit)
-  (code) case text {
-    nil:
-      Fm.Parser.Reply.value<>(code, Unit.new),
-    cons: case code {
-      nil:
-        let error = String.flatten(["Expected '", text, "'."])
-        Fm.Parser.Reply.error<>(code, error),
-      cons:
-        if U16.eql(text.head, code.head) then
-          Fm.Parser.text(text.tail, code.tail)
-        else
-          let error = String.flatten(["Expected '", text, "'."])
-          Fm.Parser.Reply.error<>(code, error)
-    }
-  }
-
-// Parses many
-Fm.Parser.many.go<A: Type>(
-  parser: Fm.Parser(A),
-  list: List(A) -> List(A),
-  code: String
-): Fm.Parser.Reply(List(A))
-  case parser(code) as parsed {
-    error: Fm.Parser.Reply.value<>(code, list([])),
-    value: Fm.Parser.many.go<A>(parser, (xs) list(List.cons<>(parsed.value, xs)), parsed.code),
-  }
-
-// Parses many
-Fm.Parser.many<A: Type>(parser: Fm.Parser(A)): Fm.Parser(List(A))
-  Fm.Parser.many.go<A>(parser, (x) x)
-
-// Parses many, minimum 1
-Fm.Parser.many1<A: Type>(parser: Fm.Parser(A)): Fm.Parser(List(A))
-  do Fm.Parser {
-    var head = parser;
-    var tail = Fm.Parser.many<A>(parser);
-    return List.cons<A>(head, tail);
-  }
-
-// Parses the first in a list
-Fm.Parser.first_of<A: Type>(pars: List(Fm.Parser(A))): Fm.Parser(A)
-  (code) case pars {
-    nil: Fm.Parser.Reply.error<>(code, "No parse."),
-    cons:
-      let parsed = pars.head(code)
-      case parsed {
-        error: Fm.Parser.first_of<>(pars.tail, code),
-        value: Fm.Parser.Reply.value<>(parsed.code, parsed.value),
-      }
-  }
-
-// Skips whitespaces
-Fm.Parser.Core.spaces: Fm.Parser(List(Unit))
-  Fm.Parser.many<>(Fm.Parser.first_of<>([
-    Fm.Parser.text(" "),
-    Fm.Parser.text("\n")
-  ]))
-  
 // Parses a letter: `[a-zA-Z_.]`
-Fm.Parser.Core.letter: Fm.Parser(Fm.Letter)
+Fm.Parser.Core.letter: Parser(Fm.Letter)
   (code) case code {
-    nil: Fm.Parser.Reply.error<>(code, "Unexpected eof."),
+    nil: Parser.Reply.error<>(code, "Unexpected eof."),
     cons: case Fm.Letter.read(code.head) as got {
-      none: Fm.Parser.Reply.error<>(code, "Expected letter."),
-      some: Fm.Parser.Reply.value<>(code.tail, got.value),
+      none: Parser.Reply.error<>(code, "Expected letter."),
+      some: Parser.Reply.value<>(code.tail, got.value),
     }
   }
   
 // Parses a (possibly empty) name: `[a-zA-Z_.]*`
-Fm.Parser.Core.name: Fm.Parser(Fm.Name)
-  Fm.Parser.many<Fm.Letter>(Fm.Parser.Core.letter)
+Fm.Parser.Core.name: Parser(Fm.Name)
+  Parser.many<Fm.Letter>(Fm.Parser.Core.letter)
 
 // Parses a non-empty name: `[a-zA-Z_.]+`
-Fm.Parser.Core.name1: Fm.Parser(Fm.Name)
-  Fm.Parser.many1<Fm.Letter>(Fm.Parser.Core.letter)
+Fm.Parser.Core.name1: Parser(Fm.Name)
+  Parser.many1<Fm.Letter>(Fm.Parser.Core.letter)
 
 // Parses a type: `Type`
-Fm.Parser.Core.type: Fm.Parser(Fm.Core)
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
-    Fm.Parser.text("Type");
+Fm.Parser.Core.type: Parser(Fm.Core)
+  do Parser {
+    Parser.spaces_text("Type");
     return Fm.Core.typ;
   }
 
 // Parses a lambda: `!var body`
-Fm.Parser.Core.lambda: Fm.Parser(Fm.Core)
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
-    Fm.Parser.text("@");
+Fm.Parser.Core.lambda: Parser(Fm.Core)
+  do Parser {
+    Parser.spaces_text("(");
     var name = Fm.Parser.Core.name;
+    Parser.spaces_text(")");
     var body = Fm.Parser.Core;
-    return Fm.Core.lam(name, body);
+    return Fm.Core.lam(name, () body);
   }
 
 // Parses a forall: `!var body`
-Fm.Parser.Core.forall: Fm.Parser(Fm.Core)
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
-    Fm.Parser.text("@");
-    Fm.Parser.text("(");
+Fm.Parser.Core.forall: Parser(Fm.Core)
+  do Parser {
+    Parser.spaces_text("(");
     var name = Fm.Parser.Core.name;
-    Fm.Parser.text(":");
+    Parser.spaces_text(":");
     var type = Fm.Parser.Core;
-    Fm.Parser.text(")");
+    Parser.spaces_text(")");
+    Parser.spaces_text("->");
     var body = Fm.Parser.Core;
-    return Fm.Core.all(name, type, body);
-  }
-
-// Parses an application: `(func argm0 argm1 ... argmN)`
-Fm.Parser.Core.application: Fm.Parser(Fm.Core)
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
-    Fm.Parser.text("(");
-    var func = Fm.Parser.Core;
-    Fm.Parser.Core.spaces;
-    var argm = Fm.Parser.Core;
-    Fm.Parser.text(")");
-    return Fm.Core.app(func, argm);
+    return Fm.Core.all(name, type, () body);
   }
 
 // Parses a reference: `name`
-Fm.Parser.Core.reference: Fm.Parser(Fm.Core)
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
+Fm.Parser.Core.reference: Parser(Fm.Core)
+  do Parser {
+    Parser.spaces;
     var name = Fm.Parser.Core.name;
-    //return Debug.log<>(Fm.Name.show(name), () Fm.Core.var(name));
-    return Fm.Core.var(name);
+    return Fm.Core.var(name, 0);
   }
 
-// Parses a core term
-Fm.Parser.Core: Fm.Parser(Fm.Core)
-  Fm.Parser.first_of<>([
-    Fm.Parser.Core.type,
-    Fm.Parser.Core.forall,
-    Fm.Parser.Core.lambda,
-    Fm.Parser.Core.application,
-    Fm.Parser.Core.reference,
+// Parses an application: `(func argm0 argm1 ... argmN)`
+Fm.Parser.Core.application(func: Fm.Core): Parser(Fm.Core)
+  do Parser {
+    Parser.text("(");
+    var argm = Fm.Parser.Core;
+    Parser.spaces_text(")");
+    return Fm.Core.app(func, argm);
+  }
+
+// Parses a core term (prefix phase)
+Fm.Parser.Core: Parser(Fm.Core)
+  do Parser {
+    var term = Parser.first_of<>([
+      Fm.Parser.Core.type,
+      Fm.Parser.Core.forall,
+      Fm.Parser.Core.lambda,
+      Fm.Parser.Core.reference,
+    ]);
+    Fm.Parser.Core.suffix(term);
+  }
+
+// Parses a core term (suffix phase)
+Fm.Parser.Core.suffix(term: Fm.Core): Parser(Fm.Core)
+  (code)
+  let suffix_parser = Parser.first_of<>([
+    Fm.Parser.Core.application(term),
   ])
+  case suffix_parser(code) as suffix_parsed {
+    error: Parser.Reply.value<>(code, term),
+    value: Fm.Parser.Core.suffix(suffix_parsed.value, suffix_parsed.code),
+  }
 
 // Parses a definition
-Fm.Parser.Core.def: Fm.Parser(Pair(Fm.Name, Fm.Core.Def))
-  do Fm.Parser {
-    Fm.Parser.Core.spaces;
+Fm.Parser.Core.def: Parser(Pair(Fm.Name, Fm.Core.Def))
+  do Parser {
+    Parser.spaces;
     var name = Fm.Parser.Core.name;
-    Fm.Parser.text(":");
+    Parser.text(":");
     var type = Fm.Parser.Core;
     var term = Fm.Parser.Core;
-    return {name, Fm.Core.Def.new(term,type)};
+    return {name, Fm.Core.Def.new(Fm.Core.bind([],term),Fm.Core.bind([],type))};
   }
 
 // Parses many definitions
-Fm.Parser.Core.defs.go(defs: Fm.Core.Defs): Fm.Parser(Fm.Core.Defs)
+Fm.Parser.Core.defs.go(defs: Fm.Core.Defs): Parser(Fm.Core.Defs)
   (code)
   case Fm.Parser.Core.def(code) as parsed {
     error:
-      Fm.Parser.Reply.value<>(code, defs),
+      Parser.Reply.value<>(code, defs),
     value:
       get name def = parsed.value
       Fm.Parser.Core.defs.go(Fm.Map.set<>(name, def, defs), parsed.code),
   }
 
 // Parses many definitions
-Fm.Parser.Core.defs: Fm.Parser(Fm.Core.Defs)
+Fm.Parser.Core.defs: Parser(Fm.Core.Defs)
   Fm.Parser.Core.defs.go(Map.new<>)
 
 // Reads a term from string
@@ -647,37 +486,39 @@ Fm.Core.Defs.show(defs: Fm.Core.Defs): String
       str,
       Fm.Name.show(Fm.Name.from_bits(name)),
       ": ",
-      Fm.Core.show(def.type),
+      Fm.Core.show(def.type, []),
       "\n  ",
-      Fm.Core.show(def.term),
+      Fm.Core.show(def.term, []),
       "\n\n",
     ])
 
-Fm.Defs.to_high(defs: Fm.Core.Defs): Fm.HCore.Defs
-  def fn = (def)
-    open def
-    Fm.HCore.Def.new(Fm.Core.to_high(def.term), Fm.Core.to_high(def.type))
-  Map.map<Fm.Core.Def, Fm.HCore.Def>(fn, defs)
+//Fm.Defs.to_high(defs: Fm.Core.Defs): Fm.Core.Defs
+  //def fn = (def)
+    //open def
+    //Fm.Core.Def.new(Fm.Core.to_high(def.term), Fm.Core.to_high(def.type))
+  //Map.map<Fm.Core.Def, Fm.Core.Def>(fn, defs)
 
 Fm.Defs.errors(defs: Fm.Core.Defs): Nat
-  let defs = Fm.Defs.to_high(defs)
   let errs = 0
   for name_def in Map.to_list<>(defs) with errs:
     get name def = name_def
     use skp = Debug.log<>(String.flatten(["Checking ",Fm.Name.show(Fm.Name.from_bits(name)),"..."]))
-    let checked = case def { new: Fm.HCore.check(def.term, def.type, defs, List.nil<>) }
+    let checked = case def { new: Fm.Core.check(def.term, def.type, defs, List.nil<>) }
     Nat.add(errs, case checked { none: 1, some: 0, })
 
 Fm: _
   let defs = Maybe.default<>(Fm.Map.new<>, Fm.Core.Defs.read("
     Nat: Type
-      @(A: Type) @(z: A) @(s: @(x: A) A) A
+      (A: Type) -> (z: A) -> (s: (x: A) -> A) -> A
 
     zero: Nat
-      @A @z @s z
+      (A) (z) (s) z
 
-    succ: @(n: Nat) Nat
-      @n @A @z @s (s (((n A) z) s))
+    succ: (n: Nat) -> Nat
+      (n) (A) (z) (s) s(n(A)(z)(s))
+
+    two: Nat
+      succ(succ(zero))
   "));
   do IO {
     IO.print("# Defs:\n");
