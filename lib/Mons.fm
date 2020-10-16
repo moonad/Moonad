@@ -100,7 +100,7 @@ T Mons.Game
   pos: Map(Pos32), // players positions
   map: Mons.Map, // the game map
   stt: Mons.Screen, // the current state of the game
-  ani: Pos32 -> List(Pair(Mons.Object, Pos32)) // objects that can animate
+  ani: List(Pair(Mons.Object, Pos32)) // objects that can animate
 );
 
 T Mons.Screen
@@ -124,35 +124,42 @@ T Mons.Type
 | Mons.Type.light;
 | Mons.Type.darkness;
 
-Mons.Game.animated_obj(hero_pos: Pos32): List(Pair(Mons.Object, Pos32))
-  let initial_pos = hero_pos //Mons.scr_mid
+Mons.Game.animated_obj: List(Pair(Mons.Object, Pos32))
+  let initial_pos = Mons.global_scr_mid
   let x = Pos32.get_x(initial_pos)
   let y = Pos32.get_y(initial_pos)
   let z = Pos32.get_z(initial_pos)
   let objs = 
     [{Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true), 
-      Pos32.new(U32.add(x, 3u), U32.sub(y, 3u), z)}
+      Mons.image_to_global(80u, 80u, 38u, 68u, 0u)}
      ]
   objs
 
 Mons.Game.add_animated_obj(game: Mons.Game): Mons.Game
-  let pos = 
-    case Mons.Game.get_hero_pos(game) as pos:
-    | Mons.scr_mid;
-    | pos.value;
-  // let x = Pos32.get_x(pos)
-  // let y = Pos32.get_y(pos)
-  // let z = Pos32.get_z(pos)
-
-  // let obj = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true)
-  // let pos = Pos32.new(U32.add(x, 3u), U32.sub(y, 3u), z)
-  for object in Mons.Game.animated_obj(pos) with game:
+  for object in Mons.Game.animated_obj with game:
     get obj pos = object
     Mons.Game.map_push(pos, obj, game)
 
-Mons.lvl1_center: Pos32
-  let mid = U32.div(U32.mul(81u, 16u), 2u)
-  Pos32.new(mid, mid, 0u) // TODO:  change to 1u
+Mons.global_scr_mid: Pos32
+  Pos32.new(2048u, 2048u, 0u) // default z is 0
+
+// Gets an imagem map, the object position on it and transforms to a global pos
+Mons.image_to_global(width: U32, height: U32, x: U32, y: U32, lvl: U32): Pos32
+  let g_x = Pos32.get_x(Mons.global_scr_mid)
+  let g_y = Pos32.get_y(Mons.global_scr_mid)
+  let mid_width  = U32.div(width, 2u)
+  let mid_height = U32.div(height, 2u)
+  let mid_x_diff = U32.sub(mid_width, x)
+  let mid_y_diff = U32.sub(mid_height, y)
+  let upd_g_x =
+    if U32.gtn(x, mid_width) then  U32.add(g_x, U32.sub(x, mid_width))
+    else if U32.ltn(x, mid_width) then U32.sub(g_x, U32.sub(mid_width, x))
+    else mid_width
+  let upd_g_y = 
+    if U32.gtn(y, mid_height) then U32.add(g_y, U32.sub(y, mid_height))
+    else if U32.ltn(y, mid_height) then U32.sub(g_y, U32.sub(mid_height, y))
+    else mid_height
+  Pos32.new(upd_g_x, upd_g_y, lvl)
 
 // Sprites are centered at 128x128
 Mons.vox_mid: Pos32
@@ -1752,13 +1759,16 @@ Mons.Game.tick(game: Mons.Game, time: U64): Mons.Game
 //   Mons.Game.map_set(pos, idx, obj, game)
 
 // How to set a pos for objects based on the map and not hero_pos?
-Mons.test.add_obj(hero_pos: Pos32, game: Mons.Game): Mons.Game
-  let x = Pos32.get_x(hero_pos)
-  let y = Pos32.get_y(hero_pos)
-  let z = Pos32.get_z(hero_pos) // dim
-  let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true)
-  let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
-  Mons.Game.map_push(obj_pos, fountain, game)
+// Mons.test.add_obj(hero_pos: Pos32, game: Mons.Game): Mons.Game
+//   let x = Pos32.get_x(hero_pos)
+//   let y = Pos32.get_y(hero_pos)
+//   let z = Pos32.get_z(hero_pos) // dim
+//   let fountain = Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true)
+//   // let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
+//   // let g_x = U32.mul(40u, 16u)
+//   // let g_y = U32.mul(40u, 16u)
+//   let obj_pos = Mons.image_to_global(80u, 80u, 38u, 71u, 0u)
+//   Mons.Game.map_push(obj_pos, fountain, game)
 
 // All valid inputs and its code
 Mons.Input.list: List(Pair(Char, Bits))
@@ -1888,14 +1898,14 @@ Mons.start(online: Bool): App(Mons.Game)
         let game = Mons.Game.cmd('d', event.addr, game) // inits hero
         open game:
         let pos = 
-        case Mons.Game.get_hero_pos(game) as pos:
-        | Mons.scr_mid;
-        | pos.value;
+          case Mons.Game.get_hero_pos(game) as pos:
+          | Mons.scr_mid;
+          | pos.value;
         let hero_info = Mons.Map.get_hero(pos, game.map)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
-        // let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        let game = Mons.test.add_obj(pos, game)
+        let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
+        // let game = Mons.test.add_obj(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
