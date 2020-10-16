@@ -723,6 +723,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
+      { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false)] }
       { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
       { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]}
