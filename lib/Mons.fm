@@ -83,7 +83,8 @@ T Mons.Attr
   mhp: U32,
   atk: U32,
   name: String,
-  spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List(Image3D),
+  wlk: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir) -> List(Image3D), // walk
+  idl: List(Image3D), // idle
   pic: Image3D,
   battle_spr: (is_up: Bool) -> Image3D,
   skills: List(Mons.Skill)
@@ -100,7 +101,6 @@ T Mons.Game
   pos: Map(Pos32), // players positions
   map: Mons.Map, // the game map
   stt: Mons.Screen, // the current state of the game
-  ani: List(Pair(Mons.Object, Pos32)), // objects that can animate
   tik: U32
 );
 
@@ -124,23 +124,6 @@ T Mons.Type
 | Mons.Type.ice;
 | Mons.Type.light;
 | Mons.Type.darkness;
-
-Mons.Game.animated_obj: List(Pair(Mons.Object, Pos32))
-  let initial_pos = Mons.global_scr_mid
-  let x = Pos32.get_x(initial_pos)
-  let y = Pos32.get_y(initial_pos)
-  let z = Pos32.get_z(initial_pos)
-  let objs = 
-    [{Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true), 
-      Mons.image_to_global(80u, 80u, 38u, 68u, 0u)}
-     ]
-  objs
-
-// Add all animated objs to the map
-Mons.Game.add_animated_obj(game: Mons.Game): Mons.Game
-  for object in Mons.Game.animated_obj with game:
-    get obj pos = object
-    Mons.Game.map_push(pos, obj, game)
 
 Mons.global_scr_mid: Pos32
   Pos32.new(2048u, 2048u, 0u) // default z is 0
@@ -921,10 +904,10 @@ Mons.Game.get_usr(game: Mons.Game): Word(160)
 
 // Set the game user
 Mons.Game.set_usr(usr: Word(160), game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.ani, game.tik)
+  open game: Mons.Game.new(usr, game.pos, game.map, game.stt, game.tik)
 
 Mons.Game.set_stt(stt: Mons.Screen, game: Mons.Game): Mons.Game
-  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.ani, game.tik)
+  open game: Mons.Game.new(game.usr, game.pos, game.map, stt, game.tik)
 
 // Gets an user's position
 Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
@@ -935,7 +918,7 @@ Mons.Game.get_user_pos(user: Word(160), game: Mons.Game): Maybe(Pos32)
 Mons.Game.set_user_pos(user: Word(160), pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   Mons.Game.new(game.usr, Map.set<>(Word.to_bits<160>(user), pos, game.pos), 
-    game.map, game.stt, game.ani, game.tik)
+    game.map, game.stt, game.tik)
 
 // Gets the hero's position
 Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
@@ -944,11 +927,11 @@ Mons.Game.get_hero_pos(game: Mons.Game): Maybe(Pos32)
 // Sets the game map
 Mons.Game.set_map(map: Mons.Map, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, map, game.stt, game.ani, game.tik)
+  Mons.Game.new(game.usr, game.pos, map, game.stt, game.tik)
 
 Mons.Game.set_tik(tik: U32, game: Mons.Game): Mons.Game
   open game:
-  Mons.Game.new(game.usr, game.pos, game.map, game.stt, game.ani, tik)
+  Mons.Game.new(game.usr, game.pos, game.map, game.stt, tik)
 
 Mons.Game.update_obj(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
   open game:
@@ -1093,6 +1076,7 @@ Mons.Attr.new_battleable(
   Mons.Attr.new(
     Bool.false, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
+    spr,
     pic,
     battle_spr, Mons.dummy_skills)
 
@@ -1101,6 +1085,7 @@ Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.true, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
+    spr,
     Mons.Kind.set_pic(spr),
     Mons.Kind.set_default_battle_spr, [])
 
@@ -1109,6 +1094,7 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
   Mons.Attr.new(
     Bool.false, 0u, 0u, "",
     Mons.Kind.set_static_sprites(spr),
+    spr,
     Mons.Kind.set_pic(spr),
     Mons.Kind.set_default_battle_spr, [])
 
@@ -1125,6 +1111,7 @@ Mons.Attr.new_hero: Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
+        [ Mons.Assets.boy_d_0],
         Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
       Mons.dummy_skills 
@@ -1134,6 +1121,7 @@ Mons.Attr.new_mage: Mons.Attr
   Mons.Attr.new(
     Bool.false, 40u, 0u, "MAGE",
     Mons.Kind.set_static_sprites([Mons.Assets.mons_croni_d_0]),
+    [Mons.Assets.mons_croni_d_0],
     Mons.Assets.mons_croni_d_0,
     (is_up: Bool) Mons.Assets.battle_croni_d,
     Mons.dummy_skills)
@@ -1592,7 +1580,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
         for obj in objs with sprs: // every obj in the tile
           open obj:
           open Mons.Kind.attr(obj.kin) as obj_attr:
-          let sprites = obj_attr.spr(t_x, t_y, obj.ani, obj.dir) // walk sprites
+          let sprites = obj_attr.wlk(t_x, t_y, obj.ani, obj.dir) // walk sprites
           get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
           let s_z = t_z
           if Mons.Kind.animate_idle(obj.kin) then // TODO: check if is idle
@@ -1827,10 +1815,9 @@ Mons.start(online: Bool): App(Mons.Game)
       game_pos, 
       game_map, 
       Mons.Screen.introduction(0u),
-      Mons.Game.animated_obj,
       0u
     )
-    let game = Mons.Game.add_animated_obj(game)
+    // let game = Mons.Game.add_animated_obj(game)
     game;
   // Render function
   | (game) App.Render.vox(Mons.draw(game, screen));

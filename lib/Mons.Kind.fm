@@ -1,6 +1,6 @@
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
-| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, is_idle: Bool);
+| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, has_idle: Bool);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 | Mons.Kind.Interactive(
   ele: Mons.Kind.inter,
@@ -158,7 +158,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
 Mons.Kind.animate_idle(kind: Mons.Kind): Bool
   case kind:
   | mons => Bool.false;
-  | const => kind.is_idle;
+  | const => kind.has_idle;
   | terrain => Bool.false;
   | inter => Bool.false;
 
