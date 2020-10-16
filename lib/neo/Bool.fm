@@ -86,11 +86,12 @@ Bool.true_isnt_false: Not(Equal(Bool, Bool.true, Bool.false))
     }
   (true_is_false) Equal.rewrite<_,_,_,P>(true_is_false, Unit.new)
 
-//// Converts to a string
-//Bool.show(b: Bool): String
-  //case b:
-  //| "Bool.true";
-  //| "Bool.false";
+// Converts to a string
+Bool.show(b: Bool): String
+  case b {
+    true: "Bool.true",
+    false: "Bool.false",
+  }
 
 // Bool that is provably different from the input
 //Bool.test.different_elem: (a: Bool) -> Subset(Bool, (b) Not(Equal(Bool, a, b)))
