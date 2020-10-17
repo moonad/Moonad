@@ -1,0 +1,2 @@
+Time.parse_days(ms: U64): U64
+  U64.div(ms, 86400000l)

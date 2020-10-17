@@ -1,0 +1,60 @@
+Time.show(t: Time, verbose: Bool): Time.stringify
+  case t:
+  | let days  = Time.show.days(t.days, verbose)
+    let hours = Time.show.hours(t.hours, verbose)
+    let mins  = Time.show.minutes(t.minutes, verbose)
+    let secs  = Time.show.seconds(t.seconds, verbose)
+    let mili  = Time.show.milliseconds(t.milliseconds, verbose)
+    let micro = Time.show.microseconds(t.microseconds, verbose)
+    let nano  = Time.show.nanoseconds(t.nanoseconds, verbose)
+    Time.stringify.new(days, hours, mins, secs, mili, micro, nano)
+  ;
+
+Time.show.days(t.days: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.days, 1l), U64.eql(t.days, 0l)): 
+    | String.concat(U64.show(t.days), " days");
+    | String.concat(U64.show(t.days), " day");;
+  | String.concat(U64.show(t.days), "d");
+
+Time.show.hours(t.hours: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.hours, 1l), U64.eql(t.hours, 0l)): 
+    | String.concat(U64.show(t.hours), " hours");
+    | String.concat(U64.show(t.hours), " hour");;
+  | String.concat(U64.show(t.hours), "h");
+
+Time.show.minutes(t.minutes: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.minutes, 1l), U64.eql(t.minutes, 0l)): 
+    | String.concat(U64.show(t.minutes), " minutes");
+    | String.concat(U64.show(t.minutes), " minute");;
+  | String.concat(U64.show(t.minutes), "m");
+
+Time.show.seconds(t.seconds: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.seconds, 1l), U64.eql(t.seconds, 0l)): 
+    | String.concat(U64.show(t.seconds), " seconds");
+    | String.concat(U64.show(t.seconds), " second");;
+  | String.concat(U64.show(t.seconds), "s");
+
+Time.show.milliseconds(t.milliseconds: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.milliseconds, 1l), U64.eql(t.milliseconds, 0l)): 
+    | String.concat(U64.show(t.milliseconds), " milliseconds");
+    | String.concat(U64.show(t.milliseconds), " millisecond");;
+  | String.concat(U64.show(t.milliseconds), "ms");
+
+Time.show.microseconds(t.microseconds: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.microseconds, 1l), U64.eql(t.microseconds, 0l)): 
+    | String.concat(U64.show(t.microseconds), " microseconds");
+    | String.concat(U64.show(t.microseconds), " microsecond");;
+  | String.concat(U64.show(t.microseconds), "µs");
+
+Time.show.nanoseconds(t.nanoseconds: U64, verbose: Bool): String
+  case verbose: 
+  | case Bool.or(U64.gtn(t.nanoseconds, 1l), U64.eql(t.nanoseconds, 0l)): 
+    | String.concat(U64.show(t.nanoseconds), " nanoseconds");
+    | String.concat(U64.show(t.nanoseconds), " nanosecond");;
+  | String.concat(U64.show(t.nanoseconds), "ns");

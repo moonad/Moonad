@@ -1,0 +1,46 @@
+Time.ex.parse: Time
+  Time.parse_ms(1337000001l)
+
+Time.ex.show_seconds: String
+  let time = Time.show(Time.ex.parse, Bool.false)
+  case time:
+  | time.seconds;
+
+// Time.ex.show_secs: The(_, Bool.true)
+//   let time = Time.show(Time.ex.parse, Bool.false)
+//   case time: 
+//   | The.value<>(String.eql(time.seconds, "20s"));
+  
+Time.ex.show_hours_min: String
+  let time = Time.show(Time.ex.parse, Bool.false)
+  case time:
+  | String.concat(time.minutes, String.concat(" ", time.seconds));
+
+Time.ex.show: Time.stringify
+  Time.show(Time.ex.parse, Bool.false)
+
+// TODO: add proof that returns Bool.true
+Time.ex.prettify_0: Bool
+  let parsed = Time.parse_ms(144000000l)
+  let res = Time.prettify(parsed, Bool.true)
+  String.eql(res, "1 day 16 hours ")
+
+Time.ex.prettify_1: Bool
+  let res = Time.prettify(Time.ex.parse, Bool.false)
+  String.eql(res, "15d 11h 23m 20s 1ms ")
+
+// TODO: add proof that returns Bool.true
+Time.ex.test_days: Bool
+  let time = Time.ex.parse
+  case time:
+  | U64.eql(time.days, 15l);
+
+Time.ex.prettify: String
+  Time.prettify(Time.parse_ms(144000000l), Bool.true)
+
+// TODO: do not check. idk why...
+// Time.ex: Bool
+//   Bool.and(Time.ex.test_days, Bool.false)
+
+// Time.ex.test: Time.ex.test_days == Bool.true
+//   _

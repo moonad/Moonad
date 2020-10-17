@@ -1,0 +1,11 @@
+// Inspired on https://github.com/sindresorhus/parse-ms
+Time.parse_ms(ms: U64): Time
+  Time.new(
+    Time.parse_days(ms),
+    Time.parse_hours(ms),
+    Time.parse_minutes(ms),
+    Time.parse_seconds(ms),
+    Time.parse_miliseconds(ms),
+    Time.parse_microseconds(ms),
+    Time.parse_nanoseconds(ms)
+  )
