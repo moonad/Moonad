@@ -22,6 +22,39 @@ type Fm.Core {
   ann(done: Bool, term: Fm.Core, type: Fm.Core),
 }
 
+// A type error
+type Fm.Error {
+  type_mismatch(expected: Fm.Core, detected: Fm.Core, context: Fm.Context),
+  undefined_reference(name: Fm.Name),
+  untyped_lambda,
+  non_function_application,
+  non_function_lambda,
+}
+
+// The result of a checking process holds a list of errors and maybe a value
+type Fm.Check<V: Type> {
+  result(value: Maybe(V), errors: List(Fm.Error)),
+}
+
+// Fm.Check monadic pure
+Fm.Check.pure<V: Type>(value: V): Fm.Check(V)
+  Fm.Check.result<V>(Maybe.some<V>(value), [])
+
+// Fm.Check monadic bind
+Fm.Check.bind<A: Type, B: Type>(a: Fm.Check(A), f: A -> Fm.Check(B)): Fm.Check(B)
+  case a {
+    result: case a.value as got {
+      none: Fm.Check.result<B>(Maybe.none<B>, a.errors),
+      some: case f(got.value) as b {
+        result: Fm.Check.result<B>(b.value, List.concat<>(a.errors,b.errors)),
+      }
+    }
+  }
+
+// Fm.Check monad
+Fm.Check.monad: Monad(Fm.Check)
+  Monad.new<Fm.Check>(Fm.Check.bind, Fm.Check.pure)
+
 // A definition is a type, term pair
 type Fm.Core.Def {
   new(term: Fm.Core, type: Fm.Core),
@@ -86,19 +119,58 @@ Fm.Core.show(term: Fm.Core, names: List(Fm.Name)): String
     app:
       let func = Fm.Core.show(term.func, names)
       let argm = Fm.Core.show(term.argm, names)
-      String.flatten([func,"(",argm,")"]),
+      let wrap = case func {nil: Bool.false, cons: U16.eql(func.head,'(')}
+      if wrap then
+        String.flatten(["(",func,")","(",argm,")"])
+      else
+        String.flatten([func,"(",argm,")"]),
     ann:
       let term = Fm.Core.show(term.term, names)
       let type = Fm.Core.show(term.type, names)
       String.flatten([term,"::",type]),
   }
 
+Fm.Error.show(error: Fm.Error): String
+  case error {
+    type_mismatch: 
+      let expected = Fm.Core.normalize(error.expected, Map.new<>)
+      let detected = Fm.Core.normalize(error.detected, Map.new<>)
+      String.flatten([
+        "Type mismatch.\n",
+        "- Expected: ", Fm.Core.view(expected, error.context), "\n",
+        "- Detected: ", Fm.Core.view(detected, error.context), "\n",
+      ]),
+    undefined_reference: 
+      String.flatten([
+        "Undefined reference: ", Fm.Name.show(error.name)
+      ]),
+    untyped_lambda: "Untyped lambda.",
+    non_function_application: "Non-function application.",
+    non_function_lambda: "Non-function lambda.",
+  }
+
+Fm.Context.show(context: Fm.Context): String
+  case context {
+    nil: "\n",
+    cons: case context.head {
+      new:
+        let name = Fm.Name.show(context.head.fst)
+        let type = Fm.Core.view(context.head.snd, context.tail)
+        let rest = Fm.Context.show(context.tail)
+        String.flatten(["- ", name, ": ", type, "\n", rest])
+    }
+  }
+
 // Binds named variables to their lambdas
 Fm.Core.bind(vars: Fm.Context, term: Fm.Core): Fm.Core 
   case term {
-    var: case Fm.Context.find(term.name, vars) as got {
+    ref: case Fm.Context.find(term.name, vars) as got {
       none: Fm.Core.ref(term.name),
       some: got.value,
+    },
+    var: case List.at_last<>(term.indx, vars) as got {
+      none: Fm.Core.var(term.name, term.indx),
+      some: Pair.snd<_,_>(got.value),
     },
     all: 
       def xtyp = Fm.Core.bind(vars, term.xtyp)
@@ -248,57 +320,59 @@ Fm.Core.equal(a: Fm.Core, b: Fm.Core, defs: Fm.Core.Defs, lv: Nat, seen: Set): B
     }
 
 // Infers the type of a core term
-Fm.Core.infer(term: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Fm.Core)
-  use skp = Debug.log<>(String.concat("- infer: ",Fm.Core.view(term,ctx)))
+Fm.Core.infer(term: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Fm.Check(Fm.Core)
+  use skip = Debug.log<>(String.concat("[debug] - infer: ",Fm.Core.view(term,ctx)))
   case term {
     ref:
-      case Fm.Map.get<>(term.name, defs) as got {
-        none: Maybe.none<>,
+      case Fm.deref<>(term.name, defs) as got {
+        none: Fm.Check.result<>(Maybe.none<>, [Fm.Error.undefined_reference(term.name)]),
         some: case got.value {
-          new: Maybe.some<>(got.value.type)
+          new: Fm.Check.result<>(Maybe.some<>(got.value.type), [])
         }
       },
     var:
-      Maybe.map<,>(Pair.snd<,>, List.at_last<>(term.indx, ctx)),
+      case List.at_last<>(term.indx, ctx) as got {
+        none: Fm.Check.result<>(Maybe.none<>, [Fm.Error.undefined_reference(term.name)]),
+        some: Fm.Check.result<>(Maybe.some<>(Pair.snd<_,_>(got.value)), []),
+      }
     typ:
-      Maybe.some<>(Fm.Core.typ),
+      Fm.Check.result<>(Maybe.some<>(Fm.Core.typ), []),
     all: 
       let ctx_size = List.length<>(ctx)
       let self_var = Fm.Core.var(term.self, ctx_size)
       let body_var = Fm.Core.var(term.name, Nat.succ(ctx_size))
       let body_ctx = List.cons<>({term.name,term.xtyp}, List.cons<>({term.self,term}, ctx))
-      do Maybe {
+      do Fm.Check {
         Fm.Core.check(term.xtyp, Fm.Core.typ, defs, ctx);
         Fm.Core.check(term.body(self_var, body_var), Fm.Core.typ, defs, body_ctx);
         return Fm.Core.typ;
       },
     lam:
-      Maybe.none<>,
+      Fm.Check.result<>(Maybe.none<>, [Fm.Error.untyped_lambda]),
     app: 
-      case Fm.Core.infer(term.func, defs, ctx) as func_typ {
-        none: Maybe.none<>,
-        some: 
-          let func_typ = Fm.Core.reduce(func_typ.value, defs)
-          case func_typ {
-            all: do Maybe {
-              Fm.Core.check(term.argm, func_typ.xtyp, defs, ctx);
-              return func_typ.body(term.func, term.argm);
-            },
-            _: Maybe.none<>,
-          }
-      }
+      do Fm.Check {
+        var func_typ = Fm.Core.infer(term.func, defs, ctx);
+        let func_typ = Fm.Core.reduce(func_typ, defs);
+        case func_typ {
+          all: do Fm.Check {
+            Fm.Core.check(term.argm, func_typ.xtyp, defs, ctx);
+            return func_typ.body(term.func, term.argm);
+          },
+          _: Fm.Check.result<>(Maybe.none<>, [Fm.Error.non_function_application]),
+        };
+      },
     ann:
-      if term.done then do Maybe {
+      if term.done then do Fm.Check {
         return term.type;
-      } else do Maybe {
+      } else do Fm.Check {
         Fm.Core.check(term.term, term.type, defs, ctx);
         return term.type;
-      }
+      },
   }
 
 // Checks the type of a core term
-Fm.Core.check(term: Fm.Core, type: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Maybe(Unit)
-  use skp = Debug.log<>(String.flatten(["- check: ",Fm.Core.view(term,ctx)," :: ",Fm.Core.view(type,ctx)]))
+Fm.Core.check(term: Fm.Core, type: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context): Fm.Check(Fm.Core)
+  use skp = Debug.log<>(String.flatten(["[debug] - check: ",Fm.Core.view(term,ctx)," :: ",Fm.Core.view(type,ctx)]))
   case term {
     lam: 
       let typv = Fm.Core.reduce(type, defs)
@@ -306,27 +380,23 @@ Fm.Core.check(term: Fm.Core, type: Fm.Core, defs: Fm.Core.Defs, ctx: Fm.Context)
         all:
           let ctx_size = List.length<>(ctx)
           let self_var = term
-          //let body_var = Fm.Core.ann(Bool.true, Fm.Core.var(term.name, ctx_size), typv.xtyp)
           let body_var = Fm.Core.var(term.name, ctx_size)
           let body_typ = typv.body(self_var, body_var)
           let body_ctx = List.cons<>({term.name,typv.xtyp}, ctx)
           Fm.Core.check(term.body(body_var), body_typ, defs, body_ctx),
-        _: Maybe.none<>,
+        _: Fm.Check.result<>(Maybe.none<>, [Fm.Error.non_function_lambda]),
       },
-    _: 
-      let infr = Fm.Core.infer(term, defs, ctx);
-      case infr {
-        none: Maybe.none<>,
-        some:
-          let eqls = Fm.Core.equal(type, infr.value, defs, List.length<>(ctx), Set.new)
-          if eqls then
-            Maybe.some<>(Unit.new)
-          else
-            //use skp = Debug.log<>("error")
-            //use skp = Debug.log<>(Fm.Core.view(type, ctx))
-            //use skp = Debug.log<>(Fm.Core.view(infr.value, ctx))
-            Maybe.none<>,
-      }
+    _: do Fm.Check {
+      var infr = Fm.Core.infer(term, defs, ctx);
+      let eqls = Fm.Core.equal(type, infr, defs, List.length<>(ctx), Set.new);
+      if eqls then
+        Fm.Check.result<>(Maybe.some<>(type), [])
+      else
+        //use skp = Debug.log<>("error")
+        //use skp = Debug.log<>(Fm.Core.view(type, ctx))
+        //use skp = Debug.log<>(Fm.Core.view(infr.value, ctx))
+        Fm.Check.result<>(Maybe.none<>, [Fm.Error.type_mismatch(type, infr, ctx)]);
+    }
   }
 
 // Converts a Char to a Letter
@@ -442,7 +512,7 @@ Fm.Parser.Core.reference: Parser(Fm.Core)
   do Parser {
     Parser.spaces;
     var name = Fm.Parser.Core.name;
-    return Fm.Core.var(name, 0);
+    return Fm.Core.ref(name);
   }
 
 // Parses an application: `(func argm0 argm1 ... argmN)`
@@ -505,7 +575,7 @@ Fm.Parser.Core.defs.go(defs: Fm.Core.Defs): Parser(Fm.Core.Defs)
       Parser.Reply.value<>(code, defs),
     value:
       get name def = parsed.value
-      Fm.Parser.Core.defs.go(Fm.Map.set<>(name, def, defs), parsed.code),
+      Fm.Parser.Core.defs.go(Fm.def<>(name, def, defs), parsed.code),
   }
 
 // Parses many definitions
@@ -539,16 +609,33 @@ Fm.Core.Defs.show(defs: Fm.Core.Defs): String
       Fm.Core.show(def.type, []),
       "\n  ",
       Fm.Core.show(def.term, []),
-      "\n\n",
+      "\n",
     ])
 
-Fm.Defs.errors(defs: Fm.Core.Defs): Nat
-  let errs = 0
-  for name_def in Map.to_list<>(defs) with errs:
-    get name def = name_def
-    use skp = Debug.log<>(String.flatten(["Checking ",Fm.Name.show(Fm.Name.from_bits(name)),"..."]))
-    let checked = case def { new: Fm.Core.check(def.term, def.type, defs, List.nil<>) }
-    Nat.add(errs, case checked { none: 1, some: 0, })
+Fm.report(defs: Fm.Core.Defs): String
+  let result = {"## Types:", "## Errors:"}
+  let result = for named_def in Map.to_list<>(defs):
+    open result
+    open named_def
+    open named_def.snd
+    let name = Fm.Name.from_bits(named_def.fst)
+    let term = named_def.snd.term
+    let type = named_def.snd.type
+    use skip = Debug.log<>(String.flatten(["[debug] Checking ",Fm.Name.show(name),"..."]))
+    case Fm.Core.check(term, type, defs, []) as check {
+      result:
+        let name_str = Fm.Name.show(name)
+        let type_str = case check.errors {nil: Fm.Core.show(type,[]), cons: "<error>"}
+        let result_0 = result.fst
+        let result_0 = String.flatten([result_0,"\n- ",name_str,": ",type_str])
+        let result_1 = result.snd
+        let result_1 = for error in check.errors:
+          String.flatten([result_1,"\n",Fm.Error.show(error)])
+        {result_0, result_1}
+    }
+  case result {
+    new: String.flatten([result.fst, "\n", result.snd])
+  }
 
 Fm: _
   let defs = Maybe.default<>(Fm.Map.new<>, Fm.Core.Defs.read("
@@ -566,11 +653,11 @@ Fm: _
 
     elim: (b: Bool) -> (P: (x:Bool) -> Type) -> (t: P(true)) -> (f: P(false)) -> P(b)
       (b) (P) (t) (f)
-      b((self) P(self))(t)(f)
+      b((self) P(self))(t)(t)
   "));
   do IO {
-    IO.print("# Defs:\n");
+    IO.print("# Defs:");
     IO.print(Fm.Core.Defs.show(defs));
-    IO.print("# Check:\n");
-    IO.print(String.flatten([Nat.to_string_base(10, Fm.Defs.errors(defs)), " errors."]));
+    IO.print("# Report:");
+    IO.print(Fm.report(defs));
   }
