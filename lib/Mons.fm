@@ -705,11 +705,43 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
-  let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
+  let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.VOID)
   let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
 
-  if U32.eql(dim, 0u) then // lvl 0 - city destroied
-    let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
+  if U32.eql(dim, 0u) then
+    let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 0))
+    let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
+    let lvl0 = 0
+    Mons.Map.code_to_tile.aux(code,[
+      // Construction
+      { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), grass ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(lvl0, 0), Bool.true) ]},
+      // -- House 0
+      { "z0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 0), Bool.false) ]},
+      { "z1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
+      { "z2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
+      // -- House 1
+      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 0), Bool.false) ]},
+      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 1), Bool.false) ]},
+      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 2), Bool.false) ]},
+      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 3), Bool.false) ]},
+      // -- House 4
+      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 0), Bool.false) ]},
+      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 1), Bool.false) ]},
+      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 2), Bool.false) ]},
+      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
+
+      // Terrain
+      { ".g", [ rock_path ]},
+      { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID) ]},
+      { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
+      { ".n", [ grass ]},
+      { ".b", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 1)) ]},
+      { ".v", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 2)) ]},
+    ])
+
+  else if U32.eql(dim, 1u) then // lvl 0 - city destroied
+    let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS(0,0)))
     Mons.Map.code_to_tile.aux(code,[
       // Mons
       { "m0", Mons.Kind.new_mons(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)},
@@ -717,9 +749,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
       { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
       { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
-      // Construction
-      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), grass ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true) ]},
+
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -750,11 +780,11 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "w3", [
       Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.down)),
       Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
-    { "T0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 0)), grass]},
-    { "T1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 1)), grass ]},
-    { "/0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 0), Bool.false), grass ]},
-    { "/1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 1), Bool.false) ]},
-    { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2), Bool.false), grass ]},
+    // { "T0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 0)), grass]},
+    // { "T1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 1)), grass ]},
+    // { "/0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 0), Bool.false), grass ]},
+    // { "/1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 1), Bool.false) ]},
+    // { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2), Bool.false), grass ]},
     { "B0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 0)), grass ]},
     { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
     { "P0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 0)), grass ]},
@@ -806,11 +836,11 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.electric, 2u) },
     { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.water, 2u) },
 
-    { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0), Bool.false), rock_path ]},
-    { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1), Bool.false) ]},
-    { "K2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 2), Bool.false) ]},
-    { "K3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 3), Bool.false) ]},
-    { "K4", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 4), Bool.false), rock_path ]},
+    // { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0), Bool.false), rock_path ]},
+    // { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1), Bool.false) ]},
+    // { "K2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 2), Bool.false) ]},
+    // { "K3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 3), Bool.false) ]},
+    // { "K4", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 4), Bool.false), rock_path ]},
     { "C0", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 0), Bool.false) rock_path ]},
     { "C1", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 1), Bool.false) rock_path ]},
     { "C2", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 2), Bool.false), rock_path ]},
@@ -999,12 +1029,26 @@ Mons.Game.hero_inital_position(
   pos: Pos32, 
   hero_idx: U32, 
   game: Mons.Game): Mons.Game
-  let y = Pos32.get_y(pos)
-  let x = Pos32.get_x(pos)
+  let x = Pos32.get_x(Mons.global_scr_mid)
+  let y = Pos32.get_y(Mons.global_scr_mid)
   let z = Pos32.get_z(pos)
-  let new_pos = Pos32.new(x,U32.add(y, 38u),z)
+  // IDK why but Mons.image_to_global doesn't work for the hero ._.
+  let new_pos = 
+    if U32.eql(z, 0u) then Pos32.new(x,U32.add(y, 30u),z)
+    if U32.eql(z, 1u) then Pos32.new(x,U32.add(y, 38u),z)
+    else Mons.global_scr_mid
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
   Mons.Game.set_user_pos(usr, new_pos, game)
+
+// Works for image to global
+Mons.test.add_obj(pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let obj = Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL)
+  let pos = Mons.image_to_global(74u, 74u, 38u, 65u, 0u)
+  let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
+  let game = Mons.Game.set_map(map, game)
+  let game = Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, obj, game)
+  game
 
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero_or_mon: Mons.Object): Bool
@@ -1815,7 +1859,7 @@ Mons.start(online: Bool): App(Mons.Game)
       game_pos, 
       game_map, 
       Mons.Screen.introduction(0u),
-      0u
+      0u // tik
     )
     // let game = Mons.Game.add_animated_obj(game)
     game;
@@ -1870,7 +1914,7 @@ Mons.start(online: Bool): App(Mons.Game)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        // let game = Mons.test.add_obj(pos, game)
+        let game = Mons.test.add_obj(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
