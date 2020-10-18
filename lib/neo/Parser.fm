@@ -24,7 +24,7 @@ Parser.monad: Monad(Parser)
   Monad.new<Parser>(Parser.bind, Parser.pure)
 
 // Consumes a specific text, returns the remaining code
-Parser.text(text: String): Parser(Unit)
+Parser.text.go(text: String): Parser(Unit)
   (code) case text {
     nil:
       Parser.Reply.value<Unit>(code, Unit.new),
@@ -41,13 +41,19 @@ Parser.text(text: String): Parser(Unit)
     }
   }
 
+Parser.text(text: String): Parser(Unit)
+  (code) case Parser.text.go(text, code) as reply {
+    error: Parser.Reply.error<Unit>(code, reply.error),
+    value: Parser.Reply.value<Unit>(reply.code, reply.value),
+  }
+
 // Repeats a parse until it fails, returns a list of results
 Parser.many<V: Type>(parser: Parser(V)): Parser(List(V))
   Parser.many.go<V>(parser, (x) x)
 
 Parser.many.go<V: Type>(parse: Parser(V), values: List(V) -> List(V), code: String): Parser.Reply(List(V))
   case parse(code) as reply {
-    error: Parser.Reply.value<List(V)>(reply.code, values([])),
+    error: Parser.Reply.value<List(V)>(code, values([])),
     value: Parser.many.go<V>(parse, (xs) values(List.cons<>(reply.value, xs)), reply.code),
   }
 
@@ -57,6 +63,13 @@ Parser.many1<V: Type>(parser: Parser(V)): Parser(List(V))
     var head = parser;
     var tail = Parser.many<V>(parser);
     return List.cons<V>(head, tail);
+  }
+
+// Parses an optional
+Parser.maybe<V: Type>(parse: Parser(V)): Parser(Maybe(V))
+  (code) case parse(code) as reply {
+    error: Parser.Reply.value<Maybe(V)>(reply.code, Maybe.none<V>),
+    value: Parser.Reply.value<Maybe(V)>(reply.code, Maybe.some<V>(reply.value)),
   }
 
 // Parses the first in a list
@@ -83,4 +96,30 @@ Parser.spaces_text(text: String): Parser(Unit)
   do Parser {
     Parser.spaces;
     Parser.text(text);
+  }
+
+// Parses a digit: `[0123456789]`
+Parser.digit: Parser(Nat)
+  (code) case code {
+    nil: Parser.Reply.error<>(code, "No parse."),
+    cons:
+      if      U16.eql(code.head, '0') then Parser.Reply.value<>(code.tail, 0)
+      else if U16.eql(code.head, '1') then Parser.Reply.value<>(code.tail, 1)
+      else if U16.eql(code.head, '2') then Parser.Reply.value<>(code.tail, 2)
+      else if U16.eql(code.head, '2') then Parser.Reply.value<>(code.tail, 2)
+      else if U16.eql(code.head, '3') then Parser.Reply.value<>(code.tail, 3)
+      else if U16.eql(code.head, '4') then Parser.Reply.value<>(code.tail, 4)
+      else if U16.eql(code.head, '5') then Parser.Reply.value<>(code.tail, 5)
+      else if U16.eql(code.head, '6') then Parser.Reply.value<>(code.tail, 6)
+      else if U16.eql(code.head, '7') then Parser.Reply.value<>(code.tail, 7)
+      else if U16.eql(code.head, '8') then Parser.Reply.value<>(code.tail, 8)
+      else if U16.eql(code.head, '9') then Parser.Reply.value<>(code.tail, 9)
+      else Parser.Reply.error<>(code, "No parse."),
+  }
+
+// Parses a natural number
+Parser.nat: Parser(Nat)
+  do Parser {
+    var digits = Parser.many1<Nat>(Parser.digit);
+    return Nat.from_base(10, digits);
   }

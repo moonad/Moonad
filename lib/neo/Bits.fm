@@ -27,6 +27,20 @@ Bits.add(a: Bits, b: Bits): Bits
     }
   }
 
+Bits.tail(a: Bits): Bits
+  case a {
+    nil: Bits.nil,
+    0: a.pred,
+    1: a.pred,
+  }
+
+Bits.show(a: Bits): String
+  case a {
+    nil: "",
+    0: String.cons('0', Bits.show(a.pred)),
+    1: String.cons('1', Bits.show(a.pred)),
+  }
+
 Bits.chunks_of(len: Nat, bits: Bits): List(Bits)
   Bits.chunks_of.go(len, bits, len, Bits.nil)
 

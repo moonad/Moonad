@@ -22,6 +22,12 @@ Maybe.default<A: Type>(a: A, m: Maybe(A)): A
     some: m.value,
   }
 
+Maybe.to_bool<A: Type>(m: Maybe(A)): Bool
+  case m {
+    none: Bool.false,
+    some: Bool.true,
+  }
+
 // The functor instance for maybe
 //Maybe.functor: Functor(Maybe)
   //Functor.new<Maybe>(Maybe.map)

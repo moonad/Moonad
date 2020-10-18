@@ -4,6 +4,12 @@ type String {
   cons(head: Char, tail: String),
 }
 
+String.is_empty(str: String): Bool
+  case str {
+    nil: Bool.true,
+    cons: Bool.false,
+  }
+
 // concatenate two string builders
 //String.Builder.concat(a: String.Builder, b: String.Builder): String.Builder
    //(x) a(b(x))
@@ -59,6 +65,20 @@ String.concat(as: String, bs: String): String
   case as {
     nil: bs,
     cons: String.cons(as.head, String.concat(as.tail,bs)),
+  }
+
+// Joins a list of strings
+String.join(sep: String, list: List(String)): String
+  String.join.go(sep, list, Bool.true)
+
+String.join.go(sep: String, list: List(String), fst: Bool): String
+  case list {
+    nil: "",
+    cons: String.flatten([
+      if fst then "" else sep,
+      list.head, 
+      String.join.go(sep, list.tail, Bool.false),
+    ]),
   }
 
 //// Concatenate any number of strings
