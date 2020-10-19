@@ -104,12 +104,12 @@ Bits.eql(a: Bits, b: Bits): Bool
   }
 
 // Converts a Bits to a string
-Bits.from_string(str: String): Bits
+Bits.read(str: String): Bits
   case str {
     nil : Bits.nil,
-    cons: case U16.eql(str.head, Char.parse("1")) {
-      true : Bits.1(Bits.from_string(str.tail)),
-      false: Bits.0(Bits.from_string(str.tail))
+    cons: case U16.eql(str.head, '1') {
+      true : Bits.1(Bits.read(str.tail)),
+      false: Bits.0(Bits.read(str.tail)),
     }
   }
 

@@ -242,18 +242,19 @@ Map.set<A: Type>(bits: Bits, val: A, map: Map(A)): Map(A)
   }
 
 Map.to_list<A: Type>(xs: Map(A)): List(Pair(Bits,A))
-  Map.to_list.go<>(xs, Bits.nil, [])
+  List.reverse<>(Map.to_list.go<>(xs, Bits.nil, List.nil<>))
 
 Map.to_list.go<A: Type>(xs: Map(A), key: Bits, list: List(Pair(Bits,A))): List(Pair(Bits,A))
   case xs {
     new: list,
     tie: 
-      let list_0 = Map.to_list.go<>(xs.lft, Bits.0(key), list)
-      let list_1 = Map.to_list.go<>(xs.rgt, Bits.1(key), list_0)
-      case xs.val {
-        none: list_1,
-        some: List.cons<>(Pair.new<,>(Bits.reverse(key), xs.val.value), list_1),
+      let list0 = case xs.val {
+        none: list,
+        some: List.cons<>(Pair.new<_,_>(Bits.reverse(key), xs.val.value), list),
       }
+      let list1 = Map.to_list.go<>(xs.lft, Bits.0(key), list0)
+      let list2 = Map.to_list.go<>(xs.rgt, Bits.1(key), list1)
+      list2
   }
 
 // combines two maps, preferring the left-hand map in case of duplicates entries
