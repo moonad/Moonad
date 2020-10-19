@@ -47,17 +47,18 @@ T Mons.Kind.mons
 
 T Mons.Kind.const
 | Mons.Kind.const.HOUSE(lvl: Nat, model: Nat, slice: Nat);
-| Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
-| Mons.Kind.const.WELL(model: Nat, slice: Nat);
-| Mons.Kind.const.FONTAIN(model: Nat, slice: Nat);
+| Mons.Kind.const.TORCHE(model: Nat, slice: Nat);
+| Mons.Kind.const.FOUNTAIN(model: Nat, slice: Nat);
 | Mons.Kind.const.CHEST;
-| Mons.Kind.const.SIGN_0;
+| Mons.Kind.const.BIG_STAIRS;
 | Mons.Kind.const.SIGN_1;
 | Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 | Mons.Kind.const.CRYSTAL;
+| Mons.Kind.const.SHADOW;
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
+| Mons.Kind.terrain.VOID_BLACK;
 | Mons.Kind.terrain.GRASS(lvl: Nat, model: Nat);
 | Mons.Kind.terrain.GRASS_PLANT;
 | Mons.Kind.terrain.BUSH;
@@ -71,9 +72,9 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.SAND_1;
 | Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.Kind.terrain.WATER1_M;
-| Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
 | Mons.Kind.terrain.PATH_BRICK;
-| Mons.Kind.terrain.PATH_BRICK_BLOCKER;
+| Mons.Kind.terrain.PATH_BLOCKER(lvl: Nat, model: Nat);
+| Mons.Kind.terrain.SHADOW_CONST;
 
 T Mons.Kind.inter
 | Mons.Kind.inter.LEVER(id: U32);
@@ -199,7 +200,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, game: Mons.Game): Mons.Game
     | lever => 
       if U32.eql(z, 1u) then // lvl 1
         if U32.eql(kind.id, 0u) then // lever 0
-          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_0, Bool.false)
+          let sign = Mons.Kind.new_const(Mons.Kind.const.SIGN_1, Bool.false)
           let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
           Mons.Game.map_push(obj_pos, sign, game)
         else game
@@ -377,48 +378,17 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.Kind.construction =>
     case kin.ele as kin:
     | Mons.HOUSE => Mons.Kind.houses(kin.lvl, kin.model, kin.slice);
-      // if Nat.eql(kin.model, 0) then // Simple house
-      //   if Nat.eql(kin.slice, 0) then
-      //     Mons.Attr.new_blockable([Mons.Assets.brown_house0_00])
-      //   else if Nat.eql(kin.slice, 1) then
-      //     Mons.Attr.new_blockable([Mons.Assets.brown_house0_01])
-      //   else if Nat.eql(kin.slice, 2) then
-      //     Mons.Attr.new_blockable([Mons.Assets.brown_house0_02])
-      //   else if Nat.eql(kin.slice, 3) then
-      //     Mons.Attr.new_blockable([Mons.Assets.brown_house0_03])
-      //   else Mons.Attr.new_blockable([Mons.Assets.brown_house0_04])
-      // else if Nat.eql(kin.model, 1) then // Tent
-      //   if Nat.eql(kin.slice, 0) then
-      //     Mons.Attr.new_blockable([Mons.Assets.tent_00])
-      //   else if Nat.eql(kin.slice, 1) then
-      //     Mons.Attr.new_blockable([Mons.Assets.tent_01])
-      //   else Mons.Attr.new_blockable([Mons.Assets.tent_02])
-      // else Mons.Attr.new_blockable([]);
-
-    | Mons.CASTLE_00 =>
+    | TORCHE =>
       if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_00])
-        else if Nat.eql(kin.slice, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_01])
-        else if Nat.eql(kin.slice, 2) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_02])
-        else if Nat.eql(kin.slice, 3) then
-          Mons.Attr.new_blockable([Mons.Assets.brown_castle_03])
-        else Mons.Attr.new_blockable([Mons.Assets.brown_castle_04])
+        if Nat.eql(kin.slice, 0) then Mons.Attr.new_blockable([Mons.Assets.0_torch0_0])
+        else Mons.Attr.new_blockable([Mons.Assets.0_torch0_1])
       else Mons.Attr.new_blockable([]);
-    | Mons.WELL =>
-      if Nat.eql(kin.model, 0) then
-        if Nat.eql(kin.slice, 0) then
-          Mons.Attr.new_blockable([Mons.Assets.well_01])
-        else Mons.Attr.new_blockable([Mons.Assets.well_02])
-      else Mons.Attr.new_blockable([]);
-    | Mons.FONTAIN =>
+    | FOUNTAIN =>
         Mons.Attr.new_blockable([
           Mons.Assets.0_fountain_0, Mons.Assets.0_fountain_1,
           Mons.Assets.0_fountain_2, Mons.Assets.0_fountain_3]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
-    | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
+    | Mons.BIG_STAIRS => Mons.Attr.new_neutral([Mons.Assets.0_big_stair]);
     | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
     | Mons.FENCE =>
       if Nat.eql(kin.model, 0) then
@@ -450,11 +420,13 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.0_crystal3, Mons.Assets.0_crystal4, Mons.Assets.0_crystal5,
         Mons.Assets.0_crystal6, Mons.Assets.0_crystal7
       ]);
+    | SHADOW => Mons.Attr.new_neutral([Mons.Assets.0_shadow]);
   ; // end of construction
 
   | Mons.Kind.terrain => 
     case kin.ele as kin:
     | VOID => Mons.Attr.new_blockable([Mons.Assets.void]);
+    | VOID_BLACK => Mons.Attr.new_blockable([Mons.Assets.void_black]);
     | GRASS => 
       if Nat.eql(kin.lvl, 0) then
         if Nat.eql(kin.model, 0) then Mons.Attr.new_neutral([Mons.Assets.0_grass_0])
@@ -518,34 +490,14 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_neutral([Mons.Assets.water_1_lu]); 
       | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_neutral([Mons.Assets.water_1_ld]);; 
     | Mons.WATER1_M => Mons.Attr.new_neutral([Mons.Assets.water_1_m, Mons.Assets.water_0_10]);
-    | ROCK =>
-        if Nat.eql(kin.model, 0) then
-          if Nat.eql(kin.slice, 0) then
-            Mons.Attr.new_blockable([Mons.Assets.rock_0_00])
-          else Mons.Attr.new_blockable([Mons.Assets.rock_0_01])
-        else if Nat.eql(kin.model, 1) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_1])
-        else if Nat.eql(kin.model, 2) then
-          if Nat.eql(kin.slice, 0) then
-            Mons.Attr.new_blockable([Mons.Assets.rock_2_00])
-          else Mons.Attr.new_blockable([Mons.Assets.rock_2_01])
-        else if Nat.eql(kin.model, 3) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_3])
-        else if Nat.eql(kin.model, 4) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_4])
-        else if Nat.eql(kin.model, 5) then
-          Mons.Attr.new_neutral([Mons.Assets.rock_5])
-        else if Nat.eql(kin.model, 6) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_6])
-        else if Nat.eql(kin.model, 7) then
-          Mons.Attr.new_neutral([Mons.Assets.rock_7])
-        else if Nat.eql(kin.model, 8) then
-          Mons.Attr.new_neutral([Mons.Assets.rock_8])
-        else if Nat.eql(kin.model, 9) then
-          Mons.Attr.new_blockable([Mons.Assets.rock_9])
-        else Mons.Attr.new_blockable([]);
     | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
-    | PATH_BRICK_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+    | PATH_BLOCKER =>
+      if Nat.eql(kin.lvl, 0) then
+        if Nat.eql(kin.model, 0) then Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m])
+        else if Nat.eql(kin.model, 1) then Mons.Attr.new_blockable([Mons.Assets.0_barrel0])
+        else Mons.Attr.new_blockable([Mons.Assets.0_barrel1])
+      else Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+    | SHADOW_CONST => Mons.Attr.new_blockable([Mons.Assets.0_shadow]);
     ; // end terrain
 
     | INTERACTIVE =>
