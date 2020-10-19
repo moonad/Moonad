@@ -715,7 +715,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     Mons.Map.code_to_tile.aux(code,[
       // Construction
       { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), grass ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(lvl0, 0), Bool.true) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(lvl0, 0), Bool.true), path_brick ]},
       // -- House 0
       { "z0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 0), Bool.false) ]},
       { "z1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
@@ -725,11 +725,32 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 1), Bool.false) ]},
       { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 2), Bool.false) ]},
       { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 3), Bool.false) ]},
+      // -- House 2
+      { "c0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 0), Bool.false) ]},
+      { "c1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 1), Bool.false) ]},
+      { "c2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 2), Bool.false) ]},
+      { "c3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 3), Bool.false) ]},
+      // { "d0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 4), Bool.false) ]},
+      // { "d1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 5), Bool.false) ]},
+      // { "d2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 6), Bool.false) ]},
+      // { "d3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 7), Bool.false) ]},
+      // -- House 3
+      { "v0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
+      { "v1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
+      { "v2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 3), Bool.false) ]},
+      // { "f0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 0), Bool.false) ]},
+      // { "f1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 1), Bool.false) ]},
+      // { "f2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 4), Bool.false) ]},
       // -- House 4
       { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 0), Bool.false) ]},
       { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 1), Bool.false) ]},
       { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 2), Bool.false) ]},
       { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
+      // -- House 5
+      { "n1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 0), Bool.false) ]},
+      { "n2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
+      { "n3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
+      // { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
 
       // Terrain
       { ".g", [ path_brick ]},

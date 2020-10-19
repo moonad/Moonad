@@ -415,15 +415,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       else Mons.Attr.new_blockable([]);
     | Mons.FONTAIN =>
         Mons.Attr.new_blockable([
-          Mons.Assets.fountain_formality_0, Mons.Assets.fountain_formality_1,
-          Mons.Assets.fountain_formality_2, Mons.Assets.fountain_formality_3]);
-      // if Nat.eql(kin.model, 0) then
-      //   if Nat.eql(kin.slice, 0) then
-      //     Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_00])
-      //   else if Nat.eql(kin.slice, 1) then
-      //     Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_01])
-      //   else Mons.Attr.new_blockable([Mons.Assets.fountain_formality0_02])
-      // else Mons.Attr.new_blockable([]);
+          Mons.Assets.0_fountain_0, Mons.Assets.0_fountain_1,
+          Mons.Assets.0_fountain_2, Mons.Assets.0_fountain_3]);
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
     | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
@@ -575,6 +568,18 @@ Mons.Kind.houses(lvl: Nat, model: Nat, slice: Nat): Mons.Attr
       if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house1_1]) else
       if Nat.eql(slice, 2) then Mons.Attr.new_blockable([Mons.Assets.0_house1_2])
       else Mons.Attr.new_blockable([Mons.Assets.0_house1_3])
+    // else if Nat.eql(model, 2) then
+    //   if Nat.eql(slice, 0) then Mons.Attr.new_blockable([Mons.Assets.0_house2_0])
+    //   // if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+    //   // if Nat.eql(slice, 2) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+    //   // if Nat.eql(slice, 3) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+    //   // if Nat.eql(slice, 4) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+    //   // if Nat.eql(slice, 5) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+    //   // if Nat.eql(slice, 6) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4])
+    //   else Mons.Attr.new_blockable([Mons.Assets.0_house2_1])
+    // else if Nat.eql(model, 3) then
+    //   if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house3_1_0])
+    //   else Mons.Attr.new_blockable([Mons.Assets.0_house3_1_0])
     else if Nat.eql(model, 4) then
       if Nat.eql(slice, 0) then Mons.Attr.new_blockable([Mons.Assets.0_house4_0]) else
       if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house4_1]) else
