@@ -706,11 +706,11 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.VOID)
-  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
+  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
 
   if U32.eql(dim, 0u) then
     let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 0))
-    let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
+    let path_brick = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
     let lvl0 = 0
     Mons.Map.code_to_tile.aux(code,[
       // Construction
@@ -732,12 +732,13 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
 
       // Terrain
-      { ".g", [ rock_path ]},
+      { ".g", [ path_brick ]},
       { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID) ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
       { ".n", [ grass ]},
       { ".b", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 1)) ]},
       { ".v", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 2)) ]},
+      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BRICK_BLOCKER)]}
     ])
 
   else if U32.eql(dim, 1u) then // lvl 0 - city destroied
@@ -797,8 +798,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "P7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 1)), grass ]},
     { "P8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(6, 0)), grass ]},
     { "P9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(7, 0)), grass ]},    
-    { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C, Bool.false), grass ]},
-    { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M, Bool.false) ]},
+    // { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C, Bool.false), grass ]},
+    // { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M, Bool.false) ]},
 
     { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.grass, 2u) },
     // { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
@@ -878,7 +879,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { "o5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_up)), grass ]},
     { "o6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_down)), grass ]},
     { "o7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_down)), grass ]},
-    { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false) ]},
+    // { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false) ]},
     { "f0", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right), Bool.false), grass ]},
     { "f1", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.middle), Bool.false), grass ]},
     { "f2", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left), Bool.false), grass ]},

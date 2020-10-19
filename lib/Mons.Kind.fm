@@ -46,8 +46,6 @@ T Mons.Kind.mons
 | Mons.Kind.mons.AZULA;
 
 T Mons.Kind.const
-| Mons.Kind.const.ROCK_PATH_C; // TODO: if will still use it in a lvl, chage to terrain
-| Mons.Kind.const.ROCK_PATH_M;
 | Mons.Kind.const.HOUSE(lvl: Nat, model: Nat, slice: Nat);
 | Mons.Kind.const.CASTLE(model: Nat, slice: Nat);
 | Mons.Kind.const.WELL(model: Nat, slice: Nat);
@@ -55,7 +53,6 @@ T Mons.Kind.const
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.SIGN_0;
 | Mons.Kind.const.SIGN_1;
-| Mons.Kind.const.PATH_BLOCKER;
 | Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 | Mons.Kind.const.CRYSTAL;
 
@@ -75,6 +72,8 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.WATER(dir: Mons.Map.Dir.expanded);
 | Mons.Kind.terrain.WATER1_M;
 | Mons.Kind.terrain.ROCK(model: Nat, slice: Nat);
+| Mons.Kind.terrain.PATH_BRICK;
+| Mons.Kind.terrain.PATH_BRICK_BLOCKER;
 
 T Mons.Kind.inter
 | Mons.Kind.inter.LEVER(id: U32);
@@ -377,8 +376,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   
   | Mons.Kind.construction =>
     case kin.ele as kin:
-    | ROCK_PATH_C => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_c]);
-    | ROCK_PATH_M => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
     | Mons.HOUSE => Mons.Kind.houses(kin.lvl, kin.model, kin.slice);
       // if Nat.eql(kin.model, 0) then // Simple house
       //   if Nat.eql(kin.slice, 0) then
@@ -430,7 +427,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.SIGN_0 => Mons.Attr.new_neutral([Mons.Assets.sign_00]);
     | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
-    | Mons.PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | Mons.FENCE =>
       if Nat.eql(kin.model, 0) then
         case kin.dir:
@@ -555,6 +551,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         else if Nat.eql(kin.model, 9) then
           Mons.Attr.new_blockable([Mons.Assets.rock_9])
         else Mons.Attr.new_blockable([]);
+    | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
+    | PATH_BRICK_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     ; // end terrain
 
     | INTERACTIVE =>
