@@ -155,8 +155,10 @@ Fm.Core.show.go(term: Fm.Core, path: Bits, show_path: Bool): String
       if show_path then
         String.flatten([
           name,
-          "\x1b[2m#",
-          Bits.show(path),
+          "\x1b[2m-",
+          Nat.show(Bits.to_nat(Bits.reverse(Bits.1(path)))),
+          //"#",
+          //Bits.show(Bits.reverse(path)),
           "\x1b[0m",
         ])
       else
@@ -300,7 +302,6 @@ Fm.Core.normalize(term: Fm.Core, defs: Fm.Core.Defs): Fm.Core
 
 // Expands a specific ref
 Fm.Core.expand_at(path: Bits, term: Fm.Core, defs: Fm.Core.Defs): Fm.Core
-  use skip = Debug.log<>(String.flatten(["expand_at ", Bits.show(path), " ... ", Fm.Core.show(term)]))
   case term {
     ref: case Fm.deref<>(term.name, defs) as got {
       none: Fm.Core.ref(term.name),
@@ -675,10 +676,12 @@ Fm.Parser.Core.goal: Parser(Fm.Core)
     var name = Fm.Parser.Core.name;
     var dref = Parser.many<>(do Parser {
       Parser.spaces_text("-");
-      var digits = Parser.many1<>(Parser.digit);
-      let bits = Bits.nil
-      let bits = for digit in digits with bits:
-        case digit {zero: Bits.0(bits), succ: Bits.1(bits)};
+      var nat = Parser.nat;
+      let bits = Bits.reverse(Bits.tail(Bits.reverse(Nat.to_bits(nat))))
+      //var digits = Parser.many1<>(Parser.digit);
+      //let bits = Bits.nil
+      //let bits = for digit in digits with bits:
+        //case digit {zero: Bits.0(bits), succ: Bits.1(bits)};
       do Parser { return bits; };
     });
     var verb = do Parser {
@@ -850,6 +853,14 @@ Fm.report(defs: Fm.Core.Defs): String
     new: String.flatten([result.fst, "\n", result.snd])
   }
 
+//Fm: _
+  //let bits = Bits.0(Bits.0(Bits.0(Bits.1(Bits.0(Bits.nil)))))
+  //do IO {
+    //IO.print(Bits.to_string(bits));
+    //IO.print(Nat.show(Fm.bits_to_nat(bits)));
+    //IO.print(Bits.to_string(Fm.nat_to_bits(Fm.bits_to_nat(bits))));
+  //}
+
 Fm: _
 
   let defs = Maybe.default<>(Fm.Map.new<>, Fm.Core.Defs.read("
@@ -903,9 +914,9 @@ Fm: _
       n(
         (n.self) Equal(Nat)(id(n.self))(n.self)
       )(
-        ?aaa-010-00010
+        ?aaa-10-34
       )(
-        ?bbb-0101-0000101
+        ?bbb-21-133
       )
 
     main: Nat
@@ -913,51 +924,16 @@ Fm: _
       let n1 = succ(n0);
       let n2 = succ(n1);
       id(n2)
-
-
   "));
-    //id (n: Nat) : Nat = n (λself. Nat) zero λpred.(succ (id pred))
-    //Equal(id(zero))(zero) ~id
-    //Equal(zero((n.self) Nat)(zero)((pred) succ(id(pred))))(zero) ~id
-    //Equal Nat (id zero) zero ~id#0
-    //Equal Nat (zero (@n.self => Nat) zero (@pred => succ (id pred))) zero ~zero#0
-    //Equal Nat zero zero ~zero#0
-    //foo(n: Nat): Equal Nat (id n) n
-      //case n {
-        //zero: refl Nat zero,
-        //succ: ?a,
-      //}
 
   let main = case Fm.deref<>(Fm.Name.read("main"), defs) as got {
     none: Fm.Core.typ,
     some: case got.value { new: got.value.term },
   }
 
-  //Equal(Nat)(id(zero))(zero)
-  //Equal(Nat)((λn. n(zero)(λpred. succ(id(pred))))(zero))(zero)
-  //Equal(Nat)(zero(zero)(λpred. succ(id(pred))))(zero)
-  //Equal(Nat)((λz.λs.z)(zero)(λpred. succ(id(pred))))(zero)
-  //Equal(Nat)((λs.zero)(λpred. succ(id(pred))))(zero)
-  //Equal(Nat)(zero)(zero)
-
-//Equal Nat (id (succ n)) (succ n)
-//~ deref:id
-//Equal Nat ((λn => n zero (λ pred => succ (id pred))) (succ n)) (succ n)
-//~ simplify
-//Equal Nat (succ n zero (λ pred => succ (id pred))) (succ n)
-//~ deref:succ
-//Equal Nat ((λ n z s => s n) n zero (λ pred => succ (id pred))) (succ n)
-//~ simplify
-//Equal Nat ((λ pred => succ (id pred)) n) (succ n)
-//~ simplify
-//Equal Nat (succ (id n)) (succ n)
-
   do IO {
     IO.print("# Defs:");
     IO.print(Fm.Core.Defs.show(defs));
     IO.print("# Report:");
     IO.print(Fm.report(defs));
-    //IO.print("# Eval:");
-    //IO.print(Fm.Core.show(Fm.Core.normalize(main, defs)));
-    //IO.print(Fm.Name.show(Fm.Name.read("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.")));
   }
