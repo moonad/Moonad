@@ -52,7 +52,6 @@ T Mons.Kind.const
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.BIG_STAIRS;
 | Mons.Kind.const.SIGN_1;
-| Mons.Kind.const.FENCE(model: Nat, dir: Mons.Map.Dir.expanded);
 | Mons.Kind.const.CRYSTAL;
 | Mons.Kind.const.SHADOW;
 
@@ -63,9 +62,6 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.GRASS_PLANT;
 | Mons.Kind.terrain.BUSH;
 | Mons.Kind.terrain.PLANT_0;
-| Mons.Kind.terrain.ELV_TERRAIN_00;
-| Mons.Kind.terrain.ELV_TERRAIN_01;
-| Mons.Kind.terrain.ELV_TERRAIN_02;
 | Mons.Kind.terrain.OCEAN(dir: Mons.Map.Dir);
 | Mons.Kind.terrain.TREE(model: Nat, slice: Nat);
 | Mons.Kind.terrain.SAND_0;
@@ -390,30 +386,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | Mons.CHEST => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
     | Mons.BIG_STAIRS => Mons.Attr.new_neutral([Mons.Assets.0_big_stair]);
     | Mons.SIGN_1 => Mons.Attr.new_neutral([Mons.Assets.sign_01]);
-    | Mons.FENCE =>
-      if Nat.eql(kin.model, 0) then
-        case kin.dir:
-        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.wood_fence_r]); 
-        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.wood_fence_l]); 
-        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.wood_fence_m]);
-        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ru]); 
-        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_rd]); 
-        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.wood_fence_lu]); 
-        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.wood_fence_ld]);
-        else if Nat.eql(kin.model, 1) then
-        case kin.dir:
-        | Mons.Map.Dir.expanded.right => Mons.Attr.new_blockable([Mons.Assets.rock_fence_r]); 
-        | Mons.Map.Dir.expanded.up => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.left => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_l]); 
-        | Mons.Map.Dir.expanded.down => Mons.Attr.new_blockable([]); 
-        | Mons.Map.Dir.expanded.middle => Mons.Attr.new_blockable([Mons.Assets.rock_fence_m]);
-        | Mons.Map.Dir.expanded.right_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_ru]); 
-        | Mons.Map.Dir.expanded.right_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_ru]); 
-        | Mons.Map.Dir.expanded.left_up => Mons.Attr.new_blockable([Mons.Assets.rock_fence1_lu]); 
-        | Mons.Map.Dir.expanded.left_down => Mons.Attr.new_blockable([Mons.Assets.rock_fence_lu]);        
-      else Mons.Attr.new_blockable([]);
     | CRYSTAL => 
       Mons.Attr.new_neutral([
         Mons.Assets.0_crystal0, Mons.Assets.0_crystal1, Mons.Assets.0_crystal2,
@@ -432,13 +404,10 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         if Nat.eql(kin.model, 0) then Mons.Attr.new_neutral([Mons.Assets.0_grass_0])
         if Nat.eql(kin.model, 1) then Mons.Attr.new_neutral([Mons.Assets.0_grass_1])
         else Mons.Attr.new_neutral([Mons.Assets.0_grass_2])
-      else  Mons.Attr.new_neutral([Mons.Assets.grass_3_m]);
-    | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_4_m]);
+      else  Mons.Attr.new_neutral([Mons.Assets.0_grass_0]);
+    | PLANT => Mons.Attr.new_neutral([Mons.Assets.0_grass_0]);
     | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
     | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
-    | ELV_TERRAIN_00 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_00]);
-    | ELV_TERRAIN_01 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_01]);
-    | ELV_TERRAIN_02 => Mons.Attr.new_neutral([Mons.Assets.grass_elevated_3_02]);
     | OCEAN => 
       case kin.dir:
         | Mons.Map.Dir.right => Mons.Attr.new_blockable([Mons.Assets.ocean_r]);
@@ -455,26 +424,6 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         if Nat.eql(kin.slice, 0) then 
           Mons.Attr.new_blockable([Mons.Assets.big_tree_0_00])
         else Mons.Attr.new_blockable([Mons.Assets.big_tree_0_01])
-      if Nat.eql(kin.model, 2) then // Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_0_00])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_0_01])
-      if Nat.eql(kin.model, 3) then // Big Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.big_pine_0_00])
-        else Mons.Attr.new_blockable([Mons.Assets.big_pine_0_01])
-      if Nat.eql(kin.model, 4) then // Pine tree 2
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.pine_2_00])
-        else Mons.Attr.new_blockable([Mons.Assets.pine_2_01])
-      if Nat.eql(kin.model, 5) then // Big Pine tree
-        if Nat.eql(kin.slice, 0) then 
-          Mons.Attr.new_blockable([Mons.Assets.big_pine_2_00])
-        else Mons.Attr.new_blockable([Mons.Assets.big_pine_2_01])
-      if Nat.eql(kin.model, 6) then // Dead Pine tree 1
-          Mons.Attr.new_blockable([Mons.Assets.dead_pine_0])
-      if Nat.eql(kin.model, 7) then // Dead Pine tree 2
-          Mons.Attr.new_blockable([Mons.Assets.dead_pine_1])
       else Mons.Attr.new_blockable([]);
     | Mons.SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
     | Mons.SAND_1 => Mons.Attr.new_neutral([Mons.Assets.sand_1]);
@@ -520,15 +469,15 @@ Mons.Kind.houses(lvl: Nat, model: Nat, slice: Nat): Mons.Attr
       if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house1_1]) else
       if Nat.eql(slice, 2) then Mons.Attr.new_blockable([Mons.Assets.0_house1_2])
       else Mons.Attr.new_blockable([Mons.Assets.0_house1_3])
-    // else if Nat.eql(model, 2) then
-    //   if Nat.eql(slice, 0) then Mons.Attr.new_blockable([Mons.Assets.0_house2_0])
-    //   // if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
-    //   // if Nat.eql(slice, 2) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
-    //   // if Nat.eql(slice, 3) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
-    //   // if Nat.eql(slice, 4) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
-    //   // if Nat.eql(slice, 5) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
-    //   // if Nat.eql(slice, 6) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4])
-    //   else Mons.Attr.new_blockable([Mons.Assets.0_house2_1])
+    else if Nat.eql(model, 2) then
+      if Nat.eql(slice, 0) then Mons.Attr.new_blockable([Mons.Assets.0_house2_0])
+      if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house2_1]) else
+      if Nat.eql(slice, 2) then Mons.Attr.new_blockable([Mons.Assets.0_house2_2]) else
+      if Nat.eql(slice, 3) then Mons.Attr.new_blockable([Mons.Assets.0_house2_3]) else
+      if Nat.eql(slice, 4) then Mons.Attr.new_blockable([Mons.Assets.0_house2_4]) else
+      if Nat.eql(slice, 5) then Mons.Attr.new_blockable([Mons.Assets.0_house2_5]) else
+      if Nat.eql(slice, 6) then Mons.Attr.new_blockable([Mons.Assets.0_house2_6])
+      else Mons.Attr.new_blockable([Mons.Assets.0_house2_7])
     // else if Nat.eql(model, 3) then
     //   if Nat.eql(slice, 1) then Mons.Attr.new_blockable([Mons.Assets.0_house3_1_0])
     //   else Mons.Attr.new_blockable([Mons.Assets.0_house3_1_0])
