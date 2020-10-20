@@ -293,8 +293,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
       Mons.Skill.kind(kin));
     | TROWL => Mons.Attr.new_battleable(
-      Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "TROWL",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
+      Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
       Mons.Skill.kind(kin));
     | MIMIC => Mons.Attr.new_battleable(
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
