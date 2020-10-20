@@ -73,6 +73,10 @@ type Fm.Term {
   hol(
     path: Maybe(Bits),
   ),
+  // A natural number
+  //nat(
+    //nval: Nat,
+  //)
 }
 
 // A type error
@@ -194,7 +198,7 @@ Fm.Error.show(error: Fm.Error, defs: Fm.Defs): String
       let goal = Fm.Term.expand(error.dref, error.goal, defs)
       let goal =
         if error.verb then
-          Fm.Term.show.go(Fm.Term.bind(error.context, goal, (x) x), Bool.true)
+          Fm.Term.show.go(Fm.Term.paths(goal, (x) x), Bool.true)
         else
           Fm.Term.show(goal)
       let context = Fm.Context.show(error.context)
@@ -298,57 +302,89 @@ Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
       String.flatten(["?", name]),
     hol:
       String.flatten(["_"]),
+    //nat:
+      //Nat.to_string(term.nval),
   }
 
 Fm.Term.show(term: Fm.Term): String
   Fm.Term.show.go(term, Bool.false)
 
-// Binds named variables to their lambdas and sets paths
-Fm.Term.bind(vars: Fm.Context, term: Fm.Term, path: Bits -> Bits): Fm.Term 
-  let this_path = Maybe.some<>(path(Bits.nil))
+// Binds named variables to their lambdas
+Fm.Term.bind(vars: Fm.Context, term: Fm.Term): Fm.Term 
   case term {
     ref: case Fm.Context.find(term.name, vars) as got {
-      none: Fm.Term.ref(term.name, this_path),
+      none: Fm.Term.ref(term.name, term.path),
       some: got.value,
     },
     var: case List.at_last<>(term.indx, vars) as got {
-      none: Fm.Term.var(term.name, term.indx, this_path),
+      none: Fm.Term.var(term.name, term.indx, term.path),
       some: Pair.snd<_,_>(got.value),
     },
     all: 
       let vlen = List.length<>(vars)
-      def xtyp = Fm.Term.bind(vars, term.xtyp, (x) path(Bits.0(x)))
+      def xtyp = Fm.Term.bind(vars, term.xtyp)
       def body = (s,x) Fm.Term.bind(
         List.cons<>({term.name,x},
           List.cons<>({term.self,s},
           vars)),
         term.body(
           Fm.Term.var(term.self, vlen, Maybe.none<>),
-          Fm.Term.var(term.name, Nat.succ(vlen), Maybe.none<>)),
-        (x) path(Bits.1(x)))
-      Fm.Term.all(term.self, term.name, xtyp, body, this_path),
+          Fm.Term.var(term.name, Nat.succ(vlen), Maybe.none<>)))
+      Fm.Term.all(term.self, term.name, xtyp, body, term.path),
     lam:
       let vlen = List.length<>(vars)
       def body = (x) Fm.Term.bind(
         List.cons<>({term.name,x},vars),
-        term.body(Fm.Term.var(term.name, vlen, Maybe.none<>)),
-        (x) path(Bits.0(x)))
-      Fm.Term.lam(term.name, body, this_path),
+        term.body(Fm.Term.var(term.name, vlen, Maybe.none<>)))
+      Fm.Term.lam(term.name, body, term.path),
     app:
-      def func = Fm.Term.bind(vars, term.func, (x) path(Bits.0(x)))
-      def argm = Fm.Term.bind(vars, term.argm, (x) path(Bits.1(x)))
-      Fm.Term.app(func, argm, this_path),
+      def func = Fm.Term.bind(vars, term.func)
+      def argm = Fm.Term.bind(vars, term.argm)
+      Fm.Term.app(func, argm, term.path),
     ann:
-      def term = Fm.Term.bind(vars, term.term, (x) path(Bits.0(x)))
-      def type = Fm.Term.bind(vars, term.type, (x) path(Bits.1(x)))
-      Fm.Term.ann(term.done, term, type, this_path),
+      def term = Fm.Term.bind(vars, term.term)
+      def type = Fm.Term.bind(vars, term.type)
+      Fm.Term.ann(term.done, term, type, term.path),
     let:
       let vlen = List.length<>(vars)
-      def expr = Fm.Term.bind(vars, term.expr, (x) path(Bits.0(x)))
+      def expr = Fm.Term.bind(vars, term.expr)
       def body = (x) Fm.Term.bind(
         List.cons<>({term.name,x}, vars),
-        term.body(Fm.Term.var(term.name, vlen, Maybe.none<>)),
-        (x) path(Bits.1(x)))
+        term.body(Fm.Term.var(term.name, vlen, Maybe.none<>)))
+      Fm.Term.let(term.name, expr, body, term.path),
+    gol:
+      Fm.Term.gol(term.name, term.dref, term.verb, term.path),
+    hol:
+      Fm.Term.hol(term.path),
+    //nat:
+      //Fm.Term.nat(term.nval),
+    _: term,
+  }
+
+// Annotates constructors with their paths
+Fm.Term.paths(term: Fm.Term, path: Bits -> Bits): Fm.Term 
+  let this_path = Maybe.some<>(path(Bits.nil))
+  case term {
+    ref: Fm.Term.ref(term.name, this_path),
+    var: Fm.Term.var(term.name, term.indx, this_path),
+    all: 
+      def xtyp = Fm.Term.paths(term.xtyp, (x) path(Bits.0(x)))
+      def body = (s,x) Fm.Term.paths(term.body(s,x), (x) path(Bits.1(x)))
+      Fm.Term.all(term.self, term.name, xtyp, body, this_path),
+    lam:
+      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.0(x)))
+      Fm.Term.lam(term.name, body, this_path),
+    app:
+      def func = Fm.Term.paths(term.func, (x) path(Bits.0(x)))
+      def argm = Fm.Term.paths(term.argm, (x) path(Bits.1(x)))
+      Fm.Term.app(func, argm, this_path),
+    ann:
+      def term = Fm.Term.paths(term.term, (x) path(Bits.0(x)))
+      def type = Fm.Term.paths(term.type, (x) path(Bits.1(x)))
+      Fm.Term.ann(term.done, term, type, this_path),
+    let:
+      def expr = Fm.Term.paths(term.expr, (x) path(Bits.0(x)))
+      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.1(x)))
       Fm.Term.let(term.name, expr, body, this_path),
     gol:
       Fm.Term.gol(term.name, term.dref, term.verb, this_path),
@@ -767,8 +803,8 @@ Fm.Term.synth(term: Fm.Term, type: Fm.Term, defs: Fm.Defs): Either(List(Fm.Error
         none: Either.left<_,_>(checked.errors),
         some: case fixed.value {
           new: 
-            let term = Fm.Term.bind([], fixed.value.fst, (x) Bits.1(x))
-            let type = Fm.Term.bind([], fixed.value.snd, (x) Bits.0(x))
+            let term = Fm.Term.bind([], fixed.value.fst)
+            let type = Fm.Term.bind([], fixed.value.snd)
             Fm.Term.synth(term, type, defs)
         }
       }
@@ -1023,8 +1059,8 @@ Fm.Parser.Core.def: Parser(Pair(Fm.Name, Fm.Term.Def))
     var term = Fm.Parser.Core;
     let type = Fm.Parser.Core.make_forall(args, type)
     let term = Fm.Parser.Core.make_lambda(args, term)
-    let type = Fm.Term.bind([], type, (x) Bits.0(x))
-    let term = Fm.Term.bind([], term, (x) Bits.1(x))
+    let type = Fm.Term.bind([], Fm.Term.paths(type, (x) Bits.0(x)))
+    let term = Fm.Term.bind([], Fm.Term.paths(term, (x) Bits.1(x)))
     do Parser {
       return {name, Fm.Term.Def.new(term, type, List.length<>(args))};
     };
@@ -1155,6 +1191,9 @@ Fm: _
     refl(A: Type)(a: A): Equal(A)(a)(a)
       (P) (refl) refl
 
+    apply(A: Type)(B: Type)(a: A)(b: A)(f: (x:A) B)(e: Equal(A)(a)(b)): Equal(B)(f(a))(f(b))
+      e((e.b) (e) Equal(B)(f(a))(f(e.b)))(refl(B)(f(a)))
+
     double(n: Nat): Nat
       n((x) Nat)(zero)((pred) succ(succ(double(pred))))
 
@@ -1170,14 +1209,48 @@ Fm: _
     test1(A: Type)(B: Type)(x: A)(y: B): A
       const(_)(_)(x)(y)
 
-    theo(n: Nat): Equal(Nat)(same(n))(n)
-      n((n.self) Equal(Nat)(same(n.self))(n.self))(?aaa-10-34)((x) ?bbb-21-133)
+    add: (a: Nat) (b: Nat) Nat
+      (a) a((x) (b:Nat) Nat)((b) b)((pred) (b) succ(add(pred)(b)))
 
+    main: Nat
+      add(succ(succ(zero)))(succ(zero))
+
+    theo(a: Nat)(b: Nat): Equal(Nat)(add(a)(b))(add(b)(a))
+      a((a) Equal(Nat)(add(a)(b))(add(b)(a)))(theo0(b))((a.pred)
+        let p0 = theo1(b)(a.pred);
+        let p1 = theo(a.pred)(b);
+        ?hmm-18-130
+      )
+
+    theo0(a: Nat): Equal(Nat)(add(zero)(a))(add(a)(zero))
+      a((a) Equal(Nat)(add(zero)(a))(add(a)(zero)))(
+        refl(Nat)(zero)
+      )((a.pred)
+        let p0 = theo0(a.pred);
+        let p1 = apply(_)(_)(_)(_)(succ)(p0);
+        p1
+      )
+
+    theo1(a: Nat)(b: Nat): Equal(Nat)(add(a)(succ(b)))(succ(add(a)(b)))
+      a((a) Equal(Nat)(add(a)(succ(b)))(succ(add(a)(b))))(
+        refl(Nat)(succ(b))
+      )((pred)
+        let p0 = theo1(pred)(b);
+        let p1 = apply(_)(_)(_)(_)(succ)(p0);
+        p1
+      )
   "));
 
+  let main = case Fm.deref<>(Fm.Name.read("main"), defs) as got {
+    none: Fm.Term.typ(Maybe.none<>),
+    some: case got.value { new: got.value.term },
+  }
+  
   do IO {
     IO.print("# Defs:");
     IO.print(Fm.Defs.show(defs));
     IO.print("# Report:");
     IO.print(Fm.report(defs));
+    IO.print("# Main:");
+    IO.print(Fm.Term.show(Fm.Term.normalize(main, defs)));
   }
