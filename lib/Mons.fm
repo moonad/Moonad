@@ -711,49 +711,54 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   if U32.eql(dim, 0u) then
     let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 0))
     let path_brick = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
-    let lvl0 = 0
+    let lvl0 = 0u
     Mons.Map.code_to_tile.aux(code,[
       // Construction
       { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0), Bool.true), path_brick ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true), path_brick ]},
       { ".-", [ Mons.Kind.new_const(Mons.Kind.const.BIG_STAIRS, Bool.false), path_brick ]},
-      { "t0", [ Mons.Kind.new_const(Mons.Kind.const.TORCHE(lvl0, 0), Bool.false) ]},
-      { "t1", [ Mons.Kind.new_const(Mons.Kind.const.TORCHE(lvl0, 1), Bool.false) ]},
+      { "--", [ Mons.Kind.new_const(Mons.Kind.const.SMALL_STAIRS, Bool.false), path_brick ]},
+      { "t0", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 0u), Bool.false) ]},
+      { "t1", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 1u), Bool.false) ]},
+      { "t2", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 2u), Bool.false) ]},
+      { "t3", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 3u), Bool.false) ]},
+      { "t4", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 4u), Bool.false) ]},
+      { "t5", [ Mons.Kind.new_const(Mons.Kind.const.TORCH(lvl0, 5u), Bool.false) ]},
 
       // -- House 0
-      { "z0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 0), Bool.false) ]},
-      { "z1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
-      { "z2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
+      { "z0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 0u), Bool.false) ]},
+      { "z1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 1u), Bool.false) ]},
+      { "z2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 2u), Bool.false) ]},
       // -- House 1
-      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 0), Bool.false) ]},
-      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 1), Bool.false) ]},
-      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 2), Bool.false) ]},
-      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1, 3), Bool.false) ]},
+      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1u, 0u), Bool.false) ]},
+      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1u, 1u), Bool.false) ]},
+      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1u, 2u), Bool.false) ]},
+      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 1u, 3u), Bool.false) ]},
       // -- House 2
-      { "c0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 0), Bool.false) ]},
-      { "c1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 1), Bool.false) ]},
-      { "c2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 2), Bool.false) ]},
-      { "c3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 3), Bool.false) ]},
-      { "d0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 4), Bool.false) ]},
-      { "d1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 5), Bool.false) ]},
-      { "d2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 6), Bool.false) ]},
-      { "d3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2, 7), Bool.false) ]},
+      { "c0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 0u), Bool.false) ]},
+      { "c1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 1u), Bool.false) ]},
+      { "c2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 2u), Bool.false) ]},
+      { "c3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 3u), Bool.false) ]},
+      { "d0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 4u), Bool.false) ]},
+      { "d1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 5u), Bool.false) ]},
+      { "d2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 6u), Bool.false) ]},
+      { "d3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 2u, 7u), Bool.false) ]},
       // -- House 3
-      { "v0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
-      { "v1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
-      { "v2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 3), Bool.false) ]},
+      { "v0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 1u), Bool.false) ]},
+      { "v1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 2u), Bool.false) ]},
+      { "v2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 3u), Bool.false) ]},
       // { "f0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 0), Bool.false) ]},
       // { "f1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 1), Bool.false) ]},
       // { "f2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 3, 4), Bool.false) ]},
       // -- House 4
-      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 0), Bool.false) ]},
-      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 1), Bool.false) ]},
-      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 2), Bool.false) ]},
-      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
+      { "x0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4u, 0u), Bool.false) ]},
+      { "x1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4u, 1u), Bool.false) ]},
+      { "x2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4u, 2u), Bool.false) ]},
+      { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4u, 3u), Bool.false) ]},
       // -- House 5
-      { "n1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 0), Bool.false) ]},
-      { "n2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 1), Bool.false) ]},
-      { "n3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0, 2), Bool.false) ]},
+      { "n1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 0u), Bool.false) ]},
+      { "n2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 1u), Bool.false) ]},
+      { "n3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 0u, 2u), Bool.false) ]},
       // { "x3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(lvl0, 4, 3), Bool.false) ]},
 
       // Terrain
@@ -762,12 +767,21 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "bk", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID_BLACK) ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
       { ".n", [ grass ]},
+      { "i0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH(1u)) ]},
       { ".b", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 1)) ]},
       { ".v", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 2)) ]},
-      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0))]},
+      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0u))]},
       { "sh", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SHADOW_CONST) ]},
-      { "u9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 1)) ]},
-      { "u8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 2)) ]},
+      { "u9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 1u)) ]},
+      { "u8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 2u)) ]},
+      // Mid city
+      { "m0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(0u)) ]},
+      // { "m1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(1u)) ]},
+      // { "m2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(2u)) ]},
+      // { "m3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(3u)) ]},
+      // { "m4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(4u)) ]},
+      // { "m5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.INTRO_SLICE(5u)) ]},
+
     ])
 
   else if U32.eql(dim, 1u) then // lvl 0 - city destroied
@@ -783,7 +797,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
-      { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
+      { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH(0u)), grass ]},
       { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]}
     ]) 
@@ -791,7 +805,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   Mons.Map.code_to_tile.aux(code,[
     { ".g", [ grass ]},
     { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
-    { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
+    { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH(0u)), grass ]},
     { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
     { "w0", [ 
       Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.up)),
