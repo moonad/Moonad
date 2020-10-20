@@ -296,7 +296,7 @@ Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
     hol:
       String.flatten(["_"]),
     nat:
-      String.flatten([Nat.to_string(term.nval)]),
+      String.flatten([Nat.show(term.nval)]),
   }
 Fm.Term.show(term: Fm.Term): String
   Fm.Term.show.go(term, Bool.false)
