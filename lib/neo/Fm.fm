@@ -77,9 +77,10 @@ type Fm.Term {
     path: Maybe(Bits),
   ),
   // A natural number
-  //nat(
-    //nval: Nat,
-  //)
+  nat(
+    nval: Nat,
+    path: Maybe(Bits),
+  )
 }
 
 // A type error
@@ -234,7 +235,7 @@ Fm.Context.show(context: Fm.Context): String
     }
   }
 
-// Stringifies a term
+// SHOW: Stringifies a term
 Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
   case term {
     ref:
@@ -294,15 +295,26 @@ Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
       String.flatten(["?", name]),
     hol:
       String.flatten(["_"]),
+    nat:
+      String.flatten([Nat.to_string(term.nval)]),
   }
-
 Fm.Term.show(term: Fm.Term): String
   Fm.Term.show.go(term, Bool.false)
 
 // Reduction
 // =========
 
-// Binds named variables to their lambdas
+// Unrolls a natural number
+Fm.Term.unroll_nat(nval: Nat): Fm.Term
+  case nval {
+    zero: Fm.Term.ref(Fm.Name.read("Nat.zero"), Maybe.none<>),
+    succ: Fm.Term.app(
+      Fm.Term.ref(Fm.Name.read("Nat.succ"), Maybe.none<>),
+      Fm.Term.nat(nval.pred, Maybe.none<>),
+      Maybe.none<>),
+  }
+
+// BIND: Binds named variables to their lambdas
 Fm.Term.bind(vars: Fm.Context, term: Fm.Term): Fm.Term 
   case term {
     ref: case Fm.Context.find(term.name, vars) as got {
@@ -349,12 +361,12 @@ Fm.Term.bind(vars: Fm.Context, term: Fm.Term): Fm.Term
       Fm.Term.gol(term.name, term.dref, term.verb, term.path),
     hol:
       Fm.Term.hol(term.path),
-    //nat:
-      //Fm.Term.nat(term.nval),
+    nat:
+      Fm.Term.nat(term.nval, term.path),
     _: term,
   }
 
-// Reduces a high order term to weak head normal form
+// REDUCE: Reduces a high order term to weak head normal form
 Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
   case term {
     ref: case Fm.deref<>(term.name, defs) as got {
@@ -371,15 +383,12 @@ Fm.Term.reduce(term: Fm.Term, defs: Fm.Defs): Fm.Term
       Fm.Term.reduce(term.term, defs),
     let:
       Fm.Term.reduce(term.body(term.expr), defs),
-    //nat:
-      //Fm.Term.reduce(case term.natx {
-        //zero: Fm.Term.ref(Fm.Name.read("Nat.zero")),
-        //succ: Fm.Term.app(Fm.Term.ref(Fm.Name.read("Nat.succ"), Fm.Term.nat(n.pred))),
-      //}, defs),
+    nat:
+      Fm.Term.reduce(Fm.Term.unroll_nat(term.nval), defs),
     _: term,
   }
 
-// Normalizes a high order term
+// NORMALIZE: Normalizes a high order term
 Fm.Term.normalize(term: Fm.Term, defs: Fm.Defs): Fm.Term
   case Fm.Term.reduce(term, defs) as term {
     ref:
@@ -411,14 +420,14 @@ Fm.Term.normalize(term: Fm.Term, defs: Fm.Defs): Fm.Term
       Fm.Term.gol(term.name, term.dref, term.verb, term.path),
     hol:
       Fm.Term.hol(term.path),
-    //nat:
-      //Fm.Term.nat(term.numb),
+    nat:
+      Fm.Term.nat(term.nval, term.path),
   }
 
 // Patching
 // ========
 
-// Annotates constructors with their paths
+// PATHS Annotates constructors with their paths
 Fm.Term.paths(term: Fm.Term, path: Bits -> Bits): Fm.Term 
   let this_path = Maybe.some<>(path(Bits.nil))
   case term {
@@ -447,10 +456,12 @@ Fm.Term.paths(term: Fm.Term, path: Bits -> Bits): Fm.Term
       Fm.Term.gol(term.name, term.dref, term.verb, this_path),
     hol:
       Fm.Term.hol(this_path),
+    nat:
+      Fm.Term.nat(term.nval, this_path),
     _: term,
   }
 
-// Does something at a specific path
+// PATCH_AT Does something at a specific path
 Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
   case term {
     all: case path {
@@ -551,11 +562,11 @@ case term {
     Bits.0(Bits.0(Bits.0(name(x)))),
   hol:
     x,
-  //nat: // TODO
-    //x,
+  nat:
+    x,
 }
 
-// Serializes a term to a representative bitstring
+// SERIALIZE: Serializes a term to a representative bitstring
 Fm.Term.serialize(term: Fm.Term, depth: Nat): Bits
   Fm.Term.serialize.go(term, depth, depth, Bits.nil)
 
@@ -565,7 +576,7 @@ Fm.Term.equal.found_hole(path: Maybe(Bits), value: Fm.Term): Fm.Check(Bool)
     Maybe.some<>(Bool.true),
     [Fm.Error.found_hole(path, value)])
 
-// Determines if two terms are equal
+// EQUAL: Determines if two terms are equal
 Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Check(Bool)
   let a1 = Fm.Term.reduce(a, defs)
   let b1 = Fm.Term.reduce(b, defs)
@@ -672,7 +683,7 @@ Fm.Check.bind<A: Type, B: Type>(a: Fm.Check(A), f: A -> Fm.Check(B)): Fm.Check(B
 Fm.Check.monad: Monad(Fm.Check)
   Monad.new<Fm.Check>(Fm.Check.bind, Fm.Check.pure)
 
-// Infers the type of a core term
+// INFER: Infers the type of a core term
 Fm.Term.infer(term: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.Check(Fm.Term)
   //use skip = Debug.log<>(String.concat("[debug] - infer: ",Fm.Term.show(term)))
   case term {
@@ -735,9 +746,11 @@ Fm.Term.infer(term: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.Check(Fm.Term)
       Fm.Check.result<>(Maybe.none<>, [Fm.Error.untyped_lambda]),
     hol:
       Fm.Check.result<>(Maybe.none<>, [Fm.Error.untyped_lambda]),
+    nat:
+      Fm.Term.infer(Fm.Term.unroll_nat(term.nval), defs, ctx),
   }
 
-// Checks the type of a core term
+// CHECK: Checks the type of a core term
 Fm.Term.check(term: Fm.Term, type: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.Check(Fm.Term)
   //use skip = Debug.log<>(String.flatten(["[debug] - check: ",Fm.Term.show(term)," :: ",Fm.Term.show(type)]))
   case term {
@@ -782,7 +795,7 @@ Fm.Term.check(term: Fm.Term, type: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.
     }
   }
 
-// Fixes a list of errors, if possible
+// SYNTH: Fixes a list of errors, if possible
 Fm.Term.synth.fix(term: Fm.Term, type: Fm.Term, defs: Fm.Defs, errors: List(Fm.Error)): Maybe(Pair(Fm.Term, Fm.Term))
   case errors {
     nil:
@@ -995,6 +1008,14 @@ Fm.Parser.Core.hole: Parser(Fm.Term)
     return Fm.Term.hol(Maybe.none<>);
   }
 
+// Parses a natural number: `123`
+Fm.Parser.Core.nat: Parser(Fm.Term)
+  do Parser {
+    Parser.spaces;
+    var nval = Parser.nat;
+    return Fm.Term.nat(nval, Maybe.none<>);
+  }
+
 // Parses a reference: `name`
 Fm.Parser.Core.reference: Parser(Fm.Term)
   do Parser {
@@ -1030,6 +1051,7 @@ Fm.Parser.Core: Parser(Fm.Term)
       Fm.Parser.Core.let,
       Fm.Parser.Core.goal,
       Fm.Parser.Core.hole,
+      Fm.Parser.Core.nat,
       Fm.Parser.Core.reference,
     ]);
     Fm.Parser.Core.suffix(term);
@@ -1135,6 +1157,7 @@ Fm.Defs.show(defs: Fm.Defs): String
       "\n",
     ])
 
+// REPORT: Synths, checks and reports errors of a defs
 Fm.report(defs: Fm.Defs): String
   let result = {"## Types:", "## Errors:"}
   let result = for named_def in Map.to_list<>(defs):
@@ -1169,101 +1192,100 @@ Fm.report(defs: Fm.Defs): String
     new: String.flatten([result.fst, "\n", result.snd])
   }
 
+// Tests
+// =====
+
+Fm.base_source: String
+("
+  id(A: Type)(x: A): A
+    x
+
+  const(A: Type)(B: Type)(x: A)(y: B): A
+    x
+
+  Bool: Type
+    self(P: (x: Bool) Type)
+    (true: P(Bool.true))
+    (false: P(Bool.false))
+    P(self)
+
+  Bool.true: Bool
+    (P) (t) (f) t
+
+  Bool.false: Bool
+    (P) (t) (f) f
+
+  Bool.elim(b: Bool)(P: (x:Bool) Type)(t: P(Bool.true))(f: P(Bool.false)): P(b)
+    b((self) P(self))(t)(f)
+
+  Nat: Type
+    self(P: (x: Nat) Type)
+    (zero: P(Nat.zero))
+    (succ: (n: Nat) P(Nat.succ(n)))
+    P(self)
+
+  Nat.zero: Nat
+    (P) (z) (s) z
+
+  Nat.succ(n: Nat): Nat
+    (P) (z) (s) s(n)
+
+  Nat.induce(n: Nat)(P: (x:Nat) Type)(z: P(Nat.zero))(s: (n: Nat) (i: P(n)) P(Nat.succ(n))): P(n)
+    n(P)(z)((pred) s(pred)(Nat.induce(pred)(P)(z)(s)))
+
+  Equal(A: Type)(a: A)(b: A): Type
+    self(P: (b: A) (x:Equal(A)(a)(b)) Type)
+    (refl: P(a)(Equal.refl(A)(a)))
+    P(b)(self)
+
+  Equal.refl(A: Type)(a: A): Equal(A)(a)(a)
+    (P) (refl) refl
+
+  Equal.apply(A: Type)(B: Type)(a: A)(b: A)(f: (x:A) B)(e: Equal(A)(a)(b)): Equal(B)(f(a))(f(b))
+    e((e.b) (e) Equal(B)(f(a))(f(e.b)))(Equal.refl(B)(f(a)))
+
+  Nat.double(n: Nat): Nat
+    n((x) Nat)(Nat.zero)((pred) Nat.succ(Nat.succ(Nat.double(pred))))
+
+  Nat.same(n: Nat): Nat
+    n((n.self) Nat)(Nat.zero)((pred) Nat.succ(Nat.same(pred)))
+
+  Nat.add: (a: Nat) (b: Nat) Nat
+    (a) a((x) (b:Nat) Nat)((b) b)((pred) (b) Nat.succ(Nat.add(pred)(b)))
+
+  Nat.add_zero(a: Nat): Equal(Nat)(Nat.add(Nat.zero)(a))(Nat.add(a)(Nat.zero))
+    a((a) Equal(Nat)(Nat.add(Nat.zero)(a))(Nat.add(a)(Nat.zero)))(
+      Equal.refl(Nat)(Nat.zero)
+    )((a.pred)
+      let p0 = Nat.add_zero(a.pred);
+      let p1 = Equal.apply(_)(_)(_)(_)(Nat.succ)(p0);
+      p1
+    )
+
+  Nat.add_succ(a: Nat)(b: Nat): Equal(Nat)(Nat.add(a)(Nat.succ(b)))(Nat.succ(Nat.add(a)(b)))
+    a((a) Equal(Nat)(Nat.add(a)(Nat.succ(b)))(Nat.succ(Nat.add(a)(b))))(
+      Equal.refl(Nat)(Nat.succ(b))
+    )((pred)
+      let p0 = Nat.add_succ(pred)(b);
+      let p1 = Equal.apply(_)(_)(_)(_)(Nat.succ)(p0);
+      p1
+    )
+
+  test0: Nat
+    let n0 = Nat.zero;
+    let n1 = Nat.succ(n0);
+    let n2 = Nat.succ(n1);
+    Nat.same(n2)
+
+  test1(A: Type)(B: Type)(x: A)(y: B): A
+    const(_)(_)(x)(y)
+
+  main: Nat
+    Nat.add(2)(3)
+")
+
 Fm: _
-  let defs = Maybe.default<>(Fm.Map.new<>, Fm.Defs.read("
-    id(A: Type)(x: A): A
-      x
-
-    const(A: Type)(B: Type)(x: A)(y: B): A
-      x
-
-    Bool: Type
-      self(P: (x: Bool) Type)
-      (true: P(true))
-      (false: P(false))
-      P(self)
-
-    true: Bool
-      (P) (t) (f) t
-
-    false: Bool
-      (P) (t) (f) f
-
-    elim(b: Bool)(P: (x:Bool) Type)(t: P(true))(f: P(false)): P(b)
-      b((self) P(self))(t)(f)
-
-    Nat: Type
-      self(P: (x: Nat) Type)
-      (zero: P(zero))
-      (succ: (n: Nat) P(succ(n)))
-      P(self)
-
-    zero: Nat
-      (P) (z) (s) z
-
-    succ(n: Nat): Nat
-      (P) (z) (s) s(n)
-
-    ind(n: Nat)(P: (x:Nat) Type)(z: P(zero))(s: (n: Nat) (i: P(n)) P(succ(n))): P(n)
-      n(P)(z)((pred) s(pred)(ind(pred)(P)(z)(s)))
-
-    Equal(A: Type)(a: A)(b: A): Type
-      self(P: (b: A) (x:Equal(A)(a)(b)) Type)
-      (refl: P(a)(refl(A)(a)))
-      P(b)(self)
-
-    refl(A: Type)(a: A): Equal(A)(a)(a)
-      (P) (refl) refl
-
-    apply(A: Type)(B: Type)(a: A)(b: A)(f: (x:A) B)(e: Equal(A)(a)(b)): Equal(B)(f(a))(f(b))
-      e((e.b) (e) Equal(B)(f(a))(f(e.b)))(refl(B)(f(a)))
-
-    double(n: Nat): Nat
-      n((x) Nat)(zero)((pred) succ(succ(double(pred))))
-
-    same(n: Nat): Nat
-      n((n.self) Nat)(zero)((pred) succ(same(pred)))
-
-    test0: Nat
-      let n0 = zero;
-      let n1 = succ(n0);
-      let n2 = succ(n1);
-      same(n2)
-
-    test1(A: Type)(B: Type)(x: A)(y: B): A
-      const(_)(_)(x)(y)
-
-    add: (a: Nat) (b: Nat) Nat
-      (a) a((x) (b:Nat) Nat)((b) b)((pred) (b) succ(add(pred)(b)))
-
-    main: Nat
-      add(succ(succ(zero)))(succ(zero))
-
-    theo(a: Nat)(b: Nat): Equal(Nat)(add(a)(b))(add(b)(a))
-      a((a) Equal(Nat)(add(a)(b))(add(b)(a)))(theo0(b))((a.pred)
-        let p0 = theo1(b)(a.pred);
-        let p1 = theo(a.pred)(b);
-        ?hmm-18-130
-      )
-
-    theo0(a: Nat): Equal(Nat)(add(zero)(a))(add(a)(zero))
-      a((a) Equal(Nat)(add(zero)(a))(add(a)(zero)))(
-        refl(Nat)(zero)
-      )((a.pred)
-        let p0 = theo0(a.pred);
-        let p1 = apply(_)(_)(_)(_)(succ)(p0);
-        p1
-      )
-
-    theo1(a: Nat)(b: Nat): Equal(Nat)(add(a)(succ(b)))(succ(add(a)(b)))
-      a((a) Equal(Nat)(add(a)(succ(b)))(succ(add(a)(b))))(
-        refl(Nat)(succ(b))
-      )((pred)
-        let p0 = theo1(pred)(b);
-        let p1 = apply(_)(_)(_)(_)(succ)(p0);
-        p1
-      )
-  "));
+  let defs = Maybe.default<>(Fm.Map.new<>, Fm.Defs.read(Fm.base_source));
 
   let main = case Fm.deref<>(Fm.Name.read("main"), defs) as got {
     none: Fm.Term.typ(Maybe.none<>),
