@@ -1,0 +1,80 @@
+// TODO add more skills
+T Mons.Skill
+| Mons.Skill.hit_4;
+| Mons.Skill.hit_2;
+| Mons.Skill.heal;
+| Mons.Skill.none;
+| Mons.Skills.dig;
+
+Mons.skills.kind(kin: Mons.Kind): List(Mons.Skill)
+  case kin:
+  | HERO        => Mons.dummy_skills;
+  | MAGE        => [];
+  | BEHOLDER    => Mons.dummy_skills;
+  | ZOIO        => [];
+  | CYCLOPE     => Mons.dummy_skills;
+  | POISOLICK   => Mons.dummy_skills;
+  | TROWL       => Mons.dummy_skills;
+  | MIMIC       => Mons.dummy_skills;
+  | AZULA       => Mons.dummy_skills;
+  | EMERELDER   => Mons.dummy_skills;
+
+Mons.Skill.description(skill: Mons.Skill): String
+  case skill:
+  | hit_4 => "damage 4"; // test
+  | hit_2 => "damage 2"; // test
+  | heal => "heal 3"; // test
+  | none => "does nothing"; // test
+  | dig => "protect for 1 turn. On the next turn, will attack and effects are applied";
+
+Mons.Skill.get_name(skill: Mons.Skill): String
+  case skill:
+  | hit_4  => "hit 4";
+  | hit_2  => "hit 2";
+  | heal   => "heal"; 
+  | none => "none";
+  | dig => "Dig";
+
+Mons.Skill.update_mon_obj(
+  hero_obj: Mons.Object,
+  obj_updated: Mons.Object,
+  pos: Pos32,
+  idx: U32,
+  game: Mons.Game) : Mons.Game
+  open hero_obj:
+  let qtd = List.length<>(hero_obj.bag)
+  if Nat.eql(qtd, 0) then
+    Mons.Game.map_set(pos, idx, obj_updated, game) // hero_obj
+  else //game
+    let idx_nat = U32.to_nat(hero_obj.mon)
+    let new_bag = List.update_at<>(idx_nat, (a) obj_updated, hero_obj.bag)
+    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj) 
+    Mons.Game.map_set(pos, idx, hero_obj, game)
+
+Mons.Skill.damage_eff(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+  Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+Mons.Skill.heal_eff(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
+  let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
+  if Mons.Object.is_obj_defeated(obj_updated) then game
+  else Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+// pos    : position of the map in which the battle is taking place
+// source : index of the object which is casting a skill
+// target : index of the object which is receiving the effect 
+Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
+  open game:
+  let source_obj = Mons.Map.get(pos, source, game.map)
+  let source_mon = Mons.Object.get_current_mon(source_obj)
+  let target_obj = Mons.Map.get(pos, target, game.map)
+  let target_mon = Mons.Object.get_current_mon(target_obj)
+  case skill:
+  | hit_4  =>
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+  | hit_2 => 
+    let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+  | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
+  | none => game;

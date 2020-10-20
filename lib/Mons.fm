@@ -65,13 +65,6 @@ T Mons.Object
   idl: U32 // frame for idle animation
 );
 
-// TODO add more skills
-T Mons.Skill
-| Mons.Skill.hit_4;
-| Mons.Skill.hit_2;
-| Mons.Skill.heal;
-| Mons.Skill.none;
-
 // TODO remove
 Mons.dummy_skills: List(Mons.Skill)
   [ Mons.Skill.hit_4, Mons.Skill.hit_2,
@@ -1135,56 +1128,49 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
-Mons.Skill.get_name(skill: Mons.Skill): String
-  case skill:
-  | hit_4  => "hit 4";
-  | hit_2  => "hit 2";
-  | heal   => "heal"; 
-  | dummu_none => "none";
+// Mons.update_mon_obj(
+//   hero_obj: Mons.Object,
+//   obj_updated: Mons.Object,
+//   pos: Pos32,
+//   idx: U32,
+//   game: Mons.Game) : Mons.Game
+//   open hero_obj:
+//   let qtd = List.length<>(hero_obj.bag)
+//   if Nat.eql(qtd, 0) then
+//     Mons.Game.map_set(pos, idx, obj_updated, game) // hero_obj
+//   else //game
+//     let idx_nat = U32.to_nat(hero_obj.mon)
+//     let new_bag = List.update_at<>(idx_nat, (a) obj_updated, hero_obj.bag)
+//     let hero_obj = Mons.Object.set_bag(new_bag, hero_obj) 
+//     Mons.Game.map_set(pos, idx, hero_obj, game)
 
-Mons.update_mon_obj(
-  hero_obj: Mons.Object,
-  obj_updated: Mons.Object,
-  pos: Pos32,
-  idx: U32,
-  game: Mons.Game) : Mons.Game
-  open hero_obj:
-  let qtd = List.length<>(hero_obj.bag)
-  if Nat.eql(qtd, 0) then
-    Mons.Game.map_set(pos, idx, obj_updated, game) // hero_obj
-  else //game
-    let idx_nat = U32.to_nat(hero_obj.mon)
-    let new_bag = List.update_at<>(idx_nat, (a) obj_updated, hero_obj.bag)
-    let hero_obj = Mons.Object.set_bag(new_bag, hero_obj) 
-    Mons.Game.map_set(pos, idx, hero_obj, game)
+// Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
+//   let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
+//   Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
 
-Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
-  let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-  Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
+// Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
+//   let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
+//   if Mons.Object.is_obj_defeated(obj_updated) then game
+//   else Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
 
-Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
-  let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
-  if Mons.Object.is_obj_defeated(obj_updated) then game
-  else Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
-
-// pos    : position of the map in which the battle is taking place
-// source : index of the object which is casting a skill
-// target : index of the object which is receiving the effect 
-Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
-  open game:
-  let source_obj = Mons.Map.get(pos, source, game.map)
-  let source_mon = Mons.Object.get_current_mon(source_obj)
-  let target_obj = Mons.Map.get(pos, target, game.map)
-  let target_mon = Mons.Object.get_current_mon(target_obj)
-  case skill:
-  | hit_4  =>
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-    Mons.damage(target_obj, pos, target, val, game);
-  | hit_2 => 
-    let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
-    Mons.damage(target_obj, pos, target, val, game);
-  | heal => Mons.heal(source_obj, pos, source, 3u, game);
-  | none => game;
+// // pos    : position of the map in which the battle is taking place
+// // source : index of the object which is casting a skill
+// // target : index of the object which is receiving the effect 
+// Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
+//   open game:
+//   let source_obj = Mons.Map.get(pos, source, game.map)
+//   let source_mon = Mons.Object.get_current_mon(source_obj)
+//   let target_obj = Mons.Map.get(pos, target, game.map)
+//   let target_mon = Mons.Object.get_current_mon(target_obj)
+//   case skill:
+//   | hit_4  =>
+//     let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+//     Mons.damage(target_obj, pos, target, val, game);
+//   | hit_2 => 
+//     let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+//     Mons.damage(target_obj, pos, target, val, game);
+//   | heal => Mons.heal(source_obj, pos, source, 3u, game);
+//   | none => game;
 
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
@@ -1409,11 +1395,11 @@ Mons.Game.exec_skills(
     let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
     // TODO: still need to test
     if Bool.or(U32.ltn(hero_agi, adve_agi), U32.eql(hero_agi, adve_agi)) then // hero attack first
-      let game = Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
-      Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game)
+      Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
     else 
-      let game = Mons.cast(pos, adve_idx, hero_idx, adve_skill, game)
-      Mons.cast(pos, hero_idx, adve_idx, hero_skill, game)
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game)
   else game
 
 
