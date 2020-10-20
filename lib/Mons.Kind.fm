@@ -10,40 +10,42 @@ T Mons.Kind
 T Mons.Kind.mons
 | Mons.Kind.mons.HERO;
 | Mons.Kind.mons.MAGE;
-| Mons.Kind.mons.BATH;
 | Mons.Kind.mons.BEHOLDER;
-| Mons.Kind.mons.CRONI;
-| Mons.Kind.mons.ELLIOT;
-| Mons.Kind.mons.ESPECTRONUS;
-| Mons.Kind.mons.GAKI;
-| Mons.Kind.mons.GORR;
-| Mons.Kind.mons.LAMURIA;
-| Mons.Kind.mons.RAFIRE;
-| Mons.Kind.mons.VARGOULI;
-| Mons.Kind.mons.TUPITREE;
-| Mons.Kind.mons.LELA;
-| Mons.Kind.mons.MOSHY;
-| Mons.Kind.mons.POISOLICK;
-| Mons.Kind.mons.BUFF;
-| Mons.Kind.mons.LAUGH;
-| Mons.Kind.mons.COBE_ORN;
-| Mons.Kind.mons.SANDY;
-| Mons.Kind.mons.SLIME;
-| Mons.Kind.mons.MIMIC;
-| Mons.Kind.mons.SPARKY;
-| Mons.Kind.mons.DOOMFIRE;
-| Mons.Kind.mons.BEANSTRONG;
-| Mons.Kind.mons.NAMELESS;
-| Mons.Kind.mons.OCTOKING;
-| Mons.Kind.mons.INPUBU;
-| Mons.Kind.mons.EMERELDER;
 | Mons.Kind.mons.ZOIO;
-| Mons.Kind.mons.IGNITE;
-| Mons.Kind.mons.FROST;
-| Mons.Kind.mons.FRAB;
-| Mons.Kind.mons.ELECTROWL;
-| Mons.Kind.mons.NOCTUBRIGHT;
+| Mons.Kind.mons.CYCLOPE;
+| Mons.Kind.mons.POISOLICK;
+| Mons.Kind.mons.TROWL;
+| Mons.Kind.mons.MIMIC;
 | Mons.Kind.mons.AZULA;
+| Mons.Kind.mons.EMERELDER;
+// | Mons.Kind.mons.CRONI;
+// | Mons.Kind.mons.ELLIOT;
+// | Mons.Kind.mons.ESPECTRONUS;
+// | Mons.Kind.mons.GAKI;
+// | Mons.Kind.mons.GORR;
+// | Mons.Kind.mons.LAMURIA;
+// | Mons.Kind.mons.RAFIRE;
+// | Mons.Kind.mons.VARGOULI;
+// | Mons.Kind.mons.TUPITREE;
+// | Mons.Kind.mons.LELA;
+// | Mons.Kind.mons.MOSHY;
+// | Mons.Kind.mons.BUFF;
+// | Mons.Kind.mons.LAUGH;
+// | Mons.Kind.mons.COBE_ORN;
+// | Mons.Kind.mons.SANDY;
+// | Mons.Kind.mons.SLIME;
+// | Mons.Kind.mons.SPARKY;
+// | Mons.Kind.mons.DOOMFIRE;
+// | Mons.Kind.mons.BEANSTRONG;
+// | Mons.Kind.mons.NAMELESS;
+// | Mons.Kind.mons.OCTOKING;
+// | Mons.Kind.mons.INPUBU;
+// | Mons.Kind.mons.IGNITE;
+// | Mons.Kind.mons.FROST;
+// | Mons.Kind.mons.FRAB;
+// | Mons.Kind.mons.ELECTROWL;
+// | Mons.Kind.mons.NOCTUBRIGHT;
+// | Mons.Kind.mons.AZULA;
 
 T Mons.Kind.const
 | Mons.Kind.const.ROCK_PATH_C; // TODO: if will still use it in a lvl, chage to terrain
@@ -117,40 +119,43 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     case kind.ele:
     | HERO        => Bool.true;
     | MAGE        => Bool.false;
-    | BATH        => Bool.false;
     | BEHOLDER    => Bool.false;
-    | CRONI       => Bool.false;
-    | ELLIOT      => Bool.false;
-    | ESPECTRONUS => Bool.false;
-    | GAKI        => Bool.false;
-    | GORR        => Bool.false;
-    | LAMURIA     => Bool.false;
-    | RAFIRE      => Bool.false;
-    | VARGOULI    => Bool.false;
-    | TUPITREE    => Bool.false;
-    | LELA        => Bool.false;
-    | MOSHY       => Bool.false;
-    | POISOLICK   => Bool.false;
-    | BUFF        => Bool.false;
-    | LAUGH       => Bool.false;
-    | COBE_ORN    => Bool.false;
-    | SANDY       => Bool.false;
-    | SLIME       => Bool.false;
-    | MIMIC       => Bool.false;
-    | SPARKY      => Bool.false;
-    | DOOMFIRE    => Bool.false;
-    | BEANSTRONG  => Bool.false;
-    | NAMELESS    => Bool.false;
-    | OCTOKING    => Bool.false;
-    | INPUBU      => Bool.false;
-    | EMERELDER   => Bool.false;
     | ZOIO        => Bool.false;
-    | IGNITE      => Bool.false;
-    | FROST       => Bool.false;
-    | FRAB        => Bool.false;
-    | ELECTROWL   => Bool.false;
-    | NOCTUBRIGHT => Bool.false;
-    | AZULA       => Bool.false;;
+    | CYCLOPE     => Bool.false;
+    | POISOLICK   => Bool.false;
+    | TROWL       => Bool.false;
+    | MIMIC       => Bool.false;
+    | AZULA       => Bool.false;
+    | EMERELDER   => Bool.false;
+    // | CRONI       => Bool.false;
+    // | ELLIOT      => Bool.false;
+    // | ESPECTRONUS => Bool.false;
+    // | GAKI        => Bool.false;
+    // | GORR        => Bool.false;
+    // | LAMURIA     => Bool.false;
+    // | RAFIRE      => Bool.false;
+    // | VARGOULI    => Bool.false;
+    // | TUPITREE    => Bool.false;
+    // | LELA        => Bool.false;
+    // | MOSHY       => Bool.false;
+    // | POISOLICK   => Bool.false;
+    // | BUFF        => Bool.false;
+    // | LAUGH       => Bool.false;
+    // | COBE_ORN    => Bool.false;
+    // | SANDY       => Bool.false;
+    // | SLIME       => Bool.false;
+    // | SPARKY      => Bool.false;
+    // | DOOMFIRE    => Bool.false;
+    // | BEANSTRONG  => Bool.false;
+    // | NAMELESS    => Bool.false;
+    // | OCTOKING    => Bool.false;
+    // | INPUBU      => Bool.false;
+    // | IGNITE      => Bool.false;
+    // | FROST       => Bool.false;
+    // | FRAB        => Bool.false;
+    // | ELECTROWL   => Bool.false;
+    // | NOCTUBRIGHT => Bool.false;
+    ;
   | const    => Bool.false;
   | terrain  => Bool.false;
   | inter => Bool.false;
@@ -271,108 +276,155 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     case kin.ele as kin:
     | HERO => Mons.Attr.new_hero;
     | MAGE => Mons.Attr.new_mage;
-    | BATH => Mons.Attr.new_battleable(
-      Mons.Assets.pic_bath, [Mons.Assets.mons_bath_d_0], "BATH",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d));
     | BEHOLDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d));
-    | CRONI => Mons.Attr.new_battleable(
-      Mons.Assets.pic_croni, [Mons.Assets.mons_croni_d_0], "CRONI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d));
-    | ELLIOT => Mons.Attr.new_battleable(
-      Mons.Assets.pic_elliot, [Mons.Assets.mons_elliot_d_0], "ELLIOT",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d));
-    | ESPECTRONUS => Mons.Attr.new_battleable(
-      Mons.Assets.pic_espectronus, [Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d));
-    | GAKI => Mons.Attr.new_battleable(
-      Mons.Assets.pic_gaki, [Mons.Assets.mons_gaki_d_0], "GAKI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d));
-    | GORR => Mons.Attr.new_battleable(
-      Mons.Assets.pic_gorr, [Mons.Assets.mons_gorr_d_0], "GORR",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d));
-    | LAMURIA => Mons.Attr.new_battleable(
-      Mons.Assets.pic_lamuria, [Mons.Assets.mons_lamuria_d_0], "LAMURIA",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d));
-    | RAFIRE => Mons.Attr.new_battleable(
-      Mons.Assets.pic_rafire, [Mons.Assets.mons_rafire_d_0], "RAFIRE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d));
-    | VARGOULI => Mons.Attr.new_battleable(
-      Mons.Assets.pic_vargouli, [Mons.Assets.mons_vargouli_d_0], "VARGOULI",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d));
-    | TUPITREE => Mons.Attr.new_battleable(
-      Mons.Assets.pic_tupitree, [Mons.Assets.mons_tupitree_d_0], "TUPITREE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d));
-    | LELA => Mons.Attr.new_battleable(
-      Mons.Assets.pic_lela, [Mons.Assets.mons_lela_d_0], "LELA",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d));
-    | MOSHY => Mons.Attr.new_battleable(
-      Mons.Assets.pic_moshy, [Mons.Assets.mons_moshy_d_0], "MOSHY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d));
-    | POISOLICK => Mons.Attr.new_battleable(
-      Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d));
-    | BUFF => Mons.Attr.new_battleable(
-      Mons.Assets.pic_buff, [Mons.Assets.mons_buff_d_0], "BUFF",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_buff_u, Mons.Assets.battle_buff_d));
-    | LAUGH => Mons.Attr.new_battleable(
-      Mons.Assets.pic_laugh, [Mons.Assets.mons_laugh_d_0], "LAUGH",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_laugh_u, Mons.Assets.battle_laugh_d));
-    | COBE_ORN => Mons.Attr.new_battleable(
-      Mons.Assets.pic_cobeorn, [Mons.Assets.mons_cobeorn_d_0], "COBE_ORN",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_cobeorn_u, Mons.Assets.battle_cobeorn_d));
-    | SANDY => Mons.Attr.new_battleable(
-      Mons.Assets.pic_sandy, [Mons.Assets.mons_sandy_d_0], "SANDY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sandy_u, Mons.Assets.battle_sandy_d));
-    | SLIME => Mons.Attr.new_battleable(
-      Mons.Assets.pic_slime, [Mons.Assets.mons_slime_d_0], "SLIME",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_slime_u, Mons.Assets.battle_slime_d));
-    | MIMIC => Mons.Attr.new_battleable(
-      Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d));
-    | SPARKY => Mons.Attr.new_battleable(
-      Mons.Assets.pic_sparky, [Mons.Assets.mons_sparky_d_0], "SPARKY",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_sparky_u, Mons.Assets.battle_sparky_d));
-    | DOOMFIRE => Mons.Attr.new_battleable(
-      Mons.Assets.pic_doomfire, [Mons.Assets.mons_doomfire_d_0], "DOOMFIRE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_doomfire_u, Mons.Assets.battle_doomfire_d));
-    | BEANSTRONG => Mons.Attr.new_battleable(
-      Mons.Assets.pic_beanstrong, [Mons.Assets.mons_beanstrong_d_0], "BEANSTRONG",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beanstrong_u, Mons.Assets.battle_beanstrong_d));
-    | NAMELESS => Mons.Attr.new_battleable(
-      Mons.Assets.pic_nameless, [Mons.Assets.mons_nameless_d_0], "NAMELESS",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_nameless_u, Mons.Assets.battle_nameless_d));
-    | OCTOKING => Mons.Attr.new_battleable(
-      Mons.Assets.pic_octoking, [Mons.Assets.mons_octoking_d_0], "OCTOKING",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_octoking_u, Mons.Assets.battle_octoking_d));
-    | INGPUBU => Mons.Attr.new_battleable(
-      Mons.Assets.pic_ingpubu, [Mons.Assets.mons_ingpubu_d_0], "INGPUBU",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ingpubu_u, Mons.Assets.battle_ingpubu_d));
-    | EMERELDER => Mons.Attr.new_battleable(
-      Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d));
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
+      Mons.Kind.skills(kin));
     | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d));
-    | IGNITE => Mons.Attr.new_battleable(
-      Mons.Assets.pic_ignite, [Mons.Assets.mons_ignite_d_0], "IGNITE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_ignite_u, Mons.Assets.battle_ignite_d));
-    | FROST => Mons.Attr.new_battleable(
-      Mons.Assets.pic_frost, [Mons.Assets.mons_frost_d_0], "FROST",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frost_u, Mons.Assets.battle_frost_d));
-    | FRAB => Mons.Attr.new_battleable(
-      Mons.Assets.pic_frab, [Mons.Assets.mons_frab_d_0], "FRAB",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d));
-    | ELECTROWL => Mons.Attr.new_battleable(
-      Mons.Assets.pic_electrowl, [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_electrowl_u, Mons.Assets.battle_electrowl_d));
-    | NOCTUBRIGHT => Mons.Attr.new_battleable(
-      Mons.Assets.pic_noctubright, [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_noctubright_u, Mons.Assets.battle_noctubright_d));
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
+      Mons.Kind.skills(kin));
+    | CYCLOPE => Mons.Attr.new_battleable(
+      Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "CYCLOPE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
+      Mons.Kind.skills(kin));
+    | POISOLICK => Mons.Attr.new_battleable(
+      Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
+      Mons.Kind.skills(kin));
+    | TROWL => Mons.Attr.new_battleable(
+      Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "TROWL",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
+      Mons.Kind.skills(kin));
+    | MIMIC => Mons.Attr.new_battleable(
+      Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
+      Mons.Kind.skills(kin));
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d));
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
+      Mons.Kind.skills(kin));
+    | EMERELDER => Mons.Attr.new_battleable(
+      Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
+      Mons.Kind.skills(kin));
+//     | BATH => Mons.Attr.new_battleable(
+      // Mons.Assets.pic_bath, [Mons.Assets.mons_bath_d_0], "BATH",
+      // (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d),
+      // Mons.Kind.skills(kin));
+    // | CRONI => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_croni, [Mons.Assets.mons_croni_d_0], "CRONI",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_croni_u, Mons.Assets.battle_croni_d),
+    //   Mons.Kind.skills(kin));
+    // | ELLIOT => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_elliot, [Mons.Assets.mons_elliot_d_0], "ELLIOT",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_elliot_u, Mons.Assets.battle_elliot_d),
+    //   Mons.Kind.skills(kin));
+    // | ESPECTRONUS => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_espectronus, [Mons.Assets.mons_espectronus_d_0], "ESPECTRONUS",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_espectronus_u, Mons.Assets.battle_espectronus_d),
+    //   Mons.Kind.skills(kin));
+    // | GAKI => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_gaki, [Mons.Assets.mons_gaki_d_0], "GAKI",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_gaki_u, Mons.Assets.battle_gaki_d),
+    //   Mons.Kind.skills(kin));
+    // | GORR => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_gorr, [Mons.Assets.mons_gorr_d_0], "GORR",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_gorr_u, Mons.Assets.battle_gorr_d),
+    //   Mons.Kind.skills(kin));
+    // | LAMURIA => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_lamuria, [Mons.Assets.mons_lamuria_d_0], "LAMURIA",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_lamuria_u, Mons.Assets.battle_lamuria_d),
+    //   Mons.Kind.skills(kin));
+    // | RAFIRE => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_rafire, [Mons.Assets.mons_rafire_d_0], "RAFIRE",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_rafire_u, Mons.Assets.battle_rafire_d),
+    //   Mons.Kind.skills(kin));
+    // | VARGOULI => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_vargouli, [Mons.Assets.mons_vargouli_d_0], "VARGOULI",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_vargouli_u, Mons.Assets.battle_vargouli_d),
+    //   Mons.Kind.skills(kin));
+    // | TUPITREE => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_tupitree, [Mons.Assets.mons_tupitree_d_0], "TUPITREE",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_tupitree_u, Mons.Assets.battle_tupitree_d),
+    //   Mons.Kind.skills(kin));
+    // | LELA => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_lela, [Mons.Assets.mons_lela_d_0], "LELA",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_lela_u, Mons.Assets.battle_lela_d),
+    //   Mons.Kind.skills(kin));
+    // | MOSHY => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_moshy, [Mons.Assets.mons_moshy_d_0], "MOSHY",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_moshy_u, Mons.Assets.battle_moshy_d),
+    //   Mons.Kind.skills(kin));
+  
+    // | BUFF => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_buff, [Mons.Assets.mons_buff_d_0], "BUFF",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_buff_u, Mons.Assets.battle_buff_d),
+    //   Mons.Kind.skills(kin));
+    // | LAUGH => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_laugh, [Mons.Assets.mons_laugh_d_0], "LAUGH",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_laugh_u, Mons.Assets.battle_laugh_d),
+    //   Mons.Kind.skills(kin));
+    // | COBE_ORN => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_cobeorn, [Mons.Assets.mons_cobeorn_d_0], "COBE_ORN",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_cobeorn_u, Mons.Assets.battle_cobeorn_d),
+    //   Mons.Kind.skills(kin));
+    // | SANDY => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_sandy, [Mons.Assets.mons_sandy_d_0], "SANDY",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_sandy_u, Mons.Assets.battle_sandy_d),
+    //   Mons.Kind.skills(kin));
+    // | SLIME => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_slime, [Mons.Assets.mons_slime_d_0], "SLIME",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_slime_u, Mons.Assets.battle_slime_d),
+    //   Mons.Kind.skills(kin));
+    // | SPARKY => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_sparky, [Mons.Assets.mons_sparky_d_0], "SPARKY",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_sparky_u, Mons.Assets.battle_sparky_d),
+    //   Mons.Kind.skills(kin));
+    // | DOOMFIRE => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_doomfire, [Mons.Assets.mons_doomfire_d_0], "DOOMFIRE",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_doomfire_u, Mons.Assets.battle_doomfire_d),
+    //   Mons.Kind.skills(kin));
+    // | BEANSTRONG => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_beanstrong, [Mons.Assets.mons_beanstrong_d_0], "BEANSTRONG",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_beanstrong_u, Mons.Assets.battle_beanstrong_d),
+    //   Mons.Kind.skills(kin));
+    // | NAMELESS => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_nameless, [Mons.Assets.mons_nameless_d_0], "NAMELESS",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_nameless_u, Mons.Assets.battle_nameless_d),
+    //   Mons.Kind.skills(kin));
+    // | OCTOKING => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_octoking, [Mons.Assets.mons_octoking_d_0], "OCTOKING",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_octoking_u, Mons.Assets.battle_octoking_d),
+    //   Mons.Kind.skills(kin));
+    // | INGPUBU => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_ingpubu, [Mons.Assets.mons_ingpubu_d_0], "INGPUBU",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_ingpubu_u, Mons.Assets.battle_ingpubu_d),
+    //   Mons.Kind.skills(kin));
+    // | ZOIO => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
+    //   Mons.Kind.skills(kin));
+    // | IGNITE => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_ignite, [Mons.Assets.mons_ignite_d_0], "IGNITE",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_ignite_u, Mons.Assets.battle_ignite_d),
+    //   Mons.Kind.skills(kin));
+    // | FROST => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_frost, [Mons.Assets.mons_frost_d_0], "FROST",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_frost_u, Mons.Assets.battle_frost_d),
+    //   Mons.Kind.skills(kin));
+    // | FRAB => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_frab, [Mons.Assets.mons_frab_d_0], "FRAB",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_frab_u, Mons.Assets.battle_frab_d),
+    //   Mons.Kind.skills(kin));
+    // | ELECTROWL => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_electrowl, [Mons.Assets.mons_electrowl_d_0], "ELECTROWL",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_electrowl_u, Mons.Assets.battle_electrowl_d),
+    //   Mons.Kind.skills(kin));
+    // | NOCTUBRIGHT => Mons.Attr.new_battleable(
+    //   Mons.Assets.pic_noctubright, [Mons.Assets.mons_noctubright_d_0], "NOCTUBRIGHT",
+    //   (is_up) Bool.if<>(is_up, Mons.Assets.battle_noctubright_u, Mons.Assets.battle_noctubright_d),
+    //   Mons.Kind.skills(kin));
   ; // end mons
   
   | Mons.Kind.construction =>
@@ -559,3 +611,16 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       | move => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
     ; // end inter
     
+
+Mons.Kind.skills(kin: Mons.Kind): List(Mons.Skill)
+  case kin:
+  | HERO        => Mons.dummy_skills;
+  | MAGE        => [];
+  | BEHOLDER    => Mons.dummy_skills;
+  | ZOIO        => Mons.dummy_skills;
+  | CYCLOPE     => Mons.dummy_skills;
+  | POISOLICK   => Mons.dummy_skills;
+  | TROWL       => Mons.dummy_skills;
+  | MIMIC       => Mons.dummy_skills;
+  | AZULA       => Mons.dummy_skills;
+  | EMERELDER   => Mons.dummy_skills;
