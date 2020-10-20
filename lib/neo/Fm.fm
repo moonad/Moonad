@@ -1,3 +1,6 @@
+// Types
+// =====
+
 // A Formality Letter is a 6-bit value:
 //  0-25 is A-Z
 // 26-51 is a-z
@@ -120,25 +123,6 @@ type Fm.Check<V: Type> {
   ),
 }
 
-// Fm.Check monad pure
-Fm.Check.pure<V: Type>(value: V): Fm.Check(V)
-  Fm.Check.result<V>(Maybe.some<V>(value), [])
-
-// Fm.Check monad bind
-Fm.Check.bind<A: Type, B: Type>(a: Fm.Check(A), f: A -> Fm.Check(B)): Fm.Check(B)
-  case a {
-    result: case a.value as got {
-      none: Fm.Check.result<B>(Maybe.none<B>, a.errors),
-      some: case f(got.value) as b {
-        result: Fm.Check.result<B>(b.value, List.concat<>(a.errors,b.errors)),
-      }
-    }
-  }
-
-// Fm.Check monad
-Fm.Check.monad: Monad(Fm.Check)
-  Monad.new<Fm.Check>(Fm.Check.bind, Fm.Check.pure)
-
 // A top-level definition
 type Fm.Term.Def {
   new(
@@ -155,6 +139,9 @@ Fm.Defs: Type
 // A context is a list of (name, term) pairs
 Fm.Context: Type
   List(Pair(Fm.Name, Fm.Term))
+
+// Contexts
+// ========
 
 // Gets a core term from a map by its name
 Fm.deref<A: Type>(name: Fm.Name, map: Map(A)): Maybe(A)
@@ -181,6 +168,10 @@ Fm.Context.find(name: Fm.Name, ctx: Fm.Context): Maybe(Fm.Term)
 Fm.Context.names(ctx: Fm.Context): List(Fm.Name)
   List.mapped<>(ctx)<>((x) Pair.fst<_,_>(x))
 
+// Stringification
+// ===============
+
+// Stringifies an error
 Fm.Error.show(error: Fm.Error, defs: Fm.Defs): String
   case error {
     type_mismatch: 
@@ -223,6 +214,7 @@ Fm.Error.show(error: Fm.Error, defs: Fm.Defs): String
       "Non-function lambda.",
   }
 
+// Stringifies a context
 Fm.Context.show(context: Fm.Context): String
   case context {
     nil: "",
@@ -242,7 +234,7 @@ Fm.Context.show(context: Fm.Context): String
     }
   }
 
-// Converts a Fm.Term term to a String
+// Stringifies a term
 Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
   case term {
     ref:
@@ -302,12 +294,13 @@ Fm.Term.show.go(term: Fm.Term, show_path: Bool): String
       String.flatten(["?", name]),
     hol:
       String.flatten(["_"]),
-    //nat:
-      //Nat.to_string(term.nval),
   }
 
 Fm.Term.show(term: Fm.Term): String
   Fm.Term.show.go(term, Bool.false)
+
+// Reduction
+// =========
 
 // Binds named variables to their lambdas
 Fm.Term.bind(vars: Fm.Context, term: Fm.Term): Fm.Term 
@@ -358,38 +351,6 @@ Fm.Term.bind(vars: Fm.Context, term: Fm.Term): Fm.Term
       Fm.Term.hol(term.path),
     //nat:
       //Fm.Term.nat(term.nval),
-    _: term,
-  }
-
-// Annotates constructors with their paths
-Fm.Term.paths(term: Fm.Term, path: Bits -> Bits): Fm.Term 
-  let this_path = Maybe.some<>(path(Bits.nil))
-  case term {
-    ref: Fm.Term.ref(term.name, this_path),
-    var: Fm.Term.var(term.name, term.indx, this_path),
-    all: 
-      def xtyp = Fm.Term.paths(term.xtyp, (x) path(Bits.0(x)))
-      def body = (s,x) Fm.Term.paths(term.body(s,x), (x) path(Bits.1(x)))
-      Fm.Term.all(term.self, term.name, xtyp, body, this_path),
-    lam:
-      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.0(x)))
-      Fm.Term.lam(term.name, body, this_path),
-    app:
-      def func = Fm.Term.paths(term.func, (x) path(Bits.0(x)))
-      def argm = Fm.Term.paths(term.argm, (x) path(Bits.1(x)))
-      Fm.Term.app(func, argm, this_path),
-    ann:
-      def term = Fm.Term.paths(term.term, (x) path(Bits.0(x)))
-      def type = Fm.Term.paths(term.type, (x) path(Bits.1(x)))
-      Fm.Term.ann(term.done, term, type, this_path),
-    let:
-      def expr = Fm.Term.paths(term.expr, (x) path(Bits.0(x)))
-      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.1(x)))
-      Fm.Term.let(term.name, expr, body, this_path),
-    gol:
-      Fm.Term.gol(term.name, term.dref, term.verb, this_path),
-    hol:
-      Fm.Term.hol(this_path),
     _: term,
   }
 
@@ -454,6 +415,41 @@ Fm.Term.normalize(term: Fm.Term, defs: Fm.Defs): Fm.Term
       //Fm.Term.nat(term.numb),
   }
 
+// Patching
+// ========
+
+// Annotates constructors with their paths
+Fm.Term.paths(term: Fm.Term, path: Bits -> Bits): Fm.Term 
+  let this_path = Maybe.some<>(path(Bits.nil))
+  case term {
+    ref: Fm.Term.ref(term.name, this_path),
+    var: Fm.Term.var(term.name, term.indx, this_path),
+    all: 
+      def xtyp = Fm.Term.paths(term.xtyp, (x) path(Bits.0(x)))
+      def body = (s,x) Fm.Term.paths(term.body(s,x), (x) path(Bits.1(x)))
+      Fm.Term.all(term.self, term.name, xtyp, body, this_path),
+    lam:
+      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.0(x)))
+      Fm.Term.lam(term.name, body, this_path),
+    app:
+      def func = Fm.Term.paths(term.func, (x) path(Bits.0(x)))
+      def argm = Fm.Term.paths(term.argm, (x) path(Bits.1(x)))
+      Fm.Term.app(func, argm, this_path),
+    ann:
+      def term = Fm.Term.paths(term.term, (x) path(Bits.0(x)))
+      def type = Fm.Term.paths(term.type, (x) path(Bits.1(x)))
+      Fm.Term.ann(term.done, term, type, this_path),
+    let:
+      def expr = Fm.Term.paths(term.expr, (x) path(Bits.0(x)))
+      def body = (x) Fm.Term.paths(term.body(x), (x) path(Bits.1(x)))
+      Fm.Term.let(term.name, expr, body, this_path),
+    gol:
+      Fm.Term.gol(term.name, term.dref, term.verb, this_path),
+    hol:
+      Fm.Term.hol(this_path),
+    _: term,
+  }
+
 // Does something at a specific path
 Fm.Term.patch_at(path: Bits, term: Fm.Term, fn: Fm.Term -> Fm.Term): Fm.Term
   case term {
@@ -503,6 +499,9 @@ Fm.Term.expand(dref: List(Bits), term: Fm.Term, defs: Fm.Defs): Fm.Term
   let term = Fm.Term.normalize(term, Map.new<>)
   for path in dref with term:
     Fm.Term.normalize(Fm.Term.expand_at(path, term, defs), Map.new<>)
+
+// Equality
+// ========
 
 // Helper function
 Fm.Term.serialize.go(term: Fm.Term, depth: Nat, init: Nat, x: Bits): Bits
@@ -650,6 +649,28 @@ Fm.Term.equal(a: Fm.Term, b: Fm.Term, defs: Fm.Defs, lv: Nat, seen: Set): Fm.Che
         },
       },
     }
+
+// Type Checking
+// =============
+
+// Fm.Check monad pure
+Fm.Check.pure<V: Type>(value: V): Fm.Check(V)
+  Fm.Check.result<V>(Maybe.some<V>(value), [])
+
+// Fm.Check monad bind
+Fm.Check.bind<A: Type, B: Type>(a: Fm.Check(A), f: A -> Fm.Check(B)): Fm.Check(B)
+  case a {
+    result: case a.value as got {
+      none: Fm.Check.result<B>(Maybe.none<B>, a.errors),
+      some: case f(got.value) as b {
+        result: Fm.Check.result<B>(b.value, List.concat<>(a.errors,b.errors)),
+      }
+    }
+  }
+
+// Fm.Check monad
+Fm.Check.monad: Monad(Fm.Check)
+  Monad.new<Fm.Check>(Fm.Check.bind, Fm.Check.pure)
 
 // Infers the type of a core term
 Fm.Term.infer(term: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.Check(Fm.Term)
@@ -810,6 +831,9 @@ Fm.Term.synth(term: Fm.Term, type: Fm.Term, defs: Fm.Defs): Either(List(Fm.Error
       }
     }
   }
+
+// Parsing
+// =======
 
 // Converts a Char to a Letter
 Fm.Letter.read(chr: Char): Maybe(Fm.Letter)
