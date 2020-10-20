@@ -4,20 +4,56 @@ T Mons.Skill
 | Mons.Skill.hit_2;
 | Mons.Skill.heal;
 | Mons.Skill.none;
-| Mons.Skills.dig;
+| Mons.Skill.dig;
+| Mons.Skill.sand_tomb;
+| Mons.Skill.protect;
+| Mons.Skill.slam;
+| Mons.Skill.counter;
+| Mons.Skill.recover;
+| Mons.Skill.rock_smash;
+| Mons.Skill.crunch;
+| Mons.Skill.sludge_bomb;
+| Mons.Skill.gyro_ball;
+| Mons.Skill.iron_defense;
+| Mons.Skill.super_fang;
+| Mons.Skill.hypnosis;
+| Mons.Skill.dream_eater;
+| Mons.Skill.wing_attack;
+| Mons.Skill.moonlight;
+| Mons.Skill.play_rough;
+| Mons.Skill.psychic;
+| Mons.Skill.ancient_power;
+| Mons.Skill.thunder_wave;
+| Mons.Skill.charge;
+| Mons.Skill.agility;
 
-Mons.skills.kind(kin: Mons.Kind): List(Mons.Skill)
+
+Mons.Skill.kind(kin: Mons.Kind): List(Mons.Skill)
   case kin:
-  | HERO        => Mons.dummy_skills;
+  | HERO        => Mons.Skill.dummy_skills;
   | MAGE        => [];
-  | BEHOLDER    => Mons.dummy_skills;
-  | ZOIO        => [];
-  | CYCLOPE     => Mons.dummy_skills;
-  | POISOLICK   => Mons.dummy_skills;
-  | TROWL       => Mons.dummy_skills;
-  | MIMIC       => Mons.dummy_skills;
-  | AZULA       => Mons.dummy_skills;
-  | EMERELDER   => Mons.dummy_skills;
+  | BEHOLDER    => Mons.Skill.dummy_skills;
+  | ZOIO        => 
+    [Mons.Skill.slam, Mons.Skill.sand_tomb, 
+    Mons.Skill.protect, Mons.Skill.dig];
+  | CYCLOPE     => 
+    [Mons.Skill.counter, Mons.Skill.recover,
+    Mons.Skill.rock_smash, Mons.Skill.slam];
+  | POISOLICK   => 
+    [Mons.Skill.crunch, Mons.Skill.sludge_bomb,
+    Mons.SKill.gyro_ball, Mons.Skill.iron_defense];
+  | TROWL       => 
+    [Mons.Skill.wing_attack, Mons.Skill.recover,
+    Mons.Skill.agility, Mons.Skill.crunch];
+  | MIMIC       => 
+    [Mons.Skill.crunch, Mons.Skill.super_fang,
+     Mons.Skill.hypnosis, Mons.Skill.dream_eater];
+  | AZULA       => 
+    [Mons.Skill.wing_attack, Mons.Skill.moonlight,
+    Mons.Skill.play_rough, Mons.Skill.psychic];
+  | EMERELDER   => 
+    [Mons.Skill.ancient_power, Mons.Skill.thunder_wave,
+    Mons.Skill.charge, Mons.Skill.iron_defense] ;
 
 Mons.Skill.description(skill: Mons.Skill): String
   case skill:
@@ -25,7 +61,29 @@ Mons.Skill.description(skill: Mons.Skill): String
   | hit_2 => "damage 2"; // test
   | heal => "heal 3"; // test
   | none => "does nothing"; // test
-  | dig => "protect for 1 turn. On the next turn, will attack and effects are applied";
+  | dig => "Protect for 1 turn. On the next turn, will attack and effects are applied";
+  | sand_tomb => "Apply an initial dmg and +1/16 of MPH for 5 turns";
+  | protect => "Avoid dmg on the next turn. Cannot be used on every turn.";
+  | slam => "Damage";
+  | counter => "Double the last damage that the adve received (dismiss effects)";
+  | recover => "Restore 50% of mhp";
+  | rock_smash => "Apply damage and 50% of change to reduce defense on the next turn";
+  | crunch => "Damage and reduce adve defense";
+  | sludge_bomb => "Damage and 30% of poisoning";
+  | gyro_ball => "Damage and if the adve has more agi, increase dmg +25% and increase defense";
+  | iron_defense => "Increase defense for 2 turns";
+  | super_fang => "Damage adve with 50% of current life. Loses 50% of hp";
+  | hypnosis => "Apply sleep to adve";
+  | dream_eater => "Will only damage if adve is sleep. Will damage adve and heal 50% of the dmg";
+  | wing_attack => "Damage";
+  | moonlight => "Damage and 20% of sleep";
+  | play_rough => "Damage and 20% of reduce damage";
+  | psychic => "Damage and 10% of reduce damage and apply confusion";
+  | ancient_power => "Damage and 10% of adve miss the attack";
+  | thunder_wave => "Damage";
+  | charge => "Double the damage of the next ellectric attack";
+  | agility => "Increase damage and 25% of apply confusion";
+
 
 Mons.Skill.get_name(skill: Mons.Skill): String
   case skill:
@@ -34,6 +92,27 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | heal   => "heal"; 
   | none => "none";
   | dig => "Dig";
+  | sand_tomb => "Sand bomb";
+  | protect => "Protect";
+  | slam => "Slam";
+  | counter => "Counter";
+  | recover => "Recover";
+  | rock_smash => "Rock Smash";
+  | crunch => "Crunch";
+  | sludge_bomb => "Sludge bomb";
+  | gyro_ball => "Gyro Ball";
+  | iron_defense => "Iron Defense";
+  | super_fang => "Super Fang";
+  | hypnosis => "Hypnosis";
+  | dream_eater => "Dream Eater";
+  | wing_attack => "Wing Attack";
+  | moonlight => "Moonlight";
+  | play_rough => "Play Rough";
+  | psychic => "Psychic";
+  | ancient_power => "Ancient Power";
+  | thunder_wave => "Thunder Wave";
+  | charge => "Charge";
+  | agility => "Agility";
 
 Mons.Skill.update_mon_obj(
   hero_obj: Mons.Object,
@@ -78,4 +157,81 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
   | none => game;
+  // TODO Protect for 1 turn. On the next turn, will attack and effects are applied
   | dig => game;
+
+  // TODO Apply an initial dmg and +1/16 of MPH for 5 turns
+  | sand_tomb => 
+   let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+
+  // TODO Avoid dmg on the next turn. Cannot be used on every turn.
+  | protect => game;
+
+  // Damage 4
+  | slam => 
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+
+  // TODO: Double the last damage that the adve received (dismiss effects)
+  | counter => game;
+
+  // TODO: Restore 50% of mhp
+  | recover => game;
+
+  // TODO: Apply damage and 50% of change to reduce defense on the next turn
+  | rock_smash => game;
+
+  // TODO: Damage and reduce adve defense
+  | crunch => game;
+
+  // TODO: Damage and 30% of poisoning
+  | sludge_bomb => game;
+
+  // TODO: Gyro Ball
+  | gyro_ball => game;
+
+  // TODO: Increase defense for 2 turns
+  | iron_defense => game;
+
+  // TODO: Damage adve with 50% of current life. Loses 50% of hp
+  | super_fang => game;
+
+  // TODO: Apply sleep to adve
+  | hypnosis => game;
+
+  // TODO: Will only damage if adve is sleep. Will damage adve and heal 50% of the dmg
+  | dream_eater => game;
+
+  // Damage
+  | wing_attack => 
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+
+  // TODO Damage and 20% of sleep
+  | moonlight => game;
+
+  // TODO Damage and 20% of reduce damage
+  | play_rough => game;
+
+  // TODO Damage and 10% of reduce damage and apply confusion
+  | psychic => game;
+
+  // TODO Damage and 10% of adve miss the attack
+  | ancient_power => game;
+
+  // Damage
+  | thunder_wave =>
+    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+
+  // TODO Double the damage of the next ellectric attack
+  | charge => game;
+
+  // TODO Increase damage and 25% of apply confusion
+  | agility => game;
+
+// TODO remove
+Mons.Skill.dummy_skills: List(Mons.Skill)
+  [ Mons.Skill.hit_4, Mons.Skill.hit_2,
+   Mons.Skill.heal, Mons.Skill.none ]

@@ -65,11 +65,6 @@ T Mons.Object
   idl: U32 // frame for idle animation
 );
 
-// TODO remove
-Mons.dummy_skills: List(Mons.Skill)
-  [ Mons.Skill.hit_4, Mons.Skill.hit_2,
-   Mons.Skill.heal, Mons.Skill.none ]
-
 T Mons.Attr
 | Mons.Attr.new(
   blocks: Bool,
