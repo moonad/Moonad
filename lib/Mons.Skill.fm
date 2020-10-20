@@ -78,3 +78,4 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
   | none => game;
+  | dig => game;
