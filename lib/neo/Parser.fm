@@ -68,7 +68,7 @@ Parser.many1<V: Type>(parser: Parser(V)): Parser(List(V))
 // Parses an optional
 Parser.maybe<V: Type>(parse: Parser(V)): Parser(Maybe(V))
   (code) case parse(code) as reply {
-    error: Parser.Reply.value<Maybe(V)>(reply.code, Maybe.none<V>),
+    error: Parser.Reply.value<Maybe(V)>(code, Maybe.none<V>),
     value: Parser.Reply.value<Maybe(V)>(reply.code, Maybe.some<V>(reply.value)),
   }
 
@@ -122,3 +122,7 @@ Parser.nat: Parser(Nat)
     var digits = Parser.many1<Nat>(Parser.digit);
     return Nat.from_base(10, digits);
   }
+
+// Gets the current code
+Parser.get_code: Parser(String)
+  (code) Parser.Reply.value<>(code, code)
