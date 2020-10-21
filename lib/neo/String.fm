@@ -143,12 +143,15 @@ String.join.go(sep: String, list: List(String), fst: Bool): String
     //| String.cons(xs.head,String.filter(f, xs.tail));
     //| String.filter(f, xs.tail);;
 
-//// Flattens a string of strings into a single string.
-//String.flatten(xs: List(String)): String
-  //case xs:
-  //| String.nil;
-  //| String.concat(xs.head, String.flatten(xs.tail));
-  //: String;
+// Flattens a string of strings into a single string.
+String.flatten(xs: List(String)): String
+  String.flatten.go(xs, "")
+
+String.flatten.go(xs: List(String), res: String): String
+  case xs {
+    nil: res,
+    cons: String.flatten.go(xs.tail, String.concat(res, xs.head)),
+  }
 
 //// Folds over a string, right associative
 //String.fold(xs: String) : <P: Type> -> P -> (Char -> P -> P) -> P

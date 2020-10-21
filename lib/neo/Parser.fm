@@ -126,3 +126,7 @@ Parser.nat: Parser(Nat)
 // Gets the current code
 Parser.get_code: Parser(String)
   (code) Parser.Reply.value<>(code, code)
+
+// Gets the current code
+Parser.log_code: Parser(Unit)
+  (code) Debug.log<>(code, () Parser.Reply.value<>(code, Unit.new))

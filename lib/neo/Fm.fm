@@ -838,7 +838,7 @@ Fm.Term.infer(term: Fm.Term, defs: Fm.Defs, ctx: Fm.Context): Fm.Check(Fm.Term)
           //let func_typ = Fm.Term.reduce(func_typ, defs);
           let term = Fm.Term.desugar_app(term.sugx.func, term.sugx.args, func_typ, defs);
           var type = Fm.Term.infer(term, defs, ctx);
-          use skip = Debug.log<>(String.flatten(["desugared", Fm.Term.show(term), "::", Fm.Term.show(func_typ)]))
+          //use skip = Debug.log<>(String.flatten(["desugared", Fm.Term.show(term), "::", Fm.Term.show(func_typ)]))
           Fm.Check.result<>(
             Maybe.some<>(type),
             [Fm.Error.patch(term.path, term)]);
@@ -1057,29 +1057,31 @@ Fm.Parser.lambda: Parser(Fm.Term)
     return Fm.Term.lam(name, () body, Maybe.none<>);
   }
 
-// Parses a binder: `(name: type)`
-Fm.Parser.binder: Parser(Pair(Fm.Name, Fm.Term))
+// Parses a name:term pair
+Fm.Parser.name_term: Parser(Pair(Fm.Name, Fm.Term))
   do Parser {
-    Parser.spaces_text("(");
     var name = Fm.Parser.name;
     Parser.spaces_text(":");
     var type = Fm.Parser.term;
-    Parser.spaces_text(")");
     return {name, type};
   }
 
-// Parses a forall: `self(name: xtyp) body`
+// Parses a forall: `self(a: A, b: B, c: C) D`
 Fm.Parser.forall: Parser(Fm.Term)
   do Parser {
     Parser.spaces;
     var self = Fm.Parser.name;
-    var bind = Fm.Parser.binder;
+    Parser.spaces_text("(");
+    var bind = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
+    Parser.spaces_text(")");
     var body = Fm.Parser.term;
-    return Fm.Term.all(self,
-      Pair.fst<_,_>(bind),
-      Pair.snd<_,_>(bind),
-      (s,x) body,
-      Maybe.none<>);
+    let term = List.for<>(bind)<>(body, (x,t) case x {
+      new: Fm.Term.all([], x.fst, x.snd, (s,x) t, Maybe.none<>)
+    });
+    return case term {
+      all: Fm.Term.all(self, term.name, term.xtyp, term.body, term.path),
+      _: term,
+    };
   }
 
 // Parses a let: `let name = expr; body`
@@ -1136,17 +1138,26 @@ Fm.Parser.nat: Parser(Fm.Term)
 Fm.Parser.reference: Parser(Fm.Term)
   do Parser {
     Parser.spaces;
-    var name = Fm.Parser.name;
+    var name = Fm.Parser.name1;
     return Fm.Term.ref(name, Maybe.none<>);
+  }
+
+// Parses an optional comma after
+Fm.Parser.item<V: Type>(parser: Parser(V)): Parser(V)
+  do Parser {
+    Parser.spaces;
+    var value = parser;
+    Parser.maybe<>(Parser.spaces_text(","));
+    return value;
   }
 
 // Parses an application: `func(argm0)`
 Fm.Parser.application(func: Fm.Term): Parser(Fm.Term)
   do Parser {
     Parser.text("(");
-    var argm = Fm.Parser.term;
+    var args = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.term));
     Parser.spaces_text(")");
-    return Fm.Term.app(func, argm, Maybe.none<>);
+    return List.for<>(args)<>(func, (x,f) Fm.Term.app(f, x, Maybe.none<>));
   }
 
 // Parses an annotation: `term :: type`
@@ -1157,18 +1168,12 @@ Fm.Parser.annotation(term: Fm.Term): Parser(Fm.Term)
     return Fm.Term.ann(Bool.false, term, type, Maybe.none<>);
   }
 
+
 // Parses a fancy application (sugar): `func(x: 1, y: 2, z: 3)`
 Fm.Parser.sugar.application(func: Fm.Term): Parser(Fm.Term)
   do Parser {
     Parser.text("(");
-    var args = Parser.many1<>(do Parser {
-      Parser.spaces;
-      var name = Fm.Parser.name;
-      Parser.spaces_text(":");
-      var argm = Fm.Parser.term;
-      Parser.maybe<>(Parser.spaces_text(","));
-      return {name, argm};
-    });
+    var args = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
     Parser.spaces_text(")");
     let args = Map.from_list<_,_>(Fm.Name.to_bits, args);
     let term = Fm.Term.sug(Fm.Sugar.app(func, args), Maybe.none<>);
@@ -1235,17 +1240,20 @@ Fm.Parser.def: Parser(Pair(Fm.Name, Fm.Term.Def))
   do Parser {
     Parser.spaces;
     var name = Fm.Parser.name;
-    var args = Parser.many<>(Fm.Parser.binder);
+    var args = Parser.many<>(do Parser {
+      Parser.spaces_text("(");
+      var bind = Fm.Parser.name_term;
+      Parser.spaces_text(")");
+      return bind;
+    });
     Parser.spaces_text(":");
     var type = Fm.Parser.term;
     var term = Fm.Parser.term;
-    let type = Fm.Parser.make_forall(args, type)
-    let term = Fm.Parser.make_lambda(args, term)
-    let type = Fm.Term.bind([], Fm.Term.paths(type, (x) Bits.0(x)))
-    let term = Fm.Term.bind([], Fm.Term.paths(term, (x) Bits.1(x)))
-    do Parser {
-      return {name, Fm.Term.Def.new(term, type, List.length<>(args))};
-    };
+    let type = Fm.Parser.make_forall(args, type);
+    let term = Fm.Parser.make_lambda(args, term);
+    let type = Fm.Term.bind([], Fm.Term.paths(type, (x) Bits.0(x)));
+    let term = Fm.Term.bind([], Fm.Term.paths(term, (x) Bits.1(x)));
+    return {name, Fm.Term.Def.new(term, type, List.length<>(args))};
   }
 
 // Parses many definitions
@@ -1358,7 +1366,7 @@ Fm.base_source: String
     n(P)(z)((pred) s(pred)(Nat.induce(pred)(P)(z)(s)))
 
   Equal(A: Type)(a: A)(b: A): Type
-    self(P: (b: A) (x:Equal(A)(a)(b)) Type)
+    self(P: (b: A) (x:Equal(A, a, b)) Type)
     (refl: P(a)(Equal.refl(A)(a)))
     P(b)(self)
 
