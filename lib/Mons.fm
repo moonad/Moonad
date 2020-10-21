@@ -804,7 +804,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M, Bool.false) ]},
 
     // { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.grass, 2u) },
-    // // { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
+    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
     // { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.darkness, 2u) },
     // { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.ice, 2u) },
     // { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.darkness, 2u) },
@@ -831,8 +831,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     // { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.psychic, 2u) },
     // { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water, 0u) },
     // { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.light, 2u) },
-    // { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u) },
-    // { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u) },
+    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u) },
+    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u) },
     // { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire, 2u) },
     // { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.ice, 2u) },
     // { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.fire, 2u) },
@@ -1167,50 +1167,6 @@ Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   | Pos32.sub(pos, Pos32.new(1u, 0u, 0u));
   | Pos32.add(pos, Pos32.new(0u, 1u, 0u));
 
-// Mons.update_mon_obj(
-//   hero_obj: Mons.Object,
-//   obj_updated: Mons.Object,
-//   pos: Pos32,
-//   idx: U32,
-//   game: Mons.Game) : Mons.Game
-//   open hero_obj:
-//   let qtd = List.length<>(hero_obj.bag)
-//   if Nat.eql(qtd, 0) then
-//     Mons.Game.map_set(pos, idx, obj_updated, game) // hero_obj
-//   else //game
-//     let idx_nat = U32.to_nat(hero_obj.mon)
-//     let new_bag = List.update_at<>(idx_nat, (a) obj_updated, hero_obj.bag)
-//     let hero_obj = Mons.Object.set_bag(new_bag, hero_obj) 
-//     Mons.Game.map_set(pos, idx, hero_obj, game)
-
-// Mons.damage(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mons.Game): Mons.Game
-//   let obj_updated = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-//   Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
-
-// Mons.heal(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons.Game): Mons.Game 
-//   let obj_updated = Mons.Object.heal(Mons.Object.get_current_mon(obj), val)
-//   if Mons.Object.is_obj_defeated(obj_updated) then game
-//   else Mons.update_mon_obj(obj, obj_updated, pos, idx, game)
-
-// // pos    : position of the map in which the battle is taking place
-// // source : index of the object which is casting a skill
-// // target : index of the object which is receiving the effect 
-// Mons.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
-//   open game:
-//   let source_obj = Mons.Map.get(pos, source, game.map)
-//   let source_mon = Mons.Object.get_current_mon(source_obj)
-//   let target_obj = Mons.Map.get(pos, target, game.map)
-//   let target_mon = Mons.Object.get_current_mon(target_obj)
-//   case skill:
-//   | hit_4  =>
-//     let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-//     Mons.damage(target_obj, pos, target, val, game);
-//   | hit_2 => 
-//     let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
-//     Mons.damage(target_obj, pos, target, val, game);
-//   | heal => Mons.heal(source_obj, pos, source, 3u, game);
-//   | none => game;
-
 // TODO: change Mons.Game.cmd to receive 'pos' instead, and use this one for usr
 // Mons.Game.cmd_usr(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
@@ -1293,13 +1249,17 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     | game =>
     if U16.eql(cmd, 'U') then
-      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 0, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, game)
+      // if Mons.Game.hero_start_attacking(hero_obj.kin) 
+      // then Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, game)
+      // else Mons.Game.exec_skills(adve_obj, hero_obj, pos, hero_idx, adve_idx, 0, game)
+
     else if U16.eql(cmd, 'I') then
-      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 1, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 1, game)
     else if U16.eql(cmd, 'J') then
-      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 2, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, game)
     else if U16.eql(cmd, 'K') then
-      Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, 3, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, game)
     else if Mons.is_walk_cmd(cmd) then
       Mons.Game.walk(cmd, pos, hero_idx, game)
 
@@ -1421,34 +1381,42 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     ;
   ;
 
-// TODO: probably similar to "exec turn"
-Mons.Game.exec_skills(
+Mons.Game.exec_turn(
   hero_obj: Mons.Object, 
   adve_obj: Mons.Object,
   pos: Pos32,
   hero_idx: U32,
+  adve_idx: U32,
+  code_skill: Nat,
+  game: Mons.Game) : Mons.Game
+  open hero_obj:
+  open adve_obj:
+  if Mons.Game.hero_start_attacking(hero_obj.kin, adve_obj.kin) 
+  then Mons.Game.exec_skills(hero_obj, adve_obj, pos, hero_idx, adve_idx, code_skill, game)
+  else Mons.Game.exec_skills(adve_obj, hero_obj, pos, hero_idx, adve_idx, code_skill, game)
+
+// TODO: probably similar to "exec turn"
+Mons.Game.exec_skills(
+  source_obj: Mons.Object, 
+  adve_obj: Mons.Object,
+  pos: Pos32,
+  source_idx: U32,
+  target_idx: U32,
   code_skill: Nat,
   game: Mons.Game)
   : Mons.Game
-  let is_battling = Mons.Object.is_battling(adve_obj, hero_obj)
+  let is_battling = Mons.Object.is_battling(adve_obj, source_obj)
   if is_battling then
-    open hero_obj:
-    open adve_obj:
-    let adve_idx = 1u
-    let hero_agi = Mons.Kind.get_agi(hero_obj.kin)
-    let adve_agi = Mons.Kind.get_agi(adve_obj.kin)
-    let hero_skill = Mons.Game.get_skills_at(code_skill, hero_obj)
-    let adve_skill_idx = Mons.Game.adve_turn(hero_obj, adve_obj, game)
-    let adve_skill = Mons.Game.get_skills_at(adve_skill_idx, adve_obj)
-    // TODO: still need to test
-    if Bool.or(U32.ltn(hero_agi, adve_agi), U32.eql(hero_agi, adve_agi)) then // hero attack first
-      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game)
-      Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-    else 
-      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-      Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game)
+    let skill = Mons.Game.get_skills_at(code_skill, source_obj)
+    Mons.Skill.cast(pos, source_idx, target_idx, skill, game)
   else game
 
+Mons.Game.hero_start_attacking(hero_kin: Mons.Kind, adve_kin: Mons.Kind) : Bool
+  let hero_agi = Mons.Kind.get_agi(hero_kin)
+  let adve_agi = Mons.Kind.get_agi(adve_kin)
+  if Bool.or(U32.ltn(hero_agi, adve_agi), U32.eql(hero_agi, adve_agi)) 
+  then Bool.true
+  else Bool.false
 
 // 0-U: hit, 1-I: hit, 2-J: heal, 3-K: hit
 // Reads the game and returns a code for the skills that the adve will use
