@@ -2,25 +2,26 @@
 // Ex: hero used ... skill; adve used... skill; show hp lost or healed
 // Draws the game to screen
 Mons.draw(game: Mons.Game, scr: Image3D): Image3D
-  open game:
+  open game
   let hero_pos = Mons.Game.get_hero_pos(game)
   let scr = Image3D.clear(scr)
-  case hero_pos:
-  | scr;
-  | let hero_pair = Mons.Map.get_hero(hero_pos.value, game.map)
+  case hero_pos {
+    none: scr,
+    some:
+    let hero_pair = Mons.Map.get_hero(hero_pos.value, game.map)
     let hero_obj = Pair.fst<,>(hero_pair)
     let hero_idx = Pair.snd<,>(hero_pair)
     let adve_obj = Mons.Map.get(hero_pos.value, U32.add(hero_idx, 1u), game.map)
     let dim = Mons.Game.dim(game)
-    open hero_obj:
-    open adve_obj:
+    open hero_obj
+    open adve_obj
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
     open hero_mon_obj:
     // let adve_attr = 
     open Mons.Kind.attr(adve_obj.kin) as adve_attr:
     let is_standing = Mons.Object.is_standing(hero_obj)
-    case game.stt as stt:
-    | introduction =>
+    case game.stt as stt {
+      introduction: 
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
         if U32.eql(stt.step, 0u) then
           let msg = [
@@ -39,16 +40,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             "[c] I'll do my best"]
           Mons.draw.list(msg, Bool.false, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj),
 
-    | intro_select => Mons.draw.initial_mons(hero_obj, scr) ;
+      intro_select: Mons.draw.initial_mons(hero_obj, scr),
   
-    | game =>
+      game: 
       let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
       open hero_mon_attr:
 
-      case adve_obj.kin as adve_kind:
-      | mon => 
+      case adve_obj.kin as adve_kind {
+        Mons: 
         let hero_chp = U32.sub(hero_mon_attr.mhp, hero_mon_obj.dmg)
         let hero_btl_img = hero_mon_attr.battle_spr(Bool.true);
         let hero_txt = String.flatten([hero_mon_attr.name, " ", Mons.draw.img_type(hero_mon_obj.kin)])
@@ -91,9 +92,9 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
             scr
         else
-          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-      ;
-      | cons =>
+          Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj),
+      
+        Const:
         if Bool.and(is_standing, adve_kind.portal) then
           let boss_def = Nat.to_u32(List.length<>(hero_obj.bos))
           if U32.gtn(boss_def, hero_idx) then
@@ -103,39 +104,45 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
             let scr = Mons.draw.text("To access the next level you must", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
             Mons.draw.text("first defeat the boss.", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
-        else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
-      ;
-      | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+        else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj),
+      
+        Terrain: Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj),
       // TODO: add message about interaction
-      | interact => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-    ; // end case stt.game
-    | inventory => Mons.draw.bag(hero_obj, dim, scr);
+        Interactive: Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+      },
+     // end case stt.game
+    inventory: Mons.draw.bag(hero_obj, dim, scr),
 
-    | capture => // pressed to capture mon
+    capture_mon:  // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
-      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-  ;
+      else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+    }
+  }
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions
 Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
-  case obj:
-  | let ani = Mons.Object.get_ani(obj)
-    let dir = Mons.Object.get_dir(obj)
-    let g_x = U32.mul(t_x, 16u)
-    let g_y = U32.mul(t_y, 16u)
-    let g_x
-      = case dir:
-      | right => U32.sub(g_x, ani);
-      | up    => g_x;
-      | left  => U32.add(g_x, ani);
-      | down  => g_x;
-    let g_y
-      = case dir:
-      | right => g_y;
-      | up    => U32.add(g_y, ani);
-      | left  => g_y;
-      | down  => U32.sub(g_y, ani);
-    Pair.new<,>(g_x, g_y);
+  case obj {
+    new:
+      let ani = Mons.Object.get_ani(obj)
+      let dir = Mons.Object.get_dir(obj)
+      let g_x = U32.mul(t_x, 16u)
+      let g_y = U32.mul(t_y, 16u)
+      let g_x
+        = case dir {
+          right: U32.sub(g_x, ani),
+          up:    g_x,
+          left:  U32.add(g_x, ani),
+          down:  g_x
+        }
+      let g_y
+        = case dir {
+          right: g_y,
+          up:    U32.add(g_y, ani),
+          left:  g_y,
+          down:  U32.sub(g_y, ani)
+        }
+      Pair.new<,>(g_x, g_y)
+  }
 
 // BAG
 // --------
@@ -144,7 +151,7 @@ Mons.draw.global_xy(t_x: U32, t_y: U32, obj: Mons.Object): Pair(U32, U32)
 Mons.draw.bag(obj: Mons.Object, idx: U32, scr: Image3D): Image3D
   let scr = Mons.draw.image(Mons.Assets.inventory, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
-  open obj:
+  open obj
   let boss_def = U32.to_string(Nat.to_u32(List.length<>(obj.bos)))
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   let qtd_field = 
@@ -180,9 +187,12 @@ Mons.draw.full_bag(obj: Mons.Object, adve_obj: Mons.Object, idx: U32, scr: Image
   let scr = Mons.draw.image(Mons.draw.get_full_bg(idx), Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.inventory_replace, Pos32.new(65u,60u,0u), scr)
-  open obj:
-  open adve_obj:
-  open Mons.Kind.attr(adve_obj.kin) as adve_attr:
+  open obj
+  open adve_obj
+//   open Mons.Kind.attr(adve_obj.kin) as adve_attr
+  let adve_attr = Mons.Kind.attr(adve_obj.kin)
+  open adve_attr
+
   let scr = Mons.draw.image(adve_attr.battle_spr(Bool.false), Pos32.new(180u,40u,0u), scr)
   let scr = Mons.draw.image(adve_attr.pic, Pos32.new(180u,90u,0u), scr)
   let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, Pos32.new(180u,90u,0u), scr)
@@ -228,10 +238,12 @@ Mons.draw.list.go(texts: List(String),  horizontal: Bool, spacing: U32, font_map
    let pos = 
     if horizontal then Pos32.new(U32.add(U32.add(spacing, idx), x),y,0u)
     else Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
-   case texts:
-   | scr;
-   | let scr = Mons.draw.text(texts.head, font_map, pos, scr)
-     Mons.draw.list.go(texts.tail, horizontal, spacing, font_map, pos, scr, U32.add(idx, 1u));
+   case texts {
+     nil : scr,
+     cons: 
+       let scr = Mons.draw.text(texts.head, font_map, pos, scr)
+       Mons.draw.list.go(texts.tail, horizontal, spacing, font_map, pos, scr, U32.add(idx, 1u))
+   }
 
 // Draw images of Mons in the replace screen
 Mons.draw.list_image(images: List(Image3D), horizontal: Bool, spacing: U32, start_pos: Pos32, scr: Image3D): Image3D
@@ -241,30 +253,34 @@ Mons.draw.list_image(images: List(Image3D), horizontal: Bool, spacing: U32, star
 Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, spacing: U32, pos: Pos32, scr: Image3D, idx: U32): Image3D
    let x = Pos32.get_x(pos)
    let y = Pos32.get_y(pos)
-   case images:
-   | scr;
-   | let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
-     let scr = Mons.draw.image(images.head, pos, scr)
-     let pos = if horizontal then
-        Pos32.new(U32.add(x, spacing),y,0u)
-        // Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
-     else
-        // let scr = Mons.draw.image(images.head, pos, scr)
-        Pos32.new(x, U32.add(y, spacing),0u)
-        Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u));
+   case images {
+     nil : scr,
+     cons: 
+      let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
+      let scr = Mons.draw.image(images.head, pos, scr)
+      let pos = if horizontal then
+         Pos32.new(U32.add(x, spacing),y,0u)
+         // Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
+      else
+         // let scr = Mons.draw.image(images.head, pos, scr)
+         Pos32.new(x, U32.add(y, spacing),0u)
+      Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
+  }
 
 // Draws an ASCII char to a position using 
 Mons.draw.char(chr: Char, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
-  case Mons.font.get_img(chr, font_map) as got:
-  | scr;
-  | let img = got.value
-    let img_len = Image3D.get_length(img)
-    let scr = for i : U32 = 0u .. img_len:
-      let vox_pos = Image3D.get_pos(i, img)
-      let pos = Pos32.sub(Pos32.add(chr_pos, vox_pos), Mons.vox_mid)
-      let col = Image3D.get_col(i, img)
-      Image3D.push(pos, col, scr)
-    scr;
+  case Mons.font.get_img(chr, font_map) as got {
+    none: scr,
+    some: 
+      let img = got.value
+      let img_len = Image3D.get_length(img)
+      let scr = for i : U32 = 0u .. img_len:
+        let vox_pos = Image3D.get_pos(i, img)
+        let pos = Pos32.sub(Pos32.add(chr_pos, vox_pos), Mons.vox_mid)
+        let col = Image3D.get_col(i, img)
+        Image3D.push(pos, col, scr)
+      scr
+  }
 
 // Draws an ASCII text to a position
 Mons.draw.text(txt: String, font_map: Mons.font, chr_pos: Pos32, scr: Image3D): Image3D
@@ -287,15 +303,16 @@ Mons.draw.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
   let len_sprite = List.length<>(sprites)
   let idl_nat = U32.to_nat(U32.sub(idl, 1u))
   let idx = Nat.mod(Nat.div(idl_nat, 4), len_sprite)
-  case List.at<>(idx, sprites) as spr:
-  | Mons.Assets.void;
-  | spr.value;
+  case List.at<>(idx, sprites) as spr {
+    none: Mons.Assets.void,
+    some: spr.value
+  }
 
 // SCREENS
 // -------
 // Draw the scene to select one of three Mons to start the game
 Mons.draw.initial_mons(obj: Mons.Object, scr: Image3D): Image3D
-  open obj:
+  open obj
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   if U32.eql(qtd, 0u) then 
     Mons.draw.text("nothing to show", Mons.font_white, Pos32.new(60u,50u,0u), scr)
@@ -364,20 +381,20 @@ Mons.draw.get_full_bg(idx: U32): Image3D
   Pair.snd<,>(Mons.draw.background(idx))
 
 Mons.draw.img_type(kind: Mons.Kind): String
-  case kind:
-  | mon => 
-    case kind.pri_type:
-    | normal   => "①";
-    | earth    => "②";
-    | fire     => "③";
-    | water    => "④";
-    | grass    => "⑤";
-    | electric => "⑥";
-    | psychic  => "⑦";
-    | ice      => "⑧";
-    | light    => "⑨";
-    | darkness => "⑩";
-  ;
-  | const => "";
-  | terrain  => "";
-  | interact => "";
+  case kind {
+    Mons: case kind.pri_type {
+      normal:   "①",
+      earth:    "②",
+      fire:     "③",
+      water:    "④",
+      grass:    "⑤",
+      electric: "⑥",
+      psychic:  "⑦",
+      ice:      "⑧",
+      light:    "⑨",
+      darkness: "⑩"
+    },
+    Const:        "",
+    Terrain:      "",
+    Interactive:  ""
+  }
