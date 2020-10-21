@@ -19,6 +19,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     // let adve_attr = 
     open Mons.Kind.attr(adve_obj.kin) as adve_attr:
     let is_standing = Mons.Object.is_standing(hero_obj)
+
     case game.stt as stt:
     | introduction =>
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
@@ -64,11 +65,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.battle_bg(adve_kind.ele, adve_kind.boss, dim, scr)
             let scr = Mons.draw.hero_hp(hero_chp, hero_mon_attr.mhp, hero_txt, hero_hp, scr)
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
-            let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-            let scr = Mons.draw.text("[J] heal(3)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-            scr
+            open stt.turn as turn:
+            if turn.is_active then  // Show end turn screen
+              if turn.exec_hero then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
+              else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
+            else Mons.draw.battle_skills(hero_mon_attr.skills, adve_attr.skills, scr)
+
           else
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
             let scr = 
@@ -114,8 +118,6 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | capture => // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
-    
-    | turn_skill => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
   ;
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions
@@ -383,3 +385,16 @@ Mons.draw.img_type(kind: Mons.Kind): String
   | const => "";
   | terrain  => "";
   | interact => "";
+
+Mons.draw.turn(name: String, skill: Mons.Skill, scr: Image3D): Image3D
+  let msg = String.flatten([name, " used ", Mons.Skill.get_name(skill), "."])
+  let scr = Mons.draw.text(msg, Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+  Mons.draw.text("[c] continue", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+
+// TODO: add skill names
+Mons.draw.battle_skills(
+  hero_skills: List(Mons.Skill), 
+  adve_skills: List(Mons.Skill), 
+  scr: Image3D): Image3D
+  let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+  Mons.draw.text("[J] heal(3)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
