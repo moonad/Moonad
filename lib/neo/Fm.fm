@@ -1242,10 +1242,11 @@ Fm.Parser.def: Parser(Pair(Fm.Name, Fm.Term.Def))
     var name = Fm.Parser.name;
     var args = Parser.many<>(do Parser {
       Parser.spaces_text("(");
-      var bind = Fm.Parser.name_term;
+      var bind = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
       Parser.spaces_text(")");
       return bind;
     });
+    let args = List.flatten<>(args);
     Parser.spaces_text(":");
     var type = Fm.Parser.term;
     var term = Fm.Parser.term;
@@ -1329,10 +1330,10 @@ Fm.report(defs: Fm.Defs): Pair(String, Fm.Defs)
 
 Fm.base_source: String
 ("
-  id(A: Type)(x: A): A
+  id(A: Type, x: A): A
     x
 
-  const(A: Type)(B: Type)(x: A)(y: B): A
+  const(A: Type, B: Type, x: A, y: B): A
     x
 
   Bool: Type
@@ -1347,8 +1348,8 @@ Fm.base_source: String
   Bool.false: Bool
     (P) (t) (f) f
 
-  Bool.elim(b: Bool)(P: (x:Bool) Type)(t: P(Bool.true))(f: P(Bool.false)): P(b)
-    b((self) P(self))(t)(f)
+  Bool.elim(b: Bool, P: (x:Bool) Type, t: P(Bool.true), f: P(Bool.false)): P(b)
+    b((self) P(self), t, f)
 
   Nat: Type
     self(P: (x: Nat) Type)
@@ -1362,44 +1363,44 @@ Fm.base_source: String
   Nat.succ(n: Nat): Nat
     (P) (z) (s) s(n)
 
-  Nat.induce(n: Nat)(P: (x:Nat) Type)(z: P(Nat.zero))(s: (n: Nat) (i: P(n)) P(Nat.succ(n))): P(n)
-    n(P)(z)((pred) s(pred)(Nat.induce(pred)(P)(z)(s)))
+  Nat.induce(n: Nat, P: (x:Nat) Type, z: P(Nat.zero), s: (n: Nat) (i: P(n)) P(Nat.succ(n))): P(n)
+    n(P, z, (pred) s(pred, Nat.induce(pred, P, z, s)))
 
-  Equal(A: Type)(a: A)(b: A): Type
+  Equal(A: Type, a: A, b: A): Type
     self(P: (b: A) (x:Equal(A, a, b)) Type)
-    (refl: P(a)(Equal.refl(A)(a)))
-    P(b)(self)
+    (refl: P(a, Equal.refl(A, a)))
+    P(b, self)
 
-  Equal.refl(A: Type)(a: A): Equal(A)(a)(a)
+  Equal.refl(A: Type, a: A): Equal(A, a, a)
     (P) (refl) refl
 
-  Equal.apply(A: Type)(B: Type)(a: A)(b: A)(f: (x:A) B)(e: Equal(A)(a)(b)): Equal(B)(f(a))(f(b))
-    e((e.b) (e) Equal(B)(f(a))(f(e.b)))(Equal.refl(B)(f(a)))
+  Equal.apply(A: Type, B: Type, a: A, b: A, f: (x:A) B, e: Equal(A, a, b)): Equal(B, f(a), f(b))
+    e((e.b) (e) Equal(B, f(a), f(e.b)), Equal.refl(B, f(a)))
 
   Nat.double(n: Nat): Nat
-    n((x) Nat)(Nat.zero)((pred) Nat.succ(Nat.succ(Nat.double(pred))))
+    n((x) Nat, Nat.zero, (pred) Nat.succ(Nat.succ(Nat.double(pred))))
 
   Nat.same(n: Nat): Nat
-    n((n.self) Nat)(Nat.zero)((pred) Nat.succ(Nat.same(pred)))
+    n((n.self) Nat, Nat.zero, (pred) Nat.succ(Nat.same(pred)))
 
   Nat.add: (a: Nat) (b: Nat) Nat
-    (a) a((x) (b:Nat) Nat)((b) b)((pred) (b) Nat.succ(Nat.add(pred)(b)))
+    (a) a((x) (b:Nat) Nat, (b) b, (pred) (b) Nat.succ(Nat.add(pred, b)))
 
-  Nat.add_zero(a: Nat): Equal(Nat)(Nat.add(Nat.zero)(a))(Nat.add(a)(Nat.zero))
-    a((a) Equal(Nat)(Nat.add(Nat.zero)(a))(Nat.add(a)(Nat.zero)))(
-      Equal.refl(Nat)(Nat.zero)
-    )((a.pred)
+  Nat.add_zero(a: Nat): Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero))
+    a((a) Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero)), 
+      Equal.refl(Nat, Nat.zero)
+    , (a.pred)
       let p0 = Nat.add_zero(a.pred);
-      let p1 = Equal.apply(_)(_)(_)(_)(Nat.succ)(p0);
+      let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
       p1
     )
 
-  Nat.add_succ(a: Nat)(b: Nat): Equal(Nat)(Nat.add(a)(Nat.succ(b)))(Nat.succ(Nat.add(a)(b)))
-    a((a) Equal(Nat)(Nat.add(a)(Nat.succ(b)))(Nat.succ(Nat.add(a)(b))))(
-      Equal.refl(Nat)(Nat.succ(b))
-    )((pred)
-      let p0 = Nat.add_succ(pred)(b);
-      let p1 = Equal.apply(_)(_)(_)(_)(Nat.succ)(p0);
+  Nat.add_succ(a: Nat, b: Nat): Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b)))
+    a((a) Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b))), 
+      Equal.refl(Nat, Nat.succ(b))
+    , (pred)
+      let p0 = Nat.add_succ(pred, b);
+      let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
       p1
     )
 
@@ -1409,8 +1410,8 @@ Fm.base_source: String
     let n2 = Nat.succ(n1);
     Nat.same(n2)
 
-  test1(A: Type)(B: Type)(x: A)(y: B): A
-    const(_)(_)(x)(y)
+  test1(A: Type, B: Type, x: A, y: B): A
+    const(_, _, x, y)
 
   main: Nat
     Nat.add(a: 2, b: 3)
