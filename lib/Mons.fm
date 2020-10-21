@@ -1255,13 +1255,13 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
     | game =>
     if U16.eql(cmd, 'U') then
-      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 0, stt.turn, game)
     else if U16.eql(cmd, 'I') then
-      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 1, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 1, stt.turn, game)
     else if U16.eql(cmd, 'J') then
-      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, stt.turn, game)
     else if U16.eql(cmd, 'K') then
-      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, game)
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, stt.turn, game)
     else if Mons.is_walk_cmd(cmd) then
       Mons.Game.walk(cmd, pos, hero_idx, game)
 
@@ -1392,27 +1392,30 @@ Mons.Game.exec_turn(
   hero_idx: U32,
   adve_idx: U32,
   code_skill: Nat,
+  turn: Mons.Turn,
   game: Mons.Game) : Mons.Game
+  open game:
   open hero_obj:
   open adve_obj:
   let hero_skill = Mons.Game.get_skills_at(code_skill, hero_obj)
   let adve_skill_code = Mons.Game.adve_turn(hero_obj, adve_obj, game)
   let adve_skill = Mons.Game.get_skills_at(adve_skill_code, adve_obj)
 
-  if Mons.Game.hero_start_attacking(hero_obj.kin, adve_obj.kin) 
-  then
-    let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
-    let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+  if Bool.not(Mons.Turn.is_active(turn)) then
+    if Mons.Game.hero_start_attacking(hero_obj.kin, adve_obj.kin) 
+    then
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
 
-    let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)
-    Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-  else 
-    let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-    let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
-    
-    let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
-    Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-   
+      let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+    else 
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
+      
+      let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+  else game
 
 // TODO: probably similar to "exec turn"
 Mons.Game.exec_skills(
