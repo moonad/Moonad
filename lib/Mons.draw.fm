@@ -114,6 +114,8 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | capture => // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+    
+    | turn_skill => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
   ;
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions

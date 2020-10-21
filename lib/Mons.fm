@@ -36,11 +36,11 @@ T Mons.Map.Dir.expanded
 //T Mons.Action
 //| Mons.Action.walk(dir: Mons.Dir);
 
-//T Mons.Battle.Action
-//| Mons.Battle.Action.atk;
-//| Mons.Battle.Action.bag;
-//| Mons.Battle.Action.mon;
-//| Mons.Battle.Action.run;
+T Mons.Effect 
+| Mons.Effect.sleep;
+| Mons.Effect.burn;
+| Mons.Effect.protect;
+| Mons.Effect.minimize(turns: U32);
 
 T Mons.Sign
 | Mons.Sign.minus;
@@ -62,7 +62,8 @@ T Mons.Object
   mon: U32, // idx of the current Mon. Default 0u
   bos: List(Mons.Object), // store Mons that are boss
   cap: Pair(U32, List(Mons.Object)), // store the quantity of Mons and a copy of the captured during game
-  idl: U32 // frame for idle animation
+  idl: U32, // frame for idle animation
+  eff: List(Mons.Effect)
 );
 
 T Mons.Attr
@@ -100,6 +101,7 @@ T Mons.Screen
 | Mons.Screen.capture_mon(
   idx: U32, // idx of the Mon to be replaced
   full_bag: Bool);
+| Mons.Screen.turn_skill(mon: String, skill: String); // who attacked and what skill was used
 
 T Mons.Type
 | Mons.Type.normal;
@@ -173,7 +175,8 @@ Mons.Pad.set_d(pad: Mons.Pad, val: Bool): Mons.Pad
 // The void tile
 Mons.Object.void: Mons.Object
   let void = Mons.Kind.Terrain(Mons.Kind.terrain.VOID)
-  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {33u, []}, 0u)
+  Mons.Object.new(void, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {33u, []},
+   0u, [])
 
 // Gets an object's direction
 Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
@@ -181,7 +184,8 @@ Mons.Object.get_dir(obj: Mons.Object): Mons.Dir
 
 // Sets an object's direction
 Mons.Object.set_dir(obj: Mons.Object, dir: Mons.Dir): Mons.Object
-  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  open obj: Mons.Object.new(obj.kin, dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 // Gets an object's pad
 Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
@@ -189,7 +193,8 @@ Mons.Object.get_pad(obj: Mons.Object): Mons.Pad
 
 // Sets an object's pad
 Mons.Object.set_pad(obj: Mons.Object, pad: Mons.Pad): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  open obj: Mons.Object.new(obj.kin, obj.dir, pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 // Gets an object's walk animation frames
 Mons.Object.get_ani(obj: Mons.Object): U32
@@ -197,7 +202,8 @@ Mons.Object.get_ani(obj: Mons.Object): U32
 
 // Sets an object's walk animation frames
 Mons.Object.set_ani(obj: Mons.Object, ani: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 // Gets an object's current HP
 Mons.Object.get_dmg(obj: Mons.Object): U32
@@ -209,11 +215,13 @@ Mons.Object.get_kin(obj: Mons.Object): Mons.Kind
 
 // Sets an object's current kin
 Mons.Object.set_kin(obj: Mons.Object, kin: Mons.Kind): Mons.Object
-  open obj: Mons.Object.new(kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  open obj: Mons.Object.new(kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 // Sets an object's current HP
 Mons.Object.set_dmg(obj: Mons.Object, dmg: U32): Mons.Object
-  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  open obj: Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 // Sets an object's pad.r
 Mons.Object.set_pad_r(obj: Mons.Object, val: Bool): Mons.Object
@@ -233,23 +241,33 @@ Mons.Object.set_pad_d(obj: Mons.Object, val: Bool): Mons.Object
 
 Mons.Object.set_bag(bag: List(Mons.Object), obj: Mons.Object): Mons.Object
   open obj:
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, obj.mon, obj.bos, obj.cap, obj.idl)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, obj.eff)
 
 Mons.Object.set_mon(idx: U32, obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, idx, obj.bos, obj.cap, obj.idl)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    idx, obj.bos, obj.cap, obj.idl, obj.eff)
 
 Mons.Object.set_bos(bos: List(Mons.Object), obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, bos, obj.cap, obj.idl)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, bos, obj.cap, obj.idl, obj.eff)
 
 Mons.Object.set_cap(cap: Pair(U32, List(Mons.Object)), obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, cap, obj.idl)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, cap, obj.idl, obj.eff)
 
 Mons.Object.set_idl(idl: U32, obj: Mons.Object): Mons.Object
   open obj: 
-  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, obj.mon, obj.bos, obj.cap, idl)
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, idl, obj.eff)
+
+Mons.Object.set_eff(eff: List(Mons.Effect), obj: Mons.Object): Mons.Object
+  open obj: 
+  Mons.Object.new(obj.kin, obj.dir, obj.pad, obj.ani, obj.dmg, obj.bag, 
+    obj.mon, obj.bos, obj.cap, obj.idl, eff)
 
 Mons.Object.qtd_mons_defeated(obj: Mons.Object): U32
   open obj:
@@ -679,7 +697,8 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {33u, []}, 0u)
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {33u, []}, 
+    0u, [])
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
   case cond:
@@ -1367,6 +1386,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           cmd, (cmd: U32) Mons.Screen.capture_mon(cmd, Bool.true),
           pos, hero_obj, hero_idx, game)
     ;
+    // TODO: show Mons
+    | turn_skill => game;
   ;
 
 // TODO: probably similar to "exec turn"
