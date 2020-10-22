@@ -174,7 +174,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // TODO Apply an initial dmg and +1/16 of MPH for 5 turns
   | sand_tomb => 
-   let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) // insta
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // TODO Avoid dmg on the next turn. Cannot be used on every turn.
