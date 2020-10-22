@@ -7,8 +7,8 @@
 T Mons.Effect
 | Mons.Effect.new(
   sleep: Pair(U32, Bool), // fst: turns that will last, snd: if used last turn
-  burn: Pair(U32, Bool),
-  protect: Pair(U32, Bool),
+  burn: U32, // turns
+  protect: Pair(Bool, Bool),
   minimize: Pair(U32, Bool),
   invulnerable: Pair(Bool, Bool), // fst: if is invulnerable, snd: if used it last turn
   hit: Pair(U32, Bool)
@@ -16,7 +16,8 @@ T Mons.Effect
 
 Mons.Effect.clear: Mons.Effect
   let clean = {0u, Bool.false}
-  Mons.Effect.new(clean, clean, clean, clean, {Bool.false, Bool.false}, clean)
+  let clean_bool = {Bool.false, Bool.false}
+  Mons.Effect.new(clean, 0u, clean_bool, clean, clean_bool, clean)
 
 // Mons.Effect.description(eff: Mons.Effect): String
 // case eff:
@@ -60,20 +61,20 @@ Mons.Effect.is_sleep(eff: Mons.Effect): Bool
   get turn used = eff.sleep
   U32.gtn(turn, 0u)
 
-Mons.Effect.is_burn(eff: Mons.Effect): Bool
-  open eff: 
-  get turn used = eff.burn
-  U32.gtn(turn, 0u)
+// Mons.Effect.is_burn(eff: Mons.Effect): Bool
+//   open eff: 
+//   get turn used = eff.burn
+//   U32.gtn(turn, 0u)
 
-Mons.Effect.is_protect(eff: Mons.Effect): Bool
-  open eff: 
-  get turn used = eff.protect
-  U32.gtn(turn, 0u)
+// Mons.Effect.is_protect(eff: Mons.Effect): Bool
+//   open eff: 
+//   get turn used = eff.protect
+//   U32.gtn(turn, 0u)
 
-Mons.Effect.is_invulnerable(eff: Mons.Effect): Bool
-  open eff: 
-  get stt used = eff.invulnerable
-  stt
+// Mons.Effect.is_invulnerable(eff: Mons.Effect): Bool
+//   open eff: 
+//   get stt used = eff.invulnerable
+//   stt
 
 Mons.Effect.set_invulnerable(obj: Mons.Object): Mons.Object
   open obj:
@@ -83,10 +84,12 @@ Mons.Effect.set_invulnerable(obj: Mons.Object): Mons.Object
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, new, eff.hit)
   Mons.Object.set_eff(new_eff, obj)
 
-// Mons.Effect.set_burn(obj: Mons.Object, turns: U32): Mons.Object
-//   open obj:
-//   open obj.eff as eff:
-//   Mons.Effect.new(eff.sleep, {turns}, eff.protect, eff.minimize, eff.invulnerable)
+Mons.Effect.set_burn(obj: Mons.Object, turns: U32): Mons.Object
+  open obj:
+  open obj.eff as eff:
+  let new_eff = Mons.Effect.new(eff.sleep, turns, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit)
+  Mons.Object.set_eff(new_eff, obj)
 
 // Hit to be executed next turn
 Mons.Effect.set_hit(obj: Mons.Object, val: U32): Mons.Object
@@ -96,7 +99,14 @@ Mons.Effect.set_hit(obj: Mons.Object, val: U32): Mons.Object
     eff.invulnerable, {val, Bool.true})
   Mons.Object.set_eff(new_eff, obj)
 
-
+Mons.Effect.set_protect(obj: Mons.Object): Mons.Object
+  open obj:
+  open obj.eff as eff:
+  get stt used = eff.protect
+  let new = {Bool.not(stt), Bool.not(used)}
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, new, eff.minimize, 
+    eff.invulnerable, eff.hit)
+  Mons.Object.set_eff(new_eff, obj)
 
 // Note: even though there's a '0', the number is not used when checking
  //       for equality, see Mons.Effect.equals
