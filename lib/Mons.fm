@@ -36,11 +36,6 @@ T Mons.Map.Dir.expanded
 //T Mons.Action
 //| Mons.Action.walk(dir: Mons.Dir);
 
-T Mons.Effect 
-| Mons.Effect.sleep;
-| Mons.Effect.burn;
-| Mons.Effect.protect;
-| Mons.Effect.minimize(turns: U32);
 
 T Mons.Sign
 | Mons.Sign.minus;
@@ -107,7 +102,7 @@ T Mons.Turn
   exec_hero: Bool, // if actions of the hero will be executed
   hero_skill: Mons.Skill, // skill used by the first player
   adve_skill: Mons.Skill, // skill used by the second player
-  play: U32 // number os plays made
+  play: U32 // number of plays made
 );
 
 T Mons.Type
@@ -565,17 +560,17 @@ Mons.Object.update_interactive(obj: Mons.Object, fun: Mons.Kind -> Mons.Kind ): 
   open obj:
   Mons.Object.set_kin(obj, fun(obj.kin))
 
-// Mons.Object.can_attack(obj: Mons.Object): Bool 
-//    open obj: 
-//    case List.find<>(Mons.Effect.is_sleep, obj.eff) as res:
-//    | none => Bool.true;
-//    | some => Bool.false;
+Mons.Object.can_attack(obj: Mons.Object): Bool 
+   open obj: 
+   case List.find<>(Mons.Effect.is_sleep, obj.eff) as res:
+   | none => Bool.true;
+   | some => Bool.false;
 
-// Mons.Object.is_burning(obj: Mons.Object): Bool
-//    open obj:
-//    case List.find<>(Mons.Effect.is_burn, obj.eff):
-//    | none => Bool.false;
-//    | some => Bool.true;
+Mons.Object.is_burning(obj: Mons.Object): Bool
+   open obj:
+   case List.find<>(Mons.Effect.is_burn, obj.eff):
+   | none => Bool.false;
+   | some => Bool.true;
 
 // Calculate the damage received depending on the type of the Mon
 Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Object): U32
