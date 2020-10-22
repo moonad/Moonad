@@ -139,6 +139,14 @@ Mons.Skill.heal_eff(obj: Mons.Object, pos: Pos32, idx: U32, val: U32, game: Mons
   if Mons.Object.is_obj_defeated(obj_updated) then game
   else Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
 
+Mons.Skill.invulnerable_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game 
+  let obj_updated = Mons.Effect.set_invulnerable(Mons.Object.get_current_mon(obj))
+  Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+Mons.Skill.hit_next_eff(obj: Mons.Object, val: U32, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Effect.set_hit(Mons.Object.get_current_mon(obj), val)
+  Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
 // pos    : position of the map in which the battle is taking place
 // source : index of the object which is casting a skill
 // target : index of the object which is receiving the effect 
@@ -160,6 +168,8 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   let medium_val = 4u
   let high_val = 6u
 
+  // Cast skill
+  // ----------
   case skill:
   | hit_4  =>
     let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
@@ -169,8 +179,13 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
   | none => game;
-  // TODO Protect for 1 turn. On the next turn, will attack and effects are applied
-  | dig => game;
+
+  // TODO Invulnerable for 1 turn. On the next turn, will attack and effects are applied
+  | dig => 
+    let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game)
+    // Will damage enemy on the next turn
+    let game = Mons.Skill.hit_next_eff(target_obj, light_val, pos, target, game)
+    game;
 
   // TODO Apply an initial dmg and +1/16 of MPH for 5 turns
   | sand_tomb => 
