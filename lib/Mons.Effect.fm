@@ -1,87 +1,88 @@
-// T Mons.Effect 
-// | Mons.Effect.sleep;
-// | Mons.Effect.burn(turns: U32);
-// | Mons.Effect.protect;
-// | Mons.Effect.minimize(turns: U32);
-
+// sleep: Can't attack on the next turn
+// burn: Loses 1/16 mhp for X turns
+// protect: Takes 50% less damage on the next turn
+// minimize: Takes 25% less damage for each of the next turns
+// invulnerable: can't be attacked by effects of physical damage
+// hit: a damage to be applied in the next turn
 T Mons.Effect
 | Mons.Effect.new(
-  sleep: Pair(U32, Bool), // fst: turns that will last, snd: if used last turn
+  sleep: Pair(Bool, Bool), // fst: turns that will last, snd: if used last turn
   burn: U32, // turns
-  protect: Pair(Bool, Bool),
+  protect: Pair(U32, Bool), // fst: if is 1u, will be applied on the same turn
   minimize: Pair(U32, Bool),
   invulnerable: Pair(Bool, Bool), // fst: if is invulnerable, snd: if used it last turn
-  hit: Pair(U32, Bool)
+  hit: U32
 );
 
 Mons.Effect.clear: Mons.Effect
   let clean = {0u, Bool.false}
   let clean_bool = {Bool.false, Bool.false}
-  Mons.Effect.new(clean, 0u, clean_bool, clean, clean_bool, clean)
+  Mons.Effect.new(clean_bool, 0u, clean, clean, clean_bool, 0u)
 
-// Mons.Effect.description(eff: Mons.Effect): String
-// case eff:
-// | sleep => "Can't attack on the next turn";
-// | burn => "Loses 1/16 mhp for X turns";
-// | protect => "Takes 50% less damage on the next turn";
-// | minimize => "Takes 25% less damage for each of the next turns";
+Mons.Effect.upd_initial_eff(eff: Mons.Effect): Mons.Effect
+  open eff:
+  Mons.Effect.new(
+    eff.sleep, 
+    U32.sub(eff.burn, 1u), 
+    eff.protect, 
+    eff.minimize, 
+    eff.invulnerable, 
+    0u) // hit only last for the next turn
 
-
-// Mons.Effect.equals(eff1: Mons.Effect, eff2: Mons.Effect): Bool
-//    case eff1:
-//    | sleep => 
-//      case eff2: 
-//      | sleep    => Bool.true;
-//      | burn     => Bool.false;
-//      | protect  => Bool.false;
-//      | minimize => Bool.false;;
-//    | burn =>
-//      case eff2: 
-//      | sleep    => Bool.false;
-//      | burn     => Bool.true;
-//      | protect  => Bool.false;
-//      | minimize => Bool.false;;
-//    | protect => 
-//      case eff2:
-//      | sleep    => Bool.false;
-//      | burn     => Bool.false;
-//      | protect  => Bool.true;
-//      | minimize => Bool.false;
-//    ;
-//    | minimize =>
-//      case eff2: 
-//      | sleep    => Bool.false;
-//      | burn     => Bool.false;
-//      | protect  => Bool.false;
-//      | minimize => Bool.true;;
-
+Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
+  open eff:
+  let sleep = Pair.fst<,>(eff.sleep)
+  let protect_turn = Pair.fst<,>(eff.protect)
+  let minimize_turn = Pair.fst<,>(eff.minimize)
+  let invulnerable = Pair.fst<,>(eff.invulnerable)
+  // let update_turn_counter = (val) {U32.sub(val, 1u), U32.eql(val, 2u)}
+  
+  Mons.Effect.new(
+    if sleep then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
+    eff.burn, 
+    {U32.sub(protect_turn, 1u), U32.eql(protect_turn, 2u)},
+    // if protect then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
+    {U32.sub(minimize_turn, 1u), U32.eql(minimize_turn, 2u)}, 
+    if invulnerable then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
+    eff.hit)
 
 Mons.Effect.is_sleep(eff: Mons.Effect): Bool
   open eff: 
-  get turn used = eff.sleep
+  get stt used = eff.sleep
+  stt
+
+Mons.Effect.has_burn(eff: Mons.Effect): Bool
+  open eff: 
+  U32.gtn(eff.burn, 0u)
+
+Mons.Effect.has_hit(eff: Mons.Effect): Bool
+  open eff:
+  U32.gtn(eff.hit, 0u)
+
+Mons.Effect.has_minimize(eff: Mons.Effect): Bool
+  open eff: 
+  get turn used = eff.minimize
   U32.gtn(turn, 0u)
 
-// Mons.Effect.is_burn(eff: Mons.Effect): Bool
-//   open eff: 
-//   get turn used = eff.burn
-//   U32.gtn(turn, 0u)
+// 0u: don't have
+// 1u: it has protect for the current turn
+// 2u: available next turn
+Mons.Effect.has_protect(eff: Mons.Effect): Bool
+  open eff: 
+  let turn = Pair.fst<,>(eff.protect)
+  U32.eql(turn, 1u)
 
-// Mons.Effect.is_protect(eff: Mons.Effect): Bool
-//   open eff: 
-//   get turn used = eff.protect
-//   U32.gtn(turn, 0u)
-
-// Mons.Effect.is_invulnerable(eff: Mons.Effect): Bool
-//   open eff: 
-//   get stt used = eff.invulnerable
-//   stt
+Mons.Effect.has_invulnerable(eff: Mons.Effect): Bool
+  open eff: 
+  get stt used = eff.invulnerable
+  stt
 
 Mons.Effect.set_invulnerable(obj: Mons.Object): Mons.Object
   open obj:
   open obj.eff as eff:
   get stt used = eff.invulnerable
-  let new = {Bool.not(stt), Bool.not(used)}
-  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, new, eff.hit)
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    {Bool.true, Bool.true}, eff.hit)
   Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_burn(obj: Mons.Object, turns: U32): Mons.Object
@@ -96,61 +97,12 @@ Mons.Effect.set_hit(obj: Mons.Object, val: U32): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
-    eff.invulnerable, {val, Bool.true})
+    eff.invulnerable, val)
   Mons.Object.set_eff(new_eff, obj)
 
-Mons.Effect.set_protect(obj: Mons.Object): Mons.Object
+Mons.Effect.set_protect(obj: Mons.Object, turn: U32): Mons.Object
   open obj:
   open obj.eff as eff:
-  get stt used = eff.protect
-  let new = {Bool.not(stt), Bool.not(used)}
-  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, new, eff.minimize, 
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, {turn, Bool.true}, eff.minimize, 
     eff.invulnerable, eff.hit)
   Mons.Object.set_eff(new_eff, obj)
-
-// Note: even though there's a '0', the number is not used when checking
- //       for equality, see Mons.Effect.equals
-// Mons.Effect.is_minimize: Mons.Effect -> Bool 
-//   Mons.Effect.equals(Mons.Effect.minimize(0u))
-
-// Mons.Effect.is_def_eff(eff: Mons.Effect): Bool 
-//   Bool.or(Mons.Effect.is_minimize(eff), Mons.Effect.is_protect(eff))
-
-// Reduce damage by 25%
-// dmg: value of the damage to be applied
-// eff_idx: index of the effect
-// Mons.Effect.apply_minimize(obj: Mons.Object, eff_idx: Nat, dmg: U32): Mons.Object
-//   open obj:
-//   let dmg = U32.sub(dmg, U32.div(dmg, 4u)) // 25% less damage
-//   let obj = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-//   let effs = List.delete_at<>(eff_idx, obj.eff)
-//   Mons.Object.set_eff(effs, obj)
-
-// // Reduce damage by 50% on the current turn
-// // TODO: update to be used on the current turn. Depends on updating effs.
-// Mons.Effect.apply_protect(obj: Mons.Object, eff_idx: Nat, dmg: U32): Mons.Object
-//   open obj:
-//   let dmg = U32.sub(dmg, U32.div(dmg, 2u)) // 25% less damage
-//   let obj = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-//   let effs = List.delete_at<>(eff_idx, obj.eff)
-//   Mons.Object.set_eff(effs, obj)
-
-// // If Mon has sleep, he can't attack. Apply the effect will remove it.
-// Mons.Effect.apply_sleep(obj: Mons.Object, eff_idx: Nat): Mons.Object
-//   open obj:
-//   let effs = List.delete_at<>(eff_idx, obj.eff)
-//   Mons.Object.set_eff(effs, obj)
-
-// // Loses 1/16 mhp
-// Mons.Effect.apply_burn(obj: Mons.Object, eff_idx: Nat): Mons.Object
-//   open obj:
-//   open Mons.Kind.attr(obj.kin) as obj_attr:
-//   let dmg = U32.add(obj.dmg, U32.div(obj_attr.mhp, 16u)) // damage of value 1/16 mhp
-//   let obj = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
-//   let effs = List.delete_at<>(eff_idx, obj.eff)
-//   Mons.Object.set_eff(effs, obj)
-
-
-// TODO: update Mons.Object to contain:
-// eff: List(Mons.Effect) -> effect to be applied on the next turn
-// trn: List(Mons.Effect) -> effect to be applied in the current turn
