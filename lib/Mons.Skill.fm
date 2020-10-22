@@ -148,12 +148,24 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   let source_mon = Mons.Object.get_current_mon(source_obj)
   let target_obj = Mons.Map.get(pos, target, game.map)
   let target_mon = Mons.Object.get_current_mon(target_obj)
+
+  // Note: attr referes to the mon that the object can have
+  // damage_eff and heal_eff updates the hp of the mon
+  open source_mon:
+  open target_mon:
+  open Mons.Kind.attr(source_mon.kin) as source_mon_attr:
+  open Mons.Kind.attr(target_mon.kin) as target_mon_attr:
+
+  let light_val = 2u
+  let medium_val = 4u
+  let high_val = 6u
+
   case skill:
   | hit_4  =>
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | hit_2 => 
-    let val = Mons.Type.skill_n_type(2u, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
   | none => game;
@@ -170,17 +182,24 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // Damage 4
   | slam => 
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // TODO: Double the last damage that the adve received (dismiss effects)
   | counter => game;
 
   // TODO: Restore 50% of mhp
-  | recover => game;
+  | recover =>
+    let val = U32.div(source_mon_attr.mhp, light_val)
+    Mons.Skill.heal_eff(source_obj, pos, source, val, game);
 
-  // TODO: Apply damage and 50% of change to reduce defense on the next turn
-  | rock_smash => game;
+  // Review: Apply damage and 50% of change to reduce defense on the next turn
+  // TODO: add def, now is only considering mhp
+  // Instant cast
+  | rock_smash =>
+    let red_def_val = Mons.Skill.reduce_def(target_mon_attr.mhp, medium_val, 50u, game.tik)
+    let obj = Mons.Skill.damage_eff(target_obj, pos, target, red_def_val, game)
+    game;
 
   // TODO: Damage and reduce adve defense
   | crunch => game;
@@ -205,8 +224,8 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // Damage
   | wing_attack => 
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
-    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    Mons.Skill.damage_eff(target_mon, pos, target, val, game);
 
   // TODO Damage and 20% of sleep
   | moonlight => game;
@@ -222,7 +241,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // Damage
   | thunder_wave =>
-    let val = Mons.Type.skill_n_type(4u, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // TODO Double the damage of the next ellectric attack
@@ -230,6 +249,12 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // TODO Increase damage and 25% of apply confusion
   | agility => game;
+
+
+Mons.Skill.reduce_def(mhp: U32, hit_val: U32, perc: U32, tik: U32): U32
+  if U32.eql(U32.mod(tik, perc), 0u) then // percentage applied
+    U32.add(U32.div(mhp, 16u), hit_val) // +1/16 damage
+  else hit_val
 
 // TODO remove
 Mons.Skill.dummy_skills: List(Mons.Skill)

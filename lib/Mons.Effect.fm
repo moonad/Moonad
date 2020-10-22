@@ -89,6 +89,7 @@ Mons.Effect.apply_burn(obj: Mons.Object, eff_idx: Nat): Mons.Object
   open obj:
   open Mons.Kind.attr(obj.kin) as obj_attr:
   let dmg = U32.add(obj.dmg, U32.div(obj_attr.mhp, 16u)) // damage of value 1/16 mhp
+  let obj = Mons.Object.hit(Mons.Object.get_current_mon(obj), dmg)
   let effs = List.delete_at<>(eff_idx, obj.eff)
   Mons.Object.set_eff(effs, obj)
 
