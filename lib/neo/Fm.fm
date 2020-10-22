@@ -97,6 +97,25 @@ type Fm.Sugar {
   ),
 }
 
+// A constructor
+type Fm.Constructor {
+  new(
+    name: Fm.Name,
+    args: List(Pair(Fm.Name, Fm.Term)),
+    inds: List(Pair(Fm.Name, Fm.Term)),
+  )
+}
+
+// An algebraic datatype
+type Fm.Datatype {
+  new(
+    name: Fm.Name,
+    pars: List(Pair(Fm.Name, Fm.Term)),
+    inds: List(Pair(Fm.Name, Fm.Term)),
+    ctrs: List(Fm.Constructor),
+  )
+}
+
 // A type error
 type Fm.Error {
   // Two types do not match
@@ -961,6 +980,156 @@ Fm.Term.synth(term: Fm.Term, type: Fm.Term, defs: Fm.Defs): Either(List(Fm.Error
     }
   }
 
+// Derivers
+// ========
+
+// Builds the type of a datatype
+Fm.Datatype.build_type(type: Fm.Datatype): Fm.Term
+  case type {
+    new: Fm.Datatype.build_type.go(type, type.name, type.pars, type.inds),
+  }
+
+Fm.Datatype.build_type.go(
+  type: Fm.Datatype,
+  name: Fm.Name,
+  pars: List(Pair(Fm.Name,Fm.Term)),
+  inds: List(Pair(Fm.Name,Fm.Term)),
+): Fm.Term
+  case pars {
+    cons: case pars.head {
+      new:
+        def par_name = pars.head.fst
+        def par_xtyp = pars.head.snd
+        def par_body = (s,x) Fm.Datatype.build_type.go(type, name, pars.tail, inds)
+        Fm.Term.all([], par_name, par_xtyp, par_body, Maybe.none<>)
+    },
+    nil: case inds {
+      cons: case inds.head {
+        new: 
+          def ind_name = inds.head.fst
+          def ind_xtyp = inds.head.snd
+          def ind_body = (s,x) Fm.Datatype.build_type.go(type, name, pars, inds.tail)
+          Fm.Term.all([], ind_name, ind_xtyp, ind_body, Maybe.none<>)
+      },
+      nil: Fm.Term.typ(Maybe.none<>),
+    }
+  }
+
+// Builds the term of a datatype (motive)
+Fm.Datatype.build_term.motive(
+  type: Fm.Datatype,
+): Fm.Term
+  case type {
+    new: Fm.Datatype.build_term.motive.go(type, type.name, type.inds),
+  }
+
+Fm.Datatype.build_term.motive.go(
+  type: Fm.Datatype,
+  name: Fm.Name,
+  inds: List(Pair(Fm.Name,Fm.Term)),
+): Fm.Term
+  case inds {
+    cons:
+      def ind_name = Pair.fst<_,_>(inds.head)
+      def ind_xtyp = Pair.snd<_,_>(inds.head)
+      def ind_body = (s,x) Fm.Datatype.build_term.motive.go(type, name, inds.tail)
+      Fm.Term.all([], ind_name, ind_xtyp, ind_body, Maybe.none<>),
+    nil:
+      open type
+      let slf = Fm.Term.ref(name, Maybe.none<>)
+      let slf = for var in type.pars:
+        Fm.Term.app(slf, Fm.Term.ref(Pair.fst<_,_>(var), Maybe.none<>), Maybe.none<>)
+      let slf = for var in type.inds:
+        Fm.Term.app(slf, Fm.Term.ref(Pair.fst<_,_>(var), Maybe.none<>), Maybe.none<>)
+      Fm.Term.all([], Fm.Name.read("self"), slf, (s,x) Fm.Term.typ(Maybe.none<>), Maybe.none<>)
+  }
+
+// Builds the term of a datatype (constructors)
+Fm.Datatype.build_term.constructors(type: Fm.Datatype): Fm.Term
+  case type {
+    new: Fm.Datatype.build_term.constructors.go(type, type.ctrs)
+  }
+
+Fm.Datatype.build_term.constructors.go(
+  type: Fm.Datatype,
+  ctrs: List(Fm.Constructor),
+): Fm.Term
+  case ctrs {
+    cons: case ctrs.head {
+      new: Fm.Term.all([],
+        ctrs.head.name,
+        Fm.Datatype.build_term.constructor(type, ctrs.head),
+        (s,x) Fm.Datatype.build_term.constructors.go(type, ctrs.tail),
+        Maybe.none<>)
+    },
+    nil:
+      open type
+      let ret = Fm.Term.ref(Fm.Name.read("P"), Maybe.none<>);
+      let ret = for var in type.inds:
+        Fm.Term.app(ret, Fm.Term.ref(Pair.fst<_,_>(var), Maybe.none<>), Maybe.none<>);
+      Fm.Term.app(ret, Fm.Term.ref(type.name, Maybe.none<>), Maybe.none<>)
+  }
+
+// Builds the term of a datatype (constructor)
+Fm.Datatype.build_term.constructor(type: Fm.Datatype, ctor: Fm.Constructor): Fm.Term
+  case ctor {
+    new: Fm.Datatype.build_term.constructor.go(type, ctor, ctor.args),
+  }
+
+Fm.Datatype.build_term.constructor.go(
+  type: Fm.Datatype,
+  ctor: Fm.Constructor,
+  args: List(Pair(Fm.Name,Fm.Term)),
+): Fm.Term
+  case args {
+    cons:
+      let name = Pair.fst<_,_>(args.head)
+      let xtyp = Pair.snd<_,_>(args.head)
+      let body = Fm.Datatype.build_term.constructor.go(type, ctor, args.tail)
+      Fm.Term.all([], name, xtyp, (s,x) body, Maybe.none<>),
+    nil:
+      open type
+      open ctor
+      let ret = Fm.Term.ref(Fm.Name.read("P"), Maybe.none<>)
+      let ret = for var in type.inds:
+        Fm.Term.app(ret, Pair.snd<_,_>(var), Maybe.none<>)
+      let slf = Fm.Term.ref(ctor.name, Maybe.none<>)
+      let slf = for var in type.pars:
+        Fm.Term.app(slf, Fm.Term.ref(Pair.fst<_,_>(var), Maybe.none<>), Maybe.none<>)
+      let slf = for var in ctor.args:
+        Fm.Term.app(slf, Fm.Term.ref(Pair.fst<_,_>(var), Maybe.none<>), Maybe.none<>)
+      Fm.Term.app(ret, slf, Maybe.none<>)
+  }
+        
+// Builds the term of a datatype
+Fm.Datatype.build_term(type: Fm.Datatype): Fm.Term
+  case type {
+    new: Fm.Datatype.build_term.go(type, type.name, type.pars, type.inds),
+  }
+
+Fm.Datatype.build_term.go(
+  type: Fm.Datatype,
+  name: Fm.Name,
+  pars: List(Pair(Fm.Name,Fm.Term)),
+  inds: List(Pair(Fm.Name,Fm.Term)),
+): Fm.Term
+  case pars {
+    cons:
+      def par_name = Pair.fst<_,_>(pars.head)
+      def par_body = (x) Fm.Datatype.build_term.go(type, name, pars.tail, inds)
+      Fm.Term.lam(par_name, par_body, Maybe.none<>),
+    nil: case inds {
+      cons:
+        def ind_name = Pair.fst<_,_>(inds.head)
+        def ind_body = (x) Fm.Datatype.build_term.go(type, name, pars, inds.tail)
+        Fm.Term.lam(ind_name, ind_body, Maybe.none<>),
+      nil: 
+        def moti = Fm.Datatype.build_term.motive(type)
+        def body = (s,x) Fm.Datatype.build_term.constructors(type) // TODO
+        Fm.Term.all(name, Fm.Name.read("P"), moti, body, Maybe.none<>)
+    }
+  }
+
 // Parsing
 // =======
 
@@ -1051,10 +1220,10 @@ Fm.Parser.type: Parser(Fm.Term)
 Fm.Parser.lambda: Parser(Fm.Term)
   do Parser {
     Parser.spaces_text("(");
-    var name = Fm.Parser.name;
+    var name = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name1));
     Parser.spaces_text(")");
     var body = Fm.Parser.term;
-    return Fm.Term.lam(name, () body, Maybe.none<>);
+    return Fm.Parser.make_lambda(name, body);
   }
 
 // Parses a name:term pair
@@ -1066,14 +1235,21 @@ Fm.Parser.name_term: Parser(Pair(Fm.Name, Fm.Term))
     return {name, type};
   }
 
+// Parses a binding list, `(a: A, b: B, c: C)`
+Fm.Parser.binder: Parser(List(Pair(Fm.Name, Fm.Term)))
+  do Parser {
+    Parser.spaces_text("(");
+    var bind = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
+    Parser.spaces_text(")");
+    return bind;
+  }
+
 // Parses a forall: `self(a: A, b: B, c: C) D`
 Fm.Parser.forall: Parser(Fm.Term)
   do Parser {
     Parser.spaces;
     var self = Fm.Parser.name;
-    Parser.spaces_text("(");
-    var bind = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
-    Parser.spaces_text(")");
+    var bind = Fm.Parser.binder;
     var body = Fm.Parser.term;
     let term = List.for<>(bind)<>(body, (x,t) case x {
       new: Fm.Term.all([], x.fst, x.snd, (s,x) t, Maybe.none<>)
@@ -1180,7 +1356,6 @@ Fm.Parser.sugar.application(func: Fm.Term): Parser(Fm.Term)
     return term;
   }
   
-
 // Parses a core term (prefix phase)
 Fm.Parser.term: Parser(Fm.Term)
   do Parser {
@@ -1224,15 +1399,46 @@ Fm.Parser.make_forall(binds: List(Pair(Fm.Name, Fm.Term)), body: Fm.Term): Fm.Te
   }
 
 // Builds a chained lambda
-Fm.Parser.make_lambda(binds: List(Pair(Fm.Name, Fm.Term)), body: Fm.Term): Fm.Term
-  case binds {
+Fm.Parser.make_lambda(names: List(Fm.Name), body: Fm.Term): Fm.Term
+  case names {
     nil: body,
-    cons: case binds.head {
-      new: Fm.Term.lam(
-        binds.head.fst,
-        (x) Fm.Parser.make_lambda(binds.tail, body),
-        Maybe.none<>)
-    }
+    cons: Fm.Term.lam(
+      names.head,
+      (x) Fm.Parser.make_lambda(names.tail, body),
+      Maybe.none<>),
+  }
+
+// Parses a constructor: `foo(a: A, b: B, c: C) ~ (i: I, j: J)`
+Fm.Parser.constructor: Parser(Fm.Constructor)
+  do Parser {
+    var name = Fm.Parser.name1;
+    var args = Parser.maybe<>(Fm.Parser.binder);
+    var inds = Parser.maybe<>(do Parser {
+      Parser.spaces_text("~");
+      Fm.Parser.binder;
+    });
+    let args = Maybe.default<>([], args);
+    let inds = Maybe.default<>([], inds);
+    return Fm.Constructor.new(name, args, inds);
+  }
+
+  
+// Parses a datatype: `type Foo (x: A) ~ (i: I) { ctor0(a: A) ~ (i: I), ... }`
+Fm.Parser.datatype: Parser(Fm.Datatype)
+  do Parser {
+    Parser.spaces_text("type ");
+    var name = Fm.Parser.name1; 
+    var pars = Parser.maybe<>(Fm.Parser.binder);
+    var inds = Parser.maybe<>(do Parser {
+      Parser.spaces_text("~");
+      Fm.Parser.binder;
+    });
+    let pars = Maybe.default<>([], pars);
+    let inds = Maybe.default<>([], inds);
+    Parser.spaces_text("{");
+    var ctrs = Parser.many<>(Fm.Parser.item<>(Fm.Parser.constructor));
+    Parser.spaces_text("}");
+    return Fm.Datatype.new(name, pars, inds, ctrs);
   }
 
 // Parses a definition
@@ -1240,37 +1446,53 @@ Fm.Parser.def: Parser(Pair(Fm.Name, Fm.Term.Def))
   do Parser {
     Parser.spaces;
     var name = Fm.Parser.name;
-    var args = Parser.many<>(do Parser {
-      Parser.spaces_text("(");
-      var bind = Parser.many1<>(Fm.Parser.item<>(Fm.Parser.name_term));
-      Parser.spaces_text(")");
-      return bind;
-    });
+    var args = Parser.many<>(Fm.Parser.binder);
     let args = List.flatten<>(args);
     Parser.spaces_text(":");
     var type = Fm.Parser.term;
     var term = Fm.Parser.term;
     let type = Fm.Parser.make_forall(args, type);
-    let term = Fm.Parser.make_lambda(args, term);
+    let term = Fm.Parser.make_lambda(List.mapped<>(args)<>(Pair.fst<_,_>),term);
     let type = Fm.Term.bind([], Fm.Term.paths(type, (x) Bits.0(x)));
     let term = Fm.Term.bind([], Fm.Term.paths(term, (x) Bits.1(x)));
     return {name, Fm.Term.Def.new(term, type, List.length<>(args))};
   }
 
 // Parses many definitions
-Fm.Parser.defs.go(defs: Fm.Defs): Parser(Fm.Defs)
-  (code)
-  case Fm.Parser.def(code) as parsed {
-    error:
-      Parser.Reply.value<>(code, defs),
-    value:
-      get name def = parsed.value
-      Fm.Parser.defs.go(Fm.def<>(name, def, defs), parsed.code),
+Fm.Parser.file.go(defs: Fm.Defs): Parser(Fm.Defs)
+  do Parser {
+    var def = Parser.maybe<>(Fm.Parser.def);
+    case def {
+      some: case def.value {
+        new: Fm.Parser.file.go(Fm.def<>(def.value.fst, def.value.snd, defs))
+      },
+      none: do Parser {
+        var adt = Parser.maybe<>(Fm.Parser.datatype);
+        case adt {
+          some:
+            use skip = Debug.log<>("Parsed ADT!")
+            use skip = Debug.log<>(Fm.Term.show(Fm.Datatype.build_type(adt.value)))
+            use skip = Debug.log<>(Fm.Term.show(Fm.Datatype.build_term(adt.value)))
+            Fm.Parser.file.go(defs),
+          none: do Parser {
+            return defs;
+          }
+        };
+      },
+    };
   }
+  //(code)
+  //case Fm.Parser.def(code) as parsed {
+    //error:
+      //Parser.Reply.value<>(code, defs),
+    //value:
+      //get name def = parsed.value
+      //Fm.Parser.file.go(Fm.def<>(name, def, defs), parsed.code),
+  //}
 
 // Parses many definitions
-Fm.Parser.defs: Parser(Fm.Defs)
-  Fm.Parser.defs.go(Map.new<>)
+Fm.Parser.file: Parser(Fm.Defs)
+  Fm.Parser.file.go(Map.new<>)
 
 // Reads a term from string
 Fm.Term.read(code: String): Maybe(Fm.Term)
@@ -1281,7 +1503,7 @@ Fm.Term.read(code: String): Maybe(Fm.Term)
 
 // Reads a defs from string
 Fm.Defs.read(code: String): Maybe(Fm.Defs)
-  case Fm.Parser.defs(code) as parsed {
+  case Fm.Parser.file(code) as parsed {
     error: Maybe.none<>,
     value: Maybe.some<>(parsed.value),
   }
@@ -1330,6 +1552,16 @@ Fm.report(defs: Fm.Defs): Pair(String, Fm.Defs)
 
 Fm.base_source: String
 ("
+  type Nat {
+    zero,
+    succ(pred: Nat),
+  }
+
+  type Vector (A: Type) ~ (size: Nat) {
+    nil ~ (size: Nat.zero),
+    ext(size: Nat, head: A, tail: Vector(A, size)) ~ (size: Nat.succ(size)),
+  }
+
   id(A: Type, x: A): A
     x
 
@@ -1343,10 +1575,10 @@ Fm.base_source: String
     P(self)
 
   Bool.true: Bool
-    (P) (t) (f) t
+    (P, t, f) t
 
   Bool.false: Bool
-    (P) (t) (f) f
+    (P, t, f) f
 
   Bool.elim(b: Bool, P: (x:Bool) Type, t: P(Bool.true), f: P(Bool.false)): P(b)
     b((self) P(self), t, f)
@@ -1358,10 +1590,10 @@ Fm.base_source: String
     P(self)
 
   Nat.zero: Nat
-    (P) (z) (s) z
+    (P, z, s) z
 
   Nat.succ(n: Nat): Nat
-    (P) (z) (s) s(n)
+    (P, z, s) s(n)
 
   Nat.induce(n: Nat, P: (x:Nat) Type, z: P(Nat.zero), s: (n: Nat) (i: P(n)) P(Nat.succ(n))): P(n)
     n(P, z, (pred) s(pred, Nat.induce(pred, P, z, s)))
@@ -1372,10 +1604,10 @@ Fm.base_source: String
     P(b, self)
 
   Equal.refl(A: Type, a: A): Equal(A, a, a)
-    (P) (refl) refl
+    (P, refl) refl
 
   Equal.apply(A: Type, B: Type, a: A, b: A, f: (x:A) B, e: Equal(A, a, b)): Equal(B, f(a), f(b))
-    e((e.b) (e) Equal(B, f(a), f(e.b)), Equal.refl(B, f(a)))
+    e((e.b, e) Equal(B, f(a), f(e.b)), Equal.refl(B, f(a)))
 
   Nat.double(n: Nat): Nat
     n((x) Nat, Nat.zero, (pred) Nat.succ(Nat.succ(Nat.double(pred))))
@@ -1383,17 +1615,16 @@ Fm.base_source: String
   Nat.same(n: Nat): Nat
     n((n.self) Nat, Nat.zero, (pred) Nat.succ(Nat.same(pred)))
 
-  Nat.add: (a: Nat) (b: Nat) Nat
-    (a) a((x) (b:Nat) Nat, (b) b, (pred) (b) Nat.succ(Nat.add(pred, b)))
+  Nat.add: (a: Nat, b: Nat) Nat
+    (a) a((x) (b:Nat) Nat, (b) b, (pred, b) Nat.succ(Nat.add(pred, b)))
 
   Nat.add_zero(a: Nat): Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero))
     a((a) Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero)), 
-      Equal.refl(Nat, Nat.zero)
-    , (a.pred)
-      let p0 = Nat.add_zero(a.pred);
-      let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
-      p1
-    )
+      Equal.refl(Nat, Nat.zero),
+      (a.pred)
+        let p0 = Nat.add_zero(a.pred);
+        let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
+        p1)
 
   Nat.add_succ(a: Nat, b: Nat): Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b)))
     a((a) Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b))), 
@@ -1401,8 +1632,7 @@ Fm.base_source: String
     , (pred)
       let p0 = Nat.add_succ(pred, b);
       let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
-      p1
-    )
+      p1)
 
   test0: Nat
     let n0 = Nat.zero;
