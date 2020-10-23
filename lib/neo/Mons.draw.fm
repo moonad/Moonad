@@ -16,9 +16,10 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     open hero_obj
     open adve_obj
     let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
-    open hero_mon_obj:
-    // let adve_attr = 
-    open Mons.Kind.attr(adve_obj.kin) as adve_attr:
+    open hero_mon_obj
+    let adve_attr = Mons.Kind.attr(adve_obj.kin)
+    open adve_attr
+    // open Mons.Kind.attr(adve_obj.kin) as adve_attr
     let is_standing = Mons.Object.is_standing(hero_obj)
     case game.stt as stt {
       introduction: 
@@ -46,7 +47,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
   
       game: 
       let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
-      open hero_mon_attr:
+      open hero_mon_attr
 
       case adve_obj.kin as adve_kind {
         Mons: 
@@ -233,17 +234,17 @@ Mons.draw.list(texts: List(String), horizontal: Bool, spacing: U32, font_map: Mo
    Mons.draw.list.go(texts, horizontal, spacing, font_map, start_pos, scr, 0u)
 
 Mons.draw.list.go(texts: List(String),  horizontal: Bool, spacing: U32, font_map: Mons.font, pos: Pos32, scr: Image3D, idx: U32): Image3D
-   let x = Pos32.get_x(pos)
-   let y = Pos32.get_y(pos)
-   let pos = 
-    if horizontal then Pos32.new(U32.add(U32.add(spacing, idx), x),y,0u)
-    else Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
-   case texts {
-     nil : scr,
-     cons: 
-       let scr = Mons.draw.text(texts.head, font_map, pos, scr)
-       Mons.draw.list.go(texts.tail, horizontal, spacing, font_map, pos, scr, U32.add(idx, 1u))
-   }
+  let x = Pos32.get_x(pos)
+  let y = Pos32.get_y(pos)
+  let pos = 
+   if horizontal then Pos32.new(U32.add(U32.add(spacing, idx), x),y,0u)
+   else Pos32.new(x,U32.add(U32.add(spacing, idx), y),0u)
+  case texts {
+    nil : scr,
+    cons: 
+      let scr = Mons.draw.text(texts.head, font_map, pos, scr)
+      Mons.draw.list.go(texts.tail, horizontal, spacing, font_map, pos, scr, U32.add(idx, 1u))
+  }
 
 // Draw images of Mons in the replace screen
 Mons.draw.list_image(images: List(Image3D), horizontal: Bool, spacing: U32, start_pos: Pos32, scr: Image3D): Image3D
@@ -251,20 +252,20 @@ Mons.draw.list_image(images: List(Image3D), horizontal: Bool, spacing: U32, star
    Mons.draw.list_image.go(images, horizontal, spacing, start_pos, scr, 0u)
 
 Mons.draw.list_image.go(images: List(Image3D), horizontal: Bool, spacing: U32, pos: Pos32, scr: Image3D, idx: U32): Image3D
-   let x = Pos32.get_x(pos)
-   let y = Pos32.get_y(pos)
-   case images {
-     nil : scr,
-     cons: 
-      let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
-      let scr = Mons.draw.image(images.head, pos, scr)
-      let pos = if horizontal then
-         Pos32.new(U32.add(x, spacing),y,0u)
-         // Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
-      else
-         // let scr = Mons.draw.image(images.head, pos, scr)
-         Pos32.new(x, U32.add(y, spacing),0u)
-      Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
+  let x = Pos32.get_x(pos)
+  let y = Pos32.get_y(pos)
+  case images {
+    nil : scr,
+    cons: 
+     let scr = Mons.draw.image(Mons.Assets.inventory_mon_selection, pos, scr)
+     let scr = Mons.draw.image(images.head, pos, scr)
+     let pos = if horizontal then
+        Pos32.new(U32.add(x, spacing),y,0u)
+        // Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
+     else
+        // let scr = Mons.draw.image(images.head, pos, scr)
+        Pos32.new(x, U32.add(y, spacing),0u)
+     Mons.draw.list_image.go(images.tail, horizontal, spacing, pos, scr, U32.add(idx, 1u))
   }
 
 // Draws an ASCII char to a position using 

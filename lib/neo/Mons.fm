@@ -1005,11 +1005,10 @@ Mons.Game.delete_adve_obj(
 Mons.Object.delete_init_mons(hero_obj: Mons.Object): Mons.Object
   open hero_obj
   let get_mon = List.at<>(U32.to_nat(hero_obj.mon), hero_obj.bag)
-  let cur_mon =
-    case get_mon {
-      none: Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth, 2u)),
-      some: get_mon.value
-    }
+  let cur_mon = case get_mon {
+    none: Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth, 2u)),
+    some: get_mon.value
+  }
   let hero_obj = Mons.Object.set_bag([], hero_obj)
   let hero_obj = Mons.Object.push_to_bag(cur_mon, hero_obj)
   let hero_obj = Mons.Object.set_mon(0u, hero_obj)
