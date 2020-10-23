@@ -67,12 +67,13 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
+            let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
             open stt.turn as turn:
             if Mons.Turn.is_active(stt.turn) then // Show end turn screen
               if Mons.Turn.hero_turn(stt.turn) 
               then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
               else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
-            else Mons.draw.battle_skills(hero_mon_attr.skills, adve_attr.skills, scr)
+            else Mons.draw.battle_skills(hero_mon_obj, scr)
 
           else
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
@@ -393,9 +394,25 @@ Mons.draw.turn(name: String, skill: Mons.Skill, scr: Image3D): Image3D
   Mons.draw.text("[c] continue", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
 
 // TODO: add skill names
-Mons.draw.battle_skills(
-  hero_skills: List(Mons.Skill), 
-  adve_skills: List(Mons.Skill), 
-  scr: Image3D): Image3D
-  let scr = Mons.draw.text("[U] hit(4)   | [I] hit(2)       ", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-  Mons.draw.text("[J] heal(3)  | [T] self hits(4)      ", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+Mons.draw.battle_skills(hero_obj: Mons.Object, scr: Image3D): Image3D
+  let u = Mons.Skill.get_name(Mons.Game.get_skills_at(0, hero_obj))
+  let i = Mons.Skill.get_name(Mons.Game.get_skills_at(1, hero_obj))
+  let j = Mons.Skill.get_name(Mons.Game.get_skills_at(2, hero_obj))
+  let k = Mons.Skill.get_name(Mons.Game.get_skills_at(3, hero_obj))
+  let scr = Mons.draw.text(String.flatten(["[u] ", u, "   [i] ", i]), Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+  Mons.draw.text(String.flatten(["[j] ", j, "   [k] ", k]), Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+
+// TODO: add sprite and icon to represent the effects
+Mons.draw.effects(hero_eff: Mons.Effect, adve_eff: Mons.Effect, scr: Image3D): Image3D
+  let scr = Mons.draw.effect(hero_eff, Pos32.new(140u, 110u, 0u), scr)
+  let scr = Mons.draw.effect(adve_eff, Pos32.new(38u, 45u, 0u), scr)
+  scr
+
+Mons.draw.effect(eff: Mons.Effect, pos: Pos32, scr: Image3D): Image3D
+  let burn = if Mons.Effect.has_burn(eff) then "burn " else "" 
+  let hit = if Mons.Effect.has_hit(eff) then "hit " else ""
+  let minimize = if Mons.Effect.has_minimize(eff) then "mini " else ""
+  let invulnerable = if Mons.Effect.has_invulnerable(eff) "invul " else ""
+  let text = String.flatten([burn, hit, minimize, invulnerable])
+  let scr = Mons.draw.text(text, Mons.font_black, pos, scr)
+  scr

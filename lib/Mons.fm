@@ -1149,7 +1149,7 @@ Mons.Attr.new_hero: Mons.Attr
         [ Mons.Assets.boy_d_0],
         Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
-      Mons.Skill.dummy_skills 
+      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig] 
   )
 
 Mons.Attr.new_mage: Mons.Attr
@@ -1402,7 +1402,7 @@ Mons.Game.exec_turn(
       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
 
-      let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)
+      let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)  
       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
     else 
       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
@@ -1410,22 +1410,6 @@ Mons.Game.exec_turn(
       
       let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-  else game
-
-// TODO: probably similar to "exec turn"
-Mons.Game.exec_skills(
-  source_obj: Mons.Object, 
-  adve_obj: Mons.Object,
-  pos: Pos32,
-  source_idx: U32,
-  target_idx: U32,
-  code_skill: Nat,
-  game: Mons.Game)
-  : Mons.Game
-  let is_battling = Mons.Object.is_battling(adve_obj, source_obj)
-  if is_battling then
-    let skill = Mons.Game.get_skills_at(code_skill, source_obj)
-    Mons.Skill.cast(pos, source_idx, target_idx, skill, game)
   else game
 
 Mons.Game.hero_start_attacking(hero_kin: Mons.Kind, adve_kin: Mons.Kind) : Bool

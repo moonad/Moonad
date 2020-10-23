@@ -276,38 +276,47 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     case kin.ele as kin:
     | HERO => Mons.Attr.new_hero;
     | MAGE => Mons.Attr.new_mage;
+    
     | BEHOLDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
-      Mons.Skill.kind(kin));
-    | ZOIO => Mons.Attr.new_battleable(
+      Mons.Skill.dummy_skills);
+    
+    | ZOIO => Mons.Attr.new_battleable( // Skills of Cyclope
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      Mons.Skill.kind(kin));
+      Mons.Skill.dummy_skills); // TODO: update, just testing
+    
     | CYCLOPE => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "CYCLOPE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.counter, Mons.Skill.recover, Mons.Skill.rock_smash, Mons.Skill.slam]);
+    
     | POISOLICK => Mons.Attr.new_battleable(
       Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.gyro_ball, Mons.Skill.iron_defense]);
+    
     | TROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.wing_attack, Mons.Skill.recover, Mons.Skill.agility, Mons.Skill.crunch]);
+    
     | MIMIC => Mons.Attr.new_battleable(
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.crunch, Mons.Skill.super_fang, Mons.Skill.hypnosis, Mons.Skill.dream_eater]);
+    
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic]);
+    
     | EMERELDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
-      Mons.Skill.kind(kin));
+      [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense]);
+
 //     | BATH => Mons.Attr.new_battleable(
       // Mons.Assets.pic_bath, [Mons.Assets.mons_bath_d_0], "BATH",
       // (is_up) Bool.if<>(is_up, Mons.Assets.battle_bath_u, Mons.Assets.battle_bath_d),

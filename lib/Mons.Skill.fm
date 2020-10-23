@@ -27,34 +27,6 @@ T Mons.Skill
 | Mons.Skill.charge;
 | Mons.Skill.agility;
 
-
-Mons.Skill.kind(kin: Mons.Kind): List(Mons.Skill)
-  case kin:
-  | HERO        => Mons.Skill.dummy_skills;
-  | MAGE        => [];
-  | BEHOLDER    => Mons.Skill.dummy_skills;
-  | ZOIO        => 
-    [Mons.Skill.slam, Mons.Skill.sand_tomb, 
-    Mons.Skill.protect, Mons.Skill.dig];
-  | CYCLOPE     => 
-    [Mons.Skill.counter, Mons.Skill.recover,
-    Mons.Skill.rock_smash, Mons.Skill.slam];
-  | POISOLICK   => 
-    [Mons.Skill.crunch, Mons.Skill.sludge_bomb,
-    Mons.SKill.gyro_ball, Mons.Skill.iron_defense];
-  | TROWL       => 
-    [Mons.Skill.wing_attack, Mons.Skill.recover,
-    Mons.Skill.agility, Mons.Skill.crunch];
-  | MIMIC       => 
-    [Mons.Skill.crunch, Mons.Skill.super_fang,
-     Mons.Skill.hypnosis, Mons.Skill.dream_eater];
-  | AZULA       => 
-    [Mons.Skill.wing_attack, Mons.Skill.moonlight,
-    Mons.Skill.play_rough, Mons.Skill.psychic];
-  | EMERELDER   => 
-    [Mons.Skill.ancient_power, Mons.Skill.thunder_wave,
-    Mons.Skill.charge, Mons.Skill.iron_defense] ;
-
 Mons.Skill.description(skill: Mons.Skill): String
   case skill:
   | hit_4 => "damage 4"; // test
@@ -244,7 +216,9 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     open source_mon.eff as eff:
     let used_last_turn = Pair.snd<,>(eff.protect)
     if used_last_turn then game
-    else Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
+    else 
+      let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game);//Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
 
   // High damage
   | slam => 
