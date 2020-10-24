@@ -76,14 +76,6 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             else Mons.draw.battle_skills(hero_mon_obj, scr)
 
           else
-            // open Mons.Kind.attr(hero_mon_obj.kin) as source_mon_attr:
-            use skp = Debug.log<>(
-              String.flatten([hero_mon_attr.name," draw before cast: ", U32.to_string(hero_mon_obj.dmg),
-              " mhp: ", U32.to_string(hero_mon_attr.mhp)
-              ]))
-              // hero_mon_attr.name === ""
-              // hero_mon_attr.dmg === 0
-              /// hero_mon_attr.mhp === 0
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then

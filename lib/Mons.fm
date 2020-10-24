@@ -1295,7 +1295,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else // Turn ended
 
         open stt.turn as turn:
-        if U32.gtn(turn.play, 0u) then
+        if Mons.Turn.is_active(stt.turn) then
           let turn = Mons.Turn.new(
             Bool.not(turn.exec_hero),
             turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
@@ -1399,17 +1399,11 @@ Mons.Game.exec_turn(
   let adve_skill = Mons.Game.get_skills_at(adve_skill_code, adve_obj)
 
   if Bool.not(Mons.Turn.is_active(turn)) then
+    let game = Mons.Skill.apply_inital_eff(hero_idx, adve_idx, pos, game)
     if Mons.Game.hero_start_attacking(hero_mon_obj.kin, adve_obj.kin) 
     then
-      let game = Mons.Skill.apply_inital_eff(hero_obj, pos, hero_idx, game)
-      let game = Mons.Skill.apply_inital_eff(adve_obj, pos, adve_idx, game)
-
       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
-
-      // let game = Mons.Skill.apply_end_turn_eff(hero_mon_obj, pos, hero_idx, game)
-      // let game = Mons.Skill.apply_end_turn_eff(adve_obj, pos, adve_idx, game)
-
       let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)  
       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
     else 
