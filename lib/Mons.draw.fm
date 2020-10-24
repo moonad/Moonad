@@ -67,13 +67,16 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.adve_hp(adve_chp, adve_attr.mhp, adve_txt, adve_hp, scr)
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-            let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
             open stt.turn as turn:
+            // let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
             if Mons.Turn.is_active(stt.turn) then // Show end turn screen
+              // let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
               if Mons.Turn.hero_turn(stt.turn) 
               then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
               else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
-            else Mons.draw.battle_skills(hero_mon_obj, scr)
+            else 
+              let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
+              Mons.draw.battle_skills(hero_mon_obj, scr)
 
           else
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
@@ -411,8 +414,10 @@ Mons.draw.effects(hero_eff: Mons.Effect, adve_eff: Mons.Effect, scr: Image3D): I
   scr
 
 Mons.draw.effect(eff: Mons.Effect, pos: Pos32, scr: Image3D): Image3D
-  let burn = if Mons.Effect.has_burn(eff) then "burn " else "" 
-  let hit = if Mons.Effect.has_hit(eff) then "hit " else ""
+  // use skp = Debug.log<>("> Draw effects")
+  open eff: 
+  let burn = if Mons.Effect.has_burn(eff) then String.flatten(["burn ", U32.to_string(eff.burn)]) else "" 
+  let hit = if Mons.Effect.has_hit(eff) then String.flatten(["hit ", U32.to_string(eff.hit)]) else ""
   let minimize = if Mons.Effect.has_minimize(eff) then "mini " else ""
   let invulnerable = if Mons.Effect.has_invulnerable(eff) "invul " else ""
   let text = String.flatten([burn, hit, minimize, invulnerable])

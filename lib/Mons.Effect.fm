@@ -53,6 +53,7 @@ Mons.Effect.has_burn(eff: Mons.Effect): Bool
   open eff: 
   U32.gtn(eff.burn, 0u)
 
+// His only last 1 turn, so if it has a values, is the value of the dmg
 Mons.Effect.has_hit(eff: Mons.Effect): Bool
   open eff:
   U32.gtn(eff.hit, 0u)
