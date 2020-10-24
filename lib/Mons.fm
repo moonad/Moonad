@@ -1065,11 +1065,9 @@ Mons.Object.ended_battle(adve: Mons.Object, hero: Mons.Object): Bool
   | inter => Bool.false;
   
 Mons.Object.is_obj_defeated(obj: Mons.Object): Bool
-  if U32.eql(Mons.Object.remainig_hp(obj), 0u) 
-  then Bool.true 
-  else Bool.false
+  U32.eql(Mons.Object.remaining_hp(obj), 0u)
 
-Mons.Object.remainig_hp(obj: Mons.Object): U32
+Mons.Object.remaining_hp(obj: Mons.Object): U32
   open obj:
   case obj.kin as kind:
   | mons => 
@@ -1079,6 +1077,7 @@ Mons.Object.remainig_hp(obj: Mons.Object): U32
   | terrain  => obj.dmg;
   | inter => obj.dmg;
 
+// If trying to get a Mon from a Mon, it will return and empty Mon (mhp 0, dmg0, no name)
 Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
   open obj:
   let idx = U32.to_nat(obj.mon)
@@ -1149,7 +1148,7 @@ Mons.Attr.new_hero: Mons.Attr
         [ Mons.Assets.boy_d_0],
         Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
-      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig] 
+      [Mons.Skill.counter, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig] 
   )
 
 Mons.Attr.new_mage: Mons.Attr
@@ -1390,17 +1389,26 @@ Mons.Game.exec_turn(
   turn: Mons.Turn,
   game: Mons.Game) : Mons.Game
   open game:
-  open hero_obj:
+  
+  let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
+  open hero_mon_obj:
   open adve_obj:
-  let hero_skill = Mons.Game.get_skills_at(code_skill, hero_obj)
+
+  let hero_skill = Mons.Game.get_skills_at(code_skill, hero_mon_obj)
   let adve_skill_code = Mons.Game.adve_turn(hero_obj, adve_obj, game)
   let adve_skill = Mons.Game.get_skills_at(adve_skill_code, adve_obj)
 
   if Bool.not(Mons.Turn.is_active(turn)) then
-    if Mons.Game.hero_start_attacking(hero_obj.kin, adve_obj.kin) 
+    if Mons.Game.hero_start_attacking(hero_mon_obj.kin, adve_obj.kin) 
     then
+      let game = Mons.Skill.apply_inital_eff(hero_obj, pos, hero_idx, game)
+      let game = Mons.Skill.apply_inital_eff(adve_obj, pos, adve_idx, game)
+
       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+
+      // let game = Mons.Skill.apply_end_turn_eff(hero_mon_obj, pos, hero_idx, game)
+      // let game = Mons.Skill.apply_end_turn_eff(adve_obj, pos, adve_idx, game)
 
       let turn = Mons.Turn.new(Bool.true, hero_skill, adve_skill, 2u)  
       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
@@ -1425,8 +1433,8 @@ Mons.Game.adve_turn(hero_obj: Mons.Object, adve_obj: Mons.Object, game: Mons.Gam
   open game:
   open hero_obj:
   open adve_obj:
-  let adve_hp = Mons.Object.remainig_hp(adve_obj)
-  let hero_hp = Mons.Object.remainig_hp(hero_obj)
+  let adve_hp = Mons.Object.remaining_hp(adve_obj)
+  let hero_hp = Mons.Object.remaining_hp(hero_obj)
   let qtd_mon_bag = Nat.to_u32(List.length<>(hero_obj.bag))
   let hero_pos = Mons.Game.get_hero_pos(game)
   let pos_x = 

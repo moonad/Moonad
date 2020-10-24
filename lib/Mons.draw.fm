@@ -76,6 +76,14 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             else Mons.draw.battle_skills(hero_mon_obj, scr)
 
           else
+            // open Mons.Kind.attr(hero_mon_obj.kin) as source_mon_attr:
+            use skp = Debug.log<>(
+              String.flatten([hero_mon_attr.name," draw before cast: ", U32.to_string(hero_mon_obj.dmg),
+              " mhp: ", U32.to_string(hero_mon_attr.mhp)
+              ]))
+              // hero_mon_attr.name === ""
+              // hero_mon_attr.dmg === 0
+              /// hero_mon_attr.mhp === 0
             let scr = Mons.draw.capture_bg(adve_kind.ele, dim, scr)
             let scr = 
               if Mons.Object.is_obj_defeated(adve_obj) then
@@ -89,12 +97,13 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[c] Capture", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
-              else
+              else if Mons.Object.is_obj_defeated(hero_mon_obj) then
                 let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
                 let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
                 let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
                 let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
+              else scr
             scr
         else
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
@@ -399,6 +408,7 @@ Mons.draw.battle_skills(hero_obj: Mons.Object, scr: Image3D): Image3D
   let i = Mons.Skill.get_name(Mons.Game.get_skills_at(1, hero_obj))
   let j = Mons.Skill.get_name(Mons.Game.get_skills_at(2, hero_obj))
   let k = Mons.Skill.get_name(Mons.Game.get_skills_at(3, hero_obj))
+  // TODO: adjust skill len to be aligned
   let scr = Mons.draw.text(String.flatten(["[u] ", u, "   [i] ", i]), Mons.font_black, Mons.draw.msg_screen.line_0, scr)
   Mons.draw.text(String.flatten(["[j] ", j, "   [k] ", k]), Mons.font_black, Mons.draw.msg_screen.line_1, scr)
 
