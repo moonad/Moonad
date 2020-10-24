@@ -68,14 +68,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
             let scr = Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr) 
             let scr = Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
             open stt.turn as turn:
-            // let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
+            let scr = Mons.draw.effects(hero_mon_obj.eff, adve_obj.eff, scr)
             if Mons.Turn.is_active(stt.turn) then // Show end turn screen
-              // let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
               if Mons.Turn.hero_turn(stt.turn) 
               then Mons.draw.turn(hero_mon_attr.name, turn.hero_skill, scr)
               else Mons.draw.turn(adve_attr.name, turn.adve_skill, scr)
-            else 
-              let scr = Mons.draw.effects(hero_obj.eff, adve_obj.eff, scr)
+            else
               Mons.draw.battle_skills(hero_mon_obj, scr)
 
           else

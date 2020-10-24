@@ -130,7 +130,7 @@ Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
   use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
-  use skp = Debug.log<>(String.flatten([" Hit counter:", U32.to_string(eff.hit)]))
+  use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
   let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
   let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
   U32.add(dmg_burn, dmg_hit)
@@ -146,25 +146,13 @@ Mons.Skill.apply_end_turn_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons
   Mons.Skill.update_mon_obj(obj, obj_mon, pos, idx, game)
 
 Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  use skp = Debug.log<>("> Clear after battle!")
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
   let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
-  // Clear effects an update Mons
-  open hero_mon_obj:
+  // Clear effects and update Mons 
   let hero_mon_obj = Mons.Object.set_eff(Mons.Effect.clear, hero_mon_obj)
   let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
-
-  // Por que não está limpando o hero_mon_obj, sendo que são a mesma coisa?
-  let cur_mon = Mons.Object.get_current_mon(adve_obj)
-  open cur_mon:
-  open cur_mon.eff as eff:
-  use skp = Debug.log<>(String.flatten(["clear - current mon hit:", U32.to_string(eff.hit)]))
-  open hero_mon_obj.eff as eff:
-  use skp = Debug.log<>(String.flatten(["clear - hero mon hit:", U32.to_string(eff.hit)]))
-
-  open adve_obj:
   let adve_obj = Mons.Object.set_eff(Mons.Effect.clear, adve_obj)
   let game = Mons.Game.update_obj(adve_obj, pos, adve_idx, game)
   game
