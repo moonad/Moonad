@@ -1303,7 +1303,6 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
         open stt.turn as turn:
         if Mons.Turn.is_active(stt.turn) then
-          use skp = Debug.log<>(String.flatten(["Turno ativo: ", U32.to_string(turn.play)]))
           if Mons.Turn.is_last_player_move(stt.turn) then
             let game = Mons.Skill.apply_end_turn_eff(hero_idx, adve_idx, pos, game)
             set_stt_game(game)
