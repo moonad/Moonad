@@ -351,6 +351,10 @@ Mons.Turn.is_active(turn: Mons.Turn): Bool
   open turn:
   U32.gtn(turn.play, 0u)
 
+Mons.Turn.is_last_player_move(turn: Mons.Turn): Bool
+  open turn:
+  U32.eql(turn.play, 1u)
+
 Mons.Turn.hero_turn(turn: Mons.Turn): Bool
   open turn:
   turn.exec_hero
@@ -1193,7 +1197,8 @@ Mons.Game.map_del(pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
 // Computes a command from an user
 Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
   let pos = Mons.Game.get_user_pos(usr, game)
-  let set_stt_game = Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+  def set_stt_game = 
+    ((game) Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)) :: Mons.Game -> Mons.Game
   case pos:
   // New player
   | let pos = Pos32.new(2048u, 2048u, 0u)
@@ -1237,7 +1242,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     //     Mons.Game.set_stt(Mons.Screen.game('.'), game)
     //   else game
     // else game
-    set_stt_game
+    Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
@@ -1286,23 +1291,28 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
-            set_stt_game
+            Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
           else
             let adve_obj = Mons.Object.set_dmg(adve_obj, 0u) // adve heals all hp
             let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
             let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
-            set_stt_game
+            Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
         else // Turn ended
 
         open stt.turn as turn:
         if Mons.Turn.is_active(stt.turn) then
+          use skp = Debug.log<>(String.flatten(["Turno ativo: ", U32.to_string(turn.play)]))
+          if Mons.Turn.is_last_player_move(stt.turn) then
+            let game = Mons.Skill.apply_end_turn_eff(hero_idx, adve_idx, pos, game)
+            set_stt_game(game)
+          else 
           let turn = Mons.Turn.new(
             Bool.not(turn.exec_hero),
             turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
           Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-        else set_stt_game
+        else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
 
       ;
 
@@ -1325,7 +1335,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
           open adjacent_obj:
           Mons.Kind.exec_eff(adjacent_obj.kin, game)
-        else set_stt_game;
+        else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
 
       | inter => 
         let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
@@ -1341,17 +1351,17 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          set_stt_game
+          Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
         else game;
-      | const => set_stt_game;
-      | terrain => set_stt_game;
-      | inter => set_stt_game;
+      | const => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
+      | terrain => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
+      | inter => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
 
     else game ;
 
     | inventory => 
       if U16.eql(cmd, 'e') then
-        set_stt_game
+        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
       
       else // update current Mon using 'w' or 's'
         Mons.Object.change_curr_mon(
@@ -1365,13 +1375,13 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
         let game = Mons.Game.map_del(pos, adve_idx, game)
         let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        set_stt_game
+        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
 
       else if U16.eql(cmd, 'z') then // Free Mon
         if Mons.Object.is_obj_defeated(adve_obj) then
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          set_stt_game
+          Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
         else game
 
       else // update current Mon using 'w' or 's'

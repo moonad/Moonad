@@ -109,7 +109,6 @@ Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
   let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
-  let target_mon = Mons.Object.get_current_mon(adve_obj)
 
   open hero_mon_obj:
   open Mons.Kind.attr(hero_mon_obj.kin) as hero_mon_attr:
@@ -129,21 +128,32 @@ Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons
 
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
-  use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
-  use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
+  // use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
+  // use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
   let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
   let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
   U32.add(dmg_burn, dmg_hit)
 
 // After casting the skills, update effects used during the cast: 
 // sleep, protect, minimize and invulnerable
-Mons.Skill.apply_end_turn_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
-  let obj_mon = Mons.Object.get_current_mon(obj)
-  open obj_mon:
-  open obj_mon.eff as eff:
-  let eff_upd = Mons.Effect.upd_end_turn_eff(obj_mon.eff) 
-  let mon_obj = Mons.Object.set_eff(eff_upd, obj_mon)
-  Mons.Skill.update_mon_obj(obj, obj_mon, pos, idx, game)
+Mons.Skill.apply_end_turn_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  use skp = Debug.log<>("> Apply end turn")
+  open game:
+  let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
+  let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
+  let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
+
+  open hero_mon_obj:
+  let eff_upd = Mons.Effect.upd_end_turn_eff(hero_mon_obj.eff) 
+  let hero_mon_obj = Mons.Object.set_eff(eff_upd, hero_mon_obj)
+  let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
+
+  open adve_obj:
+  let upd_effect = Mons.Effect.upd_end_turn_eff(adve_obj.eff)
+  let adve_obj = Mons.Object.set_eff(upd_effect, adve_obj)
+  let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
+  game
+
 
 Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
   open game:
@@ -229,14 +239,14 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // Invulnerable for this turn. On the next turn, will attack and effects can be applied
   | dig => 
-    // let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game) // it's working
+    let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game) // it's working
     // Will damage enemy on the next turn
     let game = Mons.Skill.hit_next_eff(target_obj, 3u, pos, target, game)
     game;
 
   // Apply an initial dmg and +1/16 of MPH for 5 turns
   | sand_tomb => 
-    let val = 3u //Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
+    let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
     let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
     game;
@@ -248,7 +258,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let used_last_turn = Pair.snd<,>(eff.protect)
     if used_last_turn then game
     else 
-      let val = 2u //Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+      let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
       Mons.Skill.damage_eff(target_obj, pos, target, val, game);//Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
 
   // High damage
