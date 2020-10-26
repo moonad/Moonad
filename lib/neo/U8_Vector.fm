@@ -1,43 +1,50 @@
+U8_Vector: Nat -> Type
+  Vector(U8)
+  
 U8_Vector.concat<n: Nat, m: Nat>(as: U8_Vector(n), bs: U8_Vector(m)): U8_Vector(Nat.add(n, m))
   Vector.concat<U8, n, m>(as, bs)
 
 U8_Vector.fill(n: Nat, s: U8): U8_Vector(n)
   Vector.fill<U8>(n, s)
 
-U8_Vector: Nat -> Type
-  Vector(U8)
-
 U8_Vector.from_hex(hex: String): Sigma(Nat, U8_Vector)
-  case hex:
-  | Sigma.new<Nat,U8_Vector>(0, Vector.nil<U8>);
-  | case hex.tail:
-    | let b = ECDSA.parse_byte(String.cons_var(1, hex.head))
-      let vec = Vector.ext<U8,0>(U8.from_nat(b), Vector.nil<U8>)
-      Sigma.new<Nat, U8_Vector>(1, vec);
-    | let b = ECDSA.parse_byte(String.cons_var(2, hex.head, hex.tail.head))
-      get len vec = U8_Vector.from_hex(hex.tail.tail)
-      let vec = Vector.ext<U8,len>(U8.from_nat(b), vec)
-      Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec);;
+  case hex {
+    nil : Sigma.new<Nat,U8_Vector>(0, Vector.nil<U8>),
+    cons: case hex.tail {
+      nil: 
+        let b = ECDSA.parse_byte(String.cons_var(1, hex.head))
+        let vec = Vector.ext<U8,0>(U8.from_nat(b), Vector.nil<U8>)
+        Sigma.new<Nat, U8_Vector>(1, vec),
+      cons: 
+        let b = ECDSA.parse_byte(String.cons_var(2, hex.head, hex.tail.head))
+        get len vec = U8_Vector.from_hex(hex.tail.tail)
+        let vec = Vector.ext<U8,len>(U8.from_nat(b), vec)
+        Sigma.new<Nat, U8_Vector>(Nat.succ(len), vec)
+    }
+  }
 
 U8_Vector.from_nat.aux(pad: Nat, n: Nat): U8_Vector(pad)
-  case pad:
-  | Vector.nil<U8>;
-  | get div mod = Nat.div_mod(n, 256)
-    Vector.ext<U8, pad.pred>(U8.from_nat(mod), U8_Vector.from_nat.aux(pad.pred, div));
-  : U8_Vector(pad.self);
+  case pad {
+    zero: Vector.nil<U8>,
+    succ:
+      get div mod = Nat.div_mod(n, 256)
+      Vector.ext<U8, pad.pred>(U8.from_nat(mod), U8_Vector.from_nat.aux(pad.pred, div))
+  } : U8_Vector(pad.self)
 
 U8_Vector.from_nat(pad: Nat, n: Nat): U8_Vector(pad)
   Vector.reverse<U8, pad>(U8_Vector.from_nat(pad, n))
 
 U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
-  case bytes:
-  | String.nil;
-  | String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.size>(bytes.tail));
+  case bytes {
+    nil: String.nil,
+    ext: String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.size>(bytes.tail))
+  }
 
 U8_Vector.to_number.aux<n: Nat>(bytes: U8_Vector(n), res: Nat): Nat
-  case bytes:
-  | res;
-  | U8_Vector.to_number.aux<bytes.size>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)));
+  case bytes {
+    nil: res,
+    ext: U8_Vector.to_number.aux<bytes.size>(bytes.tail, Nat.add(U8.to_nat(bytes.head), Nat.mul(res, 16)))
+  }
 
 U8_Vector.to_number<n: Nat>(bytes: U8_Vector(n)): Nat
   U8_Vector.to_number.aux<n>(bytes, 0)
