@@ -128,11 +128,13 @@ Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons
 
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
-  // use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
-  // use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
-  let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
-  let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
-  U32.add(dmg_burn, dmg_hit)
+  use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
+  use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
+  if Mons.Effect.has_invulnerable(eff) then 0u
+  else
+    let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
+    let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
+    U32.add(dmg_burn, dmg_hit)
 
 // After casting the skills, update effects used during the cast: 
 // sleep, protect, minimize and invulnerable
@@ -155,7 +157,7 @@ Mons.Skill.apply_end_turn_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mo
 
 
 Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  // use skp = Debug.log<>(">> Clear after battle")
+  use skp = Debug.log<>(">> Clear after battle")
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
@@ -173,8 +175,8 @@ Mons.Skill.damage_eff(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mo
   open obj_mon:
   if Mons.Effect.has_invulnerable(obj_mon.eff) then game
   else 
-    let dmg = if Mons.Effect.has_protect(obj_mon.eff)  then 3u else dmg //U32.div(dmg, 2u) else dmg // - 50%
-    let dmg = if Mons.Effect.has_minimize(obj_mon.eff) then 5u else dmg //U32.sub(dmg, U32.div(dmg, 4u)) else dmg // - 25%
+    let dmg = if Mons.Effect.has_protect(obj_mon.eff)  then U32.div(dmg, 2u) else dmg // - 50%
+    let dmg = if Mons.Effect.has_minimize(obj_mon.eff) then U32.sub(dmg, U32.div(dmg, 4u)) else dmg // - 25%
     // use skp = Debug.log<>(String.flatten(["Dmg eff:", U32.to_string(dmg), " idx:", U32.to_string(idx)]))
     let obj_mon = Mons.Object.hit(obj_mon, dmg)
     Mons.Skill.update_mon_obj(obj, obj_mon, pos, idx, game)
@@ -209,10 +211,10 @@ Mons.Skill.protect_eff(obj: Mons.Object, pos: Pos32, idx: U32, turn: U32, game: 
 // target : index of the object which is receiving the effect 
 Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: Mons.Game): Mons.Game 
   open game:
-  let source_obj = Mons.Map.get(pos, source, game.map)
-  let source_mon = Mons.Object.get_current_mon(source_obj)
-  let target_obj = Mons.Map.get(pos, target, game.map)
-  let target_mon = Mons.Object.get_current_mon(target_obj)
+  def source_obj = Mons.Map.get(pos, source, game.map)
+  def source_mon = Mons.Object.get_current_mon(source_obj)
+  def target_obj = Mons.Map.get(pos, target, game.map)
+  def target_mon = Mons.Object.get_current_mon(target_obj)
 
   // Note: attr referes to the mon that the object can have
   // damage_eff and heal_eff updates the hp of the mon
@@ -238,32 +240,33 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | none => game;
 
   // Invulnerable for this turn. On the next turn, will attack and effects can be applied
-  | dig => 
-    let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game) // it's working
-    // Will damage enemy on the next turn
+  | dig => // OK
+    let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game) 
     let game = Mons.Skill.hit_next_eff(target_obj, 3u, pos, target, game)
     game;
+    // Adve não tem invul mas no hero tem o hit: quando jogando contra o Gasparzinho
 
   // Apply an initial dmg and +1/16 of MPH for 5 turns
   | sand_tomb => 
     let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
-    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
-    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
+    // not working
+    // let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
+    let game = Mons.Skill.burn_eff(target_obj, pos, target, 2u, game)
     game;
 
   // Avoid effects on the next turn. Can't be used successively
+  // Updating to: reduce damage in 50% next turn. Can't be used successively.
   | protect => // UPDATE: avoid effects next turn is a "magic shield" effect, not protect
     open source_mon:
     open source_mon.eff as eff:
     let used_last_turn = Pair.snd<,>(eff.protect)
     if used_last_turn then game
     else 
-      let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
-      Mons.Skill.damage_eff(target_obj, pos, target, val, game);//Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
+      Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
 
   // High damage
-  | slam => 
-    let val = light_val //Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+  | slam => // OK
+    let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // TODO: Double the last damage that the adve received (dismiss effects)
