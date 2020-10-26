@@ -130,3 +130,7 @@ Parser.get_code: Parser(String)
 // Gets the current code
 Parser.log_code: Parser(Unit)
   (code) Debug.log<>(code, () Parser.Reply.value<>(code, Unit.new))
+
+// Parses something
+Parser.log(str: String): Parser(Unit)
+  (code) Debug.log<>(str, () Parser.Reply.value<>(code, Unit.new))
