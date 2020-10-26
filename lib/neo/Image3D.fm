@@ -14,24 +14,25 @@ Image3D.clear(img: Image3D): Image3D
 // buffer[4] = voxel2.pos
 // buffer[5] = voxel2.col
 // And so on. Positions and colors are `U32`, interpreted as `Pos32` / `Col32`.
-T Image3D
-| Image3D.new(length: U32, capacity: U32, buffer: Buffer32);
+type Image3D {
+  new(length: U32, capacity: U32, buffer: Buffer32)
+}
 
 Image3D.get_capacity(img: Image3D): U32
-  case img:
-  | img.capacity;
+  open img 
+  img.capacity
 
 Image3D.get_col(idx: U32, vox: Image3D): U32
-  case vox:
-  | Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox.buffer);
+  open vox 
+  Buffer32.get(U32.add(U32.mul(idx,2u),1u), vox.buffer)
 
 Image3D.get_length(img: Image3D): U32
-  case img:
-  | img.length;
+  open img 
+  img.length
 
 Image3D.get_pos(idx: U32, vox: Image3D): U32
-  case vox:
-  | Buffer32.get(U32.mul(idx,2u), vox.buffer);
+  open vox 
+  Buffer32.get(U32.mul(idx,2u), vox.buffer)
 
 Image3D.parse(voxdata: String): Image3D
   let siz = U32.div(U32.length(voxdata), 12u)
@@ -54,12 +55,13 @@ Image3D.parse_byte(idx: U32, voxdata: String): U32
   U32.read_base(16u, chr)
 
 Image3D.push(pos: U32, col: U32, img: Image3D): Image3D
-  case img:
-  | let idx = img.length
-    let img = Image3D.set_pos(idx, pos, img)
-    let img = Image3D.set_col(idx, col, img)
-    let img = Image3D.set_length(U32.add(img.length, 1u), img)
-    img;
+  open img
+  let idx = img.length
+  let img = Image3D.set_pos(idx, pos, img)
+  let img = Image3D.set_col(idx, col, img)
+  let img = Image3D.set_length(U32.add(img.length, 1u), img)
+  img
+  
 
 // Sets position and color of the idx voxel of an Image3D
 Image3D.set(idx: U32, pos: U32, col: U32, img: Image3D): Image3D
@@ -69,17 +71,17 @@ Image3D.set(idx: U32, pos: U32, col: U32, img: Image3D): Image3D
 
 // Sets the color of the idx voxel of an Image3D
 Image3D.set_col(idx: U32, col: U32, img: Image3D): Image3D
-  case img:
-  | let img.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, img.buffer)
-    Image3D.new(img.length, img.capacity, img.buffer);
+  open img
+  let img.buffer = Buffer32.set(U32.add(U32.mul(idx,2u),1u), col, img.buffer)
+  Image3D.new(img.length, img.capacity, img.buffer)
 
 Image3D.set_length(length: U32, img: Image3D): Image3D
-  case img:
-  | Image3D.new(length, img.capacity, img.buffer);
+  open img
+  Image3D.new(length, img.capacity, img.buffer)
 
 // Sets the position of the idx voxel of an Image3D
 Image3D.set_pos(idx: U32, pos: U32, img: Image3D): Image3D
-  case img:
-  | let img.buffer = Buffer32.set(U32.mul(idx,2u), pos, img.buffer)
-    Image3D.new(img.length, img.capacity, img.buffer);
+  open img
+  let img.buffer = Buffer32.set(U32.mul(idx,2u), pos, img.buffer)
+  Image3D.new(img.length, img.capacity, img.buffer)
 
