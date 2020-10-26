@@ -1,7 +1,10 @@
-Newtype.elim<A: Type, tag: String>(x: Newtype(A, tag)): A
-  case x:
-  | x.val;
+type Newtype<A: Type>      ~ (tag: String) {
+  new<tag: String>(val: A) ~ (tag)
+}
 
-T Newtype<A: Type>                 ~ (tag: String)
-| Newtype.new<tag: String>(val: A) ~ (tag);
+Newtype.elim<A: Type, tag: String>(x: Newtype(A, tag)): A
+  case x {
+    new: x.val
+  }
+
 
