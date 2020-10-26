@@ -63,7 +63,7 @@ T Mons.Kind.terrain
 | Mons.Kind.terrain.PATH_BLOCKER(lvl: U32, model: U32);
 | Mons.Kind.terrain.MID_CITY6(column: U32);
 | Mons.Kind.terrain.MID_CITY5(column: U32);
-// | Mons.Kind.terrain.MID_CITY4(column: U32);
+| Mons.Kind.terrain.MID_CITY4(column: U32);
 
 T Mons.Kind.inter
 | Mons.Kind.inter.LEVER(id: U32);
@@ -388,39 +388,34 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
     | PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
 
-    | MID_CITY6 => 
-      if U32.ltn(kin.column, 3u) then 
-        if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_0])
-        else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_1])
-        else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_2])
-      else
-        if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_3])
-        else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_4])
-        else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_5])
-        else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_6])
+    | MID_CITY6 =>
+      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_0])
+      else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_1])
+      else if U32.eql(kin.column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_2])
+      else if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_3])
+      else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_4])
+      else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_5])
+      else Mons.Attr.new_neutral([Mons.Assets.mid_city_2_6])
     ;
     | MID_CITY5 => 
-      if U32.ltn(kin.column, 3u) then 
-        if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_0])
-        else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_1])
-        else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_2])
-      else 
-        if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_3])
-        else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_4])
-        else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_5])
-        else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_6])
+      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_0])
+      else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_1])
+      else if U32.eql(kin.column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_2])
+      else if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_3])
+      else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_4])
+      else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_5])
+      else Mons.Attr.new_neutral([Mons.Assets.mid_city_1_6])
+
     ;
-    // | MID_CITY4 =>
-    //   if U32.ltn(kin.column, 3u) then 
-    //     if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_0])
-    //     else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_1])
-    //     else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_2])
-    //   else
-    //     if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_3])
-    //     else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_4])
-    //     else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_5])
-    //     else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_6])
-    // ;
+    | MID_CITY4 =>
+      if U32.eql(kin.column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_0])
+      else if U32.eql(kin.column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_1])
+      else if U32.eql(kin.column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_2])
+      else if U32.eql(kin.column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_3])
+      else if U32.eql(kin.column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_4])
+      else if U32.eql(kin.column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_5])
+      else Mons.Attr.new_neutral([Mons.Assets.mid_city_0_6])
+    ;
     ; // end terrain
 
     | INTERACTIVE =>
