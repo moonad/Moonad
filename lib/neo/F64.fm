@@ -13,22 +13,27 @@ F64.2 : F64
 F64.256 : F64
   F64.parse_binary("0000000000000000000000000000000000000000000000000000111000000010")
 
-T F64.Boundary
-| F64.Boundary.new(pts: List(F64.V3));
+type F64.Boundary {
+  new(pts: List(F64.V3))
+}
 
-T F64.Circle
-| F64.Circle.new(pos: F64.V3, rad: F64);
+type F64.Circle {
+  new(pos: F64.V3, rad: F64)
+}
 
-T F64.Line
-| F64.Line.new(pos: F64.V3, dir: F64.V3);
+type F64.Line {
+  new(pos: F64.V3, dir: F64.V3)
+}
 
-T F64.Ordering
-| F64.Ordering.LT;
-| F64.Ordering.EQ;
-| F64.Ordering.GT;
+type F64.Ordering {
+  LT,
+  EQ,
+  GT
+}
 
-T F64.Segment
-| F64.Segment.new(a: F64.V3, b: F64.V3);
+type F64.Segment {
+  new(a: F64.V3, b: F64.V3)
+}
 
 F64.V3.add(a: F64.V3, b: F64.V3): F64.V3 
   get a.x a.y a.z = a
@@ -41,14 +46,14 @@ F64.V3.add(a: F64.V3, b: F64.V3): F64.V3
 F64.V3.circle_boundary_intersects(c: F64.Circle, b: F64.Boundary): F64
   get c.pos c.rad = c
   get b.pts = b
-  case b.pts:
-  | F64.0;
-  | #b.pts.head b.pts.tail#
+  case b.pts {
+   nil: F64.0,
+   cons:
     let h0 = b.pts.head
     let t0 = b.pts.tail
-    case t0:
-    | F64.0;
-    | #t0.head t0.tail#
+    case t0 {
+     nil: F64.0,
+     cons:
       let h1 = t0.head
       let t1 = t0.tail
       let p0 = h0
@@ -56,10 +61,14 @@ F64.V3.circle_boundary_intersects(c: F64.Circle, b: F64.Boundary): F64
       let sg = F64.Segment.new(p0, p1)
       let cd = F64.V3.point_segment_sqrdist(c.pos, sg)
       let test = F64.ltn(cd, F64.mul(cd, cd))
-      case test:
-      | F64.1;
-      | let boun = F64.Boundary.new(List.cons<F64.V3>(h1, t1))
-        F64.V3.circle_boundary_intersects(c, boun);;;
+      case test {
+       true: F64.1,
+       false:
+        let boun = F64.Boundary.new(List.cons<F64.V3>(h1, t1))
+        F64.V3.circle_boundary_intersects(c, boun)
+      }
+    }
+  }
 
 F64.V3.dist(a: F64.V3, b: F64.V3): F64
   F64.sqrt(F64.V3.sqr_dist(a, b))
@@ -81,8 +90,9 @@ F64.V3.eql(a: F64.V3, b: F64.V3): Bool
   let same_z = F64.eql(a.z, b.z)
   Bool.and(same_x, Bool.and(same_y, same_z))
 
-T F64.V3
-| F64.V3.new(x: F64, y: F64, z: F64);
+type F64.V3 {
+  new(x: F64, y: F64, z: F64)
+}
 
 F64.V3.get_x(v: F64.V3): F64
   get v.x v.y v.z = v 
@@ -113,9 +123,10 @@ F64.V3.look_at(a: F64.V3, b: F64.V3, c: F64.V3): F64.V3
   let a_eql_b  = F64.V3.eql(a, b)
   let diff     = F64.V3.sub(b, a)
   let normdiff = F64.V3.norm(diff)
-  case a_eql_b:
-  | normdiff ;
-  | c ;
+  case a_eql_b {
+    true : normdiff,
+    false: c
+  }
 
 // Return true if "a" is less than "b"
 F64.V3.ltn(a: F64.V3, b: F64.V3): Bool
@@ -193,16 +204,18 @@ F64.V3.polygon_to_segments.cons(
   pt_a: Maybe(F64.V3),
   pt_0: Maybe(F64.V3)):
   List(F64.Segment)
-  case pt_a:
-  | segs(Maybe.some<F64.V3>(pt_b), Maybe.some<F64.V3>(pt_b));
-  | let pt_0 = 
-    case pt_0:
-    | Maybe.some<F64.V3>(pt_b); 
-    | pt_0;
+  case pt_a {
+   none: segs(Maybe.some<F64.V3>(pt_b), Maybe.some<F64.V3>(pt_b)),
+   some:
+    let pt_0 = case pt_0 {
+      none: Maybe.some<F64.V3>(pt_b),
+      some: pt_0
+    }
     let p0 = F64.V3.polygon_to_segments.transform(pos, dir, pt_a.value)
     let p1 = F64.V3.polygon_to_segments.transform(pos, dir, pt_b)
     let sg = F64.Segment.new(p0, p1)
-    List.cons<F64.Segment>(sg, segs(Maybe.some<F64.V3>(pt_b), pt_0));
+    List.cons<F64.Segment>(sg, segs(Maybe.some<F64.V3>(pt_b), pt_0))
+  }
 
 F64.V3.polygon_to_segments(
   pos: F64.V3,
@@ -222,14 +235,17 @@ F64.V3.polygon_to_segments.nil(
   pt_a: Maybe(F64.V3),
   pt_0: Maybe(F64.V3)):
   List(F64.Segment)
-  case pt_0:
-  | List.nil<F64.Segment>; 
-  | case pt_a:
-    | List.nil<F64.Segment>;
-    | let p0 = F64.V3.polygon_to_segments.transform(pos, dir, pt_a.value)
+  case pt_0 {
+   none: List.nil<F64.Segment>,
+   some: case pt_a {
+     none: List.nil<F64.Segment>,
+     some: 
+      let p0 = F64.V3.polygon_to_segments.transform(pos, dir, pt_a.value)
       let p1 = F64.V3.polygon_to_segments.transform(pos, dir, pt_0.value)
       let sg = F64.Segment.new(p0, p1)
-      List.cons<F64.Segment>(sg, List.nil<F64.Segment>);;
+      List.cons<F64.Segment>(sg, List.nil<F64.Segment>)
+    }
+  }
 
 F64.V3.polygon_to_segments.transform(pos: F64.V3, dir: F64.V3, pnt: F64.V3): F64.V3
   get pnt.x pnt.y pnt.z = pnt
@@ -313,8 +329,11 @@ F64.atan: F64 -> F64 -> F64 //prim//
   F64.atan
 
 // TODO
-F64.cmp: F64 -> F64 -> Cmp 
-  F64.cmp
+F64.cmp(x: F64, y: F64): Cmp 
+  open x
+  open y 
+  Word.cmp<64>(x.word, y.word)
+  
 
 F64.compare_numbers(a: F64, b: F64): F64.Ordering
   Bool.if<F64.Ordering>(F64.eql(a, b))
@@ -333,10 +352,9 @@ F64.div: F64 -> F64 -> F64 //prim//
 
 // TODO
 F64.eql(x: F64, y: F64): Bool
-  get x.word = x
-  case y: 
-  | get y.word = y
-    Word.eql<64>(x.word, y.word);
+  open x 
+  open y 
+  Word.eql<64>(x.word, y.word)
 
 // TODO Exponential function.
 F64.exp: F64 -> F64 -> F64 //prim//
@@ -347,24 +365,31 @@ F64.floor(x: F64): F64
   F64.sub(F64.sub(x, F64.mod(x, F64.1)), ltn_zero)
 
 // An IEEE-754 compliant 64-bit floating point.
-T F64
-| F64.new (a: Word(64));
+type F64 {
+  new(word: Word(64))
+}
 
 F64.from_bool(b: Bool): F64 
-  case b:
-  | F64.1;
-  | F64.0;
+  case b {
+   true : F64.1,
+   false: F64.0
+  }
 
 F64.gte(a: F64, b: F64): Bool
-  F64.cmp(a, b)<_>(Bool.false, Bool.true, Bool.true)
+  open a 
+  open b 
+  Word.gte<64>(a.word, b.word)
 
 F64.gtn(a: F64, b: F64): Bool
-  F64.cmp(a, b)<_>(Bool.false, Bool.false, Bool.true)
+  open a 
+  open b 
+  Word.gtn<64>(a.word, b.word)
 
 F64.if<A: Type>(x: F64, ct: A, cf: A): A
-  case F64.eql(x, F64.0):
-  | cf;
-  | ct;
+  case F64.eql(x, F64.0) {
+   true : cf,
+   false: ct
+  }
 
 // Is x inside the a..b range, with `b` exclusive?
 F64.is_between(a: F64, b: F64, x: F64): Bool
@@ -378,10 +403,14 @@ F64.log: F64 -> F64 //prim//
   F64.log
 
 F64.lte(a: F64, b: F64): Bool
-  F64.cmp(a, b)<_>(Bool.true, Bool.true, Bool.false)
+  open a 
+  open b 
+  Word.lte<64>(a.word, b.word)
 
 F64.ltn(a: F64, b: F64): Bool
-  F64.cmp(a, b)<_>(Bool.true, Bool.false, Bool.false)
+  open a 
+  open b 
+  Word.ltn<64>(a.word, b.word)
 
 // TODO
 F64.max: F64 -> F64 -> F64 //prim//
