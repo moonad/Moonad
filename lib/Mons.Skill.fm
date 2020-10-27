@@ -108,19 +108,28 @@ Mons.Skill.update_mon_obj(
 // At the beginning of the game, apply and update effect: 
 // burn and hit
 Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  let game = Mons.Skill.apply_inital_eff_hero(hero_idx, pos, game)
+  Mons.Skill.apply_inital_eff_adve(adve_idx, pos, game)
+
+Mons.Skill.apply_inital_eff_hero(hero_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
-  let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
-
   open hero_mon_obj:
   open Mons.Kind.attr(hero_mon_obj.kin) as hero_mon_attr:
-  let hero_dmg = Mons.Skill.apply_inital_eff_dmg(hero_mon_obj.eff, hero_mon_attr.mhp, hero_idx)
+  // BUG: effects in the player's Mon are not updated
   let upd_effect = Mons.Effect.upd_initial_eff(hero_mon_obj.eff)
   let hero_mon_obj = Mons.Object.set_eff(upd_effect, hero_mon_obj)
   let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
+  // Only damage is taken
+  let hero_dmg = Mons.Skill.apply_inital_eff_dmg(hero_mon_obj.eff, hero_mon_attr.mhp, hero_idx)
   let game = Mons.Skill.damage_eff(hero_obj, pos, hero_idx, hero_dmg, game)
+  
+  game
 
+Mons.Skill.apply_inital_eff_adve(adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
   let adve_dmg = Mons.Skill.apply_inital_eff_dmg(adve_obj.eff, adve_attr.mhp, adve_idx)
@@ -131,7 +140,7 @@ Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons
 
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
-  use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
+  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
   use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
   if Mons.Effect.has_invulnerable(eff) then 0u
   else
@@ -252,7 +261,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   // Apply an initial dmg and +1/16 of MPH for 5 turns
   | sand_tomb => 
     let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
-    // not working
+    // BUG: only the first line is executed
     // let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
     let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
     game;
@@ -282,8 +291,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let val = U32.div(source_mon_attr.mhp, 2u)
     Mons.Skill.heal_eff(source_obj, pos, source, val, game);
 
-  // Review: Apply damage and 50% of change to reduce defense on the next turn
-  // Update: Apply a medium damage + 50% of critical
+  // Apply a medium damage + 50% of critical
   | rock_smash => // ok 
     let val = Mons.Skill.reduce_def(target_mon_attr.mhp, medium_val, 2u, game.tik)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
@@ -350,3 +358,9 @@ Mons.Skill.reduce_def(mhp: U32, hit_val: U32, perc: U32, tik: U32): U32
 Mons.Skill.dummy_skills: List(Mons.Skill)
   [ Mons.Skill.hit_4, Mons.Skill.hit_2,
    Mons.Skill.heal, Mons.Skill.none ]
+
+
+// Bugs:
+// Adve is not getting invulnerable when using an attack to apply it
+// Hero mon: burn don't update the counter, but deals damage
+// sand_tomb can't use insta damage and burn at the same time

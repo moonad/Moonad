@@ -1154,7 +1154,7 @@ Mons.Attr.new_hero: Mons.Attr
         [ Mons.Assets.boy_d_0],
         Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
-      [Mons.Skill.hero_kill, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig] 
+      [Mons.Skill.hero_kill, Mons.Skill.none, Mons.Skill.none, Mons.Skill.none] 
   )
 
 Mons.Attr.new_mage: Mons.Attr
