@@ -26,6 +26,7 @@ T Mons.Skill
 | Mons.Skill.thunder_wave;
 | Mons.Skill.charge;
 | Mons.Skill.agility;
+| Mons.Skill.hero_kill;
 
 Mons.Skill.description(skill: Mons.Skill): String
   case skill:
@@ -39,7 +40,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | slam => "Damage";
   | counter => "Double the last damage that the adve received (dismiss effects)";
   | recover => "Restore 50% of mhp";
-  | rock_smash => "Apply damage and 50% of change to reduce defense on the next turn";
+  | rock_smash => "Apply a medium damage + 50% of critical";
   | crunch => "Damage and reduce adve defense";
   | sludge_bomb => "Damage and 30% of poisoning";
   | gyro_ball => "Damage and if the adve has more agi, increase dmg +25% and increase defense";
@@ -55,6 +56,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | thunder_wave => "Damage";
   | charge => "Double the damage of the next ellectric attack";
   | agility => "Increase damage and 25% of apply confusion";
+  | hero_kill => "Herro atk";
 
 
 Mons.Skill.get_name(skill: Mons.Skill): String
@@ -85,6 +87,7 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | thunder_wave => "Thunder Wave";
   | charge => "Charge";
   | agility => "Agility";
+  | hero_kill => "Hero kill";
 
 Mons.Skill.update_mon_obj(
   hero_obj: Mons.Object,
@@ -251,41 +254,39 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
     // not working
     // let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
-    let game = Mons.Skill.burn_eff(target_obj, pos, target, 2u, game)
+    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
     game;
 
   // Avoid effects on the next turn. Can't be used successively
   // Updating to: reduce damage in 50% next turn. Can't be used successively.
-  | protect => // UPDATE: avoid effects next turn is a "magic shield" effect, not protect
+  | protect =>
     open source_mon:
     open source_mon.eff as eff:
     let used_last_turn = Pair.snd<,>(eff.protect)
     if used_last_turn then game
-    else 
-      Mons.Skill.protect_eff(target_obj, pos, source, 2u, game);
+    else Mons.Skill.protect_eff(source_obj, pos, source, 2u, game);
 
   // High damage
   | slam => // OK
     let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
-  // TODO: Double the last damage that the adve received (dismiss effects)
-  | counter => 
-    let val = 30u
-    Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  // Double the last damage that the adve received (dismiss effects)
+  // Update: apply burn
+  | counter =>  // ok
+    Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
   ;
 
-  // TODO: Restore 50% of mhp
-  | recover =>
-    let val = U32.div(source_mon_attr.mhp, light_val)
+  // Restore 50% of mhp
+  | recover => // ok
+    let val = U32.div(source_mon_attr.mhp, 2u)
     Mons.Skill.heal_eff(source_obj, pos, source, val, game);
 
   // Review: Apply damage and 50% of change to reduce defense on the next turn
-  // TODO: add def, now is only considering mhp
-  // Instant cast
-  | rock_smash =>
-    let red_def_val = Mons.Skill.reduce_def(target_mon_attr.mhp, medium_val, 50u, game.tik)
-    let obj = Mons.Skill.damage_eff(target_obj, pos, target, red_def_val, game)
+  // Update: Apply a medium damage + 50% of critical
+  | rock_smash => // ok 
+    let val = Mons.Skill.reduce_def(target_mon_attr.mhp, medium_val, 2u, game.tik)
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     game;
 
   // TODO: Damage and reduce adve defense
@@ -336,6 +337,8 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // TODO Increase damage and 25% of apply confusion
   | agility => game;
+
+  | hero_kill => Mons.Skill.damage_eff(target_obj, pos, target, 30u, game);
 
 
 Mons.Skill.reduce_def(mhp: U32, hit_val: U32, perc: U32, tik: U32): U32

@@ -282,7 +282,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
       Mons.Skill.dummy_skills);
     
-    | ZOIO => Mons.Attr.new_battleable( // Skills of Cyclope
+    | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
       Mons.Skill.dummy_skills); // TODO: update, just testing
@@ -290,7 +290,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | CYCLOPE => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "CYCLOPE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      [Mons.Skill.counter, Mons.Skill.recover, Mons.Skill.rock_smash, Mons.Skill.slam]);
+      [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ]);
     
     | POISOLICK => Mons.Attr.new_battleable(
       Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
