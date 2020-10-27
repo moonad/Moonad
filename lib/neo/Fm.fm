@@ -1118,16 +1118,16 @@ Fm.Term.check(
   }
 
 // SYNTH: Fixes a list of errors, if possible
-Fm.Term.synth.fix(
+Fm.synth.fix(
   term: Fm.Term,
   type: Fm.Term,
   defs: Fm.Defs,
-  errors: List(Fm.Error),
-  fixed: Bool,
+  errs: List(Fm.Error),
+  fixs: Bool,
 ): Maybe(Pair(Fm.Term, Fm.Term))
-  case errors {
+  case errs {
     nil:
-      if fixed then
+      if fixs then
         Maybe.some<>({term, type})
       else
         Maybe.none<>,
@@ -1136,76 +1136,139 @@ Fm.Term.synth.fix(
         //"[fixing]",
         //"\n- ", Fm.Term.show(type),
         //"\n- ", Fm.Term.show(term),
-        //"\n- ", Fm.Error.show(errors.head, defs)
+        //"\n- ", Fm.Error.show(errs.head, defs)
       //]))
-      case errors.head {
+      case errs.head {
         // The error is a fill
         fill:
-          let filled_term = Fm.Term.fill(errors.head.name, errors.head.term, term)
-          let filled_type = Fm.Term.fill(errors.head.name, errors.head.term, type)
+          let filled_term = Fm.Term.fill(errs.head.name, errs.head.term, term)
+          let filled_type = Fm.Term.fill(errs.head.name, errs.head.term, type)
           //use skip = Debug.log<>(String.flatten([
             //"FILLING_TERM ",
-            //"\n-name:", Fm.Name.show(errors.head.name),
-            //"\n-hval:", Fm.Term.show(errors.head.term),
+            //"\n-name:", Fm.Name.show(errs.head.name),
+            //"\n-hval:", Fm.Term.show(errs.head.term),
             //"\n-term:", Fm.Term.show(term),
             //"\n-type:", Fm.Term.show(type),
             //"\n~term:", Fm.Term.show(filled_term),
             //"\n~type:", Fm.Term.show(filled_type),
           //]))
-          Fm.Term.synth.fix(filled_term, filled_type, defs, errors.tail, Bool.true),
+          Fm.synth.fix(filled_term, filled_type, defs, errs.tail, Bool.true),
         // The error is a patch
         patch: 
-          case errors.head.path {
+          case errs.head.path {
             nil: Maybe.none<>, // shouldn't happen
             0: // hole is on term
-              let patched_term = Fm.Term.patch_at(errors.head.path.pred, term, () errors.head.term)
+              let patched_term = Fm.Term.patch_at(errs.head.path.pred, term, () errs.head.term)
               //use skip = Debug.log<>(String.flatten([
                 //"PATCHING_TERM ",
-                //"\n-path:",Bits.show(errors.head.path),
-                //"\n-pval:", Fm.Term.show(errors.head.term),
+                //"\n-path:",Bits.show(errs.head.path),
+                //"\n-pval:", Fm.Term.show(errs.head.term),
                 //"\n-term:", Fm.Term.show(term),
                 //"\n~term:",Fm.Term.show(patched_term)]))
-              Fm.Term.synth.fix(patched_term, type, defs, errors.tail, Bool.true),
+              Fm.synth.fix(patched_term, type, defs, errs.tail, Bool.true),
             1: // hole is on type
-              let patched_type = Fm.Term.patch_at(errors.head.path.pred, type, () errors.head.term)
+              let patched_type = Fm.Term.patch_at(errs.head.path.pred, type, () errs.head.term)
               //use skip = Debug.log<>(String.flatten([
                 //"PATCHING_TYPE ",
-                //"\n-path:",Bits.show(errors.head.path),
-                //"\n-pval:", Fm.Term.show(errors.head.term),
+                //"\n-path:",Bits.show(errs.head.path),
+                //"\n-pval:", Fm.Term.show(errs.head.term),
                 //"\n-term:", Fm.Term.show(term),
                 //"\n~type:",Fm.Term.show(patched_type)]))
-              Fm.Term.synth.fix(term, patched_type, defs, errors.tail, Bool.true),
+              Fm.synth.fix(term, patched_type, defs, errs.tail, Bool.true),
           },
         // The error isn't fixable
-        _: Fm.Term.synth.fix(term, type, defs, errors.tail, fixed),
+        _: Fm.synth.fix(term, type, defs, errs.tail, fixs),
       }
   }
-  
-// Checks the type of a core term, fixing repairable errors
-Fm.Term.synth(
-  term: Fm.Term,
-  type: Fm.Term,
-  defs: Fm.Defs,
-): Either(List(Fm.Error), Pair(Fm.Term, Fm.Term))
-  let checked = do Fm.Check {
-    var chk_type = Fm.Term.check(type, Fm.Term.typ, defs, [], Fm.MPath.1(Fm.MPath.nil));
-    var chk_term = Fm.Term.check(term, type       , defs, [], Fm.MPath.0(Fm.MPath.nil));
-    return Fm.Check.result<>(Maybe.some<>({term,type}), []);
-  }
-  case checked {
-    result: case checked.errors {
-      nil: Either.right<_,_>({term, type}),
-      cons: case Fm.Term.synth.fix(term, type, defs, checked.errors, Bool.false) as fixed {
-        none: Either.left<_,_>(checked.errors),
-        some: case fixed.value {
-          new: 
-            let term = Fm.Term.bind([], Fm.Path.0(Fm.Path.nil), fixed.value.fst)
-            let type = Fm.Term.bind([], Fm.Path.1(Fm.Path.nil), fixed.value.snd)
-            Fm.Term.synth(term, type, defs)
-        }
+
+// SYNTH: Checks the type of a core term, fixing repairable errors
+Fm.synth(defs: Fm.Defs): Fm.Defs
+  let state = {defs, Bool.false}
+  let state = for path_def in Map.to_list<>(defs):
+    open state
+    open path_def
+    open path_def.snd
+    let defs = state.fst
+    let fixs = state.snd
+    let name = Fm.Name.from_bits(path_def.fst)
+    let term = path_def.snd.term
+    let type = path_def.snd.type
+    let checked = do Fm.Check {
+      var chk_type = Fm.Term.check(type, Fm.Term.typ, defs, [], Fm.MPath.1(Fm.MPath.nil));
+      var chk_term = Fm.Term.check(term, type       , defs, [], Fm.MPath.0(Fm.MPath.nil));
+      return Fm.Check.result<>(Maybe.some<>({term,type}), []);
+    }
+    case checked {
+      result: case checked.errors {
+        nil: {defs, fixs},
+        cons:
+          let fixed = Fm.synth.fix(term, type, defs, checked.errors, Bool.false)
+          case fixed {
+            none:
+              {defs, fixs},
+            some:
+              open fixed.value
+              let term = Fm.Term.bind([], Fm.Path.0(Fm.Path.nil), fixed.value.fst)
+              let type = Fm.Term.bind([], Fm.Path.1(Fm.Path.nil), fixed.value.snd)
+              let defs = Fm.set<>(name, Fm.Def.new(name, term, type), defs)
+              let fixs = Bool.true
+              {defs, fixs},
+          }
       }
     }
+  open state
+  let defs = state.fst
+  let fixs = state.snd
+  if fixs then
+    Fm.synth(defs)
+  else
+    defs
+
+// REPORT: Synths, checks and reports errors of a defs
+Fm.report(defs: Fm.Defs): String
+  let state = {"# Types:\n", "# Errors:\n"}
+  let state = for path_def in Map.to_list<>(defs):
+    open state
+    open path_def
+    open path_def.snd
+    let name = Fm.Name.from_bits(path_def.fst)
+    let term = path_def.snd.term
+    let type = path_def.snd.type
+    case Fm.Term.check(term, type, defs, [], Fm.MPath.nil) as check {
+      result: case check.errors {
+        nil: 
+          let name_str = Fm.Name.show(name)
+          let type_str = Fm.Term.show(type)
+          let term_str = Fm.Term.show(term)
+          let string_0 = String.flatten([
+            state.fst,
+            "\n", name_str, "\n",
+            ": ", type_str, "\n",
+            "= ", term_str, "\n",
+          ])
+          let string_1 = state.snd
+          {string_0, string_1},
+        cons: 
+          let name_str = Fm.Name.show(name)
+          let type_str = "<error>"
+          let string_0 = String.flatten([
+            state.fst,
+            "\n", name_str, " ",
+            "\n: ", type_str, "\n",
+          ])
+          let string_1 = state.snd
+          let string_1 = for error in check.errors:
+            String.flatten([
+              string_1,
+              "\n", Fm.Error.show(error, defs), "\n",
+            ])
+          {string_0, string_1},
+      }
+    }
+  case state {
+    new: String.flatten([state.fst, "\n", state.snd])
   }
+
 
 // Derivers
 // ========
@@ -1664,9 +1727,19 @@ Fm.Parser.case: Parser(Fm.Term)
     Fm.Parser.spaces_text("case ");
     Fm.Parser.spaces;
     var expr = Fm.Parser.term;
-    Fm.Parser.spaces_text("as");
-    Fm.Parser.spaces;
-    var name = Fm.Parser.name1;
+    var name = Parser.maybe<>(do Parser {
+      Fm.Parser.spaces_text("as");
+      Fm.Parser.spaces;
+      Fm.Parser.name1;
+    });
+    let name = case name {
+      none: case expr {
+        ref: expr.name,
+        var: expr.name,
+        _: Fm.Name.read("self"),
+      },
+      some: name.value,
+    };
     var with = Parser.many<>(Fm.Parser.case.with);
     Fm.Parser.spaces_text("{");
     var cses = Parser.many<>(Fm.Parser.case.case);
@@ -1940,59 +2013,17 @@ Fm.Defs.read(code: String): Maybe(Fm.Defs)
 
 Fm: _
   let defs = Maybe.default<>(Fm.Map.new<>, Fm.Defs.read(Fm.base_source));
+  let defs = Fm.synth(defs)
   do IO {
-    IO.print("# Defs:");
-    IO.print(Fm.Defs.show(defs));
-    IO.print("# Report:");
     let report = Fm.report(defs);
-    IO.print(Pair.fst<_,_>(report));
-    let defs = Pair.snd<_,_>(report);
+    IO.print(report);
     let main = case Fm.get<>(Fm.Name.read("main"), defs) as got {
       none: Fm.Term.ref(Fm.Name.read("undefined")),
       some: case got.value { new: got.value.term },
     };
-    IO.print("# Main:");
+    IO.print("# Main:\n");
     IO.print(Fm.Term.show(Fm.Term.normalize(main, defs)));
   }
-
-// REPORT: Synths, checks and reports errors of a defs
-Fm.report(defs: Fm.Defs): Pair(String, Fm.Defs)
-  let result = {{"## Types:", "## Errors:"}, Map.new<>}
-  let result = for named_def in Map.to_list<>(defs):
-    open result
-    open result.fst
-    open named_def
-    open named_def.snd
-    let name = Fm.Name.from_bits(named_def.fst)
-    let term = named_def.snd.term
-    let type = named_def.snd.type
-    case Fm.Term.synth(term, type, defs) as synth {
-      left: 
-        let name_str = Fm.Name.show(name)
-        let type_str = "<error>"
-        let result_0 = result.fst.fst
-        let result_0 = String.flatten([result_0,"\n- ",name_str,": ",type_str])
-        let result_1 = result.fst.snd
-        let result_1 = for error in synth.value:
-          String.flatten([result_1,"\n",Fm.Error.show(error, defs)])
-        let result_2 = result.snd
-        {{result_0, result_1}, result_2},
-      right: 
-        let term     = Pair.fst<_,_>(synth.value)
-        let type     = Pair.snd<_,_>(synth.value)
-        let name_str = Fm.Name.show(name)
-        let type_str = Fm.Term.show(type)
-        let term_str = Fm.Term.show(term)
-        let result_0 = result.fst.fst
-        let result_0 = String.flatten([result_0,"\n- ",name_str,": ",type_str," = ",term_str])
-        let result_1 = result.fst.snd
-        let result_2 = result.snd
-        let result_2 = Fm.set<>(name, Fm.Def.new(name, term, type), result_2)
-        {{result_0, result_1}, result_2},
-    }
-  open result
-  open result.fst
-  {String.flatten([result.fst.fst, "\n", result.fst.snd]), result.snd}
 
 Fm.base_source: String
 ("
@@ -2022,32 +2053,36 @@ Fm.base_source: String
     x
 
   Bool.elim(b: Bool, P: (x:Bool) Type, t: P(Bool.true), f: P(Bool.false)): P(b)
-    case b as b {
+    case b {
       true: t,
       false: f,
     } : P(b.self)
 
   Nat.double(n: Nat): Nat
-    case n as n {
+    case n {
       zero: Nat.zero,
       succ: Nat.succ(Nat.succ(Nat.double(n.pred))),
     }
 
   Nat.induce(n: Nat, P: (x:Nat) Type, z: P(Nat.zero), s: (n: Nat) (i: P(n)) P(Nat.succ(n))): P(n)
-    n(P, z, (pred) s(pred, Nat.induce(pred, P, z, s)))
+    case n {
+      zero: z,
+      succ: s(n.pred, Nat.induce(n.pred, P, z, s)),
+    } : P(n.self)
 
   Equal.apply(A: Type, B: Type, a: A, b: A, f: (x:A) B, e: Equal(A, a, b)): Equal(B, f(a), f(b))
-    e((e.b, e) Equal(B, f(a), f(e.b)), Equal.refl(B, f(a)))
+    case e {
+      refl: Equal.refl(B, f(a)),
+    } : Equal(B, f(a), f(e.b))
 
   Nat.same(n: Nat): Nat
-    case n as n {
+    case n {
       zero: Nat.zero,
       succ: Nat.succ(Nat.same(n.pred)),
     }
 
   Nat.add(a: Nat, b: Nat): Nat
-    //a((a.self) (b:Nat) Nat)((b) b)((a.pred) (b) Nat.succ(Nat.add(a.pred)(b)))(b)
-    case a as a with b : Nat = b {
+    case a with b : Nat = b {
       zero: b,
       succ: Nat.succ(Nat.add(a.pred, b)),
     } : Nat
@@ -2061,27 +2096,29 @@ Fm.base_source: String
   test1(A: Type, B: Type, x: A, y: B): A
     const(_, _, x, y)
 
+  Nat.add_zero(a: Nat): Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero))
+    case a {
+      zero:
+        Equal.refl(Nat, Nat.zero),
+      succ: 
+        let p0 = Nat.add_zero(a.pred);
+        let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
+        p1,
+    } : Equal(Nat, Nat.add(Nat.zero, a.self), Nat.add(a.self, Nat.zero))
+
+  Nat.add_succ(a: Nat, b: Nat): Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b)))
+    case a {
+      zero:
+        Equal.refl(Nat, Nat.succ(b)),
+      succ: 
+        let p0 = Nat.add_succ(a.pred, b);
+        let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
+        p1,
+    } : Equal(Nat, Nat.add(a.self, Nat.succ(b)), Nat.succ(Nat.add(a.self, b)))
+
   main: Nat
     Nat.double(3)
     
-  // TODO: these won't work because the reduce function is getting the Nat.add
-  // version *before* the case-of sugar gets patched. I need to think how I'll
-  // approach this problem. Will I use the same solution as in FormalityJS, or
-  // something different?
-  //Nat.add_zero(a: Nat): Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero))
-    //a((a) Equal(Nat, Nat.add(Nat.zero, a), Nat.add(a, Nat.zero)), 
-      //Equal.refl(Nat, Nat.zero),
-      //(a.pred)
-        //let p0 = Nat.add_zero(a.pred);
-        //let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
-        //p1)
-  //Nat.add_succ(a: Nat, b: Nat): Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b)))
-    //a((a) Equal(Nat, Nat.add(a, Nat.succ(b)), Nat.succ(Nat.add(a, b))),
-      //Equal.refl(Nat, Nat.succ(b))
-    //, (pred)
-      //let p0 = Nat.add_succ(pred, b);
-      //let p1 = Equal.apply(_, _, _, _, Nat.succ, p0);
-      //p1)
 
 ")
 
