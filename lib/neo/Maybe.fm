@@ -65,6 +65,12 @@ Maybe.map<A: Type, B: Type>(f: A -> B, m: Maybe(A)): Maybe(B)
     some: Maybe.some<B>(f(m.value)),
   }
 
+Maybe.mapped<A: Type>(m: Maybe(A))<B: Type>(f: A -> B): Maybe(B)
+  case m {
+    none: Maybe.none<B>,
+    some: Maybe.some<B>(f(m.value)),
+  }
+
 //Maybe.map.id<A: Type>(ma: Maybe(A)): Equal(Maybe(A), Maybe.map<A, A>(Function.id<A>, ma), ma)
   //case ma:
   //| _;

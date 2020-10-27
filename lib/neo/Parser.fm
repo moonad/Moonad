@@ -98,6 +98,17 @@ Parser.spaces_text(text: String): Parser(Unit)
     Parser.text(text);
   }
 
+// Parses a character
+Parser.char_if(fun: Char -> Bool): Parser(Char)
+  (code) case code {
+    nil: Parser.Reply.error<>(code, "No parse."),
+    cons:
+      if fun(code.head) then
+        Parser.Reply.value<>(code.tail, code.head)
+      else
+        Parser.Reply.error<>(code, "No parse."),
+  }
+
 // Parses a digit: `[0123456789]`
 Parser.digit: Parser(Nat)
   (code) case code {
