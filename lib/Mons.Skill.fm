@@ -40,10 +40,10 @@ Mons.Skill.description(skill: Mons.Skill): String
   | slam => "Damage";
   | counter => "Double the last damage that the adve received (dismiss effects)";
   | recover => "Restore 50% of mhp";
-  | rock_smash => "Apply a medium damage + 50% of critical";
-  | crunch => "Damage and reduce adve defense";
+  | rock_smash => "Apply a medium damage(4) + 50% of critical";
+  | crunch => "Apply a high damage(6) + 25% of critical";
   | sludge_bomb => "Damage and 30% of poisoning";
-  | gyro_ball => "Damage and if the adve has more agi, increase dmg +25% and increase defense";
+  | gyro_ball => "Apply medium damage (4). If this Mon has 'agi' faster than the adve, increase damage by 50%";
   | iron_defense => "Increase defense for 2 turns";
   | super_fang => "Damage adve with 50% of current life. Loses 50% of hp";
   | hypnosis => "Apply sleep to adve";
@@ -140,13 +140,17 @@ Mons.Skill.apply_inital_eff_adve(adve_idx: U32, pos: Pos32, game: Mons.Game): Mo
 
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
-  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Burn counter:", U32.to_string(eff.burn)]))
-  use skp = Debug.log<>(String.flatten(["  Hit counter:", U32.to_string(eff.hit)]))
+  let poison = if eff.poison then "poison" else "no poison"
+  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Poison? ", poison]))
   if Mons.Effect.has_invulnerable(eff) then 0u
   else
     let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
     let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
-    U32.add(dmg_burn, dmg_hit)
+    let dmg_poison = if Mons.Effect.has_poison(eff) then U32.div(mhp, 16u) else 0u
+    let dmg = U32.add(dmg_poison, U32.add(dmg_burn, dmg_hit))
+    use skp = Debug.log<>(String.flatten(["  DMG to take: ", U32.to_string(dmg)]))
+    dmg 
+
 
 // After casting the skills, update effects used during the cast: 
 // sleep, protect, minimize and invulnerable
@@ -216,6 +220,14 @@ Mons.Skill.burn_eff(obj: Mons.Object, pos: Pos32, idx: U32, turns: U32, game: Mo
 // turn 2u: available next turn
 Mons.Skill.protect_eff(obj: Mons.Object, pos: Pos32, idx: U32, turn: U32, game: Mons.Game): Mons.Game
   let obj_updated = Mons.Effect.set_protect(Mons.Object.get_current_mon(obj), turn)
+  Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+Mons.Skill.poison_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Effect.set_poison(Mons.Object.get_current_mon(obj))
+  Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
+
+Mons.Skill.minimize_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Effect.set_minimize(Mons.Object.get_current_mon(obj))
   Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
 
 // pos    : position of the map in which the battle is taking place
@@ -293,21 +305,48 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
 
   // Apply a medium damage + 50% of critical
   | rock_smash => // ok 
-    let val = Mons.Skill.reduce_def(target_mon_attr.mhp, medium_val, 2u, game.tik)
+    let val = Mons.Skill.critical_hit(target_mon_attr.mhp, medium_val, 2u, game.tik)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     game;
 
-  // TODO: Damage and reduce adve defense
-  | crunch => game;
 
-  // TODO: Damage and 30% of poisoning
-  | sludge_bomb => game;
 
-  // TODO: Gyro Ball
-  | gyro_ball => game;
+  // -----------------------
+  // High damage + 25% of critical
+  | crunch =>  // OK
+    let val = Mons.Skill.critical_hit(target_mon_attr.mhp, high_val, 4u, game.tik)
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    game;
 
-  // TODO: Increase defense for 2 turns
-  | iron_defense => game;
+  // TODO: Damage and 33% of poisoning
+  | sludge_bomb => // ok: poisoning
+    let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon)
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // don't work
+
+    let game =  // Apply poison
+      if Mons.Skill.is_critical(3u, game.tik) then
+        Mons.Skill.poison_eff(target_obj, pos, target, game)
+      else game 
+    game;
+
+  // Apply medium damage. If this Mon has "agi" faster than the adve, increase
+  // damage by 50%.
+  | gyro_ball => // OK
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    let val = 
+      if U32.ltn(Mons.Kind.get_agi(target_mon.kin), Mons.Kind.get_agi(source_mon.kin)) 
+      then U32.add(U32.div(val,2u), val)
+      else val
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    game;
+
+  // Minimize damage for 2 turns
+  | iron_defense =>  // Cause the game to be lost (????)
+    Mons.Skill.minimize_eff(source_mon, pos, source, game);
+
+  // -----------------------
+
+// 29 23
 
   // TODO: Damage adve with 50% of current life. Loses 50% of hp
   | super_fang => game;
@@ -321,7 +360,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   // Medium damage
   | wing_attack => 
     let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
-    Mons.Skill.damage_eff(target_mon, pos, target, val, game);
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // TODO Damage and 20% of sleep
   | moonlight => game;
@@ -349,10 +388,13 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | hero_kill => Mons.Skill.damage_eff(target_obj, pos, target, 30u, game);
 
 
-Mons.Skill.reduce_def(mhp: U32, hit_val: U32, perc: U32, tik: U32): U32
+Mons.Skill.critical_hit(mhp: U32, hit_val: U32, perc: U32, tik: U32): U32
   if U32.eql(U32.mod(tik, perc), 0u) then // percentage applied
     U32.add(U32.div(mhp, 16u), hit_val) // +1/16 damage
   else hit_val
+
+Mons.Skill.is_critical(perc: U32, tik: U32): Bool
+  U32.eql(U32.mod(tik, perc), 0u)
 
 // TODO remove
 Mons.Skill.dummy_skills: List(Mons.Skill)
@@ -364,3 +406,4 @@ Mons.Skill.dummy_skills: List(Mons.Skill)
 // Adve is not getting invulnerable when using an attack to apply it
 // Hero mon: burn don't update the counter, but deals damage
 // sand_tomb can't use insta damage and burn at the same time
+// sludge_bomb can't use insta damage and poison

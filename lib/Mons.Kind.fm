@@ -295,7 +295,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | POISOLICK => Mons.Attr.new_battleable(
       Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
-      [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.gyro_ball, Mons.Skill.iron_defense]);
+      [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball]);
     
     | TROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
