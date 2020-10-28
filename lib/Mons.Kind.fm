@@ -264,6 +264,13 @@ Mons.Kind.set_pic(spr: List(Image3D)): Image3D
 Mons.Kind.set_default_battle_spr:  Bool -> Image3D
   (is_up) Mons.Assets.battle_croni_u
 
+Mons.Kind.update_agi(kind: Mons.Kind, agi: U32): Mons.Kind
+  case kind:
+  | mons => Mons.Kind.Mons(kind.ele, kind.boss, kind.pri_type, agi);
+  | const => kind;
+  | terrain => kind;
+  | inter => kind;
+
 // blocks: Bool,
 // battles: Bool,
 // mhp: U32,
@@ -300,7 +307,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | TROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
-      [Mons.Skill.wing_attack, Mons.Skill.recover, Mons.Skill.agility, Mons.Skill.crunch]);
+      [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility]);
     
     | MIMIC => Mons.Attr.new_battleable(
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
