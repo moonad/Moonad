@@ -317,8 +317,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
-      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig]);
-      //[Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic]);
+      [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic]);
     
     | EMERELDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",

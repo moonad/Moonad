@@ -47,14 +47,14 @@ Mons.Skill.description(skill: Mons.Skill): String
   | iron_defense => "Increase defense for 2 turns, including the current one";
   | super_fang => "Damage adve with 50% of current life then loses 25% of hp";
   | hypnosis => "Apply sleep to adve";
-  | dream_eater => "Will only damage if adve is sleep. Will damage adve and heal 50% of the dmg";
+  | dream_eater => "Will only damage if adve is sleep. Will damage adve and heal 100% of the dmg";
   | wing_attack => "Damage";
   | moonlight => "Damage and 20% of sleep";
-  | play_rough => "Damage and 20% of reduce damage";
-  | psychic => "Damage and 10% of reduce damage and apply confusion";
+  | play_rough => "Damage and 20% of critical hit";
+  | psychic => "Damage and 20% of sleep in the current turn";
   | ancient_power => "Damage and 10% of adve miss the attack";
   | thunder_wave => "Damage";
-  | charge => "Double the damage of the next ellectric attack";
+  | charge => "Double the damage if adve has minimize";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
 
@@ -147,16 +147,15 @@ Mons.Skill.apply_inital_eff_adve(adve_idx: U32, pos: Pos32, game: Mons.Game): Mo
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
   let poison = if eff.poison then "poison" else "no poison"
-  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Poison? ", poison]))
+  // use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Poison? ", poison]))
   let poison = if eff.poison then "sleep" else "no sleep"
-  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Sleep? ", poison]))
+  // use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Sleep? ", poison]))
   if Mons.Effect.has_invulnerable(eff) then 0u
   else
     let dmg_burn = if Mons.Effect.has_burn(eff) then U32.div(mhp, 16u) else 0u
     let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
     let dmg_poison = if Mons.Effect.has_poison(eff) then U32.div(mhp, 16u) else 0u
     let dmg = U32.add(dmg_poison, U32.add(dmg_burn, dmg_hit))
-    use skp = Debug.log<>(String.flatten(["  DMG to take: ", U32.to_string(dmg)]))
     dmg 
 
 
@@ -238,8 +237,8 @@ Mons.Skill.minimize_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game)
   let obj_updated = Mons.Effect.set_minimize(Mons.Object.get_current_mon(obj))
   Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
 
-Mons.Skill.sleep_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
-  let obj_updated = Mons.Effect.set_sleep(Mons.Object.get_current_mon(obj))
+Mons.Skill.sleep_eff(obj: Mons.Object, pos: Pos32, idx: U32, turn: U32, game: Mons.Game): Mons.Game
+  let obj_updated = Mons.Effect.set_sleep(Mons.Object.get_current_mon(obj), turn)
   Mons.Skill.update_mon_obj(obj, obj_updated, pos, idx, game)
 
 Mons.Skill.swap_agi_eff(obj: Mons.Object, pos: Pos32, idx: U32, game: Mons.Game): Mons.Game
@@ -388,41 +387,77 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | super_fang => 
     let adve_dmg = U32.div(Mons.Object.remaining_hp(source_mon), 2u)
     let hero_dmg = U32.div(adve_dmg, 2u)
-    use skp = Debug.log<>(String.flatten(["Super fang dmg: ", U32.to_string(hero_dmg)]))
+    use skp = Debug.log<>(String.flatten(["Super fang adve dmg: ", U32.to_string(adve_dmg)]))
+    use skp = Debug.log<>(String.flatten(["Super fang hero dmg: ", U32.to_string(hero_dmg)]))
     let game = Mons.Skill.damage_eff(source_obj, pos, source, hero_dmg, game)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, adve_dmg, game)
     game;
 
   // Apply sleep to adve
-  | hypnosis => Mons.Skill.sleep_eff(target_obj, pos, target, game);
+  | hypnosis => Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game);
 
-  // TODO: Will only damage if adve is sleep. Will damage adve and heal 50% of the dmg
-  | dream_eater => game;
+  // Will only damage if the adve is sleep. Will damage adve and heal 100% of the dmg
+  | dream_eater =>
+    if Mons.Effect.has_sleep(target_mon.eff) then
+      let val  = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+      let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+      Mons.Skill.heal_eff(source_obj, pos, source, val, game)
+    else game
+  ;
 
-  // Medium damage
+  // High damage
   | wing_attack => 
-    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
-  // TODO Damage and 20% of sleep
-  | moonlight => game;
+  // Damage and 20% of sleep
+  | moonlight => 
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    if Mons.Skill.is_critical(5u, game.tik) then
+      let game = Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game)
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    else  Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  ;
 
-  // TODO Damage and 20% of reduce damage
-  | play_rough => game;
+  // Damage and 20% of critical hit
+  | play_rough => 
+    let val = Mons.Skill.critical_hit(target_mon_attr.mhp, medium_val, 5u, game.tik)
+    Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  ;
 
-  // TODO Damage and 10% of reduce damage and apply confusion
-  | psychic => game;
+  // Damage and 10% of sleep in the current turn and of hit next turn
+  | psychic =>
+    let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon)
+    if Mons.Skill.is_critical(10u, game.tik) then
+      let game = Mons.Skill.sleep_eff(target_obj, pos, target, 1u, game)
+      let game = Mons.Skill.hit_next_eff(target_obj, 3u, pos, target, game)
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    else 
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  ;
 
-  // TODO Damage and 10% of adve miss the attack
-  | ancient_power => game;
+  // Damage and 10% of adve miss the attack
+  | ancient_power => 
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    if Mons.Skill.is_critical(10u, game.tik) then
+      let game = Mons.Skill.sleep_eff(target_obj, pos, target, 1u, game)
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    else 
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  ;
 
-  // Medium damage
+  // High damage
   | thunder_wave =>
-    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
-  // TODO Double the damage of the next ellectric attack
-  | charge => game;
+  // Double the damage if adve has minimize
+  | charge =>
+    let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+    if Mons.Effect.has_minimize(target_mon.eff) then
+      Mons.Skill.damage_eff(target_obj, pos, target, U32.mul(val, 2u), game)
+    else Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+  ;
 
   // Invent the Mons's agility
   // Note: if the enemy uses it, the damage received by the adve is also damaged in the hero
