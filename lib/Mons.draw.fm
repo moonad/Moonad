@@ -393,7 +393,8 @@ Mons.draw.img_type(kind: Mons.Kind): String
 Mons.draw.turn(name: String, skill: Mons.Skill, scr: Image3D): Image3D
   let msg = String.flatten([name, " used ", Mons.Skill.get_name(skill), "."])
   let scr = Mons.draw.text(msg, Mons.font_black, Mons.draw.msg_screen.line_0, scr)
-  Mons.draw.text("[c] continue", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+  let desc = Mons.Skill.short_description(skill)
+  Mons.draw.text(String.flatten([desc, "  [c]"]), Mons.font_black, Mons.draw.msg_screen.line_1, scr)
 
 // TODO: add skill names
 Mons.draw.battle_skills(hero_obj: Mons.Object, scr: Image3D): Image3D

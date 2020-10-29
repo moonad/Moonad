@@ -38,7 +38,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | sand_tomb => "Apply an initial dmg and +1/16 of MPH for 5 turns";
   | protect => "Avoid dmg on the next turn. Cannot be used on every turn.";
   | slam => "Damage";
-  | counter => "Double the last damage that the adve received (dismiss effects)";
+  | counter => "Apply burn and heal 3hp";
   | recover => "Restore 50% of mhp";
   | rock_smash => "Apply a medium damage(4) + 50% of critical";
   | crunch => "Apply a high damage(6) + 25% of critical";
@@ -58,6 +58,35 @@ Mons.Skill.description(skill: Mons.Skill): String
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
 
+Mons.Skill.short_description(skill: Mons.Skill): String
+   case skill:
+  | hit_4 => "damage 4"; // test
+  | hit_2 => "damage 2"; // test
+  | heal => "heal 3"; // test
+  | none => "does nothing"; // test
+  | dig => "Add hit next turn, add invul";
+  | sand_tomb => "Dmg this turn + burn(5)";
+  | protect => "Avoid dmg next turn";
+  | slam => "Hit 6hp";
+  | counter => "Burn for 5 turns and heal 3hp";
+  | recover => "Restore 50% mhp";
+  | rock_smash => "Hit 2hp + 50% of critical";
+  | crunch => "Hit 4hp + 25% of critical";
+  | sludge_bomb => "Hit 2hp + 30% of poisoning";
+  | gyro_ball => "Hit 4. If more agility + 50% dmg";
+  | iron_defense => "-25% dmg for this and next turn";
+  | super_fang => "Hit 50% hp + loses 25% of hp";
+  | hypnosis => "Add sleep";
+  | dream_eater => "Hit if has sleep. Hit 6, heal 4";
+  | wing_attack => "Hit 6hp";
+  | moonlight => "Hit 4 + 20% of sleep";
+  | play_rough => "Hit 4 + 20% of critical";
+  | psychic => "Hit 2hp + 10% sleep andn hit";
+  | ancient_power => "Hit 4hp + 10% adve miss the attack";
+  | thunder_wave => "Hit 6";
+  | charge => "Double the hit if adve has minimize";
+  | agility => "Invert Mon's agitity value";
+  | hero_kill => "Herro atk";
 
 Mons.Skill.get_name(skill: Mons.Skill): String
   case skill:
@@ -119,11 +148,6 @@ Mons.Skill.apply_inital_eff_hero(hero_idx: U32, pos: Pos32, game: Mons.Game): Mo
   open hero_mon_obj:
   open Mons.Kind.attr(hero_mon_obj.kin) as hero_mon_attr:
   // BUG: effects in the player's Mon are not updated
-  // let hero_mon_obj = //pos: Pos32, hero_idx: U32, adve_idx: U32, game: Mons.Game
-    // if Bool.or(Mons.Effect.has_swap_agi(hero_mon_obj.eff), Mons.Effect.has_swap_agi(adve_mon.eff)) 
-    // then
-    //   Mons.Skill.invert_agility(pos, hero_idx, adve_idx, game)
-    // else
   let upd_effect = Mons.Effect.upd_initial_eff(hero_mon_obj.eff)
   let hero_mon_obj = Mons.Object.set_eff(upd_effect, hero_mon_obj)
   let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
@@ -146,9 +170,10 @@ Mons.Skill.apply_inital_eff_adve(adve_idx: U32, pos: Pos32, game: Mons.Game): Mo
 
 Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
   open eff:
-  let poison = if eff.poison then "poison" else "no poison"
-  // use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Poison? ", poison]))
-  let poison = if eff.poison then "sleep" else "no sleep"
+  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " INITIAL EFFECTS "]))
+  // let poison = if eff.poison then "poison" else "no poison"
+  // use skp = Debug.log<>(String.flatten([U32.to_string(idx), " Poison? ", poison]))
+  // let poison = if eff.poison then "sleep" else "no sleep"
   // use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " Sleep? ", poison]))
   if Mons.Effect.has_invulnerable(eff) then 0u
   else
@@ -156,6 +181,7 @@ Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // id
     let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
     let dmg_poison = if Mons.Effect.has_poison(eff) then U32.div(mhp, 16u) else 0u
     let dmg = U32.add(dmg_poison, U32.add(dmg_burn, dmg_hit))
+    use skp = Debug.log<>(String.flatten(["dmg taken: ", U32.to_string(dmg)]))
     dmg 
 
 
@@ -180,7 +206,7 @@ Mons.Skill.apply_end_turn_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mo
 
 
 Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  use skp = Debug.log<>(">> Clear after battle")
+  use skp = Debug.log<>(" CLEAR EFFECTS AFTER BATTLE ")
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
@@ -200,7 +226,7 @@ Mons.Skill.damage_eff(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mo
   else
     let dmg = if Mons.Effect.has_protect(obj_mon.eff)  then U32.div(dmg, 2u) else dmg // - 50%
     let dmg = if Mons.Effect.has_minimize(obj_mon.eff) then U32.sub(dmg, U32.div(dmg, 4u)) else dmg // - 25%
-    // use skp = Debug.log<>(String.flatten(["Dmg eff:", U32.to_string(dmg), " idx:", U32.to_string(idx)]))
+    use skp = Debug.log<>(String.flatten(["Defense idx: ", U32.to_string(idx), " total dmg: ", U32.to_string(dmg), ]))
     let obj_mon = Mons.Object.hit(obj_mon, dmg)
     Mons.Skill.update_mon_obj(obj, obj_mon, pos, idx, game)
 
@@ -310,6 +336,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | dig => // OK
     let game = Mons.Skill.invulnerable_eff(source_obj, pos, source, game) 
     let game = Mons.Skill.hit_next_eff(target_obj, 3u, pos, target, game)
+    use skp = Debug.log<>(String.flatten(["- Dig: add hit next turn, add invulnerable", ]))
     game;
     // Adve não tem invul mas no hero tem o hit: quando jogando contra o Gasparzinho
 
@@ -317,8 +344,9 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | sand_tomb => 
     let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
     // BUG: only the first line is executed
-    // let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
     let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
+    use skp = Debug.log<>(String.flatten(["- Sand bomb: dmg ", U32.to_string(val), " add burn" ]))
     game;
 
   // Avoid effects on the next turn. Can't be used successively
@@ -327,34 +355,44 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     open source_mon:
     open source_mon.eff as eff:
     let used_last_turn = Pair.snd<,>(eff.protect)
-    if used_last_turn then game
-    else Mons.Skill.protect_eff(source_obj, pos, source, 2u, game);
+    if used_last_turn then 
+      use skp = Debug.log<>(String.flatten(["- Protect: used last turn"]))
+      game
+    else 
+    use skp = Debug.log<>(String.flatten(["- Protect: add protect"]))
+    Mons.Skill.protect_eff(source_obj, pos, source, 2u, game);
 
   // High damage
   | slam => // OK
     let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+    use skp = Debug.log<>(String.flatten(["- Slam: hit ", U32.to_string(val)]))
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
-  // Double the last damage that the adve received (dismiss effects)
-  // Update: apply burn
+  // Apply burn anh heal light value
   | counter =>  // ok
+    let game = Mons.Skill.heal_eff(source_obj, pos, source, light_val, game)
+    use skp = Debug.log<>(String.flatten(["- Slam: heal ", U32.to_string(light_val), " add burn"]))
     Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
   ;
 
   // Restore 50% of mhp
+  // TODO: restore 50% hp, cannot be used every turn
   | recover => // ok
     let val = U32.div(source_mon_attr.mhp, 2u)
+    use skp = Debug.log<>(String.flatten(["- Recover: heal ", U32.to_string(val)]))
     Mons.Skill.heal_eff(source_obj, pos, source, val, game);
 
-  // Apply a medium damage + 50% of critical
+  // Apply a light damage + 50% of critical
   | rock_smash => // ok 
-    let val = Mons.Skill.critical_hit(target_mon_attr.mhp, medium_val, 2u, game.tik)
+    let val = Mons.Skill.critical_hit(target_mon_attr.mhp, light_val, 2u, game.tik)
+    use skp = Debug.log<>(String.flatten(["- Rock smasg: hit ", U32.to_string(val)]))
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     game;
 
   // Medium_val damage + 25% of critical
   | crunch =>  // OK
     let val = Mons.Skill.critical_hit(target_mon_attr.mhp, medium_val, 4u, game.tik)
+    use skp = Debug.log<>(String.flatten(["- Crunch: hit ", U32.to_string(val)]))
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     game;
 
@@ -362,11 +400,14 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | sludge_bomb => // ok: poisoning
     let val = Mons.Type.skill_n_type(light_val, source_mon, target_mon)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // don't work
-    let game =  // Apply poison
-      if Mons.Skill.is_critical(3u, game.tik) then
-        Mons.Skill.poison_eff(target_obj, pos, target, game)
-      else game
-    game;
+    // Apply poison
+    if Mons.Skill.is_critical(3u, game.tik) then
+      use skp = Debug.log<>(String.flatten(["- Sludge bomb: hit ", U32.to_string(val), "add poison"]))
+      Mons.Skill.poison_eff(target_obj, pos, target, game)
+    else 
+      use skp = Debug.log<>(String.flatten(["- Sludge bomb: hit ", U32.to_string(val)]))
+    game
+    ;
 
   // Apply medium damage. If this Mon has "agi" faster than the adve, increase
   // damage by 50%.
@@ -376,38 +417,46 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
       if U32.ltn(Mons.Kind.get_agi(target_mon.kin), Mons.Kind.get_agi(source_mon.kin)) 
       then U32.add(U32.div(val,2u), val)
       else val
+    use skp = Debug.log<>(String.flatten(["- Gyro ball: hit ", U32.to_string(val)]))
     let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     game;
 
   // Minimize damage for 2 turns, including the current one
   | iron_defense =>  // OK
+    use skp = Debug.log<>(String.flatten(["- Iron defense: add minimize "]))
     Mons.Skill.minimize_eff(source_obj, pos, source, game);
 
   // Damage adve with 50% of current life. Loses 25% of hp
   | super_fang => 
     let adve_dmg = U32.div(Mons.Object.remaining_hp(source_mon), 2u)
     let hero_dmg = U32.div(adve_dmg, 2u)
-    use skp = Debug.log<>(String.flatten(["Super fang adve dmg: ", U32.to_string(adve_dmg)]))
-    use skp = Debug.log<>(String.flatten(["Super fang hero dmg: ", U32.to_string(hero_dmg)]))
+    use skp = Debug.log<>(String.flatten(["- Super fang adve dmg: ", U32.to_string(adve_dmg)]))
+    use skp = Debug.log<>(String.flatten(["- Super fang hero dmg: ", U32.to_string(hero_dmg)]))
     let game = Mons.Skill.damage_eff(source_obj, pos, source, hero_dmg, game)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, adve_dmg, game)
     game;
 
   // Apply sleep to adve
-  | hypnosis => Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game);
+  | hypnosis => 
+    use skp = Debug.log<>(String.flatten(["- Hypnosis: sleep next turn "]))
+    Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game);
 
   // Will only damage if the adve is sleep. Will damage adve and heal 100% of the dmg
   | dream_eater =>
     if Mons.Effect.has_sleep(target_mon.eff) then
-      let val  = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
+      let val  = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+      use skp = Debug.log<>(String.flatten(["- Dream eater: hit ", U32.to_string(val), " heal", U32.to_string(val)]))
       let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game)
       Mons.Skill.heal_eff(source_obj, pos, source, val, game)
-    else game
+    else 
+    use skp = Debug.log<>(String.flatten(["- Dream eater: not sleeping, hit 0"]))
+    game
   ;
 
   // High damage
   | wing_attack => 
     let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+    use skp = Debug.log<>(String.flatten(["- Wing attack: hit ", U32.to_string(val)]))
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // Damage and 20% of sleep
@@ -415,13 +464,17 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
     if Mons.Skill.is_critical(5u, game.tik) then
       let game = Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game)
+      use skp = Debug.log<>(String.flatten(["- Moonlight: hit ", U32.to_string(val), " add sleep"]))
       Mons.Skill.damage_eff(target_obj, pos, target, val, game)
-    else  Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    else 
+      use skp = Debug.log<>(String.flatten(["- Moonlight: hit ", U32.to_string(val)]))
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
   ;
 
   // Damage and 20% of critical hit
   | play_rough => 
     let val = Mons.Skill.critical_hit(target_mon_attr.mhp, medium_val, 5u, game.tik)
+    use skp = Debug.log<>(String.flatten(["- Play rough: hit ", U32.to_string(val)]))
     Mons.Skill.damage_eff(target_obj, pos, target, val, game)
   ;
 
@@ -431,8 +484,10 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     if Mons.Skill.is_critical(10u, game.tik) then
       let game = Mons.Skill.sleep_eff(target_obj, pos, target, 1u, game)
       let game = Mons.Skill.hit_next_eff(target_obj, 3u, pos, target, game)
+      use skp = Debug.log<>(String.flatten(["- Psychic: hit ", U32.to_string(val), " add sleep and hit next turn"]))
       Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     else 
+      use skp = Debug.log<>(String.flatten(["- Psychic: hit ", U32.to_string(val)]))
       Mons.Skill.damage_eff(target_obj, pos, target, val, game)
   ;
 
@@ -441,29 +496,37 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
     if Mons.Skill.is_critical(10u, game.tik) then
       let game = Mons.Skill.sleep_eff(target_obj, pos, target, 1u, game)
+      use skp = Debug.log<>(String.flatten(["- Ancient power: hit ", U32.to_string(val), " adve miss skill"]))
       Mons.Skill.damage_eff(target_obj, pos, target, val, game)
     else 
+      use skp = Debug.log<>(String.flatten(["- Ancient power: hit ", U32.to_string(val)]))
       Mons.Skill.damage_eff(target_obj, pos, target, val, game)
   ;
 
   // High damage
   | thunder_wave =>
     let val = Mons.Type.skill_n_type(high_val, source_mon, target_mon)
+    use skp = Debug.log<>(String.flatten(["- Thunder wave: hit ", U32.to_string(val)]))
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
 
   // Double the damage if adve has minimize
   | charge =>
     let val = Mons.Type.skill_n_type(medium_val, source_mon, target_mon)
     if Mons.Effect.has_minimize(target_mon.eff) then
+      use skp = Debug.log<>(String.flatten(["- Charge: hit ", U32.to_string(val)]))
       Mons.Skill.damage_eff(target_obj, pos, target, U32.mul(val, 2u), game)
-    else Mons.Skill.damage_eff(target_obj, pos, target, val, game)
+    else 
+      use skp = Debug.log<>(String.flatten(["- Charge: hit ", U32.to_string(val)]))
+      Mons.Skill.damage_eff(target_obj, pos, target, val, game)
   ;
 
   // Invent the Mons's agility
   // Note: if the enemy uses it, the damage received by the adve is also damaged in the hero
   // a possible solution is to execute this skill at the beggining of the turn, using it
   // as an effect
-  | agility =>  game; //Mons.Skill.invert_agility(pos, source, target, game);
+  | agility => 
+    use skp = Debug.log<>(String.flatten(["- Agility: invert Mons' agi "]))
+    game; //Mons.Skill.invert_agility(pos, source, target, game);
 
   | hero_kill => Mons.Skill.damage_eff(target_obj, pos, target, 40u, game);
 
