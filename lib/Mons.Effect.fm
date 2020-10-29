@@ -13,13 +13,15 @@ T Mons.Effect
   minimize: Pair(U32, Bool),
   invulnerable: Pair(Bool, Bool), // fst: if is invulnerable, snd: if used it last turn
   hit: U32,
-  poison: Bool
+  poison: Bool,
+  swap_agi: Bool
 );
 
 Mons.Effect.clear: Mons.Effect
   let clean = {0u, Bool.false}
   let clean_bool = {Bool.false, Bool.false}
-  Mons.Effect.new(Bool.false, 0u, clean, clean, clean_bool, 0u, Bool.false)
+  Mons.Effect.new(Bool.false, 0u, clean, clean, clean_bool, 0u, 
+    Bool.false, Bool.false)
 
 Mons.Effect.upd_initial_eff(eff: Mons.Effect): Mons.Effect
   open eff:
@@ -30,7 +32,8 @@ Mons.Effect.upd_initial_eff(eff: Mons.Effect): Mons.Effect
     eff.minimize, 
     eff.invulnerable, 
     0u, // hit only last for the next turn
-    eff.poison) 
+    eff.poison,
+    Bool.false) 
 
 Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
   open eff:
@@ -45,10 +48,11 @@ Mons.Effect.upd_end_turn_eff(eff: Mons.Effect): Mons.Effect
     update_turn_counter(minimize_turn), 
     if invulnerable then {Bool.false, Bool.true} else {Bool.false, Bool.false}, 
     eff.hit,
-    eff.poison)
+    eff.poison,
+    eff.swap_agi)
 
 Mons.Effect.has_sleep(eff: Mons.Effect): Bool
-  open eff: 
+  open eff:   
   eff.sleep
 
 Mons.Effect.has_burn(eff: Mons.Effect): Bool
@@ -82,20 +86,30 @@ Mons.Effect.has_poison(eff: Mons.Effect): Bool
   open eff:
   eff.poison
 
+Mons.Effect.has_swap_agi(eff: Mons.Effect): Bool
+  open eff: 
+  eff.swap_agi
+
+Mons.Effect.set_sleep(obj: Mons.Object): Mons.Object
+  open obj:
+  open obj.eff as eff:
+  let new_eff = Mons.Effect.new(Bool.true, eff.burn, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_invulnerable(obj: Mons.Object): Mons.Object
   open obj:
   open obj.eff as eff:
   get stt used = eff.invulnerable
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
-    {Bool.true, Bool.true}, eff.hit, eff.poison)
+    {Bool.true, Bool.true}, eff.hit, eff.poison, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_burn(obj: Mons.Object, turns: U32): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, turns, eff.protect, eff.minimize, 
-    eff.invulnerable, eff.hit, eff.poison)
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
 // Hit to be executed next turn
@@ -103,26 +117,33 @@ Mons.Effect.set_hit(obj: Mons.Object, val: U32): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
-    eff.invulnerable, val, eff.poison)
+    eff.invulnerable, val, eff.poison, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_protect(obj: Mons.Object, turn: U32): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, {turn, Bool.true}, eff.minimize, 
-    eff.invulnerable, eff.hit, eff.poison)
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_poison(obj: Mons.Object): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
-    eff.invulnerable, eff.hit, Bool.true)
+    eff.invulnerable, eff.hit, Bool.true, eff.swap_agi)
   Mons.Object.set_eff(new_eff, obj)
 
 Mons.Effect.set_minimize(obj: Mons.Object): Mons.Object
   open obj:
   open obj.eff as eff:
   let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, {2u, Bool.true}, 
-    eff.invulnerable, eff.hit, eff.poison)
+    eff.invulnerable, eff.hit, eff.poison, eff.swap_agi)
+  Mons.Object.set_eff(new_eff, obj)
+
+Mons.Effect.set_swap_agi(obj: Mons.Object): Mons.Object
+  open obj:
+  open obj.eff as eff:
+  let new_eff = Mons.Effect.new(eff.sleep, eff.burn, eff.protect, eff.minimize, 
+    eff.invulnerable, eff.hit, eff.poison, Bool.true)
   Mons.Object.set_eff(new_eff, obj)
