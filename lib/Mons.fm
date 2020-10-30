@@ -742,11 +742,55 @@ Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object
 
 // Converts a tile code (ex: ".g") into a list of obs
 Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
-  let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
-  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Const(Mons.Kind.const.ROCK_PATH_M, Bool.false, Bool.false))
+  let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.VOID)
+  let rock_path = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
 
-  if U32.eql(dim, 0u) then // lvl 0 - city destroied
-    let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS))
+  if U32.eql(dim, 0u) then
+    let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 0))
+    let path_brick = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
+    let lvl0 = 0u
+    Mons.Map.code_to_tile.aux(code,[
+      // Construction
+      { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true), path_brick ]},
+      { ".-", [ Mons.Kind.new_const(Mons.Kind.const.BIG_STAIRS, Bool.false), path_brick ]},
+
+      // Terrain
+      { ".g", [ path_brick ]},
+      { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID) ]},
+      { "bk", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID_BLACK) ]},
+      { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
+      { ".n", [ grass ]},
+      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0u))]},
+      // Mid city
+      { "c0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 0u)) ]},
+      { "c1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 1u)) ]},
+      { "c2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 2u)) ]},
+      { "c3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 3u)) ]},
+      { "c4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 4u)) ]},
+      { "c5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 5u)) ]},
+      { "c6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 6u)) ]},
+
+      { "d0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 0u)) ]},
+      { "d1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 1u)) ]},
+      { "d2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 2u)) ]},
+      { "d3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 3u)) ]},
+      { "d4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 4u)) ]},
+      { "d5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 5u)) ]},
+      { "d6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 6u)) ]},
+
+      { "e0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 0u)) ]},
+      { "e1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 1u)) ]},
+      { "e2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 2u)) ]},
+      { "e3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 3u)) ]},
+      { "e4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 4u)) ]},
+      { "e5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 5u)) ]},
+      { "e6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 6u)) ]},
+
+    ])
+
+  else if U32.eql(dim, 1u) then // lvl 0 - city destroied
+    let grass = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.GRASS(0,0)))
     Mons.Map.code_to_tile.aux(code,[
       // Mons
       { "m0", Mons.Kind.new_mons(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)},
@@ -771,152 +815,28 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
   else // lvl 1 - Mons type "normal" 
   Mons.Map.code_to_tile.aux(code,[
     { ".g", [ grass ]},
-    { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
-    { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
-    { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
-    { "t0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_00) ]},
-    { "t1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_01) ]},
-    { "t2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ELV_TERRAIN_02) ]},
-    { "w0", [ 
-      Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.up)),
-      Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
-    { "wm", [ Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.middle)) ]},
-    { "w1", [ 
-      Mons.Object.new_of_kind( Mons.Kind.Terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.left))),
-      Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
-    { "w2", [ 
-      Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.right)),
-      Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0)
-     ]},
-    { "w3", [
-      Mons.Kind.new_terrain(Mons.Kind.terrain.OCEAN(Mons.Map.Dir.down)),
-      Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
-    { "T0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 0)), grass]},
-    { "T1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(0, 1)), grass ]},
-    { "/0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 0), Bool.false), grass ]},
-    { "/1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 1), Bool.false) ]},
-    { "/2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(1, 2), Bool.false), grass ]},
-    { "B0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 0)), grass ]},
-    { "B1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(1, 1)), grass ]},
-    { "P0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 0)), grass ]},
-    { "P1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(2, 1)), grass ]},
-    { "P2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(3, 0)), grass ]},
-    { "P3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(3, 1)), grass ]},
-    { "P4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(4, 0)), grass ]},
-    { "P5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(4, 1)), grass ]},
-    { "P6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 0)), grass ]},
-    { "P7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(5, 1)), grass ]},
-    { "P8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(6, 0)), grass ]},
-    { "P9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.TREE(7, 0)), grass ]},    
-    { ".s", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_C, Bool.false), grass ]},
-    { ".r", [ Mons.Kind.new_const(Mons.Kind.const.ROCK_PATH_M, Bool.false) ]},
+    // { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
+    // { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH(0u)), grass ]},
+    // { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]}, 
 
     // { "30", Mons.Kind.new_mons(Mons.Kind.mons.BATH, Mons.Type.grass, 2u) },
-    { "31", Mons.Kind.new_mons(Mons.Kind.mons.BEHOLDER, Mons.Type.normal, 2u) },
     // { "32", Mons.Kind.new_mons(Mons.Kind.mons.CRONI, Mons.Type.darkness, 2u) },
     // { "33", Mons.Kind.new_mons(Mons.Kind.mons.ELLIOT, Mons.Type.ice, 2u) },
     // { "34", Mons.Kind.new_mons(Mons.Kind.mons.ESPECTRONUS, Mons.Type.darkness, 2u) },
-    // { "35", Mons.Kind.new_mons(Mons.Kind.mons.GAKI, Mons.Type.darkness, 2u) },
-    // { "36", Mons.Kind.new_mons(Mons.Kind.mons.GORR, Mons.Type.grass, 2u) },
-    // { "37", Mons.Kind.new_mons(Mons.Kind.mons.LAMURIA, Mons.Type.earth, 2u) },
-    // { "38", Mons.Kind.new_mons(Mons.Kind.mons.RAFIRE, Mons.Type.fire, 2u) },
-    // { "39", Mons.Kind.new_mons(Mons.Kind.mons.VARGOULI, Mons.Type.darkness, 2u) },
-    // { "40", Mons.Kind.new_mons(Mons.Kind.mons.TUPITREE, Mons.Type.grass, 2u) },
-    // { "41", Mons.Kind.new_mons(Mons.Kind.mons.LELA, Mons.Type.darkness, 2u) },
-    // { "42", Mons.Kind.new_mons(Mons.Kind.mons.MOSHY, Mons.Type.grass, 2u) },
-    // // { "43", Mons.Kind.water_with_kin(Mons.Kind.mons.ESPECTRONUS, Mons.Type.water, 2u) },
-    // // { "44", Mons.Kind.water_with_kin(Mons.Kind.mons.LAMURIA, Mons.Type.water, 2u)},
-    // // { "45", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 2u) },
-    // { "46", Mons.Kind.new_boss(Mons.Kind.mons.BUFF, Mons.Type.grass, 0u) },
-    // { "47", Mons.Kind.new_boss(Mons.Kind.mons.LAUGH, Mons.Type.psychic, 0u) },
-    // { "48", Mons.Kind.new_mons(Mons.Kind.mons.COBE_ORN, Mons.Type.darkness, 2u) },
-    // { "49", Mons.Kind.new_mons(Mons.Kind.mons.SANDY, Mons.Type.darkness, 2u) },
-    // { "50", Mons.Kind.new_mons(Mons.Kind.mons.SLIME, Mons.Type.grass, 2u) },
-    // { "51", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.psychic, 2u) },
-    // { "52", Mons.Kind.new_mons(Mons.Kind.mons.SPARKY, Mons.Type.fire, 2u) },
-    // { "53", Mons.Kind.new_mons(Mons.Kind.mons.DOOMFIRE, Mons.Type.fire, 2u) },
-    // { "54", Mons.Kind.new_mons(Mons.Kind.mons.BEANSTRONG, Mons.Type.earth, 2u) },
-    // { "55", Mons.Kind.new_mons(Mons.Kind.mons.NAMELESS, Mons.Type.psychic, 2u) },
-    // { "56", Mons.Kind.new_boss(Mons.Kind.mons.OCTOKING, Mons.Type.water, 0u) },
-    // { "57", Mons.Kind.new_mons(Mons.Kind.mons.INPUBU, Mons.Type.light, 2u) },
-    { "58", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u) },
-    { "59", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u) },
-    // { "60", Mons.Kind.new_mons(Mons.Kind.mons.IGNITE, Mons.Type.fire, 2u) },
-    // { "61", Mons.Kind.new_mons(Mons.Kind.mons.FROST, Mons.Type.ice, 2u) },
-    // { "62", Mons.Kind.new_mons(Mons.Kind.mons.FRAB, Mons.Type.fire, 2u) },
-    // { "63", Mons.Kind.new_mons(Mons.Kind.mons.ELECTROWL, Mons.Type.electric, 2u) },
-    // { "64", Mons.Kind.new_mons(Mons.Kind.mons.NOCTUBRIGHT, Mons.Type.water, 2u) },
 
-    { "K0", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 0), Bool.false), rock_path ]},
-    { "K1", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 1), Bool.false) ]},
-    { "K2", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 2), Bool.false) ]},
-    { "K3", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 3), Bool.false) ]},
-    { "K4", [ Mons.Kind.new_const(Mons.Kind.const.HOUSE(0, 4), Bool.false), rock_path ]},
-    { "C0", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 0), Bool.false) rock_path ]},
-    { "C1", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 1), Bool.false) rock_path ]},
-    { "C2", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 2), Bool.false), rock_path ]},
-    { "C3", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 3), Bool.false), rock_path ]},
-    { "C4", [ Mons.Kind.new_const(Mons.Kind.const.CASTLE(0, 4), Bool.false), rock_path ]},
-    { "W0", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 0), Bool.false), grass ]},
-    { "W1", [ Mons.Kind.new_const(Mons.Kind.const.WELL(0, 1), Bool.false), grass ]},
-    { "A0", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.false), rock_path ]},
-    { "A1", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 1), Bool.false), rock_path ]},
-    { "A2", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 2), Bool.false), rock_path ]},
-    { "p1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 0)), grass ]},
-    { "p2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(0, 1)), grass ]},
-    { "p3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(1, 0)), grass ]},
-    { "p4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(2, 0)), grass ]},
-    { "p5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(2, 1)), grass ]},
-    { "p6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(3, 0)), grass ]},
-    { "p7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(4, 0)), grass ]},
-    { ".p", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(5, 0)), grass ]},
-    { "p8", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(6, 0)), grass ]},
-    { "pp", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(7, 0)), grass ]},
-    { "po", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(8, 0)), grass ]},
-    { "p9", [ Mons.Kind.new_terrain(Mons.Kind.terrain.ROCK(9, 0)), grass ]},    
-    // { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
-    { "S1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_1) ]},
-    { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CHEST) ]},
-    { "s0", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_0, Bool.false), grass ]},
-    { "s1", [ Mons.Kind.new_const(Mons.Kind.const.SIGN_1, Bool.false), grass ]},
-    { "om", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.middle))]},
-    { "on", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER1_M) ]},
-    { "o0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right)), grass ]},
-    { "o1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.up)), grass ]},
-    { "o2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left)), grass ]},
-    { "o3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.down)), grass ]},
-    { "o4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_up)), grass]},
-    { "o5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_up)), grass ]},
-    { "o6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.left_down)), grass ]},
-    { "o7", [ Mons.Kind.new_terrain(Mons.Kind.terrain.WATER(Mons.Map.Dir.expanded.right_down)), grass ]},
-    { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false) ]},
-    { "f0", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right), Bool.false), grass ]},
-    { "f1", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.middle), Bool.false), grass ]},
-    { "f2", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left), Bool.false), grass ]},
-    { "f3", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_up), Bool.false), grass ]},
-    { "f4", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_up), Bool.false), grass ]},
-    { "f5", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.left_down), Bool.false), grass ]},
-    { "f6", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(0, Mons.Map.Dir.expanded.right_down), Bool.false), grass ]},
-    { "fa", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right), Bool.false), grass ]},
-    { "fb", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.middle), Bool.false), grass ]},
-    { "fc", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left), Bool.false), grass ]},
-    { "fd", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_up), Bool.false), grass ]},
-    { "fe", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_up), Bool.false), grass ]},
-    { "ff", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.left_down), Bool.false), grass ]},
-    { "fg", [ Mons.Kind.new_const(Mons.Kind.const.FENCE(1, Mons.Map.Dir.expanded.right_down), Bool.false), grass ]},
-    { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
+    // { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 0u)},
 
-    // Interactive objects
-    { "al", [ Mons.Kind.new_interactive_tool(
-                Mons.Kind.inter.LEVER(0u),
-                Bool.false, 
-                Mons.Kind.inter_lever_eff
-              ), grass ]},
-    { "mv", [ Mons.Kind.new_interactive_tool(
-                Mons.Kind.inter.MOVE,
-                Bool.true, 
-                Mons.Kind.inter_lever_eff
-              ), grass ]} 
+    // // Interactive objects
+    // { "al", [ Mons.Kind.new_interactive_tool(
+    //             Mons.Kind.inter.LEVER(0u),
+    //             Bool.false, 
+    //             Mons.Kind.inter_lever_eff
+    //           ), grass ]},
+    // { "mv", [ Mons.Kind.new_interactive_tool(
+    //             Mons.Kind.inter.MOVE,
+    //             Bool.true, 
+    //             Mons.Kind.inter_lever_eff
+    //           ), grass ]} 
     
   ])
 
@@ -1040,12 +960,26 @@ Mons.Game.hero_inital_position(
   pos: Pos32, 
   hero_idx: U32, 
   game: Mons.Game): Mons.Game
-  let y = Pos32.get_y(pos)
-  let x = Pos32.get_x(pos)
+  let x = Pos32.get_x(Mons.global_scr_mid)
+  let y = Pos32.get_y(Mons.global_scr_mid)
   let z = Pos32.get_z(pos)
-  let new_pos = Pos32.new(x,U32.add(y, 38u),z)
+  // IDK why but Mons.image_to_global doesn't work for the hero ._.
+  let new_pos = 
+    if U32.eql(z, 0u) then Pos32.new(x,U32.add(y, 30u),z)
+    if U32.eql(z, 1u) then Pos32.new(x,U32.add(y, 38u),z)
+    else Mons.global_scr_mid
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
   Mons.Game.set_user_pos(usr, new_pos, game)
+
+// Works for image to global
+Mons.test.add_obj(pos: Pos32, game: Mons.Game): Mons.Game
+  open game:
+  let obj = Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL)
+  let pos = Mons.image_to_global(74u, 74u, 38u, 65u, 0u)
+  let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
+  let game = Mons.Game.set_map(map, game)
+  let game = Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, obj, game)
+  game
 
 // hero and adve have some hp
 Mons.Object.is_battling(adve: Mons.Object, hero_or_mon: Mons.Object): Bool
@@ -1835,7 +1769,7 @@ Mons.start(online: Bool): App(Mons.Game)
       game_pos, 
       game_map, 
       Mons.Screen.introduction(0u),
-      0u
+      0u // tik
     )
     // let game = Mons.Game.add_animated_obj(game)
     game;
@@ -1890,7 +1824,7 @@ Mons.start(online: Bool): App(Mons.Game)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        // let game = Mons.test.add_obj(pos, game)
+        let game = Mons.test.add_obj(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
