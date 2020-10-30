@@ -421,6 +421,7 @@ Mons.draw.effect(eff: Mons.Effect, pos: Pos32, scr: Image3D): Image3D
   let invulnerable = if Mons.Effect.has_invulnerable(eff) "invul " else ""
   let poison = if Mons.Effect.has_poison(eff) "poison " else ""
   let sleep = if Mons.Effect.has_sleep(eff) "sleep " else ""
-  let text = String.flatten([burn, hit, minimize, invulnerable, poison, sleep])
+  let protect = if Mons.Effect.has_protect(eff) "protect " else ""
+  let text = String.flatten([burn, hit, minimize, invulnerable, poison, sleep, protect])
   let scr = Mons.draw.text(text, Mons.font_black, pos, scr)
   scr

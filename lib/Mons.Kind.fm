@@ -309,7 +309,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
       [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility]);
     
-    | MIMIC => Mons.Attr.new_battleable(
+    | MIMIC => Mons.Attr.new_battleable( // OK
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
       [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater]);
