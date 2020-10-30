@@ -346,8 +346,8 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | sand_tomb => 
     def val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
     // BUG: only the first line is executed
-    def game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
-    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
+    let game2 = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
+    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game2)
     use skp = Debug.log<>(String.flatten(["- Sand bomb: dmg ", U32.to_string(val), " add burn" ]))
     game;
 
