@@ -19,30 +19,34 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     // let adve_attr = 
     open Mons.Kind.attr(adve_obj.kin) as adve_attr:
     let is_standing = Mons.Object.is_standing(hero_obj)
+    // let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
 
     case game.stt as stt:
     | introduction =>
+      
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
         if U32.eql(stt.step, 0u) then
-          let msg = [
-            "Few know, but the eclipse", 
-            "it's the period when the Moon", 
-            "reaches the peak of its power.",
-            "Welcome to Moongeon!", "",
-            "[c] I'm ready!"]
-          Mons.draw.list(msg, Bool.false, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
+          let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+          Mons.draw.mage_talk(
+            "Oh! So you really exist... the", "young man of the prophecy. [c]", scr)
         else if U32.eql(stt.step, 1u) then // Follow to the game
-          let msg = [
-            "Use captured Mons to fight and", 
-            "press [e] to access your bag."
-            "Follow to the tower and reachs ", 
-            "its top to save the city.", "",
-            "[c] I'll do my best"]
-          Mons.draw.list(msg, Bool.false, 14u, Mons.font_white, Pos32.new(35u,25u,0u), scr)
+          let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+          Mons.draw.mage_talk(
+            "I'm hurry and can't explain now,", "but... we depend on you. [c]", scr)
+        // else if U32.eql(stt.step, 2u) then
+        //   Mons.draw.mage_talk(
+        //     "Choose a Mon to start with,", "and run to the tower. [c]", scr)
+        else if U32.eql(stt.step, 2u) then
+          let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+          Mons.draw.mage_talk(
+            "Great choice! You can press", "[e] to check it on the bag. [c]", scr)
+        
         else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
 
-    | intro_select => Mons.draw.initial_mons(hero_obj, scr) ;
+    | intro_select => 
+      let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+      Mons.draw.initial_mons(hero_obj, scr) ;
   
     | game =>
       let hero_mon_attr = Mons.Kind.attr(hero_mon_obj.kin)
@@ -302,19 +306,28 @@ Mons.draw.cur_sprite(idl: U32, sprites: List(Image3D)): Image3D
 // SCREENS
 // -------
 // Draw the scene to select one of three Mons to start the game
+Mons.draw.mage_talk(text_0: String, text_1: String, scr: Image3D): Image3D
+  let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+  let scr = Mons.draw.text(text_0, Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+  let scr = Mons.draw.text(text_1, Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+  let scr = Mons.draw.image(Mons.Assets.battle_boy_u, Pos32.new(75u,85u,0u), scr) 
+  let scr = Mons.draw.image(Mons.Assets.battle_mage_d, Pos32.new(180u,80u,0u), scr)
+  scr
+
 Mons.draw.initial_mons(obj: Mons.Object, scr: Image3D): Image3D
   open obj:
   let qtd = Nat.to_u32(List.length<>(obj.bag))
   if U32.eql(qtd, 0u) then 
     Mons.draw.text("nothing to show", Mons.font_white, Pos32.new(60u,50u,0u), scr)
   else
+    let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,90u,0u), scr)
     let mons_images = List.reverse<>(Mons.Object.get_images(obj.bag))
     let mons_names = List.reverse<>(Mons.Object.get_names(obj.bag)) 
-    let scr = Mons.draw.list(mons_names, Bool.false, 34u, Mons.font_white, Pos32.new(70u,0u,0u), scr)
+    let scr = Mons.draw.list(mons_names, Bool.false, 34u, Mons.font_black, Pos32.new(70u,0u,0u), scr)
     let scr = Mons.draw.list_image(mons_images, Bool.false, 34u, Pos32.new(40u,30u,0u), scr)
     let scr = Mons.draw.mon_img_selected(obj.mon, qtd, Bool.false, 34u, Pos32.new(40u,30u,0u), scr)
-    let scr = Mons.draw.text("Select a Mon to start", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
-    let scr = Mons.draw.text("[c] Confirm ", Mons.font_white, Mons.draw.msg_screen.line_1, scr)
+    let scr = Mons.draw.text("Choose a Mon to start with", Mons.font_black, Pos32.new(16u,134u,0u), scr)
+    let scr = Mons.draw.text("and run to the tower. [c]", Mons.font_black, Pos32.new(16u,148u,0u), scr)
     scr
 
 Mons.draw.battle_bg(adve_kind: Mons.Kind.mons, is_boss: Bool, idx: U32, scr: Image3D): Image3D

@@ -280,8 +280,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig]);
     
     | CYCLOPE => Mons.Attr.new_battleable(
-      Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "CYCLOPE",
-      (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
+      Mons.Assets.pic_cyclop, [Mons.Assets.mons_cyclop_d_0], "CYCLOPE",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_cyclop_u, Mons.Assets.battle_cyclop_d),
       [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ]);
     
     | POISOLICK => Mons.Attr.new_battleable(

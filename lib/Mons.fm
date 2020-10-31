@@ -787,6 +787,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "e5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 5u)) ]},
       { "e6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 6u)) ]},
 
+      { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
     ])
 
   else if U32.eql(dim, 1u) then // lvl 0 - city destroied
@@ -803,12 +804,12 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
 
       // Construction
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), grass ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FONTAIN(0, 0), Bool.true) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
       // Terrain
       { ".g", [ grass ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
-      { "xx", [ Mons.Kind.new_const(Mons.Kind.const.PATH_BLOCKER, Bool.false)] }
-      { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
+      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(1u, 0u))] }
+      // { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
       { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), grass ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]}
     ]) 
@@ -1086,19 +1087,19 @@ Mons.Attr.new_hero: Mons.Attr
 
         Mons.Assets.boy_r_2, Mons.Assets.boy_u_2,
         Mons.Assets.boy_l_2, Mons.Assets.boy_d_2),
-        [ Mons.Assets.boy_d_0],
+        [ ],
         Mons.Assets.boy_d_0,
-      (is_up) Bool.if<>(is_up,Mons.Assets.battle_hero_u,Mons.Assets.battle_hero_u),
+      (is_up) Bool.if<>(is_up,Mons.Assets.battle_boy_u,Mons.Assets.battle_boy_u),
       [Mons.Skill.hero_kill, Mons.Skill.none, Mons.Skill.none, Mons.Skill.none] 
   )
 
 Mons.Attr.new_mage: Mons.Attr
   Mons.Attr.new(
     Bool.false, 40u, 0u, "MAGE",
-    Mons.Kind.set_static_sprites([Mons.Assets.mons_croni_d_0]),
-    [Mons.Assets.mons_croni_d_0],
-    Mons.Assets.mons_croni_d_0,
-    (is_up: Bool) Mons.Assets.battle_croni_d,
+    Mons.Kind.set_static_sprites([Mons.Assets.mons_mage]),
+    [Mons.Assets.mons_mage],
+    Mons.Assets.mons_mage,
+    (is_up: Bool) Mons.Assets.battle_mage_d,
     Mons.Skill.dummy_skills)
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
@@ -1156,34 +1157,35 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     let curr_mon = Mons.Object.get_current_mon(hero_obj)
     open curr_mon: 
     let skills = Mons.Kind.get_skills(curr_mon.kin)
-    // let game = Mons.test.add_bag(hero_obj, pos, 0u, game) // TEST - bag
+    // let game = Mons.initial_mons(hero_obj, pos, 0u, game) // TEST - bag
     // let game = Mons.test.add_boss(hero_obj, pos, 0u, game) // TEST - boss
 
     open hero_obj:
     open adve_obj:
-    // TODO let usr = Mons.Game.get_from_map(pos, game) // gets the object that used the command
-    // TODO let atks = Mons.Game.get_attack_list(usr.kin)... // gets the attack list of that usr
     case game.stt as stt:
     | introduction =>
-    // let can_walk = U32.eql(stt.step, 0u)
-    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-    //   Mons.Game.walk(cmd, pos, hero_idx, game)
-    // else if U16.eql(cmd, 'c') then
-    //   if U32.eql(stt.step, 0u) then // Go to Mon selection
-    //     let game = Mons.test.add_bag(hero_obj, pos, 0u, game)
-    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-    //   if U32.eql(stt.step, 1u) then  // Initiate the game. The mage is removed from the scene.
-    //     let game = Mons.Game.map_del(pos, adve_idx, game)
-    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-    //     Mons.Game.set_stt(Mons.Screen.game('.'), game)
-    //   else game
-    // else game
-    Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+    let can_walk = U32.eql(stt.step, 0u)
+    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
+    else if U16.eql(cmd, 'c') then
+      if U32.eql(stt.step, 0u) then // Dialog
+        let game = Mons.initial_mons(hero_obj, pos, 0u, game)
+        Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+      if U32.eql(stt.step, 1u) then // Go to Mon selection
+        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+      if U32.eql(stt.step, 2u) then  // After Mon selection 
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+      else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    else game
+    // Uncomment to skip the introduction (and comment the code above)
+    // Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
-      if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+      if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(2u), game)
       else // update current Mon using 'a' or 'd'
         Mons.Object.change_curr_mon(
           cmd, (cmd: U32) Mons.Screen.intro_select(cmd),
@@ -1438,16 +1440,16 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
   let len = List.length<>(obj.bag)
   Nat.eql(len, 3)
 
-// Mons.test.add_bag(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
-//   open hero_obj:
-//   let hero_obj = Mons.Object.set_bag([], hero_obj)
-//   let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.CRONI, Bool.false, Mons.Type.earth, 2u))
-//   let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.LAMURIA, Bool.false, Mons.Type.fire, 2u))
-//   let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.ELLIOT, Bool.false, Mons.Type.water, 2u))
-//   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
-//   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
-//   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
-//   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+Mons.initial_mons(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
+  open hero_obj:
+  let hero_obj = Mons.Object.set_bag([], hero_obj)
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK, Bool.false, Mons.Type.earth, 2u))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.AZULA, Bool.false, Mons.Type.fire, 2u))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER, Bool.false, Mons.Type.water, 2u))
+  let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
+  let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
+  let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
+  Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
 Mons.Screen.initial_mons: List(Mons.Object)
   let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.earth, 2u))
