@@ -1,0 +1,41 @@
+Bits.sub.go(a: Bits, b: Bits, borrow: Bool, bits: Bits): Bits
+  case a:
+  | case b:
+    | case borrow: 
+      | Bits.nil; 
+      | bits;
+      ;
+    | case borrow:
+      | Bits.nil;
+      | Bits.sub.go(a, b.pred, Bool.false, Bits.0(bits));
+      ;
+    | Bits.nil;
+    ;
+  | case b:
+    | case borrow: 
+      | Bits.sub.go(a.pred, b, Bool.true, Bits.1(bits));
+      | Bits.sub.go(a.pred, b, Bool.false, Bits.0(bits));
+      ;
+    | case borrow:
+      | Bits.sub.go(a.pred, b.pred, Bool.true, Bits.1(bits));
+      | Bits.sub.go(a.pred, b.pred, Bool.false, Bits.0(bits));
+      ;
+    | case borrow:
+      | Bits.sub.go(a.pred, b.pred, Bool.true, Bits.0(bits)); 
+      | Bits.sub.go(a.pred, b.pred, Bool.true, Bits.1(bits));
+      ;
+    ;
+  | case b:
+    | case borrow: 
+      | Bits.sub.go(a.pred, b, Bool.false, Bits.0(bits)); 
+      | Bits.sub.go(a.pred, b, Bool.false, Bits.1(bits));
+      ;
+    | case borrow:
+      | Bits.sub.go(a.pred, b.pred, Bool.false, Bits.0(bits)); 
+      | Bits.sub.go(a.pred, b.pred, Bool.false, Bits.1(bits));
+      ;
+    | case borrow: 
+      | Bits.sub.go(a.pred, b.pred, Bool.true, Bits.1(bits)); 
+      | Bits.sub.go(a.pred, b.pred, Bool.false, Bits.0(bits));
+      ;
+    ;
