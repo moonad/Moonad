@@ -496,314 +496,146 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     
 
 Mons.Kind.mid_city(row: U32, column: U32): Mons.Attr
-  if U32.eql(row, 38u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_38_1])
-    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_38_2])
-    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_38_3])
-    // else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_38_4])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_38_5])
+  if U32.eql(row, 19u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_3])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_19_5])
  
-  // else if U32.eql(row, 37u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_37_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_37_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_37_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_37_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_37_5])
+  else if U32.eql(row, 18u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_3])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_18_5])
  
-  // else if U32.eql(row, 36u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_36_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_36_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_36_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_36_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_36_5])
+  else if U32.eql(row, 17u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_3])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_17_5])
  
-  // else if U32.eql(row, 35u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_35_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_35_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_35_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_35_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_35_5])
+  else if U32.eql(row, 16u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_3])
+    else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_16_5])
  
-  // else if U32.eql(row, 34u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_34_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_34_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_34_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_34_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_34_5])
+  else if U32.eql(row, 15u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_3])
+    else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_15_5])
  
-  // else if U32.eql(row, 33u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_33_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_33_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_33_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_33_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_33_5])
+  else if U32.eql(row, 14u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_3])
+    else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_14_5])
  
-  // else if U32.eql(row, 32u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_32_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_32_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_32_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_32_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_32_5])
- 
-  // else if U32.eql(row, 31u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_31_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_31_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_31_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_31_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_31_5])
- 
-  // else if U32.eql(row, 30u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_30_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_30_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_30_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_30_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_30_5])
- 
-  // else if U32.eql(row, 29u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_29_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_29_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_29_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_29_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_29_5])
- 
-  // else if U32.eql(row, 28u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_28_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_28_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_28_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_28_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_28_5])
- 
-  // else if U32.eql(row, 27u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_27_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_27_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_27_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_27_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_27_5])
- 
-  // else if U32.eql(row, 26u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_26_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_26_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_26_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_26_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_26_5])
- 
-  // else if U32.eql(row, 25u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_25_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_25_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_25_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_25_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_25_5])
- 
-  // else if U32.eql(row, 24u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_24_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_24_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_24_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_24_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_24_5])
- 
-  // else if U32.eql(row, 23u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_23_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_23_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_23_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_23_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_23_5])
- 
-  // else if U32.eql(row, 22u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_22_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_22_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_22_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_22_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_22_5])
- 
-  // else if U32.eql(row, 21u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_21_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_21_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_21_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_21_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_21_5])
- 
-  // else if U32.eql(row, 20u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_20_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_20_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_20_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_20_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_20_5])
- 
-  // else if U32.eql(row, 19u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_19_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_19_5])
- 
-  // else if U32.eql(row, 18u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_18_4])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_18_5])
- 
-  // else if U32.eql(row, 17u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_0])
-  //   else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_4])
-  //   else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_17_5])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_17_6])
- 
-  // else if U32.eql(row, 16u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_0])
-  //   else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_4])
-  //   else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_16_5])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_16_6])
- 
-  // else if U32.eql(row, 15u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_0])
-  //   else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_4])
-  //   else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_15_5])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_15_6])
- 
-  // else if U32.eql(row, 14u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_0])
-  //   else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_4])
-  //   else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_5])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_14_6])
- 
-  // else if U32.eql(row, 13u) then 
-  //   if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_0])
-  //   else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_1])
-  //   else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_2])
-  //   else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_3])
-  //   else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_4])
-  //   else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_5])
-  //   else Mons.Attr.new_neutral([Mons.Assets.mid_city_13_6])
+  else if U32.eql(row, 13u) then 
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_1])
+    else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_2])
+    else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_13_3])
+    else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_14_4])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_13_5])
  
   else if U32.eql(row, 12u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_12_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_12_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_12_5])
  
   else if U32.eql(row, 11u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_11_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_11_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_11_5])
  
   else if U32.eql(row, 10u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_10_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_10_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_10_5])
  
   else if U32.eql(row, 9u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_9_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_9_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_9_5])
  
   else if U32.eql(row, 8u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_8_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_8_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_8_5])
  
   else if U32.eql(row, 7u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_7_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_7_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_7_5])
  
   else if U32.eql(row, 6u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_6_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_6_5])
  
   else if U32.eql(row, 5u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_5_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_5_5])
  
   else if U32.eql(row, 4u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_4_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_4_5])
  
   else if U32.eql(row, 3u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_3_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_3_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_3_5])
 
   else if U32.eql(row, 2u) then 
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_2_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_2_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_2_5])
 
   else if U32.eql(row, 1u) then
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_1_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_1_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_1_5])
 
   else if U32.eql(row, 0u) then
-    if U32.eql(column, 0u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_0])
-    else if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_1])
+    if U32.eql(column, 1u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_1])
     else if U32.eql(column, 2u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_2])
     else if U32.eql(column, 3u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_3])
     else if U32.eql(column, 4u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_4])
-    else if U32.eql(column, 5u) then Mons.Attr.new_neutral([Mons.Assets.mid_city_0_5])
-    else Mons.Attr.new_neutral([Mons.Assets.mid_city_0_6])
+    else Mons.Attr.new_neutral([Mons.Assets.mid_city_0_5])
+
   else Mons.Attr.new_blockable([Mons.Assets.void])
 
 // Mons.Kind.mid_city(row: U32, column: U32): Mons.Attr

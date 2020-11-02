@@ -749,6 +749,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     let grass = Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS(0, 0))
     let path_brick = Mons.Object.new_of_kind(Mons.Kind.Terrain(Mons.Kind.terrain.PATH_BRICK))
     let lvl0 = 0u
+    let path_blocker = Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0u))
     Mons.Map.code_to_tile.aux(code,[
       // Construction
       { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
@@ -761,112 +762,128 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "bk", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID_BLACK) ]},
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
       { ".n", [ grass ]},
-      { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0u))]},
+      { "xx", [ path_blocker ]},
       // Mid city
-      { "c0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 0u)) ]},
+    
       { "c1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 1u)) ]},
       { "c2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 2u)) ]},
       { "c3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 3u)) ]},
       { "c4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 4u)) ]},
       { "c5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 5u)) ]},
-      { "c6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 6u)) ]},
 
-      { "d0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 0u)) ]},
       { "d1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 1u)) ]},
       { "d2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 2u)) ]},
       { "d3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 3u)) ]},
       { "d4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 4u)) ]},
       { "d5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 5u)) ]},
-      { "d6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(1u, 6u)) ]},
 
-      { "e0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 0u)) ]},
       { "e1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 1u)) ]},
       { "e2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 2u)) ]},
       { "e3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 3u)) ]},
       { "e4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 4u)) ]},
       { "e5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 5u)) ]},
-      { "e6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 6u)) ]},
       
-      { "f0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 0u)) ]},
       { "f1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 1u)) ]},
-      { "f2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 2u)) ]},
+      { "f2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 2u)), path_blocker ]},
       { "f3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 3u)) ]},
-      { "f4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 4u)) ]},
+      { "f4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 4u)), path_blocker ]},
       { "f5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 5u)) ]},
-      { "f6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 6u)) ]},
       
-      { "g0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 0u)) ]},
       { "g1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 1u)) ]},
       { "g2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 2u)) ]},
       { "g3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 3u)) ]},
       { "g4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 4u)) ]},
       { "g5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 5u)) ]},
-      { "g6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 6u)) ]},
       
-      { "a0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 0u)) ]},
       { "a1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 1u)) ]},
       { "a2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 2u)) ]},
       { "a3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 3u)) ]},
       { "a4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 4u)) ]},
       { "a5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 5u)) ]},
-      { "a6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 6u)) ]},
       
-      { "b0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 0u)) ]},
       { "b1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 1u)) ]},
       { "b2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 2u)) ]},
       { "b3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 3u)) ]},
       { "b4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 4u)) ]},
       { "b5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 5u)) ]},
-      { "b6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(6u, 6u)) ]},
       
-      { "h0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 0u)) ]},
       { "h1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 1u)) ]},
       { "h2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 2u)) ]},
       { "h3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 3u)) ]},
       { "h4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 4u)) ]},
       { "h5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 5u)) ]},
-      { "h6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 6u)) ]},
       
-      { "i0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 0u)) ]},
       { "i1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 1u)) ]},
       { "i2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 2u)) ]},
       { "i3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 3u)) ]},
       { "i4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 4u)) ]},
       { "i5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 5u)) ]},
-      { "i6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 6u)) ]},
       
-      { "j0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 0u)) ]},
       { "j1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 1u)) ]},
       { "j2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 2u)) ]},
       { "j3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 3u)) ]},
       { "j4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 4u)) ]},
       { "j5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 5u)) ]},
-      { "j6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(9u, 6u)) ]},
       
-      { "k0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 0u)) ]},
       { "k1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 1u)) ]},
       { "k2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 2u)) ]},
       { "k3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 3u)) ]},
       { "k4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 4u)) ]},
       { "k5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 5u)) ]},
-      { "k6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(10u, 6u)) ]},
       
-      { "l0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 0u)) ]},
       { "l1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 1u)) ]},
       { "l2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 2u)) ]},
       { "l3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 3u)) ]},
       { "l4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 4u)) ]},
       { "l5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 5u)) ]},
-      { "l6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 6u)) ]},
       
-      { "m0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 0u)) ]},
       { "m1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 1u)) ]},
-      { "m2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 2u)) ]},
+      { "m2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 2u)), path_blocker ]},
       { "m3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 3u)) ]},
-      { "m4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 4u)) ]},
+      { "m4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 4u)), path_blocker ]},
       { "m5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 5u)) ]},
-      { "m6", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 6u)) ]},
+
+      { "n1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 1u)) ]},
+      { "n2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 2u)) ]},
+      { "n3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 3u)) ]},
+      { "n4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 4u)) ]},
+      { "n5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 5u)) ]},
+
+      { "o1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(14u, 1u)) ]},
+      { "o2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(14u, 2u)) ]},
+      { "o3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(14u, 3u)) ]},
+      { "o4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(14u, 4u)) ]},
+      { "o5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(14u, 5u)) ]},
+
+      { "p1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 1u)) ]},
+      { "p2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 2u)) ]},
+      { "p3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 3u)), path_blocker ]},
+      { "p4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 4u)) ]},
+      { "p5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 5u)) ]},
       
+      { "q1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(16u, 1u)) ]},
+      { "q2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(16u, 2u)) ]},
+      { "q3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(16u, 3u)) ]},
+      { "q4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(16u, 4u)) ]},
+      { "q5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(16u, 5u)) ]},
+
+      { "r1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(17u, 1u)) ]},
+      { "r2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(17u, 2u)) ]},
+      { "r3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(17u, 3u)) ]},
+      { "r4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(17u, 4u)) ]},
+      { "r5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(17u, 5u)) ]},
+      
+      { "s1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(18u, 1u)) ]},
+      { "s2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(18u, 2u)) ]},
+      { "s3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(18u, 3u)) ]},
+      { "s4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(18u, 4u)) ]},
+      { "s5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(18u, 5u)) ]},
+      
+      { "t1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 1u)) ]},
+      { "t2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 2u)) ]},
+      { "t3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 3u)) ]},
+      { "t4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 4u)) ]},
+      { "t5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 5u)) ]},
 
       { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
     ])
@@ -1047,7 +1064,7 @@ Mons.Game.hero_inital_position(
   let z = Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
   let new_pos = 
-    if U32.eql(z, 0u) then Pos32.new(x,U32.add(y, 30u),z)
+    if U32.eql(z, 0u) then Pos32.new(x,U32.add(y, 10u),z)
     if U32.eql(z, 1u) then Pos32.new(x,U32.add(y, 38u),z)
     else Mons.global_scr_mid
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
