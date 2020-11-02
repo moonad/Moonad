@@ -56,7 +56,7 @@ T Mons.Kind.const
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
 | Mons.Kind.terrain.VOID_BLACK;
-| Mons.Kind.terrain.GRASS(lvl: Nat, model: Nat);
+| Mons.Kind.terrain.FLOOR(lvl: U32, model: U32);
 | Mons.Kind.terrain.GRASS_PLANT;
 | Mons.Kind.terrain.BUSH(model: U32);
 | Mons.Kind.terrain.PLANT_0;
@@ -448,7 +448,11 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     case kin.ele as kin:
     | VOID => Mons.Attr.new_blockable([Mons.Assets.void]);
     | VOID_BLACK => Mons.Attr.new_blockable([Mons.Assets.void_black]);
-    | GRASS => Mons.Attr.new_neutral([Mons.Assets.grass_2]);
+    | FLOOR => Mons.Attr.new_neutral([Mons.Assets.0_brick_floor]);
+      // if U32.eql(kin.lvl, 1u) then
+      //   if U32.eql(kin.model, 0u) then Mons.Attr.new_neutral([Mons.Assets.0_brick_floor])
+      //   else Mons.Attr.new_neutral([Mons.Assets.0_brick_floor])
+      // else Mons.Attr.new_neutral([Mons.Assets.0_brick_floor]);
     | PLANT => Mons.Attr.new_neutral([Mons.Assets.grass_2]);
     | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
     | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
