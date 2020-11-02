@@ -751,6 +751,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     let lvl0 = 0u
     let path_blocker = Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(lvl0, 0u))
     Mons.Map.code_to_tile.aux(code,[
+      // Mons 
+      { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
       // Construction
       { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true), path_brick ]},
@@ -763,8 +765,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
       { ".n", [ grass ]},
       { "xx", [ path_blocker ]},
+
       // Mid city
-    
       { "c1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 1u)) ]},
       { "c2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 2u)) ]},
       { "c3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(0u, 3u)) ]},
@@ -784,15 +786,15 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "e5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(2u, 5u)) ]},
       
       { "f1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 1u)) ]},
-      { "f2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 2u)), path_blocker ]},
+      { "f2", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 2u)) ]},
       { "f3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 3u)) ]},
-      { "f4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 4u)), path_blocker ]},
+      { "f4", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 4u)) ]},
       { "f5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(3u, 5u)) ]},
       
       { "g1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 1u)) ]},
-      { "g2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 2u)) ]},
+      { "g2", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 2u)) ]},
       { "g3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 3u)) ]},
-      { "g4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 4u)) ]},
+      { "g4", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 4u)) ]},
       { "g5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(4u, 5u)) ]},
       
       { "a1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(5u, 1u)) ]},
@@ -809,13 +811,14 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       
       { "h1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 1u)) ]},
       { "h2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 2u)) ]},
-      { "h3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 3u)) ]},
+      { "h3", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 3u)) ]},
       { "h4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 4u)) ]},
       { "h5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(7u, 5u)) ]},
       
       { "i1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 1u)) ]},
       { "i2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 2u)) ]},
-      { "i3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 3u)) ]},
+      { "i3", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 3u)), 
+        Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true) ]},
       { "i4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 4u)) ]},
       { "i5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 5u)) ]},
       
@@ -838,9 +841,9 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "l5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(11u, 5u)) ]},
       
       { "m1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 1u)) ]},
-      { "m2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 2u)), path_blocker ]},
+      { "m2", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 2u)) ]},
       { "m3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 3u)) ]},
-      { "m4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 4u)), path_blocker ]},
+      { "m4", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 4u)) ]},
       { "m5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(12u, 5u)) ]},
 
       { "n1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(13u, 1u)) ]},
@@ -857,7 +860,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
 
       { "p1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 1u)) ]},
       { "p2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 2u)) ]},
-      { "p3", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 3u)), path_blocker ]},
+      { "p3", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 3u)) ]},
       { "p4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 4u)) ]},
       { "p5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(15u, 5u)) ]},
       
@@ -885,7 +888,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "t4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 4u)) ]},
       { "t5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 5u)) ]},
 
-      { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
+      // { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
     ])
 
   else if U32.eql(dim, 1u) then // lvl 0 - city destroied
@@ -1074,7 +1077,11 @@ Mons.Game.hero_inital_position(
 Mons.test.add_obj(pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   let obj = Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL)
-  let pos = Mons.image_to_global(74u, 74u, 38u, 65u, 0u)
+  // let pos = Mons.image_to_global(74u, 74u, 38u, 65u, 0u)
+  // let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
+  // let game = Mons.Game.set_map(map, game)
+
+  let pos = Mons.image_to_global(74u, 74u, 37u, 43u, 0u)
   let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
   let game = Mons.Game.set_map(map, game)
   let game = Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, obj, game)
