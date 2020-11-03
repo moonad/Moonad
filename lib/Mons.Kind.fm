@@ -55,17 +55,14 @@ T Mons.Kind.const
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
-| Mons.Kind.terrain.VOID_BLACK;
 | Mons.Kind.terrain.FLOOR(lvl: U32, model: U32);
 | Mons.Kind.terrain.GRASS_PLANT;
 | Mons.Kind.terrain.BUSH(model: U32);
 | Mons.Kind.terrain.PLANT_0;
 | Mons.Kind.terrain.SAND_0;
-| Mons.Kind.terrain.PATH_BRICK;
 | Mons.Kind.terrain.PATH_BLOCKER(lvl: U32, model: U32);
 | Mons.Kind.terrain.MID_CITY(row: U32, column: U32);
-// | Mons.Kind.terrain.MID_CITY5(column: U32);
-// | Mons.Kind.terrain.MID_CITY4(column: U32);
+| Mons.Kind.terrain.MON_AREA(pos_mon: U32);
 
 T Mons.Kind.inter
 | Mons.Kind.inter.LEVER(id: U32);
@@ -148,6 +145,60 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
   | const    => Bool.false;
   | terrain  => Bool.false;
   | inter => Bool.false;
+
+Mons.Kind.is_mon_area(adve_kin: Mons.Kind): Bool
+  case adve_kin:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain =>
+    case adve_kin.ele:
+    | VOID => Bool.false;
+    | FLOOR => Bool.false;
+    | GRASS_PLANT => Bool.false;
+    | BUSH => Bool.false;
+    | PLANT_0 => Bool.false;
+    | SAND_0 => Bool.false;
+    | PATH_BLOCKER => Bool.false;
+    | MID_CITY => Bool.false;
+    | MON_AREA => Bool.true;
+  ;
+  | inter => Bool.false;
+
+Mons.Kind.is_void(adve_kin: Mons.Kind): Bool
+  case adve_kin:
+  | mons => Bool.false;
+  | const => Bool.false;
+  | terrain =>
+    case adve_kin.ele:
+    | VOID => Bool.true;
+    | FLOOR => Bool.false;
+    | GRASS_PLANT => Bool.false;
+    | BUSH => Bool.false;
+    | PLANT_0 => Bool.false;
+    | SAND_0 => Bool.false;
+    | PATH_BLOCKER => Bool.false;
+    | MID_CITY => Bool.false;
+    | MON_AREA => Bool.false;
+  ;
+  | inter => Bool.false;
+
+Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
+  case adve_kin:
+  | mons => hero_pos;
+  | const => hero_pos;
+  | terrain =>
+    case adve_kin.ele as terrain:
+    | VOID => hero_pos;
+    | FLOOR => hero_pos;
+    | GRASS_PLANT => hero_pos;
+    | BUSH => hero_pos;
+    | PLANT_0 => hero_pos;
+    | SAND_0 => hero_pos;
+    | PATH_BLOCKER => hero_pos;
+    | MID_CITY => hero_pos;
+    | MON_AREA => terrain.pos_mon ;
+  ;
+  | inter => hero_pos;
 
 Mons.Kind.animate_idle(kind: Mons.Kind): Bool
   case kind:
@@ -232,6 +283,9 @@ Mons.Kind.new_mons(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Ob
   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi)),
     // Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH)
     ]
+
+Mons.Kind.new_mon(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.false, type, agi))
 
 Mons.Kind.new_boss(kin: Mons.Kind.mons, type: Mons.Type, agi: U32): List(Mons.Object)
   [ Mons.Object.new_of_kind(Mons.Kind.Mons(kin, Bool.true, type, agi)),
@@ -447,8 +501,8 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   | Mons.Kind.terrain => 
     case kin.ele as kin:
     | VOID => Mons.Attr.new_blockable([Mons.Assets.void]);
-    | VOID_BLACK => Mons.Attr.new_blockable([Mons.Assets.void_black]);
-    | FLOOR => Mons.Attr.new_neutral([Mons.Assets.0_brick_floor]);
+    // | VOID_BLACK => Mons.Attr.new_blockable([Mons.Assets.void_black]);
+    | FLOOR => Mons.Attr.new_neutral([Mons.Assets.grass_2]);
       // if U32.eql(kin.lvl, 1u) then
       //   if U32.eql(kin.model, 0u) then Mons.Attr.new_neutral([Mons.Assets.0_brick_floor])
       //   else Mons.Attr.new_neutral([Mons.Assets.0_brick_floor])
@@ -457,9 +511,10 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
     | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
     | SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
-    | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
+    // | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
     | PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | MID_CITY => Mons.Kind.mid_city(kin.row, kin.column);
+    | MON_AREA => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
     ; // end terrain
 
     | INTERACTIVE =>

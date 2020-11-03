@@ -84,7 +84,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | psychic => "Hit 2hp + 10% sleep and hit";
   | ancient_power => "Hit 4hp + 10% adve miss the attack";
   | thunder_wave => "Hit 6";
-  | charge => "Double the hit if adve has minimize";
+  | charge => "Double hit if adve has minimize";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
 
