@@ -356,6 +356,10 @@ Mons.Turn.is_last_player_move(turn: Mons.Turn): Bool
   open turn:
   U32.eql(turn.play, 1u)
 
+Mons.Turn.hero_run(turn: Mons.Turn): Bool
+  open turn:
+  U32.eql(turn.play, 5u)
+
 Mons.Turn.hero_turn(turn: Mons.Turn): Bool
   open turn:
   turn.exec_hero
@@ -1343,6 +1347,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 2, stt.turn, game)
     else if U16.eql(cmd, 'K') then
       Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 3, stt.turn, game)
+    else if U16.eql(cmd, 'R') then
+      Mons.Game.exec_turn(hero_obj, adve_obj, pos, hero_idx, adve_idx, 4, stt.turn, game)
     else if Mons.is_walk_cmd(cmd) then
       if Mons.Kind.is_mon_area(adve_obj.kin) then 
         let adve_pos = Mons.Kind.area_mon_pos(adve_obj.kin, pos)
@@ -1362,9 +1368,9 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | terrain => Mons.Game.walk(cmd, pos, hero_idx, game);
         | inter => Mons.Game.walk(cmd, pos, hero_idx, game);
       else 
-        // if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
-        // then Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
-        // else 
+        if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
+        then Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+        else 
         // Note: uncomment the code above to insert not moving while in battle
         Mons.Game.walk(cmd, pos, hero_idx, game)
 
@@ -1409,8 +1415,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
 
         open stt.turn as turn:
         if Mons.Turn.is_active(stt.turn) then
-          if Mons.Turn.is_last_player_move(stt.turn) then
+          if Bool.or(Mons.Turn.is_last_player_move(stt.turn), Mons.Turn.hero_run(stt.turn)) then
             let game = Mons.Skill.apply_end_turn_eff(hero_idx, adve_idx, pos, game)
+            if Mons.Turn.hero_run(stt.turn) then
+              use skp = Debug.log<>(String.flatten(["Hero run from battle"]))
+              let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
+              // TODO: Move to last check point
+              let game = Mons.Game.move_obj(pos, adve_idx, Mons.Kind.get_pos(adve_obj.kin), adve_obj, game)
+              let game = Mons.Game.move_hero_down(game.usr, hero_obj, pos, hero_idx, game)
+              Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+            else
             set_stt_game(game)
           else 
           let turn = Mons.Turn.new(
@@ -1517,6 +1531,14 @@ Mons.Game.exec_turn(
 
   if Bool.not(Mons.Turn.is_active(turn)) then
     let game = Mons.Skill.apply_inital_eff(hero_idx, adve_idx, pos, game)
+
+    if Nat.eql(code_skill, 4) then // Run from gram, only adve plays
+      let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
+      let game = Mons.Skill.cast(pos, hero_idx, adve_idx, Mons.Skill.run, game)
+      let turn = Mons.Turn.new(Bool.true, Mons.Skill.run, adve_skill, 5u)
+      Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
+    else
+
     if Mons.Game.hero_start_attacking(hero_mon_obj.kin, adve_obj.kin) 
     then
       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
@@ -1526,7 +1548,6 @@ Mons.Game.exec_turn(
     else 
       let game = Mons.Skill.cast(pos, adve_idx, hero_idx, adve_skill, game)
       let game = Mons.Skill.cast(pos, hero_idx, adve_idx, hero_skill, game) // hero cast
-      
       let turn = Mons.Turn.new(Bool.false, hero_skill, adve_skill, 2u)
       Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
   else game
@@ -1880,15 +1901,15 @@ Mons.Input.list: List(Pair(Char, Bits))
     {'i', b0(b0(b0(b0(b1(b1(b0(b1(bn))))))))},
     {'j', b0(b0(b0(b0(b1(b1(b1(b0(bn))))))))},
     {'k', b0(b0(b0(b0(b1(b1(b1(b1(bn))))))))},
-    {'P', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))}, //TODO remove! for now its just a hack to test dimensions
-    {'O', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))}, //TODO remove! for now its just a hack to test dimensions
+    // {'P', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))},
     {'e', b0(b0(b0(b1(b0(b0(b0(b0(bn))))))))},
     {'E', b0(b0(b0(b1(b0(b0(b0(b1(bn))))))))},
     {'c', b0(b0(b0(b1(b0(b0(b1(b1(bn))))))))},
     {'C', b0(b0(b0(b1(b0(b1(b1(b1(bn))))))))},
     {'z', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))},
     {'Z', b0(b0(b1(b0(b0(b0(b0(b0(bn))))))))},
-    {'T', b0(b0(b1(b0(b0(b0(b0(b1(bn))))))))} //TODO remove! just using to test heal
+    {'R', b0(b0(b1(b0(b0(b0(b0(b1(bn))))))))},
+    {'r', b0(b0(b0(b1(b1(b1(b1(b1(bn))))))))}
   ]
 
 // Maps from chars to their codes
