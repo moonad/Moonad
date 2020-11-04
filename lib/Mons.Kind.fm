@@ -52,6 +52,7 @@ T Mons.Kind.const
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.BIG_STAIRS;
 | Mons.Kind.const.CRYSTAL;
+| Mons.Kind.const.PORTAL;
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
@@ -365,7 +366,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
       [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
-      set_pos_lvl1(18u, 50u));
+      set_pos_lvl1(18u, 51u));
     
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
@@ -512,6 +513,13 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.0_crystal3, Mons.Assets.0_crystal4, Mons.Assets.0_crystal5,
         Mons.Assets.0_crystal6, Mons.Assets.0_crystal7
       ]);
+    | PORTAL => 
+      Mons.Attr.new_blockable([
+        Mons.Assets.portal_0, Mons.Assets.portal_1, Mons.Assets.portal_2,
+        Mons.Assets.portal_3, Mons.Assets.portal_4, Mons.Assets.portal_5,
+        Mons.Assets.portal_6, Mons.Assets.portal_7
+      ]);
+
   ; // end of construction
 
   | Mons.Kind.terrain => 
@@ -527,8 +535,9 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | BUSH => Mons.Attr.new_neutral([Mons.Assets.bush_0, Mons.Assets.bush_1]);
     | PLANT_0 => Mons.Attr.new_blockable([Mons.Assets.home_decor_plant_0]);
     | SAND_0 => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
-    // | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
-    | PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
+    | PATH_BLOCKER => 
+      if U32.eql(kin.lvl, 1u) then Mons.Attr.new_blockable([Mons.Assets.grass_2])
+      else Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | MID_CITY => Mons.Kind.mid_city(kin.row, kin.column);
     | MON_AREA => Mons.Attr.new_neutral([Mons.Assets.grass_2]);
     ; // end terrain

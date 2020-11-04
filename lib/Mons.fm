@@ -912,14 +912,21 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // Construction
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
+      { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
       // Terrain
       { ".g", [ floor ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
       { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(1u, 0u))] }
       // { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
       { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), floor ]},
-      { "zo", [ get_pos(Mons.Kind.mons.ZOIO) ]}
-      
+      { "zo", [ get_pos(Mons.Kind.mons.ZOIO) ]},
+      { "mi", [ get_pos(Mons.Kind.mons.MIMIC) ]},
+      { "po", [ get_pos(Mons.Kind.mons.POISOLICK) ]},
+      { "az", [ get_pos(Mons.Kind.mons.AZULA) ]},
+      { "cy", [ get_pos(Mons.Kind.mons.CYCLOPE) ]},
+      { "tr", [ get_pos(Mons.Kind.mons.TROWL) ]},
+      { "em", [ get_pos(Mons.Kind.mons.EMERELDER) ]},
+
     ]) 
   else // lvl 1 - Mons type "normal" 
   let path_brick = Mons.Kind.new_terrain(Mons.Kind.terrain.FLOOR(1u, 0u))
@@ -1092,8 +1099,13 @@ Mons.Game.add_mon(kind_mon: Mons.Kind.mons, agi: U32, game: Mons.Game): Mons.Gam
 
 // Works for image to global
 Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
-  let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 2u, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC, 0u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.POISOLICK, 2u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 1u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, game)
   game
 
 // TODO
