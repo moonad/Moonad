@@ -897,13 +897,13 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     let azula_area = Mons.Kind.new_terrain(Mons.Kind.terrain.MON_AREA(azula_pos))
     Mons.Map.code_to_tile.aux(code,[
       // Mons
-      { "m0", Mons.Kind.new_mons(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)},
-      { "m1", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 1u)},
-      { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
-      { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
-      { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
-      { "m5", Mons.Kind.new_mons(Mons.Kind.mons.CYCLOPE, Mons.Type.normal, 2u)},
-      { "m6", Mons.Kind.new_mons(Mons.Kind.mons.TROWL, Mons.Type.normal, 2u)},
+      // { "m0", Mons.Kind.new_mons(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)},
+      // { "m1", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 1u)},
+      // { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
+      // { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
+      // { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
+      // { "m5", Mons.Kind.new_mons(Mons.Kind.mons.CYCLOPE, Mons.Type.normal, 2u)},
+      // { "m6", Mons.Kind.new_mons(Mons.Kind.mons.TROWL, Mons.Type.normal, 2u)},
 
       // Construction
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
@@ -1077,16 +1077,17 @@ Mons.Game.hero_inital_position(
   let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
   Mons.Game.set_user_pos(usr, new_pos, game)
 
+// mon: a Mon type
+// adi: Mon agility
+// pos: Mons.Kind.get_pos
+Mons.Game.add_mon(kind_mon: Mons.Kind.mons, agi: U32, game: Mons.Game): Mons.Game
+  let mon_kin = Mons.Kind.Mons(kind_mon, Bool.false, Mons.Type.normal, agi)
+  let mon_obj = Mons.Object.new_of_kind(mon_kin)
+  Mons.Game.move_obj(Mons.global_scr_mid, 0u, Mons.Kind.get_pos(mon_kin), mon_obj, game)
+
 // Works for image to global
 Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
-  let add_mon = 
-    ((mon: Mons.Kind.mons, agi: U32, pos: Mons.Kind -> Pos32)
-      let mon_kin = Mons.Kind.Mons(mon, Bool.false, Mons.Type.normal, agi)
-      let mon_obj = Mons.Object.new_of_kind(mon_kin)
-      Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos(mon_kin), mon_obj, game))
-    :: Mons.Kind.mons -> U32 -> (Mons.Kind -> Pos32) -> Mons.Game
-
-  let game = add_mon(Mons.Kind.mons.AZULA, 2u, Mons.Kind.get_pos)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 2u, game)
   game
 
 // TODO
@@ -1372,6 +1373,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
         else if Mons.Object.is_obj_defeated(curr_mon) then // Battle ended
           let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
+          let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
+          let game = Mons.Game.add_mon(kind.ele, kind.agi, game)
           if Mons.Kind.is_hero(curr_mon.kin) then
             let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
