@@ -4,6 +4,7 @@ T Mons.Skill
 | Mons.Skill.hit_2;
 | Mons.Skill.heal;
 | Mons.Skill.none;
+| Mons.Skill.run;
 | Mons.Skill.dig;
 | Mons.Skill.sand_tomb;
 | Mons.Skill.protect;
@@ -34,6 +35,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | hit_2 => "damage 2"; // test
   | heal => "heal 3"; // test
   | none => "does nothing"; // test
+  | run => "Hero run from battle";
   | dig => "Protect for 1 turn. On the next turn, will attack and effects are applied";
   | sand_tomb => "Apply an initial dmg and +1/16 of MPH for 5 turns";
   | protect => "Avoid dmg on the next turn. Cannot be used on every turn.";
@@ -64,6 +66,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | hit_2 => "damage 2"; // test
   | heal => "heal 3"; // test
   | none => "does nothing"; // test
+  | run => "Run from battle";
   | dig => "Add hit next turn, add invul";
   | sand_tomb => "Dmg this turn + burn(5)";
   | protect => "Avoid dmg next turn";
@@ -84,7 +87,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | psychic => "Hit 2hp + 10% sleep and hit";
   | ancient_power => "Hit 4hp + 10% adve miss the attack";
   | thunder_wave => "Hit 6";
-  | charge => "Double the hit if adve has minimize";
+  | charge => "Double hit if adve has minimize";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
 
@@ -94,6 +97,7 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | hit_2  => "hit 2";
   | heal   => "heal"; 
   | none => "none";
+  | run => "Run";
   | dig => "Dig";
   | sand_tomb => "Sand bomb";
   | protect => "Protect";
@@ -333,6 +337,7 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     Mons.Skill.damage_eff(target_obj, pos, target, val, game);
   | heal => Mons.Skill.heal_eff(source_obj, pos, source, 3u, game);
   | none => game;
+  | run => game;
 
   // Invulnerable for this turn. On the next turn, will attack and effects can be applied
   | dig => // OK
