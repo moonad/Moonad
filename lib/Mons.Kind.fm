@@ -341,43 +341,43 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
       [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
-      default_pos);
+      set_pos_lvl1(38u, 53u));
     
     | CYCLOPE => Mons.Attr.new_battleable(
       Mons.Assets.pic_cyclop, [Mons.Assets.mons_cyclop_d_0], "CYCLOPE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_cyclop_u, Mons.Assets.battle_cyclop_d),
       [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ],
-      default_pos);
+      set_pos_lvl1(61u, 51u));
     
     | POISOLICK => Mons.Attr.new_battleable(
       Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
       [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball],
-      default_pos);
+      set_pos_lvl1(19u, 39u));
     
     | TROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
       [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility],
-      default_pos);
+      set_pos_lvl1(62u, 34u));
     
     | MIMIC => Mons.Attr.new_battleable( // OK
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
       [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
-      default_pos);
+      set_pos_lvl1(18u, 50u));
     
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
       [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic],
-      set_pos_lvl1(38u, 53u));
+      set_pos_lvl1(46u, 39u));
     
     | EMERELDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
       [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
-      default_pos);
+      set_pos_lvl1(16u, 23u));
 
 //     | BATH => Mons.Attr.new_battleable(
       // Mons.Assets.pic_bath, [Mons.Assets.mons_bath_d_0], "BATH",
@@ -530,7 +530,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     // | PATH_BRICK => Mons.Attr.new_neutral([Mons.Assets.rock_path_0_m]);
     | PATH_BLOCKER => Mons.Attr.new_blockable([Mons.Assets.rock_path_0_m]);
     | MID_CITY => Mons.Kind.mid_city(kin.row, kin.column);
-    | MON_AREA => Mons.Attr.new_neutral([Mons.Assets.sand_0]);
+    | MON_AREA => Mons.Attr.new_neutral([Mons.Assets.grass_2]);
     ; // end terrain
 
     | INTERACTIVE =>

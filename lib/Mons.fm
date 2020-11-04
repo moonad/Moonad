@@ -889,12 +889,16 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
 
     ])
 
-  else if U32.eql(dim, 1u) then // lvl 0 - city destroied
+  else if U32.eql(dim, 1u) then // lvl 1 - Normal type
     let floor = Mons.Kind.new_terrain(Mons.Kind.terrain.FLOOR(1u, 0u))
-    let azula_pos = Mons.image_to_global(81u, 81u, 38u, 53u, 1u)
-    // TODO: usar a posição global do Object (no console tava mostrando números > 2000)
-    // let test_pos = 
-    let azula_area = Mons.Kind.new_terrain(Mons.Kind.terrain.MON_AREA(azula_pos))
+    let get_pos = 
+      ((kind_mon: Mons.Kind.mons)
+        // placeholder. The right Mon will be added later.
+        let mon_kin = Mons.Kind.Mons(kind_mon, Bool.false, Mons.Type.normal, 2u)
+        let pos = Mons.Kind.get_pos(mon_kin)
+        Mons.Kind.new_terrain(Mons.Kind.terrain.MON_AREA(pos))) 
+      :: Mons.Kind.mons -> Mons.Object
+
     Mons.Map.code_to_tile.aux(code,[
       // Mons
       // { "m0", Mons.Kind.new_mons(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)},
@@ -914,7 +918,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "xx", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(1u, 0u))] }
       // { "bg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.BUSH), grass ]},
       { "pg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PLANT_0), floor ]},
-      { "S0", [ azula_area, Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]}
+      { "zo", [ get_pos(Mons.Kind.mons.ZOIO) ]}
+      
     ]) 
   else // lvl 1 - Mons type "normal" 
   let path_brick = Mons.Kind.new_terrain(Mons.Kind.terrain.FLOOR(1u, 0u))
@@ -1088,6 +1093,7 @@ Mons.Game.add_mon(kind_mon: Mons.Kind.mons, agi: U32, game: Mons.Game): Mons.Gam
 // Works for image to global
 Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 2u, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, game)
   game
 
 // TODO
