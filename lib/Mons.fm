@@ -1328,7 +1328,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     //   else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
     // else game
     // Uncomment to skip the introduction (and comment the code above)
-    Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+    set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
@@ -1369,7 +1369,9 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | inter => Mons.Game.walk(cmd, pos, hero_idx, game);
       else 
         if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
-        then Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+        then 
+          use skp = Debug.log<>("> To run from battle press [R]")
+          Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
         else 
         // Note: uncomment the code above to insert not moving while in battle
         Mons.Game.walk(cmd, pos, hero_idx, game)
@@ -1403,14 +1405,14 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
-            Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+            set_stt_game(game)
           else
             let adve_obj = Mons.Object.set_dmg(adve_obj, 0u) // adve heals all hp
             let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
             let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
-            Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+            set_stt_game(game)
         else // Turn ended
 
         open stt.turn as turn:
@@ -1423,7 +1425,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               // TODO: Move to last check point
               let game = Mons.Game.move_obj(pos, adve_idx, Mons.Kind.get_pos(adve_obj.kin), adve_obj, game)
               let game = Mons.Game.move_hero_down(game.usr, hero_obj, pos, hero_idx, game)
-              Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+              set_stt_game(game)
             else
             set_stt_game(game)
           else 
@@ -1431,17 +1433,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             Bool.not(turn.exec_hero),
             turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
           Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-        else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+        else set_stt_game(game)
 
       ;
 
       | construction =>
-        // let qtd_boss = Nat.to_u32(List.length<>(hero_obj.bos))
-        // let lvl_mons = Bool.or(
-          // Bool.not(U32.eql(U32.div(Mons.Game.dim(game), 2u), 0u)), 
-          // U32.eql(Mons.Game.dim(game), 0u)) // TODO: Update to 1u when lvl 0 is ready
-        // let mons_lvl = Bool.not(U32.eql(U32.mod(Mons.Game.dim(game), 2u), 0u))
-        // let defeated_boss = U32.eql(U32.add(hero_idx, 1u), qtd_boss)
         let can_use_portal = Mons.Game.can_use_portal(Mons.Game.dim(game))
         if can_use_portal then
           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
@@ -1454,7 +1450,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           let adjacent_obj = Mons.Object.get_adjacent_obj(pos, hero_obj.dir, game.map)
           open adjacent_obj:
           Mons.Kind.exec_eff(adjacent_obj.kin, game)
-        else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
+        else set_stt_game(game);
 
       | inter => 
         let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
@@ -1470,17 +1466,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           let hero_obj = Mons.Object.add_defeated_mon(adve_obj, hero_obj)
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+          set_stt_game(game)
         else game;
-      | const => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
-      | terrain => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
-      | inter => Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game); //set_stt_game(game);
+      | const => set_stt_game(game);
+      | terrain => set_stt_game(game);
+      | inter => set_stt_game(game);
 
     else game ;
 
     | inventory => 
-      if U16.eql(cmd, 'e') then
-        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+      if U16.eql(cmd, 'e') then set_stt_game(game)
       
       else // update current Mon using 'w' or 's'
         Mons.Object.change_curr_mon(
@@ -1494,13 +1489,13 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         let hero_obj = Mons.Object.set_mon(2u, hero_obj) // TODO: why 2u? review
         let game = Mons.Game.map_del(pos, adve_idx, game)
         let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+        set_stt_game(game)
 
       else if U16.eql(cmd, 'z') then // Free Mon
         if Mons.Object.is_obj_defeated(adve_obj) then
           let game = Mons.Game.map_del(pos, adve_idx, game)
           let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-          Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game) //set_stt_game(game)
+          set_stt_game(game)
         else game
 
       else // update current Mon using 'w' or 's'
