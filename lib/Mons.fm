@@ -71,7 +71,8 @@ T Mons.Attr
   idl: List(Image3D), // idle
   pic: Image3D,
   battle_spr: (is_up: Bool) -> Image3D,
-  skills: List(Mons.Skill)
+  skills: List(Mons.Skill),
+  pos: Pos32
 );
 
 // A 2d map of game tiles
@@ -1077,23 +1078,15 @@ Mons.Game.hero_inital_position(
   Mons.Game.set_user_pos(usr, new_pos, game)
 
 // Works for image to global
-Mons.test.add_obj(pos: Pos32, game: Mons.Game): Mons.Game
-  open game:
-  // let obj = Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL)
-  // let pos = Mons.image_to_global(74u, 74u, 38u, 65u, 0u)
-  // let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
-  // let game = Mons.Game.set_map(map, game)
+Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
+  let add_mon = 
+    ((mon: Mons.Kind.mons, agi: U32, pos: Mons.Kind -> Pos32)
+      let mon_kin = Mons.Kind.Mons(mon, Bool.false, Mons.Type.normal, agi)
+      let mon_obj = Mons.Object.new_of_kind(mon_kin)
+      Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos(mon_kin), mon_obj, game))
+    :: Mons.Kind.mons -> U32 -> (Mons.Kind -> Pos32) -> Mons.Game
 
-  // let pos = Mons.image_to_global(74u, 74u, 37u, 43u, 0u)
-  // let map = Mons.Map.push(Mons.global_scr_mid, obj, game.map)
-  use skp = Debug.log<>(">> Add object")
-  let azula_pos = Mons.image_to_global(81u, 81u, 38u, 53u, 1u)
-  let azula = Mons.Kind.new_mon(Mons.Kind.mons.AZULA, Mons.Type.normal, 2u)
-  // let map = Mons.Map.push(azula_pos, azula, game.map)
-
-  // let game = Mons.Game.set_map(map, game)
-  // let game = Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, obj, game)
-  let game = Mons.Game.move_obj(Mons.global_scr_mid, 0u, azula_pos, azula, game)
+  let game = add_mon(Mons.Kind.mons.AZULA, 2u, Mons.Kind.get_pos)
   game
 
 // TODO
@@ -1175,14 +1168,13 @@ Mons.Attr.new_battleable(
   spr: List(Image3D),
   name: String,
   battle_spr: Bool -> Image3D,
-  skills: List(Mons.Skill)
+  skills: List(Mons.Skill),
+  pos: Pos32
   ): Mons.Attr
   Mons.Attr.new(
     Bool.false, 40u, 0u, name,
     Mons.Kind.set_static_sprites(spr),
-    spr,
-    pic,
-    battle_spr, skills)
+    spr, pic, battle_spr, skills, pos)
 
 // Mons.Attr with "block" equals to Bool.true
 Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
@@ -1191,7 +1183,8 @@ Mons.Attr.new_blockable(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_static_sprites(spr),
     spr,
     Mons.Kind.set_pic(spr),
-    Mons.Kind.set_default_battle_spr, [])
+    Mons.Kind.set_default_battle_spr, [], 
+    Mons.global_scr_mid) // placeholder
 
 // Mons.Attr with "block" and "batlles" equals to Bool.false
 Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
@@ -1200,7 +1193,8 @@ Mons.Attr.new_neutral(spr: List(Image3D)): Mons.Attr
     Mons.Kind.set_static_sprites(spr),
     spr,
     Mons.Kind.set_pic(spr),
-    Mons.Kind.set_default_battle_spr, [])
+    Mons.Kind.set_default_battle_spr, [],
+    Mons.global_scr_mid) // placeholder
 
 Mons.Attr.new_hero: Mons.Attr
   Mons.Attr.new(Bool.false, 40u, 0u, "HERO",
@@ -1218,7 +1212,8 @@ Mons.Attr.new_hero: Mons.Attr
         [ ],
         Mons.Assets.boy_d_0,
       (is_up) Bool.if<>(is_up,Mons.Assets.battle_boy_u,Mons.Assets.battle_boy_u),
-      [Mons.Skill.hero_kill, Mons.Skill.none, Mons.Skill.none, Mons.Skill.none] 
+      [Mons.Skill.hero_kill, Mons.Skill.none, Mons.Skill.none, Mons.Skill.none],
+      Mons.global_scr_mid // placeholder
   )
 
 Mons.Attr.new_mage: Mons.Attr
@@ -1228,7 +1223,8 @@ Mons.Attr.new_mage: Mons.Attr
     [Mons.Assets.mons_mage],
     Mons.Assets.mons_mage,
     (is_up: Bool) Mons.Assets.battle_mage_d,
-    Mons.Skill.dummy_skills)
+    Mons.Skill.dummy_skills, 
+    Mons.global_scr_mid) // placeholder
 
 Mons.Dir.move(dir: Mons.Dir, pos: Pos32): Pos32
   case dir:
@@ -1337,7 +1333,9 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | mon =>
           let game = Mons.Game.walk(cmd, pos, hero_idx, game)
           if U32.eql(hero_obj.ani, 0u) then
+            // Move adve to hero`s position
             let game = Mons.Game.move_obj(adve_pos, 0u, pos, mon_area_obj, game)
+            // Move hero to the same position. This is to be in idx 0u
             let game = Mons.Game.move_obj(pos, 1u, pos, hero_obj, game)
             Mons.Game.set_user_pos(game.usr, pos, game)
           else game;
@@ -1345,10 +1343,10 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | terrain => Mons.Game.walk(cmd, pos, hero_idx, game);
         | inter => Mons.Game.walk(cmd, pos, hero_idx, game);
       else 
-        if Mons.Object.is_battling(adve_obj, hero_obj) then 
-        let game = Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
-        game
-        else
+        // if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
+        // then Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+        // else 
+        // Note: uncomment the code above to insert not moving while in battle
         Mons.Game.walk(cmd, pos, hero_idx, game)
 
     else if U16.eql(cmd, 'e') then // Open hero's bag
@@ -1974,7 +1972,7 @@ Mons.start(online: Bool): App(Mons.Game)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        let game = Mons.test.add_obj(pos, game)
+        let game = Mons.Game.add_mons_to_map(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];

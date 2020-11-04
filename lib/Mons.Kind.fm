@@ -310,6 +310,10 @@ Mons.Kind.update_agi(kind: Mons.Kind, agi: U32): Mons.Kind
   | terrain => kind;
   | inter => kind;
 
+Mons.Kind.get_pos(kin: Mons.Kind): Pos32
+  open Mons.Kind.attr(kin) as attr:
+  attr.pos
+
 // blocks: Bool,
 // battles: Bool,
 // mhp: U32,
@@ -317,6 +321,10 @@ Mons.Kind.update_agi(kind: Mons.Kind, agi: U32): Mons.Kind
 // name: String
 // spr: (x: U32) -> (y: U32) -> (obj_ani: U32) -> (obj_dir: Mons.Dir)-> List(Image3D)
 Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
+  let default_pos = Mons.global_scr_mid
+  let set_pos_lvl1 = 
+    ((x: U32, y: U32) Mons.image_to_global(81u, 81u, x, y, 1u))
+    :: U32 -> U32 -> Pos32
   case kin:
   | Mons.Kind.mons => 
     case kin.ele as kin:
@@ -326,42 +334,50 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | BEHOLDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
-      Mons.Skill.dummy_skills);
+      Mons.Skill.dummy_skills, 
+      default_pos);
     
     | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig]);
+      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
+      default_pos);
     
     | CYCLOPE => Mons.Attr.new_battleable(
       Mons.Assets.pic_cyclop, [Mons.Assets.mons_cyclop_d_0], "CYCLOPE",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_cyclop_u, Mons.Assets.battle_cyclop_d),
-      [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ]);
+      [Mons.Skill.slam, Mons.Skill.rock_smash, Mons.Skill.recover, Mons.Skill.counter ],
+      default_pos);
     
     | POISOLICK => Mons.Attr.new_battleable(
       Mons.Assets.pic_poisolick, [Mons.Assets.mons_poisolick_d_0], "POISOLICK",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_poisolick_u, Mons.Assets.battle_poisolick_d),
-      [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball]);
+      [Mons.Skill.crunch, Mons.Skill.sludge_bomb, Mons.Skill.iron_defense, Mons.Skill.gyro_ball],
+      default_pos);
     
     | TROWL => Mons.Attr.new_battleable(
       Mons.Assets.pic_trowl, [Mons.Assets.mons_trowl_d_0], "TROWL",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_trowl_u, Mons.Assets.battle_trowl_d),
-      [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility]);
+      [Mons.Skill.wing_attack, Mons.Skill.crunch, Mons.Skill.recover, Mons.Skill.agility],
+      default_pos);
     
     | MIMIC => Mons.Attr.new_battleable( // OK
       Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
-      [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater]);
+      [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
+      default_pos);
     
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_azula_u, Mons.Assets.battle_azula_d),
-      [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic]);
+      [Mons.Skill.wing_attack, Mons.Skill.moonlight, Mons.Skill.play_rough, Mons.Skill.psychic],
+      set_pos_lvl1(38u, 53u));
     
     | EMERELDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_emerelder, [Mons.Assets.mons_emerelder_d_0], "EMERELDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_emerelder_u, Mons.Assets.battle_emerelder_d),
-      [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense]);
+      [Mons.Skill.ancient_power, Mons.Skill.thunder_wave, Mons.Skill.charge, Mons.Skill.iron_defense],
+      default_pos);
 
 //     | BATH => Mons.Attr.new_battleable(
       // Mons.Assets.pic_bath, [Mons.Assets.mons_bath_d_0], "BATH",
