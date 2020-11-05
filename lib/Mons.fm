@@ -909,7 +909,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // { "m1", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 1u)},
       // { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
       // { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
-      // { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
+      { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // { "m5", Mons.Kind.new_mons(Mons.Kind.mons.CYCLOPE, Mons.Type.normal, 2u)},
       // { "m6", Mons.Kind.new_mons(Mons.Kind.mons.TROWL, Mons.Type.normal, 2u)},
 
@@ -1098,28 +1098,18 @@ Mons.Game.hero_inital_position(
     if U32.eql(Pos32.get_z(pos), 0u) then 1u 
     else Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
-  if U32.eql(z, 0u) then 
-    let new_pos = Pos32.new(x,U32.add(y, 20u), 1u)
+  if U32.eql(z, 0u) then
+    let new_pos = Pos32.new(x,U32.add(y, 20u), 0u)
     let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
     Mons.Game.set_user_pos(usr, new_pos, game)
   else 
     let new_pos = 
-    if U32.eql(z, 1u) then
-     Pos32.new(x,U32.add(y, 38u), 1u)
-    // let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
-    // let game = Mons.Game.add_mons_to_map(pos, game)
-    // Mons.Game.set_user_pos(usr, new_pos, game)
-    else if U32.eql(z, 2u) then
-      Pos32.new(x,U32.add(y, 5u), 2u)
-      // let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
-      // let game = Mons.Game.add_mons_to_map(pos, game)
-      // Mons.Game.set_user_pos(usr, new_pos, game)
+    if U32.eql(z, 1u) then Pos32.new(x,U32.add(y, 38u), 1u)
+    else if U32.eql(z, 2u) then Pos32.new(x,U32.add(y, 5u), 2u)
     else pos
     let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
-    let game = Mons.Game.add_mons_to_map(pos, game)
-    Mons.Game.set_user_pos(usr, new_pos, game)
-
-  // Mons.Game.set_user_pos(usr, new_pos, game)
+    let game = Mons.Game.set_user_pos(usr, new_pos, game)
+    Mons.Game.add_mons_to_map(new_pos, game)
 
 // mon: a Mon type
 // adi: Mon agility
@@ -1679,13 +1669,6 @@ Mons.Screen.initial_mons: List(Mons.Object)
   let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.water, 2u))
   [mon0_bag, mon1_bag, mon2_bag]
 
-// Mons.test.add_boss(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
-//   open hero_obj:
-//   let hero_obj = Mons.Object.set_bos([], hero_obj)
-//   let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.BUFF, Bool.true, Mons.Type.earth, 0u))
-//   let hero_obj = Mons.Object.capture_boss(mon0_bag, hero_obj)
-//   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-
 // Converts a keyboard key to a direction:
 // A = [-1,  0,  0]
 // D = [ 1,  0,  0]
@@ -2048,7 +2031,6 @@ Mons.start(online: Bool): App(Mons.Game)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        // let game = Mons.Game.add_mons_to_map(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];

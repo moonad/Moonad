@@ -41,7 +41,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | protect => "Avoid dmg on the next turn. Cannot be used on every turn.";
   | slam => "Damage";
   | counter => "Apply burn and heal 3hp";
-  | recover => "Restore 50% of mhp but add poison";
+  | recover => "Restore 25% of hp but add poison";
   | rock_smash => "Apply a medium damage(4) + 50% of critical";
   | crunch => "Apply a high damage(6) + 25% of critical";
   | sludge_bomb => "Damage and 30% of poisoning";
@@ -72,7 +72,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | protect => "Avoid dmg next turn";
   | slam => "Hit 6hp";
   | counter => "Burn for 5 turns and heal 3hp";
-  | recover => "Restore 50% mhp + poison";
+  | recover => "Restore 25% hp, add poison";
   | rock_smash => "Hit 2hp + 50% of critical";
   | crunch => "Hit 4hp + 25% of critical";
   | sludge_bomb => "Hit 2hp + 30% of poisoning";
@@ -379,9 +379,9 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
   ;
 
-  // Restore 50% of mhp but add poison
+  // Restore 25% of hp but add poison
   | recover =>
-    let val = U32.div(source_mon_attr.mhp, 2u)
+    let val = U32.div(Mons.Object.remaining_hp(source_mon), 4u)
     use skp = Debug.log<>(String.flatten(["- Recover: heal ", U32.to_string(val)]))
     let game = Mons.Skill.poison_eff(source_obj, pos, source, game)
     Mons.Skill.heal_eff(source_obj, pos, source, val, game);
@@ -430,13 +430,13 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     use skp = Debug.log<>(String.flatten(["- Iron defense: add minimize "]))
     Mons.Skill.minimize_eff(source_obj, pos, source, game);
 
-  // Damage adve with 50% of current life. Loses 25% of hp
+  // Damage adve with 25% of current life. Add self burn for 2 turns
   | super_fang => // ok
-    let adve_dmg = U32.div(Mons.Object.remaining_hp(source_mon), 2u)
-    let hero_dmg = U32.div(adve_dmg, 2u)
+    let adve_dmg = U32.div(Mons.Object.remaining_hp(source_mon), 4u)
     use skp = Debug.log<>(String.flatten(["- Super fang adve dmg: ", U32.to_string(adve_dmg)]))
-    use skp = Debug.log<>(String.flatten(["- Super fang hero dmg: ", U32.to_string(hero_dmg)]))
-    let game = Mons.Skill.damage_eff(source_obj, pos, source, hero_dmg, game)
+    use skp = Debug.log<>(String.flatten(["- Super fang hero eff: burn"]))
+    // let game = Mons.Skill.damage_eff(source_obj, pos, source, hero_dmg, game)
+    let game = Mons.Skill.burn_eff(source_obj, pos, target, 2u, game)
     let game = Mons.Skill.damage_eff(target_obj, pos, target, adve_dmg, game)
     game;
 
