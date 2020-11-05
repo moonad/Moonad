@@ -132,11 +132,11 @@ Mons.image_to_global(width: U32, height: U32, x: U32, y: U32, lvl: U32): Pos32
   let upd_g_x =
     if U32.gtn(x, mid_width) then  U32.add(g_x, U32.sub(x, mid_width))
     else if U32.ltn(x, mid_width) then U32.sub(g_x, U32.sub(mid_width, x))
-    else mid_width
+    else g_x
   let upd_g_y = 
     if U32.gtn(y, mid_height) then U32.add(g_y, U32.sub(y, mid_height))
     else if U32.ltn(y, mid_height) then U32.sub(g_y, U32.sub(mid_height, y))
-    else mid_height
+    else g_y
   Pos32.new(upd_g_x, upd_g_y, lvl)
 
 // Sprites are centered at 128x128
@@ -932,6 +932,17 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "em", [ get_pos(Mons.Kind.mons.EMERELDER) ]},
 
     ]) 
+
+  else if U32.eql(dim, 2u) then // BOSS type Normal
+    let floor = Mons.Kind.new_terrain(Mons.Kind.terrain.FLOOR(2u, 0u))
+
+    Mons.Map.code_to_tile.aux(code,[
+    { ".g", [ floor ]},
+    // { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(1u, 0u))] },
+    { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] }
+
+    ]) 
+
   else // lvl 1 - Mons type "normal" 
   let path_brick = Mons.Kind.new_terrain(Mons.Kind.terrain.FLOOR(1u, 0u))
   Mons.Map.code_to_tile.aux(code,[
@@ -1083,34 +1094,62 @@ Mons.Game.hero_inital_position(
   game: Mons.Game): Mons.Game
   let x = Pos32.get_x(Mons.global_scr_mid)
   let y = Pos32.get_y(Mons.global_scr_mid)
-  let z = Pos32.get_z(pos)
+  let z = // TEST not using intro level
+    if U32.eql(Pos32.get_z(pos), 0u) then 1u 
+    else Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
-  // let new_pos = 
-  //   if U32.eql(z, 0u) then Pos32.new(x,U32.add(y, 10u),z)
-  //   if U32.eql(z, 1u) then Pos32.new(x,U32.add(y, 38u),z)
-  //   else Mons.global_scr_mid
-  let new_pos = Pos32.new(x,U32.add(y, 38u), 1u)
-  let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game) 
-  Mons.Game.set_user_pos(usr, new_pos, game)
+  if U32.eql(z, 0u) then 
+    let new_pos = Pos32.new(x,U32.add(y, 20u), 1u)
+    let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
+    Mons.Game.set_user_pos(usr, new_pos, game)
+  else 
+    let new_pos = 
+    if U32.eql(z, 1u) then
+     Pos32.new(x,U32.add(y, 38u), 1u)
+    // let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
+    // let game = Mons.Game.add_mons_to_map(pos, game)
+    // Mons.Game.set_user_pos(usr, new_pos, game)
+    else if U32.eql(z, 2u) then
+      Pos32.new(x,U32.add(y, 5u), 2u)
+      // let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
+      // let game = Mons.Game.add_mons_to_map(pos, game)
+      // Mons.Game.set_user_pos(usr, new_pos, game)
+    else pos
+    let game = Mons.Game.move_obj(Mons.global_scr_mid, hero_idx, new_pos, hero_obj, game)
+    let game = Mons.Game.add_mons_to_map(pos, game)
+    Mons.Game.set_user_pos(usr, new_pos, game)
+
+  // Mons.Game.set_user_pos(usr, new_pos, game)
 
 // mon: a Mon type
 // adi: Mon agility
 // pos: Mons.Kind.get_pos
-Mons.Game.add_mon(kind_mon: Mons.Kind.mons, agi: U32, game: Mons.Game): Mons.Game
-  let mon_kin = Mons.Kind.Mons(kind_mon, Bool.false, Mons.Type.normal, agi)
-  let mon_obj = Mons.Object.new_of_kind(mon_kin)
+Mons.Game.add_mon(kind_mon: Mons.Kind.mons, agi: U32, type: Mons.Type, game: Mons.Game): Mons.Game
+  def mon_kin = Mons.Kind.Mons(kind_mon, Bool.false, type, agi)
+  def mon_obj = Mons.Object.new_of_kind(mon_kin)
+  Mons.Game.move_obj(Mons.global_scr_mid, 0u, Mons.Kind.get_pos(mon_kin), mon_obj, game)
+
+Mons.Game.add_boss(kind_mon: Mons.Kind.mons, agi: U32, type: Mons.Type, game: Mons.Game): Mons.Game
+  def mon_kin = Mons.Kind.Mons(kind_mon, Bool.true, type, agi)
+  def mon_obj = Mons.Object.new_of_kind(mon_kin)
   Mons.Game.move_obj(Mons.global_scr_mid, 0u, Mons.Kind.get_pos(mon_kin), mon_obj, game)
 
 // Works for image to global
 Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
-  let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC, 0u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.POISOLICK, 2u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 1u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, game)
-  let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, game)
+  let lvl = Pos32.get_z(pos)
+  if U32.eql(lvl, 1u) then // Normal
+  let type = Mons.Type.normal
+  let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC, 0u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.POISOLICK, 2u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 1u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, type, game)
   game
+  else if U32.eql(lvl, 2u) then
+    Mons.Game.add_boss(Mons.Kind.mons.BEHOLDER, 2u, Mons.Type.normal, game)
+  else game
 
 // TODO
 Mons.Game.can_use_portal(dim: U32): Bool
@@ -1400,7 +1439,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         else if Mons.Object.is_obj_defeated(curr_mon) then // Battle ended
           let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
           let game = Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
-          let game = Mons.Game.add_mon(kind.ele, kind.agi, game)
+          let game = Mons.Game.add_mon(kind.ele, kind.agi, kind.pri_type, game)
           if Mons.Kind.is_hero(curr_mon.kin) then
             let hero_obj = Mons.Object.set_dmg(hero_obj, 0u)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
@@ -2009,7 +2048,7 @@ Mons.start(online: Bool): App(Mons.Game)
         let hero_obj = Pair.fst<,>(hero_info)
         let hero_idx = Pair.snd<,>(hero_info)
         let game = Mons.Game.hero_inital_position(game.usr, hero_obj, pos, 0u, game)
-        let game = Mons.Game.add_mons_to_map(pos, game)
+        // let game = Mons.Game.add_mons_to_map(pos, game)
         App.Action.state<>(game),
       ];
       | tick => [App.Action.state<>(Mons.Game.tick(game, event.time))];
