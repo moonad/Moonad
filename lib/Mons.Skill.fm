@@ -38,7 +38,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | run => "Hero run from battle";
   | dig => "Protect for 1 turn. On the next turn, will attack and effects are applied";
   | sand_tomb => "Apply an initial dmg and +1/16 of MPH for 5 turns";
-  | protect => "Avoid dmg on the next turn. Cannot be used on every turn.";
+  | protect => "Reduce 50% dmg on the next turn. Cannot be used on every turn.";
   | slam => "Damage";
   | counter => "Apply burn and heal 3hp";
   | recover => "Restore 25% of hp but add poison";
@@ -69,7 +69,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | run => "Run from battle";
   | dig => "Add hit next turn, add invul";
   | sand_tomb => "Dmg this turn + burn(5)";
-  | protect => "Avoid dmg next turn";
+  | protect => "-50% dmg next turn";
   | slam => "Hit 6hp";
   | counter => "Burn for 5 turns and heal 3hp";
   | recover => "Restore 25% hp, add poison";
@@ -87,7 +87,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | psychic => "Hit 2hp + 10% sleep and hit";
   | ancient_power => "Hit 4hp + 10% adve miss the attack";
   | thunder_wave => "Hit 6";
-  | charge => "Double hit if adve has minimize";
+  | charge => "Hit4, if adve has minimize, hit8";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
 
@@ -120,7 +120,7 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | thunder_wave => "Thunder Wave";
   | charge => "Charge";
   | agility => "Agility";
-  | hero_kill => "Hero kill";
+  | hero_kill => "ONE PUNCH";
 
 Mons.Skill.update_mon_obj(
   hero_obj: Mons.Object,
@@ -141,11 +141,6 @@ Mons.Skill.update_mon_obj(
 // At the beginning of the game, apply and update effect: 
 // burn and hit
 Mons.Skill.apply_inital_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  let game = Mons.Skill.apply_inital_eff_hero(hero_idx, pos, game)
-  Mons.Skill.apply_inital_eff_adve(adve_idx, pos, game)
-
-
-Mons.Skill.apply_inital_eff_hero(hero_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
@@ -155,26 +150,27 @@ Mons.Skill.apply_inital_eff_hero(hero_idx: U32, pos: Pos32, game: Mons.Game): Mo
   let upd_effect = Mons.Effect.upd_initial_eff(hero_mon_obj.eff)
   let hero_mon_obj = Mons.Object.set_eff(upd_effect, hero_mon_obj)
   let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
-  // Only damage is taken
+  // Only update damage
   let hero_dmg = Mons.Skill.apply_inital_eff_dmg(hero_mon_obj.eff, hero_mon_attr.mhp, hero_idx)
   let game = Mons.Skill.damage_eff(hero_obj, pos, hero_idx, hero_dmg, game)
   
-  game
-
-Mons.Skill.apply_inital_eff_adve(adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  open game:
+  // -- Adve
   let adve_obj = Mons.Map.get(pos, adve_idx, game.map)
+  // let adve_mon_obj = Mons.Object.get_current_mon(adve_obj)
   open adve_obj:
   open Mons.Kind.attr(adve_obj.kin) as adve_attr:
-  let adve_dmg = Mons.Skill.apply_inital_eff_dmg(adve_obj.eff, adve_attr.mhp, adve_idx)
+  // eff
   let upd_effect = Mons.Effect.upd_initial_eff(adve_obj.eff)
   let adve_obj = Mons.Object.set_eff(upd_effect, adve_obj)
+  // dmg
+  let adve_dmg = Mons.Skill.apply_inital_eff_dmg(adve_obj.eff, adve_attr.mhp, adve_idx)
   let game = Mons.Skill.damage_eff(adve_obj, pos, adve_idx, adve_dmg, game)
   game
 
-Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // idx is used for testing
+Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32
   open eff:
-  use skp = Debug.log<>(String.flatten(["\n", U32.to_string(idx), " INITIAL EFFECTS "]))
+  let player = if U32.eql(idx, 1u) then "adve " else "hero "
+  use skp = Debug.log<>(String.flatten(["> ", player, " initial effects "]))
   if Mons.Effect.has_invulnerable(eff) then 
     use skp = Debug.log<>(String.flatten(["invulnerable"]))
     0u
@@ -183,7 +179,7 @@ Mons.Skill.apply_inital_eff_dmg(eff: Mons.Effect, mhp: U32, idx: U32): U32 // id
     let dmg_hit = if Mons.Effect.has_hit(eff) then eff.hit else 0u
     let dmg_poison = if Mons.Effect.has_poison(eff) then U32.div(mhp, 16u) else 0u
     let dmg = U32.add(dmg_poison, U32.add(dmg_burn, dmg_hit))
-    use skp = Debug.log<>(String.flatten(["dmg taken: ", U32.to_string(dmg)]))
+    // use skp = Debug.log<>(String.flatten([player, "initial dmg: ", U32.to_string(dmg)]))
     dmg 
 
 
@@ -204,11 +200,12 @@ Mons.Skill.apply_end_turn_eff(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mo
   let upd_effect = Mons.Effect.upd_end_turn_eff(adve_obj.eff)
   let adve_obj = Mons.Object.set_eff(upd_effect, adve_obj)
   let game = Mons.Game.map_set(pos, adve_idx, adve_obj, game)
+  use skp = Debug.log<>("end turn < \n ---------- \n")
   game
 
-
+// It's not working and idk why. Only works if set before adding adve to the bag
 Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mons.Game): Mons.Game
-  use skp = Debug.log<>(" CLEAR EFFECTS AFTER BATTLE ")
+  use skp = Debug.log<>("clear after battle < \n ---------- \n")
   open game:
   let hero_obj = Mons.Map.get(pos, hero_idx, game.map)
   let hero_mon_obj = Mons.Object.get_current_mon(hero_obj)
@@ -217,7 +214,8 @@ Mons.Skill.clear_after_battle(hero_idx: U32, adve_idx: U32, pos: Pos32, game: Mo
   let hero_mon_obj = Mons.Object.set_eff(Mons.Effect.clear, hero_mon_obj)
   let game = Mons.Skill.update_mon_obj(hero_obj, hero_mon_obj, pos, hero_idx, game)
   let adve_obj = Mons.Object.set_eff(Mons.Effect.clear, adve_obj)
-  let game = Mons.Game.update_obj(adve_obj, pos, adve_idx, game)
+  let game = Mons.Skill.update_mon_obj(adve_obj, adve_obj, pos, adve_idx, game)
+  // BUG: don't clear adve before adding it to the bag
   game
 
 // Add damage to a Mon. Consider effects of invulnerable, protect and minimize before damaging
@@ -228,9 +226,11 @@ Mons.Skill.damage_eff(obj: Mons.Object, pos: Pos32, idx: U32, dmg: U32, game: Mo
     use skp = Debug.log<>(String.flatten([U32.to_string(idx), " invulnerable, avoid: ", U32.to_string(dmg) ]))
     game
   else
+    let player = if U32.eql(idx, 1u) then "adve " else "hero "
+    use skp = Debug.log<>(String.flatten([ "  ", player, "hp before hit: ", U32.to_string(Mons.Object.remaining_hp(obj_mon))]))
     let dmg = if Mons.Effect.has_protect(obj_mon.eff)  then U32.div(dmg, 2u) else dmg // - 50%
     let dmg = if Mons.Effect.has_minimize(obj_mon.eff) then U32.sub(dmg, U32.div(dmg, 4u)) else dmg // - 25%
-    use skp = Debug.log<>(String.flatten([ U32.to_string(idx), " defense + dmg: ", U32.to_string(dmg)]))
+    use skp = Debug.log<>(String.flatten([ "  ", player, "defense + dmg, total: ", U32.to_string(dmg)]))
     let obj_mon = Mons.Object.hit(obj_mon, dmg)
     Mons.Skill.update_mon_obj(obj, obj_mon, pos, idx, game)
 
@@ -350,17 +350,17 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   // Apply an initial dmg and burn for 5 turns
   | sand_tomb => 
     def val = Mons.Type.skill_n_type(light_val, source_mon, target_mon) 
-    // BUG: only the first line is executed
-    let game2 = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
-    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game2)
+    // BUG: only the last line is executed
     use skp = Debug.log<>(String.flatten(["- Sand bomb: dmg ", U32.to_string(val), " add burn" ]))
+    let game = Mons.Skill.damage_eff(target_obj, pos, target, val, game) // insta
+    let game = Mons.Skill.burn_eff(target_obj, pos, target, 5u, game)
     game;
 
   // Reduce damage by 50% on the next turn. Can't be used successively.
   | protect => // ok
     def used_last_turn = Pair.snd<,>(s_mon_eff.protect)
     if used_last_turn then 
-      use skp = Debug.log<>(String.flatten(["- Protect: used last turn"]))
+      use skp = Debug.log<>(String.flatten(["- Protect: used last turn, so can't use on this"]))
       game
     else 
     use skp = Debug.log<>(String.flatten(["- Protect: add protect for next turn"]))
@@ -536,7 +536,9 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     use skp = Debug.log<>(String.flatten(["- Agility: invert Mons' agi "]))
     Mons.Skill.invert_agility(pos, source, target, game);
 
-  | hero_kill => Mons.Skill.damage_eff(target_obj, pos, target, 40u, game);
+  | hero_kill => 
+    use skp = Debug.log<>(String.flatten(["- One Punch: hit ", U32.to_string(40u)]))
+    Mons.Skill.damage_eff(target_obj, pos, target, 40u, game);
 
   else game // end case of "can_attack" 
 

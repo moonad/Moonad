@@ -441,7 +441,7 @@ Mons.draw.effect(eff: Mons.Effect, pos: Pos32, scr: Image3D): Image3D
   // use skp = Debug.log<>("> Draw effects")
   open eff: 
   let burn = if Mons.Effect.has_burn(eff) then String.flatten(["burn ", U32.to_string(eff.burn)]) else "" 
-  let hit = if Mons.Effect.has_hit(eff) then String.flatten(["hit ", U32.to_string(eff.hit)]) else ""
+  let hit = if Mons.Effect.has_hit(eff) then "hit " else ""
   let minimize = if Mons.Effect.has_minimize(eff) then "mini " else ""
   let invulnerable = if Mons.Effect.has_invulnerable(eff) "invul " else ""
   let poison = if Mons.Effect.has_poison(eff) "poison " else ""

@@ -1127,9 +1127,9 @@ Mons.Game.add_boss(kind_mon: Mons.Kind.mons, agi: U32, type: Mons.Type, game: Mo
 
 Mons.test.add_mon(game: Mons.Game): Mons.Game
   use skp = Debug.log<>("Add Mon test")
-  def mon_kin = Mons.Kind.Mons(Mons.Kind.mons.MIMIC, Bool.false, Mons.Type.normal, 2u)
+  def mon_kin = Mons.Kind.Mons(Mons.Kind.mons.AZULA, Bool.false, Mons.Type.normal, 2u)
   def mon_obj = Mons.Object.new_of_kind(mon_kin)
-  def pos = Mons.image_to_global(80u, 80u, 43u, 71u, 1u)
+  def pos = Mons.image_to_global(80u, 80u, 43u, 52u, 1u)
   Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, mon_obj, game)
 
 // Works for image to global
@@ -1144,6 +1144,7 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, type, game)
+  let game = Mons.test.add_mon(game)
   game
   else if U32.eql(lvl, 2u) then
     Mons.Game.add_boss(Mons.Kind.mons.BEHOLDER, 2u, Mons.Type.normal, game)
@@ -1435,6 +1436,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
               let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
               Mons.Game.set_stt(Mons.Screen.capture_mon(0u, Bool.true), game)
             else
+              let adve_obj = Mons.Object.set_eff(Mons.Effect.clear, adve_obj)
               let hero_obj = Mons.Object.push_to_bag(adve_obj, hero_obj)
               Mons.Game.delete_adve_obj(adve_obj, hero_obj, pos, hero_idx, adve_idx, game)
         else if Mons.Object.is_obj_defeated(curr_mon) then // Battle ended
@@ -1447,6 +1449,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             let game = Mons.Game.move_hero_down(usr, hero_obj, pos, hero_idx, game)
             set_stt_game(game)
           else
+            let game = Mons.Skill.clear_after_battle(hero_idx, adve_idx, pos, game)
             let adve_obj = Mons.Object.set_dmg(adve_obj, 0u) // adve heals all hp
             let hero_obj = Mons.Object.delete_from_bag(hero_obj.mon, hero_obj)
             let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
@@ -1473,7 +1476,8 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
             Bool.not(turn.exec_hero),
             turn.hero_skill, turn.adve_skill, U32.sub(turn.play, 1u))
           Mons.Game.set_stt(Mons.Screen.game('.', turn), game)
-        else set_stt_game(game)
+        else 
+        set_stt_game(game)
 
       ;
 
