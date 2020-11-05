@@ -326,6 +326,10 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
   let set_pos_lvl1 = 
     ((x: U32, y: U32) Mons.image_to_global(81u, 81u, x, y, 1u))
     :: U32 -> U32 -> Pos32
+  let set_pos_lvl2 = 
+    ((x: U32, y: U32) Mons.image_to_global(20u, 20u, x, y, 2u))
+    :: U32 -> U32 -> Pos32
+
   case kin:
   | Mons.Kind.mons => 
     case kin.ele as kin:
@@ -336,7 +340,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
       Mons.Skill.dummy_skills, 
-      default_pos);
+      set_pos_lvl2(10u, 10u));
     
     | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
@@ -514,7 +518,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.0_crystal6, Mons.Assets.0_crystal7
       ]);
     | PORTAL => 
-      Mons.Attr.new_blockable([
+      Mons.Attr.new_neutral([
         Mons.Assets.portal_0, Mons.Assets.portal_1, Mons.Assets.portal_2,
         Mons.Assets.portal_3, Mons.Assets.portal_4, Mons.Assets.portal_5,
         Mons.Assets.portal_6, Mons.Assets.portal_7
