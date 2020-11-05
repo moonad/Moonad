@@ -909,7 +909,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // { "m1", Mons.Kind.new_mons(Mons.Kind.mons.POISOLICK, Mons.Type.normal, 1u)},
       // { "m2", Mons.Kind.new_mons(Mons.Kind.mons.EMERELDER, Mons.Type.normal, 2u)},
       // { "m3", Mons.Kind.new_mons(Mons.Kind.mons.ZOIO, Mons.Type.normal, 2u)},
-      { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
+      // { "m4", Mons.Kind.new_mons(Mons.Kind.mons.MIMIC, Mons.Type.normal, 2u)},
       // { "m5", Mons.Kind.new_mons(Mons.Kind.mons.CYCLOPE, Mons.Type.normal, 2u)},
       // { "m6", Mons.Kind.new_mons(Mons.Kind.mons.TROWL, Mons.Type.normal, 2u)},
 
@@ -930,6 +930,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "cy", [ get_pos(Mons.Kind.mons.CYCLOPE) ]},
       { "tr", [ get_pos(Mons.Kind.mons.TROWL) ]},
       { "em", [ get_pos(Mons.Kind.mons.EMERELDER) ]},
+      { "en", [ get_pos(Mons.Kind.mons.EMERELDER2) ]},
 
     ]) 
 
@@ -1123,6 +1124,13 @@ Mons.Game.add_boss(kind_mon: Mons.Kind.mons, agi: U32, type: Mons.Type, game: Mo
   def mon_kin = Mons.Kind.Mons(kind_mon, Bool.true, type, agi)
   def mon_obj = Mons.Object.new_of_kind(mon_kin)
   Mons.Game.move_obj(Mons.global_scr_mid, 0u, Mons.Kind.get_pos(mon_kin), mon_obj, game)
+
+Mons.test.add_mon(game: Mons.Game): Mons.Game
+  use skp = Debug.log<>("Add Mon test")
+  def mon_kin = Mons.Kind.Mons(Mons.Kind.mons.MIMIC, Bool.false, Mons.Type.normal, 2u)
+  def mon_obj = Mons.Object.new_of_kind(mon_kin)
+  def pos = Mons.image_to_global(80u, 80u, 43u, 71u, 1u)
+  Mons.Game.move_obj(Mons.global_scr_mid, 0u, pos, mon_obj, game)
 
 // Works for image to global
 Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
@@ -1399,8 +1407,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       else 
         if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
         then 
+          // Avoid bug with infity walk when in the same position as adve
+          if U32.eql(hero_obj.ani, 0u) then  
           use skp = Debug.log<>("> To run from battle press [R]")
           Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+          else Mons.Game.walk(cmd, pos, hero_idx, game)
         else 
         // Note: uncomment the code above to insert not moving while in battle
         Mons.Game.walk(cmd, pos, hero_idx, game)
