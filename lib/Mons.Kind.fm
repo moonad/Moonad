@@ -341,7 +341,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | BEHOLDER => Mons.Attr.new_battleable(
       Mons.Assets.pic_beholder, [Mons.Assets.mons_beholder_d_0], "BEHOLDER",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_beholder_u, Mons.Assets.battle_beholder_d),
-      Mons.Skill.dummy_skills, 
+      [Mons.Skill.super_fang, Mons.Skill.nightmare, Mons.Skill.protect, Mons.Skill.hypnosis], 
       set_pos_lvl2(10u, 10u));
     
     | ZOIO => Mons.Attr.new_battleable(

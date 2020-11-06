@@ -28,6 +28,7 @@ T Mons.Skill
 | Mons.Skill.charge;
 | Mons.Skill.agility;
 | Mons.Skill.hero_kill;
+| Mons.Skill.nightmare;
 
 Mons.Skill.description(skill: Mons.Skill): String
   case skill:
@@ -59,6 +60,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | charge => "Double the damage if adve has minimize";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
+  | nightmare => "If sleep damage hit 20% hp";
 
 Mons.Skill.short_description(skill: Mons.Skill): String
    case skill:
@@ -90,6 +92,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | charge => "Hit4, if adve has minimize, hit8";
   | agility => "Invert Mon's agitity value";
   | hero_kill => "Herro atk";
+  | nightmare => "If sleep damage hit 20% hp";
 
 Mons.Skill.get_name(skill: Mons.Skill): String
   case skill:
@@ -121,6 +124,7 @@ Mons.Skill.get_name(skill: Mons.Skill): String
   | charge => "Charge";
   | agility => "Agility";
   | hero_kill => "ONE PUNCH";
+  | nightmare => "Nightmare";
 
 Mons.Skill.update_mon_obj(
   hero_obj: Mons.Object,
@@ -539,6 +543,17 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
   | hero_kill => 
     use skp = Debug.log<>(String.flatten(["- One Punch: hit ", U32.to_string(40u)]))
     Mons.Skill.damage_eff(target_obj, pos, target, 40u, game);
+
+  // If sleep damage hit 20% hp
+  | nightmare =>
+    if Mons.Effect.has_sleep(target_mon.eff) then
+      let hp = Mons.Object.remaining_hp(target_mon)
+      use skp = Debug.log<>(String.flatten(["- Nightmare: hit ", U32.to_string(U32.div(hp, 5u))]))
+      Mons.Skill.damage_eff(target_obj, pos, target, U32.div(hp, 5u), game)
+    else 
+      use skp = Debug.log<>("- Nightmare: hit 0, because was not sleep")
+      game
+  ;
 
   else game // end case of "can_attack" 
 
