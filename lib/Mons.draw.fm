@@ -22,6 +22,21 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     // let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
 
     case game.stt as stt:
+    | welcome =>
+      let scr = Mons.draw.image(Mons.Assets.logo, Pos32.new(120u,80u,0u), scr)
+      let scr = Mons.draw.list(["Play", "Credits"], Bool.false, 25u, Mons.font_white, Pos32.new(40u,50u,0u), scr)
+      let scr = Mons.draw.list_selector(stt.idx, Bool.false, 25u, Mons.font_white, Pos32.new(30u,50u,0u), scr)
+      let scr = Mons.draw.text("[c] Select", Mons.font_white, Pos32.new(40u,128u,0u), scr)
+      scr
+    ;
+    | credits =>
+      let artists0 = ["Alexandre Avila", "Caio Carvalho", "Lucca Tuelher", "Maisa Milena", "Marcio Maia", "Marcos Medeiros"]
+      let artists1 = ["Marcos Motta", "Nathan Danjo", "Paulo Reis", "Pedro Taka", "Rodrigo Rodrigues", "Victor Maia", "Yuri Carvalho"]
+      let scr = Mons.draw.text("[z] Back", Mons.font_white, Pos32.new(20u,20u,0u), scr)
+      let scr = Mons.draw.list(artists0, Bool.false, 15u, Mons.font_white, Pos32.new(20u,30u,0u), scr)
+      let scr = Mons.draw.list(artists1, Bool.false, 15u, Mons.font_white, Pos32.new(120u,20u,0u), scr)
+      scr
+    ; 
     | introduction =>
       
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
@@ -254,6 +269,18 @@ Mons.draw.list.go(texts: List(String),  horizontal: Bool, spacing: U32, font_map
    | scr;
    | let scr = Mons.draw.text(texts.head, font_map, pos, scr)
      Mons.draw.list.go(texts.tail, horizontal, spacing, font_map, pos, scr, U32.add(idx, 1u));
+
+Mons.draw.list_selector(
+  idx: U32,
+  horizontal: Bool, spacing: U32, font_map: Mons.font, start_pos: Pos32,
+  scr: Image3D): Image3D
+  let x = Pos32.get_x(start_pos)
+  let y = Pos32.get_y(start_pos)
+  let idx = U32.add(idx, 1u)
+  let pos = 
+    if horizontal then Pos32.new(U32.add(U32.mul(spacing, idx), x),y,0u)
+    else  Pos32.new(x,U32.add(U32.mul(spacing, idx), y),0u)
+  Mons.draw.text("> ", font_map, pos, scr)
 
 // Draw images of Mons in the replace screen
 Mons.draw.list_image(images: List(Image3D), horizontal: Bool, spacing: U32, start_pos: Pos32, scr: Image3D): Image3D

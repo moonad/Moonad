@@ -90,6 +90,8 @@ T Mons.Game
 );
 
 T Mons.Screen
+| Mons.Screen.welcome(idx: U32);
+| Mons.Screen.credits;
 | Mons.Screen.introduction(step: U32); // step: number identifying the completion of scene
 | Mons.Screen.intro_select(idx: U32); // idx: used to choose a Mon
 | Mons.Screen.game(cmd: Char, turn: Mons.Turn); // cmd: movement
@@ -1348,6 +1350,23 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     open hero_obj:
     open adve_obj:
     case game.stt as stt:
+    | welcome => 
+      if Bool.or(U16.eql(cmd, 'c'), U16.eql(cmd, 'C')) then
+        if U32.eql(stt.idx, 0u) then
+          set_stt_game(game) // start game
+        else
+          Mons.Game.set_stt(Mons.Screen.credits, game)
+      else if Bool.or(U16.eql(cmd, 'w'), U16.eql(cmd, 'W')) then
+        Mons.Game.set_stt(Mons.Screen.welcome(0u), game)
+      else if Bool.or(U16.eql(cmd, 's'), U16.eql(cmd, 'S')) then
+        Mons.Game.set_stt(Mons.Screen.welcome(1u), game)
+      else game
+    ;
+    | credits => // People how participated in the game's creation
+      if Bool.or(U16.eql(cmd, 'z'), U16.eql(cmd, 'Z')) then
+        Mons.Game.set_stt(Mons.Screen.welcome(0u), game)
+      else game
+    ;
     | introduction =>
     // let can_walk = U32.eql(stt.step, 0u)
     // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
@@ -1990,7 +2009,8 @@ Mons.start(online: Bool): App(Mons.Game)
       game_usr, 
       game_pos, 
       game_map, 
-      Mons.Screen.introduction(0u),
+      // Mons.Screen.introduction(0u),
+      Mons.Screen.welcome(0u),
       0u // tik
     )
     // let game = Mons.Game.add_animated_obj(game)
