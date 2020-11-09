@@ -1446,16 +1446,16 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | terrain => Mons.Game.walk(cmd, pos, hero_idx, game);
         | inter => Mons.Game.walk(cmd, pos, hero_idx, game);
       else 
-      //   if Bool.and(
-      //       Mons.Object.is_battling(adve_obj, hero_obj),
-      //       Bool.not(Mons.Kind.is_mage(adve_obj.kin))) 
-      //   then // Can't move when in a battle
-      //     // Avoid bug with infity walk when in the same position as adve
-      //     if U32.eql(hero_obj.ani, 0u) then  
-      //     use skp = Debug.log<>("> To run from battle press [R]")
-      //     Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
-      //     else Mons.Game.walk(cmd, pos, hero_idx, game)
-      //   else 
+        if Bool.and(
+            Mons.Object.is_battling(adve_obj, hero_obj),
+            Bool.not(Mons.Kind.is_mage(adve_obj.kin))) 
+        then // Can't move when in a battle
+          // Avoid bug with infity walk when in the same position as adve
+          if U32.eql(hero_obj.ani, 0u) then  
+          use skp = Debug.log<>("> To run from battle press [R]")
+          Mons.Game.move_obj(pos, 0u, pos, hero_obj, game)
+          else Mons.Game.walk(cmd, pos, hero_idx, game)
+        else 
         // Note: uncomment the code above to insert not moving while in battle
         Mons.Game.walk(cmd, pos, hero_idx, game)
 
