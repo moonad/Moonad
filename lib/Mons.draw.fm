@@ -30,25 +30,25 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       scr
     ;
     | credits =>
-      let artists0 = ["Alexandre Avila", "Caio Carvalho", "Lucca Tuelher", "Maisa Milena", "Marcio Maia", "Marcos Medeiros"]
+      let scr = Mons.draw.image(Mons.Assets.battle_normal_bg_full, Pos32.new(120u,80u,0u), scr)
+      let artists0 = ["Alexandre Avila", "Caio Carvalho", "Johnny Azevedo", "Lucca Tuelher", "Maisa Milena", "Marcio Maia", "Marcos Medeiros"]
       let artists1 = ["Marcos Motta", "Nathan Danjo", "Paulo Reis", "Pedro Taka", "Rodrigo Rodrigues", "Victor Maia", "Yuri Carvalho"]
-      let scr = Mons.draw.text("[z] Back", Mons.font_white, Pos32.new(20u,20u,0u), scr)
-      let scr = Mons.draw.list(artists0, Bool.false, 15u, Mons.font_white, Pos32.new(20u,30u,0u), scr)
-      let scr = Mons.draw.list(artists1, Bool.false, 15u, Mons.font_white, Pos32.new(120u,20u,0u), scr)
+      let scr = Mons.draw.text("[z] Back", Mons.font_white, Pos32.new(20u,15u,0u), scr)
+      let scr = Mons.draw.list(artists0, Bool.false, 15u, Mons.font_white, Pos32.new(20u,20u,0u), scr)
+      let scr = Mons.draw.list(artists1, Bool.false, 15u, Mons.font_white, Pos32.new(125u,20u,0u), scr)
       scr
     ; 
-    | introduction =>
-      
+    | introduction => 
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
-        if U32.eql(stt.step, 0u) then
+        if U32.eql(stt.step, 1u) then
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "Oh! So you really exist... the", "young man of the prophecy. [c]", scr)
-        else if U32.eql(stt.step, 1u) then // Follow to the game
+        else if U32.eql(stt.step, 2u) then // Follow to the game
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "I'm hurry and can't explain now,", "but... we depend on you. [c]", scr)
-        else if U32.eql(stt.step, 2u) then
+        else if U32.eql(stt.step, 3u) then
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "Great choice! You can press", "[e] to check it on the bag. [c]", scr)
@@ -107,10 +107,10 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
                 let scr = Mons.draw.text("[z] Free", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(adve_btl_img, Pos32.new(180u,40u,0u), scr)
               else if Mons.Object.is_obj_defeated(hero_mon_obj) then
-                let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
-                let scr = Mons.draw.text("You lost the battle and", Mons.font_black, Pos32.new(16u,26u,0u), scr)
-                let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
-                let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                // let scr = Mons.draw.text(hero_txt, Mons.font_black, Pos32.new(130u,104u,0u), scr)
+                let scr = Mons.draw.text("You lost the battle and your Mon.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+                // let scr = Mons.draw.text("your current Mon.", Mons.font_black, Pos32.new(16u,42u,0u), scr)
+                let scr = Mons.draw.text("[c] I'll do better next time",Mons.font_black, Mons.draw.msg_screen.line_1, scr)
                 Mons.draw.image(hero_btl_img, Pos32.new(75u,80u,0u), scr)
               else scr
             scr

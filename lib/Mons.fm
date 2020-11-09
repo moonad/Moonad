@@ -734,7 +734,7 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {33u, []}, 
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {11u, []}, 
     0u, Mons.Effect.clear)
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
@@ -766,8 +766,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
 
       // Terrain
       { ".g", [ path_brick ]},
-      { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID) ]},
-      // { "bk", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID_BLACK) ]},
+      // { "bk", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID) ]},
+      { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.VOID_BLACK) ]},
       // { "S0", [ Mons.Kind.new_terrain(Mons.Kind.terrain.SAND_0) ]},
       { "xx", [ path_blocker ]},
 
@@ -893,6 +893,18 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "t4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 4u)) ]},
       { "t5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(19u, 5u)) ]},
 
+      // Stairs
+      { "fg", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(0u, 0u)) ]},
+      { "mc", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(38u, 0u)) ]},
+      { "mf", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(38u, 1u)) ]},
+      { "lc", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(37u, 0u)) ]},
+      { "lf", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(37u, 1u)) ]},
+      { "kc", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(36u, 0u)) ]},
+      { "kf", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(36u, 1u)) ]},
+      { "jc", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(35u, 0u)) ]},
+      { "jf", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(35u, 1u)) ]},
+      { "ic", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(34u, 0u)) ]},
+      { "if", [ Mons.Kind.new_terrain(Mons.Kind.terrain.STAIRS(34u, 1u)) ]},
     ])
 
   else if U32.eql(dim, 1u) then // lvl 1 - Normal type
@@ -1098,11 +1110,12 @@ Mons.Game.hero_inital_position(
   let x = Pos32.get_x(Mons.global_scr_mid)
   let y = Pos32.get_y(Mons.global_scr_mid)
   let z = // TEST not using intro level
-    if U32.eql(Pos32.get_z(pos), 0u) then 1u 
-    else Pos32.get_z(pos)
+    // if U32.eql(Pos32.get_z(pos), 0u) then 1u 
+    // else 
+    Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
   if U32.eql(z, 0u) then
-    let new_pos = Pos32.new(x,U32.add(y, 20u), 0u)
+    let new_pos = Pos32.new(x,U32.add(y, 12u), 0u)
     let game = Mons.Game.move_obj(pos, hero_idx, new_pos, hero_obj, game)
     Mons.Game.set_user_pos(usr, new_pos, game)
   else 
@@ -1146,7 +1159,7 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, type, game)
-  let game = Mons.test.add_mon(game)
+  // let game = Mons.test.add_mon(game)
   game
   else if U32.eql(lvl, 2u) then
     Mons.Game.add_boss(Mons.Kind.mons.BEHOLDER, 2u, Mons.Type.normal, game)
@@ -1353,7 +1366,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     | welcome => 
       if Bool.or(U16.eql(cmd, 'c'), U16.eql(cmd, 'C')) then
         if U32.eql(stt.idx, 0u) then
-          set_stt_game(game) // start game
+          Mons.Game.set_stt(Mons.Screen.introduction(0u), game) // start game
         else
           Mons.Game.set_stt(Mons.Screen.credits, game)
       else if Bool.or(U16.eql(cmd, 'w'), U16.eql(cmd, 'W')) then
@@ -1368,28 +1381,37 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       else game
     ;
     | introduction =>
-    // let can_walk = U32.eql(stt.step, 0u)
-    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-    //   Mons.Game.walk(cmd, pos, hero_idx, game)
-    // else if U16.eql(cmd, 'c') then
-    //   if U32.eql(stt.step, 0u) then // Dialog
-    //     let game = Mons.initial_mons(hero_obj, pos, 0u, game)
-    //     Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
-    //   if U32.eql(stt.step, 1u) then // Go to Mon selection
-    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-    //   if U32.eql(stt.step, 2u) then  // After Mon selection 
-    //     let game = Mons.Game.map_del(pos, adve_idx, game)
-    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-    //     Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    //   else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    // else game
+    let can_walk = Bool.true //U32.eql(stt.step, 0u)
+
+    let can_walk2 = if can_walk then "true" else "false"
+    let cmdd = if U16.eql(cmd, 'c') then "cmd C" else "not cmd c"
+    use skp = Debug.log<>(String.flatten(["can walk? ", can_walk2]))
+    use skp = Debug.log<>(String.flatten(["step: ", U32.to_string(stt.step)]))
+    use skp = Debug.log<>(String.flatten(["cmd: ",cmdd]))
+
+    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
+    else if U16.eql(cmd, 'c') then
+      if U32.eql(stt.step, 0u) then
+        Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+      else if U32.eql(stt.step, 1u) then // Dialog
+        let game = Mons.initial_mons(hero_obj, pos, 0u, game)
+        Mons.Game.set_stt(Mons.Screen.introduction(2u), game)
+      else if U32.eql(stt.step, 2u) then // Go to Mon selection
+        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+      else if U32.eql(stt.step, 3u) then  // After Mon selection 
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+      else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    else game
     // Uncomment to skip the introduction (and comment the code above)
-    set_stt_game(game)
+    // set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
-      if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(2u), game)
+      if U16.eql(cmd, 'c') then Mons.Game.set_stt(Mons.Screen.introduction(3u), game)
       else // update current Mon using 'a' or 'd'
         Mons.Object.change_curr_mon(
           cmd, (cmd: U32) Mons.Screen.intro_select(cmd),
@@ -1425,8 +1447,10 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
         | terrain => Mons.Game.walk(cmd, pos, hero_idx, game);
         | inter => Mons.Game.walk(cmd, pos, hero_idx, game);
       else 
-        if Mons.Object.is_battling(adve_obj, hero_obj) // Can't move when in a battle
-        then 
+        if Bool.and(
+            Mons.Object.is_battling(adve_obj, hero_obj),
+            Bool.not(Mons.Kind.is_mage(adve_obj.kin))) 
+        then // Can't move when in a battle
           // Avoid bug with infity walk when in the same position as adve
           if U32.eql(hero_obj.ani, 0u) then  
           use skp = Debug.log<>("> To run from battle press [R]")
