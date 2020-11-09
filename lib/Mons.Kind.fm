@@ -16,6 +16,7 @@ T Mons.Kind.mons
 | Mons.Kind.mons.POISOLICK;
 | Mons.Kind.mons.TROWL;
 | Mons.Kind.mons.MIMIC;
+| Mons.Kind.mons.MIMIC2;
 | Mons.Kind.mons.AZULA;
 | Mons.Kind.mons.EMERELDER;
 | Mons.Kind.mons.EMERELDER2;
@@ -114,6 +115,7 @@ Mons.Kind.is_hero(kind: Mons.Kind): Bool
     | POISOLICK   => Bool.false;
     | TROWL       => Bool.false;
     | MIMIC       => Bool.false;
+    | MIMIC2      => Bool.false;
     | AZULA       => Bool.false;
     | EMERELDER   => Bool.false;
     | EMERELDER2   => Bool.false;
@@ -134,6 +136,7 @@ Mons.Kind.is_mage(kind: Mons.Kind): Bool
     | POISOLICK   => Bool.false;
     | TROWL       => Bool.false;
     | MIMIC       => Bool.false;
+    | MIMIC2      => Bool.false;
     | AZULA       => Bool.false;
     | EMERELDER   => Bool.false;
     | EMERELDER2   => Bool.false;
@@ -346,7 +349,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.hero_kill],
+      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
       set_pos_lvl1(38u, 52u));
     
     | CYCLOPE => Mons.Attr.new_battleable(
@@ -372,6 +375,12 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
       [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
       set_pos_lvl1(41u, 24u));
+    
+    | MIMIC2 => Mons.Attr.new_battleable(
+      Mons.Assets.pic_mimic, [Mons.Assets.mons_mimic_d_0], "MIMIC",
+      (is_up) Bool.if<>(is_up, Mons.Assets.battle_mimic_u, Mons.Assets.battle_mimic_d),
+      [Mons.Skill.super_fang, Mons.Skill.crunch, Mons.Skill.hypnosis, Mons.Skill.dream_eater],
+      set_pos_lvl1(62u, 33u));
     
     | AZULA => Mons.Attr.new_battleable(
       Mons.Assets.pic_azula, [Mons.Assets.mons_azula_d_0], "AZULA",
