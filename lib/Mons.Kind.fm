@@ -346,7 +346,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
     | ZOIO => Mons.Attr.new_battleable(
       Mons.Assets.pic_zoio, [Mons.Assets.mons_zoio_d_0], "ZOIO",
       (is_up) Bool.if<>(is_up, Mons.Assets.battle_zoio_u, Mons.Assets.battle_zoio_d),
-      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.dig],
+      [Mons.Skill.slam, Mons.Skill.sand_tomb, Mons.Skill.protect, Mons.Skill.hero_kill],
       set_pos_lvl1(38u, 52u));
     
     | CYCLOPE => Mons.Attr.new_battleable(

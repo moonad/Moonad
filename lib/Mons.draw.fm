@@ -40,15 +40,15 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     ; 
     | introduction => 
       if Bool.and(String.eql(adve_attr.name, "MAGE"), is_standing) then
-        if U32.eql(stt.step, 1u) then
+        if U32.eql(stt.step, 0u) then
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "Oh! So you really exist... the", "young man of the prophecy. [c]", scr)
-        else if U32.eql(stt.step, 2u) then // Follow to the game
+        else if U32.eql(stt.step, 1u) then // Follow to the game
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "I'm hurry and can't explain now,", "but... we depend on you. [c]", scr)
-        else if U32.eql(stt.step, 3u) then
+        else if U32.eql(stt.step, 2u) then
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
             "Great choice! You can press", "[e] to check it on the bag. [c]", scr)
@@ -151,6 +151,12 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
     | capture => // pressed to capture mon
       if stt.full_bag then Mons.draw.full_bag(hero_obj, adve_obj, dim, scr) 
       else Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+
+    | game_over =>
+      Mons.draw.text("GAME OVER", Mons.font_white, Pos32.new(90u,80u,0u), scr)
+      // TODO:
+      // Mons.draw.text("Press [c] to restart", Mons.font_white, Mons.draw.msg_screen.line_0, scr)
+    ;
   ;
 
 // Given a tile (x, y) and an object, returns its global (x, y) positions
