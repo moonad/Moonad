@@ -54,6 +54,7 @@ T Mons.Kind.const
 | Mons.Kind.const.CHEST;
 | Mons.Kind.const.CRYSTAL;
 | Mons.Kind.const.PORTAL;
+| Mons.Kind.const.HEAL;
 
 T Mons.Kind.terrain
 | Mons.Kind.terrain.VOID;
@@ -204,6 +205,20 @@ Mons.Kind.area_mon_pos(adve_kin: Mons.Kind, hero_pos: Pos32): Pos32
     | MON_AREA => terrain.pos_mon ;
   ;
   | inter => hero_pos;
+
+Mons.Kind.is_heal_area(adve_kin: Mons.Kind): Bool
+  case adve_kin:
+  | mons => Bool.false;
+  | const =>
+    case adve_kin.ele:
+    | FOUNTAIN => Bool.false;
+    | CHEST => Bool.false;
+    | CRYSTAL => Bool.false;
+    | PORTAL => Bool.false;
+    | HEAL => Bool.true;
+  ;
+  | terrain => Bool.false;
+  | inter => Bool.false;
 
 Mons.Kind.animate_idle(kind: Mons.Kind): Bool
   case kind:
@@ -538,6 +553,7 @@ Mons.Kind.attr(kin: Mons.Kind): Mons.Attr
         Mons.Assets.portal_3, Mons.Assets.portal_4, Mons.Assets.portal_5,
         Mons.Assets.portal_6, Mons.Assets.portal_7
       ]);
+    | HEAL => Mons.Attr.new_neutral([Mons.Assets.tile_chest_0]);
 
   ; // end of construction
 

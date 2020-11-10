@@ -932,6 +932,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
       { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
+      { "hl", [ Mons.Kind.new_const(Mons.Kind.const.HEAL, Bool.false)] },
       // Terrain
       { ".g", [ floor ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -1110,9 +1111,7 @@ Mons.Game.hero_inital_position(
   game: Mons.Game): Mons.Game
   let x = Pos32.get_x(Mons.global_scr_mid)
   let y = Pos32.get_y(Mons.global_scr_mid)
-  let z = // TEST not using intro level
-    // ifw
-    Pos32.get_z(pos)
+  let z = 1u // Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
   if U32.eql(z, 0u) then
     let new_pos = Pos32.new(x,U32.add(y, 12u), 0u)
@@ -1162,11 +1161,13 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   let type = Mons.Type.normal
   let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC, 0u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC2, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.POISOLICK, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 1u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER2, 2u, type, game)
   // let game = Mons.test.add_mon(game)
   game
   else if U32.eql(lvl, 2u) then
@@ -1174,11 +1175,13 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   else game
 
 // TODO
-Mons.Game.can_use_portal(dim: U32): Bool
-  let mon_lvl = Bool.not(U32.eql(U32.mod(dim, 2u), 0u)) // odd lvl
-  let did_intro = Bool.true
-  if Bool.and(U32.eql(dim, 0u), did_intro) then Bool.true
-  else if mon_lvl then Bool.true
+Mons.Game.can_use_portal(dim: U32, is_portal: Bool): Bool
+  if is_portal then
+    let mon_lvl = Bool.not(U32.eql(U32.mod(dim, 2u), 0u)) // odd lvl
+    let did_intro = Bool.true
+    if Bool.and(U32.eql(dim, 0u), did_intro) then Bool.true
+    else if mon_lvl then Bool.true
+    else Bool.false
   else Bool.false
 
 // Exclude boss
@@ -1231,6 +1234,12 @@ Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
   case List.at<>(idx, obj.bag) as mon:
   | obj;
   | mon.value;
+
+Mons.Object.heal_all_mons(obj: Mons.Object): Mons.Object
+  open obj:
+  let heal = ((mon: Mons.Object) Mons.Object.heal(mon, 5u)) :: Mons.Object -> Mons.Object
+  let new_bag = List.map<,>(heal, obj.bag)
+  Mons.Object.set_bag(new_bag, obj)
 
 // When hero wins a battle, adds the adversary to hero's game
 // and updates de game status
@@ -1390,23 +1399,23 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     ;
     | introduction =>
     let can_walk = U32.eql(stt.step, 0u)
-    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-      Mons.Game.walk(cmd, pos, hero_idx, game)
-    else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
-      if U32.eql(stt.step, 0u) then // Dialog
-        let game = Mons.initial_mons(hero_obj, pos, 0u, game)
-        Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
-      else if U32.eql(stt.step, 1u) then // Go to Mon selection
-        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-      else if U32.eql(stt.step, 2u) then  // After Mon selection 
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-      else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    else game
+    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+    //   Mons.Game.walk(cmd, pos, hero_idx, game)
+    // else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
+    //   if U32.eql(stt.step, 0u) then // Dialog
+    //     let game = Mons.initial_mons(hero_obj, pos, 0u, game)
+    //     Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+    //   else if U32.eql(stt.step, 1u) then // Go to Mon selection
+    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+    //   else if U32.eql(stt.step, 2u) then  // After Mon selection 
+    //     let game = Mons.Game.map_del(pos, adve_idx, game)
+    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    //     Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    //   else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    // else game
     // Uncomment to skip the introduction (and comment the code above)
-    // set_stt_game(game)
+    set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
@@ -1430,7 +1439,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if Mons.is_walk_cmd(cmd) then
       if Mons.Kind.is_mon_area(adve_obj.kin) then 
         let adve_pos = Mons.Kind.area_mon_pos(adve_obj.kin, pos)
-        def mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
+        let mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
         open mon_area_obj:
         case mon_area_obj.kin:
         | mon =>
@@ -1520,8 +1529,10 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       ;
 
       | construction =>
-        let can_use_portal = Mons.Game.can_use_portal(Mons.Game.dim(game))
-        if can_use_portal then
+        if Mons.Kind.is_heal_area(adve_obj.kin) then
+          let hero_obj = Mons.Object.heal_all_mons(hero_obj)
+          Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        else if Mons.Game.can_use_portal(Mons.Game.dim(game), kind.portal) then
           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
           Mons.Game.hero_inital_position(usr, hero_obj, new_pos, hero_idx, game)
         else game
