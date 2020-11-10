@@ -445,6 +445,10 @@ Mons.draw.img_type(kind: Mons.Kind): String
   | terrain  => "";
   | interact => "";
 
+// Mons.draw.img_effect(eff: Mons.Effect): String
+//   open eff:
+//   if
+
 Mons.draw.small_HP: String
   "ƕƥ"
 
@@ -466,20 +470,20 @@ Mons.draw.battle_skills(hero_obj: Mons.Object, scr: Image3D): Image3D
 
 // TODO: add sprite and icon to represent the effects
 Mons.draw.effects(hero_eff: Mons.Effect, adve_eff: Mons.Effect, scr: Image3D): Image3D
-  let scr = Mons.draw.effect(hero_eff, Pos32.new(140u, 110u, 0u), scr)
+  let scr = Mons.draw.effect(hero_eff, Pos32.new(140u, 105u, 0u), scr)
   let scr = Mons.draw.effect(adve_eff, Pos32.new(38u, 45u, 0u), scr)
   scr
 
 Mons.draw.effect(eff: Mons.Effect, pos: Pos32, scr: Image3D): Image3D
   // use skp = Debug.log<>("> Draw effects")
   open eff: 
-  let burn = if Mons.Effect.has_burn(eff) then String.flatten(["burn ", U32.to_string(eff.burn)]) else "" 
-  let hit = if Mons.Effect.has_hit(eff) then "hit " else ""
-  let minimize = if Mons.Effect.has_minimize(eff) then "mini " else ""
-  let invulnerable = if Mons.Effect.has_invulnerable(eff) "invul " else ""
-  let poison = if Mons.Effect.has_poison(eff) "poison " else ""
-  let sleep = if Mons.Effect.has_sleep(eff) "sleep " else ""
-  let protect = if Mons.Effect.has_protect(eff) "protect " else ""
+  let burn = if Mons.Effect.has_burn(eff) then "Ⓐ " else "" 
+  let hit = if Mons.Effect.has_hit(eff) then "Ⓑ " else ""
+  let minimize = if Mons.Effect.has_minimize(eff) then "Ⓓ " else ""
+  let invulnerable = if Mons.Effect.has_invulnerable(eff) "Ⓒ " else ""
+  let poison = if Mons.Effect.has_poison(eff) "Ⓔ " else ""
+  let sleep = if Mons.Effect.has_sleep(eff) "Ⓖ " else ""
+  let protect = if Mons.Effect.has_protect(eff) "Ⓕ " else ""
   let text = String.flatten([burn, hit, minimize, invulnerable, poison, sleep, protect])
   let scr = Mons.draw.text(text, Mons.font_black, pos, scr)
   scr
