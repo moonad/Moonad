@@ -151,7 +151,23 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
       ;
       | terrain => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
       // TODO: add message about interaction
-      | interact => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+      | interact =>
+        case adve_kind.ele:
+        | LEVER => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+        | MOVE => Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
+        | HEAL => 
+          if adve_kind.on then
+            let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+            let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+            let scr = Mons.draw.text("Press [c] to heal 20HP on all of", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+            Mons.draw.text("your Mons", Mons.font_black, Mons.draw.msg_screen.line_1, scr)
+          else
+            let scr = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
+            let scr = Mons.draw.image(Mons.Assets.text_screen_bg, Pos32.new(120u,80u,0u), scr)
+            Mons.draw.text("You already use the heal.", Mons.font_black, Mons.draw.msg_screen.line_0, scr)
+        ;
+      ;
+      // Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj);
     ; // end case stt.game
     | inventory => Mons.draw.bag(hero_obj, dim, scr);
 

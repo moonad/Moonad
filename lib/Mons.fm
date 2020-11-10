@@ -736,7 +736,7 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {11u, []}, 
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {11u, []}, 
     0u, Mons.Effect.clear)
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
@@ -933,8 +933,16 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
       { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
-      // { "hl", [ Mons.Kind.new_interactive_tool(
-      //     Mons.Kind.inter.HEAL, Bool.true, Mons.Kind.inter_lever_eff)] },
+      { "hl", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.HEAL, Bool.false, Mons.Kind.inter_lever_eff)
+              ] },
+
+      { "al", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.LEVER(0u),
+                Bool.false, 
+                Mons.Kind.inter_lever_eff
+              ) ]},
+
       // Terrain
       { ".g", [ floor ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -1548,11 +1556,21 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           Mons.Kind.exec_eff(adjacent_obj.kin, game)
         else set_stt_game(game);
 
-      | inter => 
-        let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
-        let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
-        open inter_obj:
-        Mons.Kind.exec_eff(inter_obj.kin, game)
+      | inter =>
+        let game_eff_after_interact = 
+          // This was the code that was working for lever and push
+          // let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
+          let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+          let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
+          open inter_obj:
+          Mons.Kind.exec_eff(inter_obj.kin, game)
+        case kind.ele as inter:
+        | lever => game_eff_after_interact;
+        | move  => game_eff_after_interact;
+        | heal => 
+          let game = Mons.Kind.exec_eff(adve_obj.kin, game)
+          let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+          Mons.Game.map_set(pos, adve_idx, inter_obj, game);
       ;
 
     else if U16.eql(cmd, 'z') then // Free Mon
@@ -1820,7 +1838,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           let sprites = obj_attr.wlk(t_x, t_y, obj.ani, obj.dir) // walk sprites
           get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
           let s_z = t_z
-          if Mons.Kind.animate_idle(obj.kin) then // TODO: check if is idle
+          if Mons.Object.is_standing(obj) then
             let cur_spr = Mons.draw.cur_sprite(game.tik, sprites) // get the sprite
             let spr = Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
             List.cons<>(spr, sprs)
