@@ -934,7 +934,8 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
       { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
       { "hl", [ Mons.Kind.new_interactive_tool(
-                Mons.Kind.inter.HEAL, Bool.false, Mons.Kind.inter_lever_eff)
+                Mons.Kind.inter.HEAL, Bool.false, Mons.Kind.inter_lever_eff), 
+                floor
               ] },
 
       { "al", [ Mons.Kind.new_interactive_tool(
@@ -1247,7 +1248,7 @@ Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
 
 Mons.Object.heal_all_mons(obj: Mons.Object): Mons.Object
   open obj:
-  let heal = ((mon: Mons.Object) Mons.Object.heal(mon, 5u)) :: Mons.Object -> Mons.Object
+  let heal = ((mon: Mons.Object) Mons.Object.heal(mon, 15u)) :: Mons.Object -> Mons.Object
   let new_bag = List.map<,>(heal, obj.bag)
   Mons.Object.set_bag(new_bag, obj)
 
