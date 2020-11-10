@@ -334,6 +334,7 @@ Mons.Object.hero_can_push_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Bool
     case kind.ele:
     | lever => Bool.true;
     | move  => Bool.true;
+    | heal  => Bool.false;
   ;
 
 Mons.Object.get_adjacent_obj(pos: Pos32, dir: Mons.Dir, map: Mons.Map): Mons.Object
@@ -735,7 +736,7 @@ Mons.Type.skill_n_type(val: U32, source_obj: Mons.Object, target_obj: Mons.Objec
 // Creates a new object with a given kind
 Mons.Object.new_of_kind(kin: Mons.Kind): Mons.Object
   // kin, dir, pad, ani, dmg, bag, mon, bos, cap
-  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 1u, 0u, [], 0u, [], {11u, []}, 
+  Mons.Object.new(kin, Mons.Dir.down, Mons.Pad.null, 0u, 0u, [], 0u, [], {11u, []}, 
     0u, Mons.Effect.clear)
 
 Mons.Map.code_to_tile.aux(code: String, cond: List(Pair(String, List(Mons.Object)))) : List(Mons.Object)
@@ -932,6 +933,17 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
       { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
       { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
+      { "hl", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.HEAL, Bool.false, Mons.Kind.inter_lever_eff), 
+                floor
+              ] },
+
+      { "al", [ Mons.Kind.new_interactive_tool(
+                Mons.Kind.inter.LEVER(0u),
+                Bool.false, 
+                Mons.Kind.inter_lever_eff
+              ) ]},
+
       // Terrain
       { ".g", [ floor ]},
       { ".d", [ Mons.Kind.new_terrain(Mons.Kind.terrain.GRASS_PLANT) ]},
@@ -1110,9 +1122,7 @@ Mons.Game.hero_inital_position(
   game: Mons.Game): Mons.Game
   let x = Pos32.get_x(Mons.global_scr_mid)
   let y = Pos32.get_y(Mons.global_scr_mid)
-  let z = // TEST not using intro level
-    // ifw
-    Pos32.get_z(pos)
+  let z = 1u // Pos32.get_z(pos)
   // IDK why but Mons.image_to_global doesn't work for the hero ._.
   if U32.eql(z, 0u) then
     let new_pos = Pos32.new(x,U32.add(y, 12u), 0u)
@@ -1162,11 +1172,13 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   let type = Mons.Type.normal
   let game = Mons.Game.add_mon(Mons.Kind.mons.ZOIO, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC, 0u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.MIMIC2, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.POISOLICK, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.AZULA, 1u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.CYCLOPE, 2u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.TROWL, 0u, type, game)
   let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER, 2u, type, game)
+  let game = Mons.Game.add_mon(Mons.Kind.mons.EMERELDER2, 2u, type, game)
   // let game = Mons.test.add_mon(game)
   game
   else if U32.eql(lvl, 2u) then
@@ -1174,11 +1186,13 @@ Mons.Game.add_mons_to_map(pos: Pos32, game: Mons.Game): Mons.Game
   else game
 
 // TODO
-Mons.Game.can_use_portal(dim: U32): Bool
-  let mon_lvl = Bool.not(U32.eql(U32.mod(dim, 2u), 0u)) // odd lvl
-  let did_intro = Bool.true
-  if Bool.and(U32.eql(dim, 0u), did_intro) then Bool.true
-  else if mon_lvl then Bool.true
+Mons.Game.can_use_portal(dim: U32, is_portal: Bool): Bool
+  if is_portal then
+    let mon_lvl = Bool.not(U32.eql(U32.mod(dim, 2u), 0u)) // odd lvl
+    let did_intro = Bool.true
+    if Bool.and(U32.eql(dim, 0u), did_intro) then Bool.true
+    else if mon_lvl then Bool.true
+    else Bool.false
   else Bool.false
 
 // Exclude boss
@@ -1231,6 +1245,12 @@ Mons.Object.get_current_mon(obj: Mons.Object): Mons.Object
   case List.at<>(idx, obj.bag) as mon:
   | obj;
   | mon.value;
+
+Mons.Object.heal_all_mons(obj: Mons.Object): Mons.Object
+  open obj:
+  let heal = ((mon: Mons.Object) Mons.Object.heal(mon, 15u)) :: Mons.Object -> Mons.Object
+  let new_bag = List.map<,>(heal, obj.bag)
+  Mons.Object.set_bag(new_bag, obj)
 
 // When hero wins a battle, adds the adversary to hero's game
 // and updates de game status
@@ -1390,23 +1410,23 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     ;
     | introduction =>
     let can_walk = U32.eql(stt.step, 0u)
-    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-      Mons.Game.walk(cmd, pos, hero_idx, game)
-    else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
-      if U32.eql(stt.step, 0u) then // Dialog
-        let game = Mons.initial_mons(hero_obj, pos, 0u, game)
-        Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
-      else if U32.eql(stt.step, 1u) then // Go to Mon selection
-        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-      else if U32.eql(stt.step, 2u) then  // After Mon selection 
-        let game = Mons.Game.map_del(pos, adve_idx, game)
-        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-      else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    else game
+    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+    //   Mons.Game.walk(cmd, pos, hero_idx, game)
+    // else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
+    //   if U32.eql(stt.step, 0u) then // Dialog
+    //     let game = Mons.initial_mons(hero_obj, pos, 0u, game)
+    //     Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+    //   else if U32.eql(stt.step, 1u) then // Go to Mon selection
+    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+    //   else if U32.eql(stt.step, 2u) then  // After Mon selection 
+    //     let game = Mons.Game.map_del(pos, adve_idx, game)
+    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+    //     Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    //   else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    // else game
     // Uncomment to skip the introduction (and comment the code above)
-    // set_stt_game(game)
+    set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
@@ -1430,7 +1450,7 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     else if Mons.is_walk_cmd(cmd) then
       if Mons.Kind.is_mon_area(adve_obj.kin) then 
         let adve_pos = Mons.Kind.area_mon_pos(adve_obj.kin, pos)
-        def mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
+        let mon_area_obj = Mons.Map.get(adve_pos, 0u, game.map)
         open mon_area_obj:
         case mon_area_obj.kin:
         | mon =>
@@ -1520,8 +1540,11 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
       ;
 
       | construction =>
-        let can_use_portal = Mons.Game.can_use_portal(Mons.Game.dim(game))
-        if can_use_portal then
+        // if Mons.Kind.is_heal_area(adve_obj.kin) then
+        //   let hero_obj = Mons.Object.heal_all_mons(hero_obj)
+        //   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        // else 
+        if Mons.Game.can_use_portal(Mons.Game.dim(game), kind.portal) then
           let new_pos = Pos32.add(pos, Pos32.new(0u,0u,1u)) 
           Mons.Game.hero_inital_position(usr, hero_obj, new_pos, hero_idx, game)
         else game
@@ -1534,11 +1557,21 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
           Mons.Kind.exec_eff(adjacent_obj.kin, game)
         else set_stt_game(game);
 
-      | inter => 
-        let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
-        let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
-        open inter_obj:
-        Mons.Kind.exec_eff(inter_obj.kin, game)
+      | inter =>
+        let game_eff_after_interact = 
+          // This was the code that was working for lever and push
+          // let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.swap_interactive)
+          let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+          let game = Mons.Game.map_set(pos, adve_idx, inter_obj, game)
+          open inter_obj:
+          Mons.Kind.exec_eff(inter_obj.kin, game)
+        case kind.ele as inter:
+        | lever => game_eff_after_interact;
+        | move  => game_eff_after_interact;
+        | heal => 
+          let game = Mons.Kind.exec_eff(adve_obj.kin, game)
+          let inter_obj = Mons.Object.update_interactive(adve_obj, Mons.Kind.set_on_interactive)
+          Mons.Game.map_set(pos, adve_idx, inter_obj, game);
       ;
 
     else if U16.eql(cmd, 'z') then // Free Mon
@@ -1717,18 +1750,18 @@ Mons.Object.is_full_bag(obj: Mons.Object): Bool
 Mons.initial_mons(hero_obj: Mons.Object, pos: Pos32, hero_idx: U32, game: Mons.Game): Mons.Game
   open hero_obj:
   let hero_obj = Mons.Object.set_bag([], hero_obj)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK, Bool.false, Mons.Type.earth, 2u))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.AZULA, Bool.false, Mons.Type.fire, 2u))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER, Bool.false, Mons.Type.water, 2u))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.POISOLICK, Bool.false, Mons.Type.normal, 2u))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.AZULA, Bool.false, Mons.Type.normal, 2u))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.EMERELDER, Bool.false, Mons.Type.normal, 2u))
   let hero_obj = Mons.Object.push_to_bag(mon0_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon1_bag, hero_obj)
   let hero_obj = Mons.Object.push_to_bag(mon2_bag, hero_obj)
   Mons.Game.map_set(pos, hero_idx, hero_obj, game)
 
 Mons.Screen.initial_mons: List(Mons.Object)
-  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.earth, 2u))
-  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.fire, 2u))
-  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.water, 2u))
+  let mon0_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.normal, 2u))
+  let mon1_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.normal, 2u))
+  let mon2_bag = Mons.Object.new_of_kind(Mons.Kind.Mons(Mons.Kind.mons.HERO, Bool.false, Mons.Type.normal, 2u))
   [mon0_bag, mon1_bag, mon2_bag]
 
 // Converts a keyboard key to a direction:
@@ -1806,7 +1839,7 @@ Mons.game_sprites(game: Mons.Game): List(Mons.Sprite)
           let sprites = obj_attr.wlk(t_x, t_y, obj.ani, obj.dir) // walk sprites
           get s_x s_y = Mons.draw.global_xy(t_x, t_y, obj)
           let s_z = t_z
-          if Mons.Kind.animate_idle(obj.kin) then // TODO: check if is idle
+          if Mons.Object.is_standing(obj) then
             let cur_spr = Mons.draw.cur_sprite(game.tik, sprites) // get the sprite
             let spr = Mons.Sprite.new(s_x, s_y, s_z, cur_spr)
             List.cons<>(spr, sprs)

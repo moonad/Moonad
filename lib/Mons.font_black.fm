@@ -123,4 +123,13 @@ Mons.font_black: Mons.font
   let map = Mons.font.set_img(9321s, Mons.Char_black.darkness, map) // add ⑩
   let map = Mons.font.set_img(405s, Mons.Char_black.s_72, map) // add ƕ, small H
   let map = Mons.font.set_img(421s, Mons.Char_black.s_80, map) // add ƥ, small P
+
+  let map = Mons.font.set_img(9398s, Mons.Char_black.burn, map) // add Ⓐ
+  let map = Mons.font.set_img(9399s, Mons.Char_black.hit, map) // add Ⓑ
+  let map = Mons.font.set_img(9400s, Mons.Char_black.invulnerable, map) // add Ⓒ
+  let map = Mons.font.set_img(9401s, Mons.Char_black.minimize, map) // add Ⓓ
+  let map = Mons.font.set_img(9402s, Mons.Char_black.poison, map) // add Ⓔ
+  let map = Mons.font.set_img(9403s, Mons.Char_black.protect, map) // add Ⓕ
+  let map = Mons.font.set_img(9404s, Mons.Char_black.sleep, map) // add Ⓖ
+
   map
