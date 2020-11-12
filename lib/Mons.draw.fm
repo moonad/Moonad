@@ -118,7 +118,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
           Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
       ;
       | cons =>
-        if Bool.and(is_standing, adve_kind.portal) then
+        if Bool.and(is_standing, Mons.Kind.is_portal(adve_obj.kin)) then
           let game = Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           def captured = Pair.fst<,>(hero_obj.cap)
           def boss_def = Nat.to_u32(List.length<>(hero_obj.bos))

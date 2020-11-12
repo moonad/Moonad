@@ -1,6 +1,6 @@
 T Mons.Kind
 | Mons.Kind.Mons(ele: Mons.Kind.mons, boss: Bool, pri_type: Mons.Type, agi: U32);
-| Mons.Kind.Const(ele: Mons.Kind.const, portal: Bool, has_idle: Bool);
+| Mons.Kind.Const(ele: Mons.Kind.const);
 | Mons.Kind.Terrain(ele: Mons.Kind.terrain);
 | Mons.Kind.Interactive(
   ele: Mons.Kind.inter,
@@ -240,7 +240,7 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, on: Bool, game: Mons.Game): Mon
     | lever => 
       if U32.eql(z, 1u) then // lvl 1
         if U32.eql(kind.id, 0u) then // lever 0
-          let sign = Mons.Kind.new_const(Mons.Kind.const.CHEST, Bool.false)
+          let sign = Mons.Kind.new_const(Mons.Kind.const.CHEST)
           let obj_pos = Pos32.new(U32.add(1u, x), U32.sub(y, 1u), z)
           Mons.Game.map_push(obj_pos, sign, game)
         else game
@@ -269,11 +269,11 @@ Mons.Kind.inter_lever_eff(kind: Mons.Kind.inter, on: Bool, game: Mons.Game): Mon
 Mons.Kind.new_terrain(kin: Mons.Kind.terrain): Mons.Object
   Mons.Object.new_of_kind(Mons.Kind.Terrain(kin))
 
-Mons.Kind.new_const(kin: Mons.Kind.const, animate: Bool): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.false, animate))
+Mons.Kind.new_const(kin: Mons.Kind.const): Mons.Object
+  Mons.Object.new_of_kind(Mons.Kind.Const(kin))
 
-Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
-  Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true, Bool.true))
+// Mons.Kind.new_portal(kin: Mons.Kind.const): Mons.Object
+//   Mons.Object.new_of_kind(Mons.Kind.Const(kin, Bool.true, Bool.true))
 
 Mons.Kind.new_interactive_tool(
   kin: Mons.Kind.inter,

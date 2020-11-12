@@ -762,9 +762,9 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // Mons 
       { "mg", Mons.Kind.new_mons(Mons.Kind.mons.MAGE, Mons.Type.normal, 2u) },
       // Construction
-      { "ct", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL) ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true), path_brick ]},
-      // { ".-", [ Mons.Kind.new_const(Mons.Kind.const.BIG_STAIRS, Bool.false), path_brick ]},
+      { "ct", [ Mons.Kind.new_const(Mons.Kind.const.CRYSTAL) ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u)), path_brick ]},
+      { "pt", [ Mons.Kind.new_const(Mons.Kind.const.PORTAL)] },
 
       // Terrain
       { ".g", [ path_brick ]},
@@ -825,7 +825,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       { "i1", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 1u)) ]},
       { "i2", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 2u)) ]},
       { "i3", [ path_blocker, Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 3u)), 
-        Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u), Bool.true) ]},
+        Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(lvl0, 0u)) ]},
       { "i4", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 4u)) ]},
       { "i5", [ Mons.Kind.new_terrain(Mons.Kind.terrain.MID_CITY(8u, 5u)) ]},
       
@@ -930,9 +930,9 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
       // { "m6", Mons.Kind.new_mons(Mons.Kind.mons.TROWL, Mons.Type.normal, 2u)},
 
       // Construction
-      { "ch", [ Mons.Kind.new_portal(Mons.Kind.const.CRYSTAL), floor ]},
-      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u), Bool.true) ]},
-      { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] },
+      // { "ch", [ Mons.Kind.new_const(Mons.Kind.const.CRYSTAL), floor ]},
+      { "ft", [ Mons.Kind.new_const(Mons.Kind.const.FOUNTAIN(1u, 0u)) ]},
+      { "pt", [ Mons.Kind.new_const(Mons.Kind.const.PORTAL)] },
       { "hl", [ Mons.Kind.new_interactive_tool(
                 Mons.Kind.inter.HEAL, Bool.false, Mons.Kind.inter_lever_eff), 
                 floor
@@ -967,7 +967,7 @@ Mons.Map.code_to_tile(code: String, dim: U32): List(Mons.Object)
     Mons.Map.code_to_tile.aux(code,[
     { ".g", [ floor ]},
     // { "bb", [ Mons.Kind.new_terrain(Mons.Kind.terrain.PATH_BLOCKER(1u, 0u))] },
-    { "pt", [ Mons.Kind.new_portal(Mons.Kind.const.PORTAL)] }
+    { "pt", [ Mons.Kind.new_const(Mons.Kind.const.PORTAL)] }
 
     ]) 
 
