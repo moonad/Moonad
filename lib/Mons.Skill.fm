@@ -49,7 +49,7 @@ Mons.Skill.description(skill: Mons.Skill): String
   | gyro_ball => "Apply medium damage (4). If this Mon has 'agi' faster than the adve, increase damage by 50%";
   | iron_defense => "Increase defense for 2 turns, including the current one";
   | super_fang => "Damage adve with 50% of current life then loses 25% of hp";
-  | hypnosis => "Apply sleep to adve";
+  | hypnosis => "50% to apply sleep to adve. Can't use on consecutive turns.";
   | dream_eater => "Will only damage if adve is sleep. Will damage adve and heal 100% of the dmg";
   | wing_attack => "Damage";
   | moonlight => "Damage and 20% of sleep";
@@ -81,7 +81,7 @@ Mons.Skill.short_description(skill: Mons.Skill): String
   | gyro_ball => "Hit 4. If more agility + 50% dmg";
   | iron_defense => "-25% dmg for this and next turn";
   | super_fang => "Hit 50% hp + loses 25% of hp";
-  | hypnosis => "Add sleep if can";
+  | hypnosis => "50% of sleep if can";
   | dream_eater => "If sleep, hit 6 and heal 4";
   | wing_attack => "Hit 6hp";
   | moonlight => "Hit 4 + 20% of sleep";
@@ -444,14 +444,14 @@ Mons.Skill.cast(pos: Pos32, source: U32, target: U32, skill: Mons.Skill, game: M
     let game = Mons.Skill.damage_eff(target_obj, pos, target, adve_dmg, game)
     game;
 
-  // Apply sleep to adve
+  // 50% of apply sleep to adve
   | hypnosis => // ok
-    if Mons.Effect.has_sleep(target_mon.eff) then 
-      use skp = Debug.log<>(String.flatten(["- Hypnosis: used last turn"]))
-      game
-    else 
+    if Bool.and(Mons.Skill.is_critical(2u, game.tik), Mons.Effect.has_sleep(target_mon.eff)) then
       use skp = Debug.log<>(String.flatten(["- Hypnosis: sleep next turn "]))
-      Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game);
+      Mons.Skill.sleep_eff(target_obj, pos, target, 2u, game)
+    else
+      use skp = Debug.log<>(String.flatten(["- Hypnosis: used last turn or miss hit"]))
+      game;
 
   // Will only damage if the adve is sleep. Will damage adve and heal 100% of the dmg
   | dream_eater => // ok

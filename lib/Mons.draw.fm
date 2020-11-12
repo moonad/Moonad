@@ -47,7 +47,7 @@ Mons.draw(game: Mons.Game, scr: Image3D): Image3D
         else if U32.eql(stt.step, 1u) then // Follow to the game
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
-            "I'm hurry and can't explain now,", "but... we depend on you. [c]", scr)
+            "I'm in a hurry and can't explain", "now, but... we depend on you. [c]", scr)
         else if U32.eql(stt.step, 2u) then
           let game =  Mons.Map.build_sprites(game, scr, hero_pos.value, hero_obj)
           Mons.draw.mage_talk(
