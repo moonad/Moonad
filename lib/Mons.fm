@@ -1410,23 +1410,23 @@ Mons.Game.cmd(cmd: Char, usr: Word(160), game: Mons.Game): Mons.Game
     ;
     | introduction =>
     let can_walk = U32.eql(stt.step, 0u)
-    // if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
-    //   Mons.Game.walk(cmd, pos, hero_idx, game)
-    // else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
-    //   if U32.eql(stt.step, 0u) then // Dialog
-    //     let game = Mons.initial_mons(hero_obj, pos, 0u, game)
-    //     Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
-    //   else if U32.eql(stt.step, 1u) then // Go to Mon selection
-    //     Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
-    //   else if U32.eql(stt.step, 2u) then  // After Mon selection 
-    //     let game = Mons.Game.map_del(pos, adve_idx, game)
-    //     let hero_obj = Mons.Object.delete_init_mons(hero_obj)
-    //     let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
-    //     Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    //   else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
-    // else game
+    if Bool.and(can_walk, Mons.is_walk_cmd(cmd)) then
+      Mons.Game.walk(cmd, pos, hero_idx, game)
+    else if Bool.and(U16.eql(cmd, 'c'), Mons.Kind.is_mage(adve_obj.kin)) then
+      if U32.eql(stt.step, 0u) then // Dialog
+        let game = Mons.initial_mons(hero_obj, pos, 0u, game)
+        Mons.Game.set_stt(Mons.Screen.introduction(1u), game)
+      else if U32.eql(stt.step, 1u) then // Go to Mon selection
+        Mons.Game.set_stt(Mons.Screen.intro_select(0u), game)
+      else if U32.eql(stt.step, 2u) then  // After Mon selection 
+        let game = Mons.Game.map_del(pos, adve_idx, game)
+        let hero_obj = Mons.Object.delete_init_mons(hero_obj)
+        let game = Mons.Game.map_set(pos, hero_idx, hero_obj, game)
+        Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+      else Mons.Game.set_stt(Mons.Screen.game('.', Mons.Turn.empty), game)
+    else game
     // Uncomment to skip the introduction (and comment the code above)
-    set_stt_game(game)
+    // set_stt_game(game)
     ;
 
     | Mons.Screen.intro_select => 
@@ -1693,11 +1693,11 @@ Mons.Game.adve_turn(hero_obj: Mons.Object, adve_obj: Mons.Object, game: Mons.Gam
   if U32.gtn(U32.sub(hero_hp, adve_hp), 15u) then 2 // heal
   else if Bool.and(U32.gtn(hero_hp, 30u), U32.ltn(hero_hp, 25u)) then 2 // heal
 
-  else if U32.gte(U32.sub(adve_hp, hero_hp), 8u) then 1 // none
-  else if Bool.and(U32.gtn(qtd_mon_bag, 1u), U32.gtn(hero_hp, 30u)) then 1 // none
-  else if U32.eql(hero_hp, adve_hp) then 3 // none
-  else if Bool.and(Bool.not(U32.eql(U32.mod(pos_x, 2u), 0u)), U32.ltn(hero_hp, 15u)) then 3 // n
+  else if U32.gte(U32.sub(adve_hp, hero_hp), 8u) then 1
+  else if Bool.and(U32.gtn(qtd_mon_bag, 1u), U32.gtn(hero_hp, 30u)) then 1 
+  else if U32.eql(hero_hp, adve_hp) then 3 
 
+  else if Bool.and(Bool.not(U32.eql(U32.mod(pos_x, 2u), 0u)), U32.ltn(hero_hp, 15u)) then 1
   else if U32.gtn(U32.sub(adve_hp, hero_hp), 15u) then 0 // heal
   else if Bool.and(U32.gtn(adve_hp, hero_hp), U32.gtn(hero_hp, 30u)) then 0 //hit
   else if U32.gtn(hero_hp, 20u) then 1 // hit
