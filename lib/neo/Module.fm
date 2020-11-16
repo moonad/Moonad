@@ -1,7 +1,8 @@
 Module.Row(field: String, T: Type, m: Module) : Type
-  case Map.get<Export>(String.to_bits(field),m) as got:
-  | Empty;
-  | Equal(Type,T,Export.T(got.value));
+  case Map.get<Export>(String.to_bits(field),m) as got {
+    none: Empty,
+    some: Equal(Type,T,Export.T(got.value))
+  }
 
 Module: Type
   Map(Export)
@@ -10,12 +11,13 @@ Module.from(defs: List(Pair(String, Export))): Module
   Map.from_list<,>(String.to_bits,defs)
 
 Module.get(key: String, mod: Module): Module.type(key, mod)
-  case Map.get<Export>(String.to_bits(key), mod) as got:
-  | Unit.new;
-  | Export.value(got.value);
-  : case got.self:
-    | Unit;
-    | Export.T(got.self.value);;
+  case Map.get<Export>(String.to_bits(key), mod) as got {
+    none: Unit.new,
+    some: Export.value(got.value)
+  } : case got.self {
+      none: Unit,
+      some: Export.T(got.self.value)
+    }
 
 Module.new: Module
   Map.new<Export>
@@ -29,7 +31,8 @@ Module.to_list(m : Module) : List(Pair(Bits,Type))
   List.map<,>(f, Map.to_list<>(m))
 
 Module.type(key: String, mod: Module): Type
-  case Map.get<Export>(String.to_bits(key), mod) as got:
-  | Unit;
-  | Export.T(got.value);
+  case Map.get<Export>(String.to_bits(key), mod) as got {
+    none: Unit,
+    some: Export.T(got.value)
+  }
 
