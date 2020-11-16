@@ -1,6 +1,7 @@
 // Sprites have a position, angle and a Image3D
-T Game.Sprite
-| Game.Sprite.new(mid: Pos32, pos: Pos32, ang: U32, img: Image3D);
+type Game.Sprite {
+  new(mid: Pos32, pos: Pos32, ang: U32, img: Image3D)
+}
 
 // Renders a list of sprites to a image. Words by taking each sprite on the
 // list, transforming its voxels and pushing to the screen.
@@ -11,8 +12,8 @@ Game.draw(sprites: List(Game.Sprite), scr: Image3D): Image3D
   // For each sprite...
   def next(sprite, state)
     get idx scr = state
-    case sprite:
-    | // For each voxel...
+    case sprite {
+     new: // For each voxel...
       let len = Image3D.get_length(sprite.img)
       let scr = for i : U32 = 0u .. len:
         // Gets the sprite origin (mid) and position (pos)
@@ -35,10 +36,11 @@ Game.draw(sprites: List(Game.Sprite), scr: Image3D): Image3D
         let pos = Pos32.new(v_x, v_y, v_z)
         let col = Image3D.get_col(i, sprite.img)
         let scr = Image3D.set_pos(U32.add(i, idx), pos, scr)
-        let scr = Image3D.set_col(U32.add(i, idx), col, scr);
+        let scr = Image3D.set_col(U32.add(i, idx), col, scr)
         scr
       // Returns new to-write idx and updated screen
-      Pair.new<,>(U32.add(len, idx), scr);
+      Pair.new<,>(U32.add(len, idx), scr) 
+    }
   // Performs the algorithm above and returns the resulting image
   Pair.snd<,>(List.fold<>(sprites)<>(init, next))
 
