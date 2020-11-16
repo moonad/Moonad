@@ -1,3 +1,3 @@
-T Subset <A: Type> <B: A -> Type>
-| Subset.new(a: A)<b: B(a)>;
-
+type Subset <A: Type> <B: A -> Type> {
+  new(a: A)<b: B(a)>
+}
