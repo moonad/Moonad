@@ -1,2 +1,0 @@
-U32.read_base(base: U32, str: String): U32
-  U32.read_base(base, str)

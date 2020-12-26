@@ -1,2 +1,0 @@
-T The <A: Type>   ~ (x: A)
-| The.value(x: A) ~ (x);

@@ -1,2 +1,0 @@
-U8_Vector.to_number<n: Nat>(bytes: U8_Vector(n)): Nat
-  U8_Vector.to_number.aux<n>(bytes, 0)

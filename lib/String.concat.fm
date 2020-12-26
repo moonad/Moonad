@@ -1,5 +1,0 @@
-// Concatenates two strings.
-String.concat(as: String, bs: String): String
-  case as:
-  | bs;
-  | String.cons(as.head, String.concat(as.tail,bs));

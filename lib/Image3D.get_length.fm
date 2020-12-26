@@ -1,3 +1,0 @@
-Image3D.get_length(img: Image3D): U32
-  case img:
-  | img.length;

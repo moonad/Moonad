@@ -1,4 +1,0 @@
-// A Map from bitstrings to values.
-T Map<A: Type>
-| Map.new;
-| Map.tie(val: Maybe(A), lft: Map(A), rgt: Map(A));

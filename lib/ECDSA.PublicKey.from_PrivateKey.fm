@@ -1,3 +1,0 @@
-ECDSA.PublicKey.from_PrivateKey(priv: Nat, compressed: Bool): U8_Vector(Bool.if<Nat>(compressed, 33, 65))
-    let point = ECDSA.Point.from_PrivateKey(priv)
-    ECDSA.Point.to_bytes(point, compressed)

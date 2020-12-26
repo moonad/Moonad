@@ -1,3 +1,0 @@
-T Parser.Error
-| Parser.Error.new(pos: Nat, unx: Maybe(Parser.Item), exp: List(Parser.Item));
-| Parser.Error.msg(pos: Nat, msgs: List(String));

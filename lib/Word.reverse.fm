@@ -1,5 +1,0 @@
-Word.reverse<size: Nat>(word: Word(size)): Word(size)
-  def nil = Word.nil
-  def w0  = <size> (rev) Word.0<size>(rev)
-  def w1  = <size> (rev) Word.1<size>(rev)
-  Word.foldl<Word, size>(nil, w0, w1, word)

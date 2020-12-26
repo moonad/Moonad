@@ -1,3 +1,0 @@
-// Computes the length of the list.
-List.length.u32<A: Type>(xs: List(A)): U32
-  List.length.u32.go<>(xs, 0u)

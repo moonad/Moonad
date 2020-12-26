@@ -1,3 +1,0 @@
-Newtype.elim<A: Type, tag: String>(x: Newtype(A, tag)): A
-  case x:
-  | x.val;

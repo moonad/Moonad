@@ -1,3 +1,0 @@
-U8.to_bits(a: U8): Bits
-  get a_val = a 
-  Word.to_bits<>(a_val)

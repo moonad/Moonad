@@ -1,2 +1,0 @@
-Col32.white : Col32
-  Col32.new(255u, 255u, 255u, 255u)

@@ -1,4 +1,0 @@
-List.reverse.go<A: Type>(xs: List(A), res: List(A)): List(A)
-  case xs:
-  | res;
-  | List.reverse.go<>(xs.tail,List.cons<>(xs.head,res));

@@ -1,6 +1,0 @@
-Parser.ap<A: Type, B: Type>(pf: Parser(A -> B), pa: Parser(A)): Parser(B)
-  (s1) case pf(s1) as f:
-  | case pa(f.state) as a:
-    | Parser.Reply.val<>(a.state,f.value(a.value));
-    | Parser.Reply.err<>(a.state,a.error);;
-  | Parser.Reply.err<>(f.state,f.error);

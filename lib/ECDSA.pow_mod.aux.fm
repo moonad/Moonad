@@ -1,7 +1,0 @@
-ECDSA.pow_mod.aux(a: Nat, b: Nat, modulo: Nat, res: Nat): Nat
-  case Nat.eql(b, 0):
-  | res;
-  | let res = Bool.if<>(Nat.odd(b), Nat.mod(Nat.mul(res, a), modulo), res)
-    let b = Nat.div(b, 2)
-    let a = Nat.mod(Nat.mul(a, a), modulo)
-    ECDSA.pow_mod.aux(a, b, modulo, res);

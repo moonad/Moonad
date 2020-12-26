@@ -1,5 +1,0 @@
-// a >= b
-U64.gte(a: U64, b: U64): Bool
-  get a_val = a
-  get b_val = b
-  Word.gte<>(a_val, b_val)

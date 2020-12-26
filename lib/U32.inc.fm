@@ -1,3 +1,0 @@
-U32.inc(a: U32): U32
-  get a_val = a 
-  U32.new(Word.inc<>(a_val))

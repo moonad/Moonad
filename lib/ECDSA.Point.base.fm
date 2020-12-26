@@ -1,2 +1,0 @@
-ECDSA.Point.base: ECDSA.Point
-  ECDSA.Point.new(ECDSA.CURVE.Gx, ECDSA.CURVE.Gy)

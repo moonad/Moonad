@@ -1,3 +1,0 @@
-// n <= m
-Nat.lte(n: Nat, m: Nat): Bool
-  Cmp.as_lte(Nat.cmp(n, m))

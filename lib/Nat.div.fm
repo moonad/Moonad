@@ -1,3 +1,0 @@
-// Nat division
-Nat.div(n: Nat, m: Nat): Nat
-  Pair.fst<_,_>(Nat.div_mod(n, m))

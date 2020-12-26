@@ -1,7 +1,0 @@
-Map.disj<A: Type>(a: Map(A), b: Map(A)): Bool
-  case a: | Bool.true; |
-  case b: | Bool.true; |
-  let v = case a.val: | Bool.true;
-        | case b.val: | Bool.true;
-        | Bool.false;;
-  Bool.and(v,Bool.and(Map.disj<>(a.lft,b.lft), Map.disj<>(a.rgt,b.rgt)));;

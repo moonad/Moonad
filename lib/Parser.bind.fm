@@ -1,4 +1,0 @@
-Parser.bind<A: Type, B: Type>(pa: Parser(A), pf: A -> Parser(B)): Parser(B)
-  (s1) case pa(s1) as a:
-  | pf(a.value,a.state);
-  | Parser.Reply.err<>(a.state,a.error);

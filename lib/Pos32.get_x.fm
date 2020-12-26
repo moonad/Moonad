@@ -1,2 +1,0 @@
-Pos32.get_x(pos: Pos32): U32
-  U32.and(pos, 2047u)

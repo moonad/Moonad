@@ -1,3 +1,0 @@
-Export.T(ex: Export): Type
-  case ex:
-  | ex.T;

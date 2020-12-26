@@ -1,2 +1,0 @@
-Parser.optional<A: Type>(p: Parser(A)): Parser(Maybe(A))
-  Parser.plus<>(Parser.map<,>(Maybe.some<>,p),Parser.pure<>(Maybe.none<>))

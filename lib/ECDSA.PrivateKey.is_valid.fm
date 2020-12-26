@@ -1,2 +1,0 @@
-ECDSA.PrivateKey.is_valid(n: Nat): Bool
-  Bool.and(Nat.gtn(0, n), Nat.gtn(n, ECDSA.CURVE.n))

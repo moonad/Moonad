@@ -1,3 +1,0 @@
-// Nat modulus
-Nat.mod(n: Nat, m: Nat): Nat
-  Pair.snd<_,_>(Nat.div_mod(n, m))

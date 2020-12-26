@@ -1,3 +1,0 @@
-// Are all elements true?
-List.and(list: List(Bool)): Bool
-  List.all<>((x) x)(list)

@@ -1,4 +1,0 @@
-U256.gte(a: U256, b: U256): Bool
-  get a_val = a
-  get b_val = b
-  Word.gte<>(a_val, b_val)

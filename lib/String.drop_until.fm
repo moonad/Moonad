@@ -1,2 +1,0 @@
-String.drop_until(f: Char -> Bool, xs: String): String
-  String.drop_while((c) Bool.not(f(c)), xs)

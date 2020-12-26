@@ -1,2 +1,0 @@
-U8.shr(n: U8, a: U8): U8
-  U8.shr(n, a)

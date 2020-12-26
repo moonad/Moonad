@@ -1,3 +1,0 @@
-U256.inc(a: U256): U256
-  get a_val = a
-  U256.new(Word.inc<>(a_val))

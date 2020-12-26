@@ -1,3 +1,0 @@
-// Reverses a bitstring.
-Bits.reverse(a: Bits): Bits
-  Bits.reverse.tco(a, Bits.nil)

@@ -1,4 +1,0 @@
-Parser.map<A: Type, B: Type>(f: A -> B, p: Parser(A)): Parser(B)
-  (s1) case p(s1):
-  | Parser.Reply.val<>(self.state,f(self.value));
-  | Parser.Reply.err<>(self.state,self.error);

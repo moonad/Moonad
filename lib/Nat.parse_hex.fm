@@ -1,2 +1,0 @@
-Nat.parse_hex(str: String): Nat
-  Nat.parse_hex.go(str, Nat.zero)

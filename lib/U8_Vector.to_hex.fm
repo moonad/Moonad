@@ -1,4 +1,0 @@
-U8_Vector.to_hex<n: Nat>(bytes: U8_Vector(n)): String
-  case bytes:
-  | String.nil;
-  | String.concat(ECDSA.number_to_hex(U8.to_nat(bytes.head)), U8_Vector.to_hex<bytes.size>(bytes.tail));

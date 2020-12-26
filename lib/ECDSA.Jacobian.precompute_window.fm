@@ -1,6 +1,0 @@
-//ECDSA.Jacobian.precompute_window: ECDSA.Jacobian -> (w: Nat) -> Vector(ECDSA.Jacobian, ECDSA.size(w))
-ECDSA.Jacobian.precompute_window(p: ECDSA.Jacobian, w: Nat): List(ECDSA.Jacobian)
-  let windows = ECDSA.window(w)
-  let points = List.Builder.new<ECDSA.Jacobian>
-  let size = Nat.pow(2, Nat.pred(w))
-  List.run_builder<>(ECDSA.Jacobian.precompute_window.aux(p, windows, points, 0, ECDSA.Jacobian.0, size, 0))

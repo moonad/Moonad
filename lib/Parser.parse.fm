@@ -1,5 +1,0 @@
-Parser.parse<A: Type>(p: Parser(A), s: String): Parser.type(A, Parser.run<A>(p,s))
-  case Parser.run<A>(p,s) as x:
-  | x.value;
-  | x.error;
-  : Parser.type(A,x.self);

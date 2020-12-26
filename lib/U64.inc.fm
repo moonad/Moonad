@@ -1,3 +1,0 @@
-U64.inc(a: U64): U64
-  get a_val = a 
-  U64.new(Word.inc<>(a_val))

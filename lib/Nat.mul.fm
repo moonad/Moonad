@@ -1,5 +1,0 @@
-// Nat multiplication
-Nat.mul(n: Nat, m: Nat): Nat
-  case n:
-  | Nat.zero;
-  | Nat.add(m, Nat.mul(n.pred, m));

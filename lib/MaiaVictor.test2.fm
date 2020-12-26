@@ -1,2 +1,0 @@
-MaiaVictor.test2(n: Nat): Nat
-  Nat.add(2,n)

@@ -1,3 +1,0 @@
-T IO<A: Type>
-| IO.end(value: A);
-| IO.ask(query: String, param: String, then: String -> IO(A));

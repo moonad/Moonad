@@ -1,2 +1,0 @@
-CList.balance<A: Type>(cl: CList(A)): CList(A)
-  CList.from_list<>(CList.to_list<>(cl))

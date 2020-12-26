@@ -1,7 +1,0 @@
-// insert separators between elements, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-List.intersperse<A: Type>(sep: A, xs: List(A)): List(A)
-  case xs:
-  | List.nil<>;
-  | case xs.tail:
-    | List.pure<>(xs.head);
-    | List.cons<>(xs.head,List.cons<>(sep,List.intersperse<A>(sep,xs.tail)));;

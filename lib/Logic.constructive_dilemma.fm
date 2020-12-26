@@ -1,9 +1,0 @@
-// (P -> Q) ∧ (R -> S) ∧ (P ∨ R) |- (Q ∨ S)
-Logic.constructive_dilemma<P: Type, Q: Type, R: Type, S: Type>(
-  f: P -> Q,
-  g: R -> S,
-  c: Or(P,R)
-) : Or(Q,S)
-  c<() _>
-  | (x) Or.lft<_,_>(f(x));
-  | (x) Or.rgt<_,_>(g(x));

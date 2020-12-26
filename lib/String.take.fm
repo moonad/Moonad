@@ -1,7 +1,0 @@
-// Returns the first characters of a string, discards the rest.
-String.take(n: Nat, xs: String): String
-  case xs:
-  | String.nil;
-  | case n:
-    | String.nil;
-    | String.cons(xs.head,String.take(n.pred, xs.tail));;

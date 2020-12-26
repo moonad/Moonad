@@ -1,6 +1,0 @@
-Word.neg<size: Nat>(word: Word(size)): Word(size)
-  case word:
-  | Word.nil;
-  | Word.0<word.size>(Word.neg.aux<word.size>(word.pred, Bool.true));
-  | Word.1<word.size>(Word.neg.aux<word.size>(word.pred, Bool.false));
-  : Word(word.size);

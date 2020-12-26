@@ -1,3 +1,0 @@
-// Compares two words
-Word.cmp<size: Nat>(a: Word(size), b: Word(size)): Cmp
-  Word.cmp.go<size>(a, b, Cmp.eql)

@@ -1,7 +1,0 @@
-Bits.from_string(str: String): Bits
-  case str:
-  | Bits.nil;
-  | case U16.eql(str.head, Char.parse("1")):
-    | Bits.1(Bits.from_string(str.tail));
-    | Bits.0(Bits.from_string(str.tail));
-    | Unit.new;;

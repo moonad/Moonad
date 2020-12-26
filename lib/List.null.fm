@@ -1,4 +1,0 @@
-List.null<A: Type>(xs: List(A)) : Bool
-  case xs:
-  | Bool.true;
-  | Bool.false;

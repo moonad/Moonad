@@ -1,2 +1,0 @@
-ECDSA.USE_ENDOMORPHISM: Bool
-  Nat.eql(ECDSA.CURVE.a, 0)

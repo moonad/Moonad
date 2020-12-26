@@ -1,6 +1,0 @@
-List.ifind.go<A: Type>(xs: List(A), f: A -> Nat -> Bool, i: Nat): Maybe(Pair(A,Nat))
-  case xs:
-  | Maybe.none<>;
-  | case f(xs.head,i):
-    | Maybe.some<>(Pair.new<,>(xs.head)(i));
-    | List.ifind.go<>(xs.tail,f,Nat.succ(i));;

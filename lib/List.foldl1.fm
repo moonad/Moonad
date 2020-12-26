@@ -1,5 +1,0 @@
-List.foldl1<A: Type>(f: A -> A -> A, xs: List(A), ne: List.not_empty<A>(xs)): A
-  case xs:
-  with ne : List.not_empty<>(xs.self) = ne;
-  | Empty.absurd<>(ne);
-  | List.foldl<A,A>(xs.head,f,xs.tail);

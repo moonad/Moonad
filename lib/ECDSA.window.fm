@@ -1,4 +1,0 @@
-ECDSA.window(n: Nat): Nat
-  case ECDSA.USE_ENDOMORPHISM:
-  | Nat.add(2, Nat.div(Nat.parse_decimal("128"), n));
-  | Nat.add(1, Nat.div(Nat.parse_decimal("256"), n));

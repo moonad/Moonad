@@ -1,3 +1,0 @@
-// append a character
-String.Builder.snoc(c: Char, lb: String.Builder) : String.Builder
-  (x) lb(String.cons(c,x))

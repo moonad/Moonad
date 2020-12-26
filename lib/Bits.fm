@@ -1,4 +1,0 @@
-T Bits
-| Bits.nil;
-| Bits.0(pred: Bits);
-| Bits.1(pred: Bits);

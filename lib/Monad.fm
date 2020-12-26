@@ -1,4 +1,0 @@
-T Monad<M: Type -> Type>
-| Monad.new(
-  bind: <A: Type, B: Type> -> M(A) -> (A -> M(B)) -> M(B),
-  pure: <A: Type> -> A -> M(A));

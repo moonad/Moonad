@@ -1,9 +1,0 @@
-// Are both booleans equal?
-Bool.eql(a: Bool, b: Bool): Bool
-  case a:
-  | case b: 
-    | Bool.true;
-    | Bool.false;;
-  | case b:
-    | Bool.false;
-    | Bool.true;;

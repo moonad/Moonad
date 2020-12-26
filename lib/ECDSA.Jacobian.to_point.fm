@@ -1,3 +1,0 @@
-ECDSA.Jacobian.to_point(p: ECDSA.Jacobian): ECDSA.Point
-  get p.x p.y p.z = p
-  ECDSA.Jacobian.to_point.aux(p, ECDSA.invert(p.z, ECDSA.CURVE.P))

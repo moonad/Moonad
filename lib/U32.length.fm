@@ -1,2 +1,0 @@
-U32.length(str: String): U32
-  U32.length(str)

@@ -1,2 +1,0 @@
-ECDSA.Error.map<A: Type, B: Type>(f: A -> B, m: ECDSA.Error(A)): ECDSA.Error(B)
-  Either.map<ECDSA.ErrorTypes, A, B>(f, m)

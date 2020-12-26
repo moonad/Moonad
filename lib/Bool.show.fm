@@ -1,5 +1,0 @@
-// Converts to a string
-Bool.show(b: Bool): String
-  case b:
-  | "Bool.true";
-  | "Bool.false";

@@ -1,3 +1,0 @@
-U64.to_nat(a: U64): Nat
-  get a_val = a 
-  Word.to_nat<>(a_val)

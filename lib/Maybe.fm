@@ -1,4 +1,0 @@
-// The Maybe(A) type can hold a value of type A or nothing.
-T Maybe <A: Type>
-| Maybe.none;
-| Maybe.some(value: A);

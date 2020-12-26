@@ -1,2 +1,0 @@
-Char.is_lower(char: Char): Bool
-  Bool.and(U16.gte(char, 'a'), U16.lte(char, 'z'))

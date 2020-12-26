@@ -1,2 +1,0 @@
-U16.0: U16
-  U16.new(Word.zero(16))

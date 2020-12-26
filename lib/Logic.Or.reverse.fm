@@ -1,5 +1,0 @@
-// ¬P ∧ ¬Q -> ¬(P ∨ Q)
-Logic.Or.reverse<A: Type, B: Type>(x: And(Not(A), Not(B))): Not(Or(A, B))
-  (or) or<() _>
-  | (a) x<() _>((not_a, not_b) not_a(a));
-  | (b) x<() _>((not_a, not_b) not_b(b));

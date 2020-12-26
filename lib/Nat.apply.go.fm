@@ -1,4 +1,0 @@
-Nat.apply.go<A: Type>(n: Nat, f: A -> A, x: A): A
-  case n:
-  | x;
-  | Nat.apply.go<A>(n.pred, f, f(x));

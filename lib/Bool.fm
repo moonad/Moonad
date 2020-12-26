@@ -1,4 +1,0 @@
-// Booleans.
-T Bool
-| Bool.true;
-| Bool.false;

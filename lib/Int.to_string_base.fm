@@ -1,5 +1,0 @@
-Int.to_string_base(base: Nat, a: Int): String
-  get a.x a.y = a
-  case a.y:
-  | Nat.to_string_base(base, a.x);
-  | String.cons(Char.parse("-"), Nat.to_string_base(base, a.y));

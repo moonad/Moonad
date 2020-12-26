@@ -1,3 +1,0 @@
-Int.neg(a: Int): Int
-  get a.x a.y = a
-  Int.new(a.y, a.x)

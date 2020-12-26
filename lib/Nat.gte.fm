@@ -1,3 +1,0 @@
-// n >= m
-Nat.gte(n: Nat, m: Nat): Bool
-  Cmp.as_gte(Nat.cmp(n, m))

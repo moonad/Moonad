@@ -1,2 +1,0 @@
-T F64.Segment
-| F64.Segment.new(a: F64.V3, b: F64.V3);

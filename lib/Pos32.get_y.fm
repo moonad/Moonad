@@ -1,2 +1,0 @@
-Pos32.get_y(pos: Pos32): U32
-  U32.and(U32.shr(pos, 12u), 2047u)

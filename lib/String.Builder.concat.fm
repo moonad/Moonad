@@ -1,3 +1,0 @@
-// concatenate two string builders
-String.Builder.concat(a: String.Builder, b: String.Builder): String.Builder
-   (x) a(b(x))

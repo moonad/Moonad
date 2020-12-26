@@ -1,5 +1,0 @@
-// A theorem that String.cons isn't String.nil
-String.cons_isnt_nil(x:Char, xs: String)
-  : Not(Equal(String,String.cons(x,xs), String.nil))
-  def P = String.not_empty
-  (e) Equal.rewrite<String, String.cons(x,xs), String.nil,P>(e, Unit.new)

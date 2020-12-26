@@ -1,7 +1,0 @@
-// A theorem that a string made with String.cons is not the empty string
-String.cons_isnt_empty(x: Char, xs: String): String.not_empty(String.cons(x,xs))
-  def y = String.cons(x,xs)
-  case y:
-  with e : Equal(String,y,y.self) = Equal.to<String,y>;
-  | Empty.absurd<>(String.cons_isnt_nil(x,xs,e));
-  | Unit.new;

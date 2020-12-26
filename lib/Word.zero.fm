@@ -1,5 +1,0 @@
-Word.zero(size: Nat): Word(size)
-  case size:
-  | Word.nil;
-  | Word.0<size.pred>(Word.zero(size.pred));
-  : Word(size.self);

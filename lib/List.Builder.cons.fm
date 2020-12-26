@@ -1,3 +1,0 @@
-// prepend an element
-List.Builder.cons<A: Type>(c: A, lb: List.Builder(A)) : List.Builder(A)
-  (x) List.cons<>(c,lb(x))

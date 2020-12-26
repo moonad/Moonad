@@ -1,3 +1,0 @@
-F64.V3.map_y(fn: F64 -> F64, v: F64.V3): F64.V3
-  get v.x v.y v.z = v 
-  F64.V3.new(v.x, fn(v.y), v.z)

@@ -1,3 +1,0 @@
-U8.inc(a: U8): U8
-  get a_val = a 
-  U8.new(Word.inc<>(a_val))

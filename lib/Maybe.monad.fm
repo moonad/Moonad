@@ -1,3 +1,0 @@
-// the monad instance for Maybe
-Maybe.monad: Monad(Maybe)
-  Monad.new<Maybe>(Maybe.bind, Maybe.pure)

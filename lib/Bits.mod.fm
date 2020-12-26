@@ -1,4 +1,0 @@
-// TODO
-// Modulus of two Bitstrings.
-Bits.mod(a: Bits, b: Bits): Bits
-  Bits.mod(a, b)

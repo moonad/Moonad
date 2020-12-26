@@ -1,2 +1,0 @@
-ECDSA.Jacobian.0: ECDSA.Jacobian
-  ECDSA.Jacobian.new(0, 0, 1)

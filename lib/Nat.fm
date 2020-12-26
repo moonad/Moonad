@@ -1,4 +1,0 @@
-// Natural numbers
-T Nat
-| Nat.zero;
-| Nat.succ(pred: Nat);

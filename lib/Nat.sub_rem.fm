@@ -1,7 +1,0 @@
-// Nat subtraction and remainder
-Nat.sub_rem(n: Nat, m: Nat): Either(Nat, Nat)
-  case m:
-  | Either.left<_,_>(n);
-  | case n:
-    | Either.right<_,_>(Nat.succ(m.pred));
-    | Nat.sub_rem(n.pred, m.pred);;

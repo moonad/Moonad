@@ -1,6 +1,0 @@
-Maybe.is_some<A: Type>(x: A): Maybe.IsSome(A,Maybe.some<A>(x))
-  def y = Maybe.some<A>(x)
-  case y:
-  with e : Equal(Maybe(A),y,y.self) = Equal.to<Maybe(A),y>;
-  | Empty.absurd<>(Maybe.some_isnt_none<A>(x,e));
-  | y.value;

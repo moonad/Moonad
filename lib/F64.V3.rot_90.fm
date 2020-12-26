@@ -1,3 +1,0 @@
-F64.V3.rot_90(v: F64.V3): F64.V3
-  get v.x v.y v.z = v
-  F64.V3.new(v.y, F64.sub(F64.0, v.x), v.z)

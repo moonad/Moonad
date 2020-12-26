@@ -1,3 +1,0 @@
-// n == m
-Nat.eql(n: Nat, m: Nat): Bool
-  Cmp.as_eql(Nat.cmp(n, m))

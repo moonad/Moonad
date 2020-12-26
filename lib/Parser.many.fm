@@ -1,7 +1,0 @@
-Parser.many<A: Type>(p: Parser(A)) : Parser(List(A))
-  do Parser {
-    var x = Parser.optional<>(p);
-    case x:
-    | Parser.pure<>([]);
-    | Parser.map<><>(List.cons<>(x.value),Parser.many<>(p));;
-  }

@@ -1,4 +1,0 @@
-CList.focus<A: Type>(cl: CList(A)): Maybe(A)
-  case cl:
-  | nil  => Maybe.none<>;
-  | ring => Maybe.some<>(cl.focus);

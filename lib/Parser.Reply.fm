@@ -1,3 +1,0 @@
-T Parser.Reply<A: Type>
-| Parser.Reply.val(state: Parser.State, value: A);
-| Parser.Reply.err(state: Parser.State, error: Parser.Error);

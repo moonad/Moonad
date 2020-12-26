@@ -1,7 +1,0 @@
-// Creates an array of depth `depth` and initial value `x`.
-Array.alloc<A: Type>(depth: Nat, x: A): Array(A, depth)
-  case depth:
-  | Array.tip<A>(x);
-  | let half = Array.alloc<A>(depth.pred, x)
-    Array.tie<A, depth.pred>(half, half);
-  : Array(A, depth.self);

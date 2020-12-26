@@ -1,2 +1,0 @@
-CList.empty<A: Type> : CList(A)
-  CList.nil<A>

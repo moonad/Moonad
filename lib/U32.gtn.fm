@@ -1,5 +1,0 @@
-// a > b
-U32.gtn(a: U32, b: U32): Bool
-  get a_val = a 
-  get b_val = b 
-  Word.gtn<>(a_val, b_val)

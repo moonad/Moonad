@@ -1,3 +1,0 @@
-U64.to_bits(a: U64): Bits
-  get a_val = a 
-  Word.to_bits<>(a_val)

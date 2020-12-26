@@ -1,5 +1,0 @@
-// a < b
-U32.ltn(a: U32, b: U32): Bool
-  get a_val = a 
-  get b_val = b 
-  Word.ltn<>(a_val, b_val)

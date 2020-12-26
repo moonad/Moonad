@@ -1,6 +1,0 @@
-// n == m
-Cmp.as_eql(cmp: Cmp): Bool
-  case cmp:
-  | Bool.false;
-  | Bool.true;
-  | Bool.false;

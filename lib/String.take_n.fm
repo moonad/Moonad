@@ -1,5 +1,0 @@
-String.take_n(n: Nat, str: String): Maybe(Pair(String, String))
-  case String.take_n.aux(n, String.nil, str) as m:
-  | Maybe.none<Pair(String, String)>;
-  | get x y = m.value
-    Maybe.some<>(Pair.new<,>(String.reverse(x), y));

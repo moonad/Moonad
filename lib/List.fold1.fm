@@ -1,7 +1,0 @@
-List.fold1<A: Type>(xs: List(A))<ne: List.not_empty<A>(xs)>
-  : <P: Type> -> P -> (A -> P -> P) -> P
-  <P> (nil, cons)
-  case xs:
-  with ne : List.not_empty<>(xs.self) = ne;
-  | Empty.absurd<>(ne);
-  | List.fold<>(xs)<P>(nil,cons);

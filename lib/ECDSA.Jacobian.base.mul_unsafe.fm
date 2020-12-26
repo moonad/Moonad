@@ -1,2 +1,0 @@
-ECDSA.Jacobian.base.mul_unsafe(n: Nat): ECDSA.Jacobian
-  ECDSA.Jacobian.mul_unsafe(ECDSA.Jacobian.base, n)

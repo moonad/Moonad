@@ -1,3 +1,0 @@
-// Is any element true?
-List.or(list: List(Bool)): Bool
-  List.any<>((x) x)(list)

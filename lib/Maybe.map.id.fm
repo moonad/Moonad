@@ -1,5 +1,0 @@
-Maybe.map.id<A: Type>(ma: Maybe(A)): Equal(Maybe(A), Maybe.map<A, A>(Function.id<A>, ma), ma)
-  case ma:
-  | _;
-  | _;
-  : Equal(_, Maybe.map<,>(Function.id<>, ma.self), ma.self);

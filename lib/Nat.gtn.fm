@@ -1,3 +1,0 @@
-// n > m
-Nat.gtn(n: Nat, m: Nat): Bool
-  Cmp.as_gtn(Nat.cmp(n, m))

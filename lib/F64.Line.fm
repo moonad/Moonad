@@ -1,2 +1,0 @@
-T F64.Line
-| F64.Line.new(pos: F64.V3, dir: F64.V3);

@@ -1,3 +1,0 @@
-T NonEmpty <A: Type>
-| NonEmpty.end(value: A);
-| NonEmpty.cons(head: A, tail: NonEmpty(A));

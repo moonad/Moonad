@@ -1,5 +1,0 @@
-// If-then-else
-Bool.if<A: Type>(cond: Bool, true_case: A, false_case: A): A
-  case cond:
-  | true_case;
-  | false_case;

@@ -1,4 +1,0 @@
-U256.add(a: U256, b: U256): U256
-  get a_val = a
-  get b_val = b
-  U256.new(Word.add<>(a_val, b_val))

@@ -1,2 +1,0 @@
-Maybe.pure<A: Type>(a: A): Maybe(A)
-  Maybe.some<A>(a)

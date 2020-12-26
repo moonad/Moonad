@@ -1,2 +1,0 @@
-ECDSA.Jacobian.base.mul(n: Nat): ECDSA.Jacobian
-  ECDSA.Jacobian.mul_pre(n, ECDSA.Jacobian.base.window_size, ECDSA.Jacobian.base.precomputes)

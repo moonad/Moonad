@@ -1,4 +1,0 @@
-Parser.char(c: Char) : Parser(Char)
-  Parser.token<>
-  | (x) case U16.eql(c,x): | Maybe.some<>(c); | Maybe.none<>;;
-  | List.pure<>(Parser.Item.tokens(String.pure(c)));

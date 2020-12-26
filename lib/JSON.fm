@@ -1,8 +1,0 @@
-// JavaScript Object Notation.
-T JSON
-| JSON.null;
-| JSON.bool(x: Bool);
-| JSON.number(x: F64);
-| JSON.string(x: String);
-| JSON.array(x: List(JSON));
-| JSON.object(x: List(Pair(String, JSON)));

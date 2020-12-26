@@ -1,3 +1,0 @@
-// turn a builder into a String
-String.run_builder(lb: String.Builder): String
-  lb(String.nil)

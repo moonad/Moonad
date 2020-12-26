@@ -1,7 +1,0 @@
-ECDSA.Point.valid_point(p: ECDSA.Point): ECDSA.Error(ECDSA.Point)
-  get x y = p
-  case Bool.or(Nat.eql(x, 0), Nat.eql(y, 0)):
-  | ECDSA.Error.err<>(ECDSA.ErrorTypes.point_not_in_curve);
-  | case Nat.eql(ECDSA.mod(Nat.square(y)), ECDSA.weierstrass(x)):
-    | ECDSA.Error.ok<>(p);
-    | ECDSA.Error.err<>(ECDSA.ErrorTypes.point_not_in_curve);;

@@ -1,7 +1,0 @@
-F64.V3.eql(a: F64.V3, b: F64.V3): Bool
-  get a.x a.y a.z = a
-  get b.x b.y b.z = b
-  let same_x = F64.eql(a.x, b.x)
-  let same_y = F64.eql(a.y, b.y)
-  let same_z = F64.eql(a.z, b.z)
-  Bool.and(same_x, Bool.and(same_y, same_z))

@@ -1,4 +1,0 @@
-// Converts a function from 2 arguments to a function that receives a pair.
-Function.uncurry<A: Type, B: Type, C: Type>(f: A -> B -> C, p: Pair(A, B)): C
-  get a b = p
-  f(a, b)

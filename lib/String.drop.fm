@@ -1,7 +1,0 @@
-// Removes the first characters of a string.
-String.drop(n: Nat, xs: String):  String
-  case n:
-  | xs;
-  | case xs:
-    | String.nil;
-    | String.drop(n.pred,xs.tail);;

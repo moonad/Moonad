@@ -1,4 +1,0 @@
-U64.mod(a: U64, b: U64): U64
-  get a_val = a 
-  get b_val = b 
-  U64.new(Word.mod<>(a_val, b_val))

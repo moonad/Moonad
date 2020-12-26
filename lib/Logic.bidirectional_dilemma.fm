@@ -1,9 +1,0 @@
-// (P -> Q) ∧ (R -> S) ∧ (P ∨ ¬S) |- (Q ∨ ¬R)
-Logic.bidirectional_dilemma<P: Type, Q: Type, R: Type, S: Type>(
-  f: P -> Q,
-  g: R -> S,
-  c: Or(P,Not(S))
-) : Or(Q,Not(R))
-  c<() _>
-  | (x) Or.lft<_,_>(f(x));
-  | (x) Or.rgt<_,_>((r) x(g(r)));

@@ -1,7 +1,0 @@
-// TODO: use Map?
-Parser.decimal.digit : Parser(Nat)
-  def char = ((x,y) Parser.then<Char,Nat>(Parser.char(x),Parser.pure<Nat>(y))) 
-           :: Char -> Nat -> Parser(Nat)
-  def ds = [char('0',0), char('1',1), char('2',2), char('3',3),char('4',4),
-            char('5',5), char('6',6), char('7',7), char('8',8),char('9',9)]
-  Parser.choice<>(ds)

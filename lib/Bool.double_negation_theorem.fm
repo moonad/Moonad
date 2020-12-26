@@ -1,6 +1,0 @@
-// Proof that not(not(b)) == b
-Bool.double_negation_theorem(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
-  case b:
-  | Equal.to<_, Bool.true>;
-  | Equal.to<_, Bool.false>;
-  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);

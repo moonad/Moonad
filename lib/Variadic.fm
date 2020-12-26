@@ -1,4 +1,0 @@
-Variadic(n: Nat, A: Type, B: Type): Type
-  case n:
-  | B;
-  | A -> Variadic(n.pred, A, B);

@@ -1,8 +1,0 @@
-ECDSA.invert(number: Nat, modulo: Nat): Nat
-  case Nat.eql(number, 0):
-  | 0;
-  | get gcd p = Nat.egcd(Nat.mod(number, modulo), modulo)
-    case Nat.eql(gcd, 1):
-    | get x y = p
-      Int.mod_nat(x, modulo);
-    | 0;;

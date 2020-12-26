@@ -1,2 +1,0 @@
-Parser.State.new(input: String) : Parser.State
-  Parser.State.make(Nat.zero, input, List.nil<_>)

@@ -1,2 +1,0 @@
-U8_Vector: Nat -> Type
-  Vector(U8)

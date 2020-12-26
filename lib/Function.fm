@@ -1,3 +1,0 @@
-// `Function(A, (x) B(x))` is a synonym for `(x: A) -> B(x)`
-Function(A: Type, B: A -> Type): Type
-  (x: A) -> B(x)

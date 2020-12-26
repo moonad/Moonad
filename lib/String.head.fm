@@ -1,5 +1,0 @@
-// Get the head of a nonempty string
-String.head(xs: String): Maybe(Char)
-  case xs:
-  | Maybe.none<>;
-  | Maybe.some<>(xs.head);

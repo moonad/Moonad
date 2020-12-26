@@ -1,3 +1,0 @@
-// Add the total of a list of natural numbers
-List.sum(xs: List(Nat)) : Nat
-  List.sum.go(xs, Nat.zero)

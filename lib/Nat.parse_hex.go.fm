@@ -1,6 +1,0 @@
-Nat.parse_hex.go(str: String, res: Nat): Nat
-  case str:
-  | res;
-  | let dig = Char.hex_value(str.head)
-    let res = Nat.add(dig, Nat.mul(16, res))
-    Nat.parse_hex.go(str.tail, res);

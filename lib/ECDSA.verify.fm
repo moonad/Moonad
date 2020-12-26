@@ -1,9 +1,0 @@
-ECDSA.verify(signature: ECDSA.SignResult, msgHash: String, pubkey: ECDSA.Point): Bool
-  let h = ECDSA.truncate_hash(msgHash)
-  get r s = signature
-  let pubkey = ECDSA.Jacobian.from_point(pubkey)
-  let s1 = ECDSA.invert(s, ECDSA.CURVE.n)
-  let Ghs1 = ECDSA.Jacobian.base.mul(Nat.mod(Nat.mul(h, s1), ECDSA.CURVE.n))
-  let Prs1 = ECDSA.Jacobian.mul_unsafe(pubkey, Nat.mod(Nat.mul(r, s1), ECDSA.CURVE.n))
-  get res.x _ = ECDSA.Jacobian.to_point(ECDSA.Jacobian.add(Ghs1, Prs1))
-  Nat.eql(res.x, r)

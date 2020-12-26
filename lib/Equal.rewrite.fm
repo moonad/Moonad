@@ -1,5 +1,0 @@
-// If a == b, then, P(a) implies P(b)
-Equal.rewrite<A: Type, a: A, b: A, P: A -> Type>(e: Equal(A,a,b), x: P(a)): P(b)
-  case e:
-  | x;
-  : P(e.b);

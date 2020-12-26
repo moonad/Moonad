@@ -1,7 +1,0 @@
-// Removes all elements that do not satisfy a condition.
-List.filter<A: Type>(f: A -> Bool, xs: List(A)): List(A)
-  case xs:
-  | List.nil<>;
-  | case f(xs.head):
-    | List.cons<>(xs.head,List.filter<>(f, xs.tail));
-    | List.filter<>(f, xs.tail);;

@@ -1,5 +1,0 @@
-// Applies a function to all elements of the list.
-List.map<A: Type, B: Type>(f: A -> B, as: List(A)): List(B)
-  case as:
-  | List.nil<>;
-  | List.cons<>(f(as.head),List.map<,>(f,as.tail));

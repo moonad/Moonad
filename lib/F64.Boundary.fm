@@ -1,2 +1,0 @@
-T F64.Boundary
-| F64.Boundary.new(pts: List(F64.V3));

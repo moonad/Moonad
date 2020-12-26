@@ -1,4 +1,0 @@
-NonEmpty.to_list<A: Type>(xs: NonEmpty(A)): List(A)
-  case xs:
-  | List.cons<A>(xs.value)(List.nil<A>);
-  | List.cons<A>(xs.head)(NonEmpty.to_list<A>(xs.tail));

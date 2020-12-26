@@ -1,9 +1,0 @@
-// (P -> Q) ∧ (R -> S) ∧ (¬Q ∨ ¬S) |- (¬P ∨ ¬R)
-Logic.destructive_dilemma<P: Type, Q: Type, R: Type, S: Type>(
-  f: P -> Q,
-  g: R -> S,
-  c: Or(Not(Q),Not(S))
-) : Or(Not(P),Not(R))
-  c<() _>
-  | (x) Or.lft<_,_>((p) x(f(p)));
-  | (x) Or.rgt<_,_>((r) x(g(r)));

@@ -1,2 +1,0 @@
-Bits.length(xs: Bits): Nat
-  Bits.length.go(xs, 0)

@@ -1,5 +1,0 @@
-// Nat predecessor
-Nat.pred(n: Nat): Nat
-  case n:
-  | Nat.zero;
-  | n.pred;

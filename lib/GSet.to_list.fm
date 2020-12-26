@@ -1,3 +1,0 @@
-// just a synonym for `members`
-GSet.to_list<A: Type>(set: GSet(A)): List(A)
-  GSet.members<>(set)

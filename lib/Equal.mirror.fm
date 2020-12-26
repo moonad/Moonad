@@ -1,5 +1,0 @@
-// If a == b, then b == a
-Equal.mirror<A: Type, a: A, b: A>(e: Equal(A,a,b)): Equal(A,b,a)
-  case e:
-  | Equal.to<A, a>;
-  : Equal(A, e.b, a);

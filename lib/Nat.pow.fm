@@ -1,4 +1,0 @@
-Nat.pow(base: Nat, exp: Nat) : Nat
-  case exp:
-  | 1;
-  | Nat.mul(base,Nat.pow(base,exp.pred));

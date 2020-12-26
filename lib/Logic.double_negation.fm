@@ -1,2 +1,0 @@
-Logic.double_negation<P: Type>(p:P): Not(Not(P))
-  (notP) notP(p)

@@ -1,4 +1,0 @@
-String.null(xs: String) : Bool
-  case xs:
-  | Bool.true;
-  | Bool.false;

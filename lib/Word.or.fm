@@ -1,3 +1,0 @@
-// TODO bitwise OR between two words
-Word.or<size: Nat>(a: Word(size), b: Word(size)): Word(size)
-  Word.or<size>(a,b)

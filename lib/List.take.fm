@@ -1,7 +1,0 @@
-// Returns the first elements of a list, discards the rest.
-List.take<A: Type>(n: Nat, xs: List(A)): List(A)
-  case xs:
-  | List.nil<>;
-  | case n:
-    | List.nil<>;
-    | List.cons<>(xs.head,List.take<>(n.pred, xs.tail));;

@@ -1,2 +1,0 @@
-ECDSA.Error.bind<A: Type, B: Type>(m: ECDSA.Error(A), f: A -> ECDSA.Error(B)): ECDSA.Error(B)
-  Either.bind<ECDSA.ErrorTypes, A, B>(m, f)

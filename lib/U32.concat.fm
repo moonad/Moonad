@@ -1,4 +1,0 @@
-U32.concat(a: U32, b: U32): U64
-  get a_val = a
-  get b_val = b 
-  U64.new(Word.concat<><>(a_val, b_val))

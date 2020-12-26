@@ -1,5 +1,0 @@
-// A proposition that a list is not the empty list
-List.not_empty<A: Type>(xs: List(A)) : Type
-  case xs:
-  | Empty;
-  | Unit;

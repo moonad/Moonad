@@ -1,4 +1,0 @@
-// Where "a" is between 0u and 100u
-// Approximate value due to U32 calculus
-Col32.set_alpha(a: U32): U32
-  U32.percent(a, 255u)

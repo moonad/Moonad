@@ -1,4 +1,0 @@
-Maybe.extract<A: Type>(m: Maybe(A), a: A): A
-  case m:
-  | a;
-  | m.value;

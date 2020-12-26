@@ -1,3 +1,0 @@
-U8.from_nat(n: Nat): U8
-  // TODO
-  U8.parse_hex(Nat.to_string_base(16, n))

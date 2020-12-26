@@ -1,7 +1,0 @@
-F64.V3.sub(a: F64.V3, b: F64.V3): F64.V3 
-  get a.x a.y a.z = a
-  get b.x b.y b.z = b
-  let c.x = F64.sub(a.x, a.x)
-  let c.y = F64.sub(a.y, b.y)
-  let c.z = F64.sub(a.z, b.z)
-  F64.V3.new(c.x, c.y, c.z)

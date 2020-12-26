@@ -1,8 +1,0 @@
-String.take_n.aux(n: Nat, str: String, res: String): Maybe(Pair(String, String))
-  case res:
-  | case n:
-    | Maybe.some<>(Pair.new<,>(str, String.nil));
-    | Maybe.none<Pair(String, String)>;;
-  | case n:
-    | Maybe.some<>(Pair.new<String, String>(str, res));
-    | String.take_n.aux(n.pred, String.cons(res.head, str), res.tail);;

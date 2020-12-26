@@ -1,6 +1,0 @@
-ECDSA.truncate_hash(hash: String): Nat
-  let msg = Nat.parse_hex(hash)
-  let delta = Nat.sub(Nat.mul(Nat.div(String.length(hash), 2), 8), ECDSA.PRIME_SIZE)
-  let msg = Bool.if<>(Nat.gtn(delta, 0), Nat.div(msg, Nat.pow(2, delta)), msg)
-  let msg = Bool.if<>(Nat.gte(msg, ECDSA.CURVE.n), Nat.sub(msg, ECDSA.CURVE.n), msg)
-  msg

@@ -1,6 +1,0 @@
-Parser.Item.show(e: Parser.Item): String
-  case e:
-  | String.flatten(["tokens(","\"",e.xs,"\"",")"]);
-  | String.flatten(["label(","\"",e.xs,"\"",")"]);
-  | "end_of_input";
-  : String;

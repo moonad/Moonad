@@ -1,7 +1,0 @@
-//Finds the first occurrence that satisfies a condition
-List.find<A: Type>(cond: A -> Bool, xs: List(A)): Maybe(A)
-  case xs:
-  | Maybe.none<>;
-  | case cond(xs.head):
-    | Maybe.some<>(xs.head);
-    | List.find<>(cond)(xs.tail);;

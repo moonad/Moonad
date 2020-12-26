@@ -1,2 +1,0 @@
-T F64.Circle
-| F64.Circle.new(pos: F64.V3, rad: F64);

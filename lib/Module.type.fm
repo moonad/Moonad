@@ -1,4 +1,0 @@
-Module.type(key: String, mod: Module): Type
-  case Map.get<Export>(String.to_bits(key), mod) as got:
-  | Unit;
-  | Export.T(got.value);

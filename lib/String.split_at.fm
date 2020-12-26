@@ -1,2 +1,0 @@
-String.split_at(n : Nat, xs: String) : Pair(String,String)
-  Pair.new<,>(String.take(n,xs),String.drop(n,xs))

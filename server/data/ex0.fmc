@@ -1,0 +1,1 @@
+ex0 : Bool = (id Bool.true);

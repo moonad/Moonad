@@ -1,3 +1,0 @@
-// logical disjunction
-Or(A:Type,B:Type): Type
-  Either(A,B)

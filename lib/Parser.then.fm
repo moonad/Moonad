@@ -1,4 +1,0 @@
-Parser.then<A: Type, B: Type>(pa: Parser(A), pb: Parser(B)): Parser(B)
-  (s1) case pa(s1) as a:
-  | pb(a.state);
-  | Parser.Reply.err<>(a.state,a.error);

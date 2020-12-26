@@ -1,6 +1,0 @@
-// n < m
-Cmp.as_ltn(cmp: Cmp): Bool
-  case cmp:
-  | Bool.true;
-  | Bool.false;
-  | Bool.false;

@@ -1,2 +1,0 @@
-Int.1: Int
-  Int.from_nat(1)

@@ -1,2 +1,0 @@
-F64.gtn(a: F64, b: F64): Bool
-  F64.cmp(a, b)<_>(Bool.false, Bool.false, Bool.true)

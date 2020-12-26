@@ -1,5 +1,0 @@
-// Adding all numbers of a list:
-Docs.List.sum(xs: List(Nat)) : Nat
-  case xs:
-  | Nat.zero;
-  | Nat.add(xs.head, Docs.List.sum(xs.tail));

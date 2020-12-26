@@ -1,5 +1,0 @@
-Vector.fill<A: Type>(n: Nat, a: A): Vector(A, n)
-  case n:
-  | Vector.nil<A>;
-  | Vector.ext<A, n.pred>(a, Vector.fill<A>(n.pred, a));
-  : Vector(A, n.self);

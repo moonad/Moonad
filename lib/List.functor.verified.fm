@@ -1,3 +1,0 @@
-// Proof that List.functor conforms to the functor laws
-List.functor.verified: VerifiedFunctor(List, List.functor)
-  VerifiedFunctor.new<List, List.functor>(List.map.id, List.map.comp)

@@ -1,3 +1,0 @@
-ECDSA.Jacobian.mul(p: ECDSA.Jacobian, n: Nat): ECDSA.Jacobian
-  let precomputes = ECDSA.Jacobian.normalizeZ_batch(ECDSA.Jacobian.precompute_window(p, 8))
-  ECDSA.Jacobian.mul_pre(n, 8, precomputes)

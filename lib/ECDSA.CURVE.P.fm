@@ -1,3 +1,0 @@
-// Field over which we'll do calculations
-ECDSA.CURVE.P: Nat
-  Nat.parse_hex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F")

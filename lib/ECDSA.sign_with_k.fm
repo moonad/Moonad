@@ -1,4 +1,0 @@
-ECDSA.sign_with_k(msgHash: String, priv: Nat, k: Nat): ECDSA.Error(String)
-  let msg = Nat.parse_hex(msgHash)
-  use qrs = ECDSA.Error.bind<,>(ECDSA.QRS.from_k(k, msg, priv))
-  ECDSA.Error.ok<>(ECDSA.sign_qrs(priv, qrs))

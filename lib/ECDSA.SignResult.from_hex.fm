@@ -1,2 +1,0 @@
-ECDSA.SignResult.from_hex(str: String): ECDSA.Error(ECDSA.SignResult)
-  ECDSA.SignResult.from_hex(str)

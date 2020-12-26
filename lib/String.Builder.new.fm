@@ -1,3 +1,0 @@
-// construct a new builder (it's just the identity function)
-String.Builder.new : String.Builder
-  (x) x

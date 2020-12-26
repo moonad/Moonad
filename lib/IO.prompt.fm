@@ -1,4 +1,0 @@
-IO.prompt(text: String): IO(String)
-  use skip = IO.ask<String>("print", text)
-  use line = IO.ask<String>("get_line", "")
-  IO.end<String>(line)

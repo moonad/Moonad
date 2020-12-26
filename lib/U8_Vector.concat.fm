@@ -1,2 +1,0 @@
-U8_Vector.concat<n: Nat, m: Nat>(as: U8_Vector(n), bs: U8_Vector(m)): U8_Vector(Nat.add(n, m))
-  Vector.concat<U8, n, m>(as, bs)

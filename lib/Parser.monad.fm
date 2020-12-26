@@ -1,2 +1,0 @@
-Parser.monad : Monad(Parser)
-  Monad.new<Parser>(Parser.bind, Parser.pure)

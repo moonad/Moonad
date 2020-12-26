@@ -1,5 +1,0 @@
-// Map over a list with the index
-List.imap<A: Type,B: Type>(f: Nat -> A -> B, xs: List(A)): List(B)
-  case xs:
-  | List.nil<>;
-  | List.cons<>(f(0,xs.head),List.imap<,>((n) f(Nat.succ(n)),xs.tail));

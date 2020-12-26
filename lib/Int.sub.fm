@@ -1,2 +1,0 @@
-Int.sub(a: Int, b: Int): Int
-  Int.add(a, Int.neg(b))

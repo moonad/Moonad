@@ -1,3 +1,0 @@
-// The monad instance for list
-List.monad: Monad(List)
-  Monad.new<List>(List.bind, List.pure)

@@ -1,2 +1,0 @@
-T ECDSA.SignResult
-| ECDSA.SignResult.new(r: Nat, s: Nat);

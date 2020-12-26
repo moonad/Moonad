@@ -1,2 +1,0 @@
-ECDSA.mod(a: Nat): Nat
-  Nat.mod(a, ECDSA.CURVE.P)

@@ -1,2 +1,0 @@
-Col32.get_r(col: Col32): U32
-  U32.and(col, 255u)

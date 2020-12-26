@@ -1,4 +1,0 @@
-Module.to_list(m : Module) : List(Pair(Bits,Type))
-  def f  = ((p) get x y = p Pair.new<Bits,Type>(x,Export.T(y)))
-          :: Pair(Bits,Export) -> Pair(Bits,Type)
-  List.map<,>(f, Map.to_list<>(m))

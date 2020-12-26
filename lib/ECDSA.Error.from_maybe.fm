@@ -1,4 +1,0 @@
-ECDSA.Error.from_maybe<A: Type>(err: ECDSA.ErrorTypes, m: Maybe(A)): ECDSA.Error(A)
-  case m:
-  | ECDSA.Error.err<A>(err);
-  | ECDSA.Error.ok<A>(m.value);

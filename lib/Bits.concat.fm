@@ -1,5 +1,0 @@
-Bits.concat(a: Bits, b: Bits): Bits
-  case a:
-  | b;
-  | Bits.0(Bits.concat(a.pred, b));
-  | Bits.1(Bits.concat(a.pred, b));

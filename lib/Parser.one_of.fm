@@ -1,2 +1,0 @@
-Parser.one_of(xs : List(Char)): Parser(Char)
-  Parser.choice<>(List.map<,>(Parser.char,xs))

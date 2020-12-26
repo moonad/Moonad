@@ -1,3 +1,0 @@
-U16.to_u32(a: U16): U32
-  case a:
-  | U32.new(Word.trim<16>(32, a.a));

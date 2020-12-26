@@ -1,3 +1,0 @@
-// insert separators between characters, i.e. `[A,B,C] ~> [A,sep,B,sep,C]`
-String.intercalate(sep: String, xs: List(String)): String
-  String.flatten(List.intersperse<>(sep,xs))

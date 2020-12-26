@@ -1,2 +1,0 @@
-Char.eql(a: Char, b: Char): Bool
-  U16.eql(a, b)

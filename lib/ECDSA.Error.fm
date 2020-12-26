@@ -1,2 +1,0 @@
-ECDSA.Error(A: Type): Type
-  Either(ECDSA.ErrorTypes, A)

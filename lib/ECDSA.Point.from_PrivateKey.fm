@@ -1,2 +1,0 @@
-ECDSA.Point.from_PrivateKey(n: Nat): ECDSA.Point
-  ECDSA.Point.base.mul(n)

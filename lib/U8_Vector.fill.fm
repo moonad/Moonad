@@ -1,2 +1,0 @@
-U8_Vector.fill(n: Nat, s: U8): U8_Vector(n)
-  Vector.fill<U8>(n, s)

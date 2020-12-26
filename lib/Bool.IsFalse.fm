@@ -1,5 +1,0 @@
-// Ensures a Bool is false
-Bool.IsFalse(b: Bool): Type
-  case b:
-  | Empty;
-  | Unit;

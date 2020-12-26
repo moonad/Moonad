@@ -1,4 +1,0 @@
-T Parser.Item
-| Parser.Item.tokens(xs: String);
-| Parser.Item.label(xs: String);
-| Parser.Item.eof;

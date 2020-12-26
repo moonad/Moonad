@@ -1,3 +1,0 @@
-// simplification
-And.fst<A: Type,B: Type>(x: And(A,B)) : A
-  Pair.fst<A,B>(x)

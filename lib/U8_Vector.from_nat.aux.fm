@@ -1,6 +1,0 @@
-U8_Vector.from_nat.aux(pad: Nat, n: Nat): U8_Vector(pad)
-  case pad:
-  | Vector.nil<U8>;
-  | get div mod = Nat.div_mod(n, 256)
-    Vector.ext<U8, pad.pred>(U8.from_nat(mod), U8_Vector.from_nat.aux(pad.pred, div));
-  : U8_Vector(pad.self);

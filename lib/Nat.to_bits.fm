@@ -1,4 +1,0 @@
-Nat.to_bits(n: Nat): Bits
-  case n:
-  | Bits.nil;
-  | Bits.inc(Nat.to_bits(n.pred));

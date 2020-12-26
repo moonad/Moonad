@@ -1,3 +1,0 @@
-Queue.length<A: Type>(q: Queue(A)): Nat 
-  case q:
-  | Nat.add(q.size_front, q.size_rear);

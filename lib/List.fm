@@ -1,4 +1,0 @@
-// The polymorphic List type can hold a number of elements.
-T List <A: Type>
-| List.nil;
-| List.cons(head: A, tail: List(A));

@@ -1,4 +1,0 @@
-Maybe.bind<A: Type, B: Type>(m: Maybe(A), f: A -> Maybe(B)): Maybe(B)
-  case m:
-  | Maybe.none<B>;
-  | f(m.value);

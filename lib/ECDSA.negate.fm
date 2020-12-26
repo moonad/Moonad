@@ -1,5 +1,0 @@
-ECDSA.negate(a: Nat): Nat
-  let a = ECDSA.mod(a)
-  case Nat.eql(a, 0):
-  | 0;
-  | Nat.sub(ECDSA.CURVE.P, a);

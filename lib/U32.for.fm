@@ -1,5 +1,0 @@
-U32.for<S: Type>(state: S, from: U32, til: U32, func: U32 -> S -> S): S
-  if U32.eql(from, til) then
-    state
-  else
-    U32.for<S>(func(from, state), U32.inc(from), til, func)

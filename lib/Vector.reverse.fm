@@ -1,2 +1,0 @@
-Vector.reverse<A: Type, size: Nat>(xs: Vector(A, size)): Vector(A, size)
-  Vector.indl<A, Vector(A), size>(Vector.nil<A>, Vector.ext<A>, xs)

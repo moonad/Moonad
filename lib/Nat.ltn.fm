@@ -1,3 +1,0 @@
-// n < m
-Nat.ltn(n: Nat, m: Nat): Bool
-  Cmp.as_ltn(Nat.cmp(n, m))

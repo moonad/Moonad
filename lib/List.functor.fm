@@ -1,3 +1,0 @@
-// The functor instance for list
-List.functor: Functor(List)
-  Functor.new<List>(List.map)

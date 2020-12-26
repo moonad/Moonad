@@ -1,6 +1,0 @@
-// A proof that negating a bool twice returns the same bool:
-Docs.Bool.double_negation_theorem(b: Bool): Equal(Bool, Bool.not(Bool.not(b)), b)
-  case b:
-  | Equal.to<_, Bool.true>;
-  | Equal.to<_, Bool.false>;
-  : Equal(Bool, Bool.not(Bool.not(b.self)), b.self);

@@ -1,5 +1,0 @@
-Buffer32.get(idx: U32, buf: Buffer32): U32
-  get dep arr = buf
-  get wrd = idx
-  let idx = Word.trim<32>(dep, wrd)
-  Array.get<U32, dep>(idx, arr)

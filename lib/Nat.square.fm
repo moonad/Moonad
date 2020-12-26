@@ -1,2 +1,0 @@
-Nat.square(a: Nat): Nat
-  Nat.mul(a, a)

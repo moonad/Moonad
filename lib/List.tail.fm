@@ -1,5 +1,0 @@
-// Get the tail of a nonempty list
-List.tail<A: Type>(xs: List(A)): List(A)
-  case xs:
-  | [];
-  | xs.tail;

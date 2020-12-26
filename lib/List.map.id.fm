@@ -1,9 +1,0 @@
-List.map.id<A: Type>(ls: List(A)): Equal(List(A), List.map<A, A>(Function.id<A>, ls), ls)
-  case ls:
-  | Equal.to<_, List.map<,>(Function.id<>, List.nil<>)>;
-  | let tail_eq = List.map.id<>(ls.tail)
-    Equal.apply<_, _,
-                List.map<,>(Function.id<>, ls.tail),
-                ls.tail,
-                List.cons<>(ls.head)>(tail_eq);
-  : Equal(_, List.map<,>(Function.id<>, ls.self), ls.self);

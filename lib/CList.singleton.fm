@@ -1,2 +1,0 @@
-CList.singleton<A: Type>(a: A): CList(A)
-  CList.ring<>([], a, [])

@@ -1,6 +1,0 @@
-ECDSA.sign_qrs(priv: Nat, qrs: ECDSA.QRS): String
-  get q r s = qrs
-  let max = Nat.div(ECDSA.CURVE.n, 2)
-  let adjustedS = Bool.if<>(Nat.gtn(s, max), Nat.sub(ECDSA.CURVE.n, s), ECDSA.CURVE.n)
-  let sig = ECDSA.SignResult.new(r, adjustedS)
-  ECDSA.SignResult.to_hex(sig, Bool.false)

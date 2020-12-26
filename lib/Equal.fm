@@ -1,3 +1,0 @@
-// The Equal datatype.
-T Equal <A: Type> (a: A) ~ (b: A)
-| Equal.to               ~ (a);

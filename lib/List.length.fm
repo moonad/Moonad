@@ -1,3 +1,0 @@
-// Computes the length of the list.
-List.length<A: Type>(xs: List(A)): Nat
-  List.length.go<>(xs, 0)

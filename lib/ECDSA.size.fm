@@ -1,2 +1,0 @@
-ECDSA.size(n: Nat): Nat
-  Nat.mul(ECDSA.window(n), Nat.pow(2, Nat.pred(n)))

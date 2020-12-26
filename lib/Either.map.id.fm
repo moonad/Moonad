@@ -1,5 +1,0 @@
-Either.map.id<A: Type, B: Type>(e: Either(A, B)): Equal(Either(A, B), Either.map<A, B, B>(Function.id<B>, e), e)
-  case e:
-  | _;
-  | _;
-  : Equal(_, Either.map<A,B,B>(Function.id<>, e.self), e.self);

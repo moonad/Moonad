@@ -1,3 +1,0 @@
-// Reverse the order of the elements of the list
-List.reverse<A: Type>(xs: List(A)) : List(A)
-  List.reverse.go<>(xs,List.nil<>)

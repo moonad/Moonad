@@ -1,7 +1,0 @@
-List.chunk<A: Type>(n: Nat, xs: List(A)): Maybe(List(A))
-  case n:
-  | Maybe.some<>(List.nil<>);
-  | case xs:
-    | Maybe.none<>;
-    | Maybe.bind<,>(List.chunk<>(n.pred,xs.tail))
-      | (x) Maybe.some<>(List.cons<>(xs.head,x));;;

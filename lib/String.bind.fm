@@ -1,5 +1,0 @@
-// The bind function of the string Monad.
-String.bind(xs: String, f: Char -> String): String
-  case xs:
-  | String.nil;
-  | String.concat(f(xs.head), String.bind(xs.tail,f));

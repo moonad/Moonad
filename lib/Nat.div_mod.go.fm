@@ -1,5 +1,0 @@
-// Nat division and remainder (helper function)
-Nat.div_mod.go(n: Nat, m: Nat, d: Nat): Pair(Nat, Nat)
-  case Nat.sub_rem(n, m) as p:
-  | Nat.div_mod.go(p.value, m, Nat.succ(d));
-  | Pair.new<_,_>(d, n);
