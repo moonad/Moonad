@@ -1,0 +1,23 @@
+{
+  "devDependencies": {
+    "express": "^4.17.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.0",
+    "http-server": "^0.12.3",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.1"
+  },
+  "name": "moonad-webapp",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "inferno": "^7.4.6",
+    "inferno-hyperscript": "^7.4.6"
+  }
+}
