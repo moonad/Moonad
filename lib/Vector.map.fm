@@ -1,0 +1,4 @@
+Vector.map<A: Type, B: Type, size: Nat>(f: A -> B, vec: Vector(A, size)): List(B)
+  case vec:
+  | List.nil<B>;
+  | List.cons<B>(f(vec.head), Vector.map<A,B,vec.size>(f,vec.tail));

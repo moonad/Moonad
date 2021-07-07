@@ -1,0 +1,15 @@
+Vector.add<size : Nat>(u: Vector(Nat, size), v: Vector(Nat,size)): Vector(Nat, size)
+  case u:
+  with v : Vector(Nat,u.size) = v;
+  | Vector.nil<Nat>;
+  | get v.head v.tail = Vector.extract<Nat, u.size>(v)
+  Vector.ext<Nat, u.size>(Nat.add(u.head, v.head), Vector.add<u.size>(u.tail, v.tail));
+  : Vector(Nat, u.size);
+
+Vector.add.test: IO(Unit)
+  do IO {
+    let size = 3;
+    let u = Vector.fill<Nat>(size, 3);
+    let v = Vector.fill<Nat>(size, 4);
+    IO.print(Vector.show<Nat,size>(Nat.show, Vector.add<size>(u, v)));
+  }
